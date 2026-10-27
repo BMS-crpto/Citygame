@@ -1,7 +1,7 @@
 services:
   - type: web
-    name: city-life-online
+    name: lagos-life-online
     runtime: node
     plan: free
-    buildCommand: echo "no build needed"
+    buildCommand: npm install
     startCommand: node server.js
