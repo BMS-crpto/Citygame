@@ -105,7 +105,7 @@ const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.
 const server = http.createServer((req, res) => {
   if (req.method === 'POST' && (req.url === '/api/register' || req.url === '/api/login')) return authApi(req, res);
   if (req.url === '/api/health') { res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ ok: true, storage: UP_ON ? (dbWritesOk ? 'upstash (accounts are permanent)' : 'upstash unreachable - using temporary files') : 'temporary file (accounts are WIPED when Render restarts or redeploys)', accounts: Object.keys(accounts).length - 1, lastError: dbLastError })); }
-  if (req.url === '/config.json') { res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ googleClientId: GOOGLE_CLIENT_ID })); }
+  if (req.url === '/config.json') { res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ googleClientId: GOOGLE_CLIENT_ID, turn: process.env.TURN_URL ? { urls: process.env.TURN_URL.split(','), username: process.env.TURN_USER || '', credential: process.env.TURN_PASS || '' } : null })); }
   let url; try { url = decodeURIComponent(req.url.split('?')[0]); } catch (e) { res.writeHead(400); return res.end(); }
   if (url === '/') url = '/index.html';
   const file = path.normalize(path.join(PUB, url));
@@ -165,7 +165,7 @@ const saveKey = (room, p) => room + ':' + (p.acct ? 'a:' + p.acct : p.email ? 'g
 function savePlayer(room, p) {
   const R = rooms[room]; if (!R || !p) return;
   const k = saveKey(room, p);
-  saves[k] = { role: p.role, garage: p.garage, money: p.money, bank: p.bank, food: p.food, life: p.life, inv: p.inv, houses: [], path: p.path, look: p.look, saved: Date.now() };
+  saves[k] = { money: p.money, bank: p.bank, food: p.food, life: p.life, inv: p.inv, houses: [], path: p.path, look: p.look, ext: p.ext, saved: Date.now() };
   saveDirty = true; dirtySaves.add(k);
 }
 function flushSaves() {
@@ -198,13 +198,6 @@ async function loadStore() {
 const rooms = {}; // code -> { players:{}, owners:{houseId:playerId} }
 let nextId = 1;
 const ROLES = ['citizen', 'police', 'thief', 'nurse', 'lawyer', 'taxi'];
-// vehicles: nobody drives for free. col = model index used by the client
-const CARS = {
-  5: { name: 'Okada bike', price: 150000 }, 6: { name: 'Keke', price: 350000 },
-  0: { name: 'Toyota sedan', price: 900000 }, 3: { name: 'Honda sedan', price: 1200000 },
-  1: { name: 'SUV', price: 2500000 }, 4: { name: 'Family SUV', price: 3000000 },
-  2: { name: 'Nissan GT-R', price: 12000000 }, 7: { name: 'Lamborghini', price: 45000000 }
-};
 
 // ---- world layout (same for every room) ----
 // v0.5: blocks are 64m wide. Block (bx,bz) has its centre at bx*64+32.
@@ -239,7 +232,7 @@ HOUSES.forEach(h => { h.price = h.rent; h.units = h.kind === 'flat' ? 20 : h.kin
 const UNITS = [];
 HOUSES.forEach(h => { h.first = UNITS.length; for (let k = 0; k < h.units; k++) UNITS.push({ id: UNITS.length, house: h.id, k }); });
 const SHOPS = [[-4,-3],[-3,-2],[-4,2],[-3,3]].map(([bx,bz],i) => ({ id: i, x: cx(bx)+13, z: cx(bz)-12 }));
-const JAIL = { x: -405, z: 405 };
+const JAIL = { x: -533, z: 533 };   // moved to the new corner of the bigger map
 // places you can walk into. Their insides are built far away from the city (x = 1000).
 const BANK_DOOR = { x: 32, z: 43 }, BANK_OUT = { x: 32, z: 47 };
 const MALL_DOOR = { x: 32, z: 174.5 }, MALL_OUT = { x: 32, z: 179 };
@@ -260,7 +253,11 @@ const PLACES = [
   { id: 'agege', name: 'Agege', icon: '🏚️', x: -320, z: -128 }, { id: 'mushin', name: 'Mushin', icon: '🏘️', x: -320, z: 128 },
   { id: 'yaba', name: 'Yaba', icon: '🎓', x: -128, z: -320 }, { id: 'oshodi', name: 'Oshodi', icon: '🚌', x: 128, z: -320 },
   { id: 'maryland', name: 'Maryland', icon: '🛍️', x: -64, z: 320 }, { id: 'eko', name: 'Eko Atlantic', icon: '🌆', x: 192, z: 320 },
-  { id: 'airport', name: 'Lagos Airport', icon: '✈️', x: -192, z: 300 }, { id: 'jail', name: 'City Jail', icon: '⛓️', x: -398, z: 398 }
+  { id: 'airport', name: 'Lagos Airport', icon: '✈️', x: -192, z: 300 }, { id: 'jail', name: 'City Jail', icon: '⛓️', x: -526, z: 526 },
+  { id: 'ikorodu', name: 'Ikorodu', icon: '🏭', x: -64, z: -448 }, { id: 'ojota', name: 'Ojota', icon: '🚏', x: 192, z: -448 },
+  { id: 'epe', name: 'Epe', icon: '🐟', x: 448, z: 64 }, { id: 'lekki2', name: 'Lekki Phase 2', icon: '🏖️', x: 448, z: 320 },
+  { id: 'ojo', name: 'Ojo', icon: '🌾', x: -448, z: -192 }, { id: 'festac', name: 'Festac Town', icon: '🏘️', x: -448, z: 192 },
+  { id: 'apapa', name: 'Apapa Port', icon: '🚢', x: -320, z: 448 }, { id: 'badagry', name: 'Badagry Road', icon: '🛣️', x: 128, z: 448 }
 ];
 const RIDES = { keke: { name: 'Keke', rate: 0.15, min: 30, speed: 28 }, danfo: { name: 'Danfo', rate: 0.07, min: 20, speed: 20 }, okada: { name: 'Okada', rate: 0.28, min: 60, speed: 42 }, jet: { name: 'Private Jet', rate: 0.2, min: 350, speed: 110 } };
 const MAXLOOK = [4, 4, 7, 4, 1, 5];   // skin, hair style, top, trousers, body (0 man / 1 woman), hair colour
@@ -311,14 +308,6 @@ function jail(room, p, ms) {
   p.x = JAIL.x + (Math.random() - 0.5) * 6; p.z = JAIL.z + (Math.random() - 0.5) * 6; p.car = -1; p.inside = null;
   send(p.ws, { t: 'tp', x: p.x, z: p.z });
 }
-// friends who rob together: other thieves standing near the robber get 30% of the loot
-function crew(room, p, gain) {
-  const cut = Math.floor(gain * 0.3); if (cut <= 0) return;
-  for (const q of Object.values(rooms[room].players)) {
-    if (q === p || q.role !== 'thief' || q.inside !== p.inside || q.jailUntil > Date.now() || dist(q, p) > 18) continue;
-    q.money += cut; send(q.ws, { t: 'toast', text: `🦹 Crew cut from ${p.name}: +₦${cut}` });
-  }
-}
 function cooldown(p, key, ms) { const n = Date.now(); if ((p.cd[key] || 0) > n) return false; p.cd[key] = n + ms; return true; }
 
 function onConnection(ws) {
@@ -327,11 +316,11 @@ function onConnection(ws) {
     let m; try { m = JSON.parse(raw); } catch { return; }
     if (m.t === 'join') { const go = (gu) => {
       room = 'CITY1'; // one shared world for every player
-      const role = 'citizen'; // the path (good or bad job) is chosen inside the game
+      const role = ROLES.includes(m.role) ? m.role : 'citizen';
       id = nextId++;
       rooms[room] = rooms[room] || { players: {}, owners: {}, paint: {} };
       rooms[room].players[id] = {
-        ws, id, name: String(m.name || 'Player').slice(0, 14), role, money: 500, bank: 0, inside: null, food: 100, job: null, travelUntil: 0, dest: null, look: (Array.isArray(m.look) ? m.look : []).slice(0, 6).concat([0,0,0,0,0,0]).slice(0, 6).map((v, i) => Math.max(0, Math.min(MAXLOOK[i], Math.floor(+v) || 0))), car: -1, garage: [], jailUntil: 0, cd: {},
+        ws, id, name: String(m.name || 'Player').slice(0, 14), role, money: 500, bank: 0, inside: null, food: 100, job: null, travelUntil: 0, dest: null, look: (Array.isArray(m.look) ? m.look : []).slice(0, 6).concat([0,0,0,0,0,0]).slice(0, 6).map((v, i) => Math.max(0, Math.min(MAXLOOK[i], Math.floor(+v) || 0))), car: -1, jailUntil: 0, cd: {},
         x: (Math.random() - 0.5) * 8, z: (Math.random() - 0.5) * 8, ry: 0, moving: false
       };
       const np = rooms[room].players[id]; if (gu) { np.email = gu.email; np.acct = gu.acct; if (gu.acct) np.name = gu.acct; else if (!m.name) np.name = String(gu.name).slice(0, 14); }
@@ -339,8 +328,6 @@ function onConnection(ws) {
       if (sv) {
         np.money = Math.max(0, Math.floor(+sv.money) || 0); np.bank = Math.max(0, Math.floor(+sv.bank) || 0); np.food = Math.max(0, Math.min(100, +sv.food || 100));
       }
-      if (sv && ROLES.includes(sv.role)) np.role = sv.role;
-      np.garage = (sv && Array.isArray(sv.garage) ? sv.garage : []).filter(c => CARS[c]);
       // life path: the system decides once, then it is saved with the player
       const first = !sv || !sv.path;
       np.path = (sv && PATHS[sv.path]) ? sv.path : (Math.random() < 0.5 ? 'nepo' : 'lapo');
@@ -353,21 +340,23 @@ function onConnection(ws) {
         }
       }
       np.life = newLife(); if (sv && sv.life) restoreLife(np.life, sv.life); restoreInv(np, sv && sv.inv);
-      send(ws, { t: 'welcome', id, room, world: WORLD, path: np.path, role: np.role, garage: np.garage, cars: CARS, first, pathInfo: PATHS[np.path], start: START[np.path], starter: np.starter || null, home: homeInfo(np) });
+      np.ext = loadExt(sv && sv.ext); if (np.ext.role && ROLES.includes(np.ext.role)) np.role = np.ext.role;
+      send(ws, { t: 'welcome', id, room, world: WORLD, path: np.path, first, pathInfo: PATHS[np.path], start: START[np.path], starter: np.starter || null, home: homeInfo(np) });
       if (sv && !first) send(ws, { t: 'toast', text: '💾 Welcome back! Progress restored' });
       send(ws, { t: 'catalog', items: Object.entries(ITEMS).map(([id, i]) => ({ id, name: i.name, icon: i.icon, cat: i.cat, price: i.price, desc: i.desc })) });
-      sendLife(np, rooms[room]);
-      broadcast(room, { t: 'toast', text: `${rooms[room].players[id].name} joined Lagos` });
+      sendLife(np, rooms[room]); sendExtras(np);
+      broadcast(room, { t: 'toast', text: `${rooms[room].players[id].name} joined as ${np.role}` });
       }; if (m.token) { const a = readToken(m.token); if (!a) return send(ws, { t: 'authfail' }); go(a); } else if (m.idToken) verifyGoogle(m.idToken, go); else go(null); return;
     }
     if (!room || !rooms[room] || !rooms[room].players[id]) return;
     const p = rooms[room].players[id], R = rooms[room];
     const now = Date.now();
     if (p.travelUntil > now && m.t !== 'chat') return;
+    if (extraMsg(room, p, m, now)) return;
     if (m.t === 'move') {
       if (p.jailUntil > now) return;
       p.x = +m.x || 0; p.z = +m.z || 0; p.ry = +m.ry || 0; p.moving = !!m.moving;
-      p.car = Number.isInteger(m.car) && p.garage.includes(m.car) ? m.car : -1;
+      p.car = Number.isInteger(m.car) && VEHICLES[m.car] && p.ext && p.ext.license && p.ext.cars.includes(m.car) ? m.car : -1;
       if (p.job && !p.inside) {
         const j = p.job;
         if (now > j.until) { p.job = null; send(ws, { t: 'job', job: null }); send(ws, { t: 'toast', text: '📦 Delivery job expired' }); }
@@ -378,22 +367,6 @@ function onConnection(ws) {
       }
     } else if (m.t === 'chat') {
       broadcast(room, { t: 'chat', name: p.name, text: String(m.text || '').slice(0, 80) });
-    } else if (m.t === 'buycar') {
-      const c = CARS[m.col];
-      if (!c) return;
-      if (p.garage.includes(+m.col)) return send(ws, { t: 'toast', text: 'You already own this one' });
-      if (!charge(p, c.price, 'Bought ' + c.name)) return;
-      p.garage.push(+m.col); savePlayer(room, p);
-      send(ws, { t: 'garage', garage: p.garage, bought: +m.col });
-      send(ws, { t: 'toast', text: `🔑 You bought a ${c.name}!` }); sendLife(p, R);
-    } else if (m.t === 'role') {
-      if (!ROLES.includes(m.role)) return;
-      if (p.jailUntil > now) return send(ws, { t: 'toast', text: 'You are in jail!' });
-      if (p.role === m.role) return;
-      if (!cooldown(p, 'role', 20000)) return send(ws, { t: 'toast', text: 'Wait a few seconds before changing path' });
-      p.role = m.role; savePlayer(room, p);
-      send(ws, { t: 'rolenow', role: p.role });
-      broadcast(room, { t: 'toast', text: ({ citizen: '🙂 ' + p.name + ' is a normal citizen now', police: '🚔 ' + p.name + ' joined the police', thief: '🦹 ' + p.name + ' went to the dark side', nurse: '💉 ' + p.name + ' became a nurse', lawyer: '⚖️ ' + p.name + ' became a lawyer', taxi: '🚕 ' + p.name + ' became a taxi driver' })[p.role] });
     } else if (m.t === 'rent' || m.t === 'buy') {
       if (p.jailUntil > now) return send(ws, { t: 'toast', text: 'You are in jail!' });
       const curU = myUnit(p), cur = curU && HOUSES[curU.house];
@@ -493,9 +466,7 @@ function onConnection(ws) {
       const say = text => broadcast(room, { t: 'toast', text });
       const me = text => send(ws, { t: 'toast', text });
       const free = q => q.jailUntil <= now && !(q.travelUntil > now);
-      if (p.role === 'citizen') {
-        return me('Open your phone → Jobs to pick a path: police, nurse, lawyer, taxi... or the dark side');
-      } else if (p.role === 'police') {
+      if (p.role === 'police') {
         const t = nearest(room, p, q => q.role === 'thief' && free(q), 10);
         if (!t) return me('No thief close enough');
         const take = Math.floor(t.money * 0.25); t.money -= take; p.money += take + 200;
@@ -503,21 +474,21 @@ function onConnection(ws) {
       } else if (p.role === 'thief') {
         if (p.inside === 'bank' && dist(p, VAULT) < 7) {
           if (!cooldown(p, 'vault', 60000)) return me('The vault is empty for now, wait...');
-          p.money += 1200; crew(room, p, 1200); return say(`🚨 ${p.name} robbed the BANK VAULT! (+₦1200)`);
+          p.money += 1200; return say(`🚨 ${p.name} robbed the BANK VAULT! (+₦1200)`);
         }
         if (p.inside === 'mall' && dist(p, MALLCASH) < 8) {
           if (!cooldown(p, 'shop', 20000)) return me('Cashier was just robbed, wait...');
-          p.money += 400; crew(room, p, 400); return say(`💰 ${p.name} robbed the Grand Market cashier! (+₦400)`);
+          p.money += 400; return say(`💰 ${p.name} robbed the Grand Market cashier! (+₦400)`);
         }
         const shop = !p.inside && SHOPS.find(s => dist(s, p) < 11);
         if (shop) {
           if (!cooldown(p, 'shop', 20000)) return me('Shop was just robbed, wait...');
-          p.money += 400; crew(room, p, 400); say(`💰 ${p.name} robbed a shop! (+₦400)`);
+          p.money += 400; say(`💰 ${p.name} robbed a shop! (+₦400)`);
         } else {
-          const v = nearest(room, p, q => free(q) && q.money >= 50, 7);
+          const v = nearest(room, p, q => free(q) && q.money >= 50 && !(q.ext && q.ext.guardUntil > now), 7);
           if (!v) return me('Go near a shop or a player to rob');
           if (!cooldown(p, 'rob', 8000)) return me('Wait a few seconds...');
-          const loot = Math.min(500, Math.floor(v.money * 0.15)); v.money -= loot; p.money += loot; crew(room, p, loot);
+          const loot = Math.min(500, Math.floor(v.money * 0.15)); v.money -= loot; p.money += loot;
           say(`💰 ${p.name} robbed ${v.name} of ₦${loot}!`);
         }
       } else if (p.role === 'nurse') {
@@ -564,7 +535,7 @@ setInterval(() => {
     for (const id in tenants) { const t = activeTenant(id), u = UNITS[+id]; if (!t || !u) continue; const h = HOUSES[u.house]; occ[h.id] = (occ[h.id] || 0) + 1; if (h.units === 1) owners[h.id] = t.name; }
     const list = Object.values(R.players).map(p => ({
       id: p.id, name: p.name, role: p.role, x: p.x, z: p.z, ry: p.ry, moving: p.moving,
-      car: p.car, money: p.money, bank: p.bank, food: p.food, look: p.look, hidden: p.travelUntil > now, jailed: p.jailUntil > now
+      car: p.car, money: p.money, bank: p.bank, food: p.food, look: p.look, hidden: p.travelUntil > now, jailed: p.jailUntil > now, phone: !!p.phone, mic: !!p.mic, guard: !!(p.ext && p.ext.guardUntil > now)
     }));
     broadcast(code, { t: 'state', players: list, owners, occ, paint: R.paint });
   }
@@ -680,7 +651,7 @@ function sendLife(p, R) {
     career: c ? { title: c.title, level: c.lv[lv][0], pay: c.lv[lv][1], xp: L.career.xp, next: c.lv[lv + 1] ? c.lv[lv + 1][2] : null } : null,
     careers: Object.entries(CAREERS).map(([id, x]) => ({ id, title: x.title, pay: x.lv[0][1] })),
     missions: MISSIONS.filter(x => !x.path || x.path === p.path).map(x => ({ name: x.name, reward: x.reward, done: !!L.done[x.id] })),
-    garage: p.garage, role: p.role, path: { id: p.path, name: (PATHS[p.path] || {}).name, emoji: (PATHS[p.path] || {}).emoji, goal: (PATHS[p.path] || {}).goal }, home: homeInfo(p),
+    path: { id: p.path, name: (PATHS[p.path] || {}).name, emoji: (PATHS[p.path] || {}).emoji, goal: (PATHS[p.path] || {}).goal }, home: homeInfo(p),
     log: (p.ledger || []).slice(-8).reverse(), inv: p.inv, atShop: atShop(p), cap: BAG_CAP });
 }
 function lifeOp(room, p, m) {
@@ -812,6 +783,190 @@ setInterval(() => {
 
 // autosave every 20 seconds
 setInterval(() => { for (const code in rooms) for (const o of Object.values(rooms[code].players)) savePlayer(code, o); flushSaves(); }, 20000);
+
+
+// ================= v0.7 EXTRAS =================
+// vehicles must be bought (and you need a Driver's License), certificates, invest, DMs, pay, food, hire, decor, voice chat signalling
+const VEHICLES = {
+  8: { name: 'Okada Bike', icon: '🏍️', price: 180000 },
+  6: { name: 'Keke Napep', icon: '🛺', price: 450000 },
+  5: { name: 'Danfo Bus', icon: '🚌', price: 1500000 },
+  0: { name: 'Toyota Corolla', icon: '🚗', price: 1800000 },
+  3: { name: 'Honda Accord', icon: '🚗', price: 2200000 },
+  1: { name: 'Toyota Prado SUV', icon: '🚙', price: 4500000 },
+  4: { name: 'Lexus RX SUV', icon: '🚙', price: 6500000 },
+  2: { name: 'Nissan GT-R', icon: '🏎️', price: 12000000 },
+  9: { name: 'BMW M4 Competition', icon: '🚘', price: 18000000 },
+  7: { name: 'Lamborghini', icon: '🏎️', price: 28000000 }
+};
+const LICENSE_PRICE = 20000;
+RIDES.driver = { name: 'Private Driver', rate: 0.12, min: 150, speed: 36 };
+const MARKET = {
+  dangote: { name: 'Dangote Cement', icon: '🏭', base: 38000, vol: 0.012 },
+  mtn: { name: 'MTN Nigeria', icon: '📡', base: 25000, vol: 0.010 },
+  gtb: { name: 'GTBank', icon: '🏦', base: 4500, vol: 0.014 },
+  land: { name: 'Lekki Land Share', icon: '🏗️', base: 800000, vol: 0.006 },
+  crypto: { name: 'Crypto Coin', icon: '🪙', base: 1500000, vol: 0.035 }
+};
+const mkHist = {};
+for (const id in MARKET) { MARKET[id].price = MARKET[id].base; mkHist[id] = Array(30).fill(MARKET[id].base); }
+setInterval(() => {
+  for (const id in MARKET) {
+    const a = MARKET[id], drift = (a.base - a.price) / a.base * 0.02;
+    a.price = Math.round(Math.max(a.base * 0.25, Math.min(a.base * 4, a.price * (1 + drift + (Math.random() - 0.5) * 2 * a.vol))));
+    const h = mkHist[id]; h.push(a.price); if (h.length > 30) h.shift();
+  }
+}, 8000);
+const DECOR = {
+  plant: { name: 'Potted Plant', icon: '🪴', price: 3500 }, lamp: { name: 'Floor Lamp', icon: '💡', price: 6500 },
+  rug: { name: 'Persian Rug', icon: '🟥', price: 15000 }, sofa: { name: 'Leather Sofa', icon: '🛋️', price: 85000 },
+  tv: { name: 'Smart TV', icon: '📺', price: 120000 }, bed: { name: 'King Bed', icon: '🛏️', price: 150000 },
+  fridge: { name: 'Fridge', icon: '🧊', price: 95000 }, speaker: { name: 'Sound System', icon: '🔊', price: 60000 },
+  chandelier: { name: 'Chandelier', icon: '🕯️', price: 250000 }, trophy: { name: 'Trophy', icon: '🏆', price: 20000 },
+  painting: { name: 'Painting', icon: '🖼️', price: 40000 }, desk: { name: 'Work Desk', icon: '🖥️', price: 70000 }
+};
+const clampN = (v, m) => Math.max(-m, Math.min(m, +v || 0));
+function loadExt(s) {
+  const e = { cars: [], license: 0, since: Date.now(), stocks: {}, decorInv: {}, decor: {}, guardUntil: 0, role: '' };
+  if (!s || typeof s !== 'object') return e;
+  e.cars = (Array.isArray(s.cars) ? s.cars.map(Number) : []).filter((c, i, a) => VEHICLES[c] && a.indexOf(c) === i);
+  e.license = +s.license || 0; e.since = +s.since || e.since;
+  for (const id in MARKET) { const q = Math.floor(+(s.stocks || {})[id]) || 0; if (q > 0) e.stocks[id] = Math.min(q, 1e7); }
+  for (const id in DECOR) { const q = Math.floor(+(s.decorInv || {})[id]) || 0; if (q > 0) e.decorInv[id] = Math.min(q, 200); }
+  const d = s.decor && typeof s.decor === 'object' ? s.decor : {};
+  for (const u in d) if (Array.isArray(d[u])) e.decor[u] = d[u].filter(x => x && DECOR[x.id]).slice(0, 60).map(x => ({ id: x.id, x: clampN(x.x, 8), z: clampN(x.z, 8), ry: +x.ry || 0 }));
+  e.guardUntil = +s.guardUntil > Date.now() ? +s.guardUntil : 0;
+  e.role = ROLES.includes(s.role) ? s.role : '';
+  return e;
+}
+const idNo = p => 'LG-' + (parseInt(crypto.createHash('sha1').update(pKey(p)).digest('hex').slice(0, 8), 16) % 90000000 + 10000000);
+function sendCert(p) { const E = p.ext; send(p.ws, { t: 'x_cert', id: idNo(p), name: p.name, since: E.since, license: E.license, role: p.role, path: p.path, price: LICENSE_PRICE }); }
+function sendCars(p) { const E = p.ext; send(p.ws, { t: 'x_cars', cars: E.cars, license: !!E.license, list: Object.entries(VEHICLES).map(([c, v]) => ({ col: +c, name: v.name, icon: v.icon, price: v.price })) }); }
+function sendMarket(p) { const E = p.ext, prices = {}; for (const id in MARKET) prices[id] = { name: MARKET[id].name, icon: MARKET[id].icon, price: MARKET[id].price, hist: mkHist[id] }; send(p.ws, { t: 'x_mk', prices, hold: E.stocks, cash: p.money }); }
+function sendDecor(p) { const E = p.ext; send(p.ws, { t: 'x_decor', shop: Object.entries(DECOR).map(([id, d]) => ({ id, name: d.name, icon: d.icon, price: d.price })), inv: E.decorInv, placed: E.decor }); }
+function sendExtras(p) { sendCert(p); sendCars(p); sendDecor(p); send(p.ws, { t: 'x_role', role: p.role }); }
+function applyFx(p, f) {
+  const L = p.life; if (!f || !L) return;
+  if (f.food) p.food = Math.min(100, p.food + f.food);
+  if (f.energy) L.energy = Math.min(100, L.energy + f.energy);
+  if (f.hygiene) L.hygiene = Math.min(100, L.hygiene + f.hygiene);
+  if (f.fun) L.fun = Math.min(100, L.fun + f.fun);
+}
+const HUSTLES = {
+  recharge: { name: 'Sell recharge cards', icon: '📱', min: 200, max: 700, cd: 12000 },
+  suya: { name: 'Roast suya at the junction', icon: '🍢', min: 400, max: 900, cd: 15000 },
+  pos: { name: 'Run a POS stand', icon: '💳', min: 500, max: 1500, cd: 25000 },
+  tutor: { name: 'Give lessons', icon: '📚', min: 800, max: 1200, cd: 40000 },
+  content: { name: 'Post content online', icon: '🎬', min: 300, max: 3000, cd: 30000 }
+};
+const EXTRA = new Set(['getx', 'buycar', 'cert', 'setrole', 'inv', 'dm', 'pay', 'order', 'hire', 'decor', 'rtc', 'phone', 'mic', 'hustle']);
+function extraMsg(room, p, m, now) {
+  if (!EXTRA.has(m.t)) return false;
+  const E = p.ext = p.ext || loadExt(null), R = rooms[room];
+  const toast = t => send(p.ws, { t: 'toast', text: t });
+  const jailed = p.jailUntil > now;
+  if (m.t === 'getx') {
+    if (m.k === 'cert') sendCert(p); else if (m.k === 'cars') sendCars(p); else if (m.k === 'mk') sendMarket(p); else if (m.k === 'decor') sendDecor(p);
+  } else if (m.t === 'hustle') {
+    const h = HUSTLES[m.id]; if (!h) return true;
+    if (jailed) return toast('You are in jail!'), true;
+    if (p.inside) return toast('Go outside to hustle'), true;
+    if (!cooldown(p, 'h_' + m.id, h.cd)) return toast('⏳ Wait a bit before doing that again'), true;
+    const L = p.life; if (L && L.energy < 8) return toast('😴 Too tired. Rest first'), true;
+    if (L) L.energy = Math.max(0, L.energy - 6);
+    const amt = h.min + Math.floor(Math.random() * (h.max - h.min + 1));
+    addMoney(p, amt, 'Hustle shift: ' + h.name); toast(`${h.icon} ${h.name}: +${fmtN(amt)}`); sendLife(p, R);
+  } else if (m.t === 'phone') { p.phone = !!m.on;
+  } else if (m.t === 'mic') { p.mic = !!m.on;
+  } else if (m.t === 'rtc') {
+    const q = R.players[m.to]; if (!q || q.id === p.id || !m.data) return true;
+    if (JSON.stringify(m.data).length > 6000) return true;
+    send(q.ws, { t: 'x_rtc', from: p.id, data: m.data });
+  } else if (m.t === 'cert') {
+    if (m.op === 'buy' && m.id === 'license') {
+      if (E.license) return toast('You already have a Driver\'s License'), true;
+      if (!charge(p, LICENSE_PRICE, "Driver's License")) return true;
+      E.license = now; toast('🪪 Driver\'s License issued! You can now buy and drive vehicles.'); sendCert(p); sendCars(p); savePlayer(room, p);
+    }
+  } else if (m.t === 'buycar') {
+    const col = Math.floor(+m.col), v = VEHICLES[col];
+    if (!v) return true;
+    if (E.cars.includes(col)) return toast('You already own this vehicle'), true;
+    if (!E.license) return toast("🪪 Get your Driver's License first (Phone → ID & Certificates)"), true;
+    if (!charge(p, v.price, 'Bought ' + v.name)) return true;
+    E.cars.push(col); sendCars(p); toast(`🔑 You bought a ${v.name}! Walk to one and press DRIVE`); savePlayer(room, p);
+  } else if (m.t === 'setrole') {
+    if (jailed) return toast('You are in jail!'), true;
+    const role = String(m.role);
+    if (!ROLES.includes(role) || role === p.role) return true;
+    if (!cooldown(p, 'role', 3000)) return toast('Wait a few seconds...'), true;
+    p.role = role; E.role = role; p.car = -1;
+    if (role === 'thief' && m.crew) { const f = R.players[m.crew]; if (f && f.id !== p.id && f.role === 'thief') { send(f.ws, { t: 'toast', text: `🦹 ${p.name} joined your crew!` }); toast(`🦹 You joined ${f.name}'s crew. Rob together, watch for police!`); } }
+    send(p.ws, { t: 'x_role', role }); broadcast(room, { t: 'toast', text: `${p.name} is now a ${role}` }); savePlayer(room, p);
+  } else if (m.t === 'inv') {
+    const a = MARKET[m.id], qty = Math.floor(+m.qty);
+    if (!a || !(qty >= 1 && qty <= 100000)) return true;
+    if (m.op === 'buy') {
+      const cost = a.price * qty; if (p.money < cost) return toast(`Need ${fmtN(cost)}`), true;
+      addMoney(p, -cost, 'Invest: bought ' + a.name); E.stocks[m.id] = Math.min(1e7, (E.stocks[m.id] || 0) + qty);
+    } else if (m.op === 'sell') {
+      if ((E.stocks[m.id] || 0) < qty) return toast('You do not own that many'), true;
+      E.stocks[m.id] -= qty; if (E.stocks[m.id] <= 0) delete E.stocks[m.id];
+      addMoney(p, a.price * qty, 'Invest: sold ' + a.name);
+    }
+    sendMarket(p);
+  } else if (m.t === 'dm') {
+    const q = R.players[m.to], text = String(m.text || '').slice(0, 200).trim();
+    if (!q || q.id === p.id || !text) return true;
+    if (!cooldown(p, 'dm', 400)) return true;
+    send(q.ws, { t: 'x_dm', from: p.id, name: p.name, text, ts: now });
+  } else if (m.t === 'pay') {
+    const q = R.players[m.to], amt = Math.floor(+m.amt);
+    if (!q || q.id === p.id || !(amt >= 1)) return true;
+    if (jailed) return toast('You are in jail!'), true;
+    if (!cooldown(p, 'pay', 1500)) return toast('Wait a moment...'), true;
+    if (p.money < amt) return toast(`Need ${fmtN(amt)}`), true;
+    addMoney(p, -amt, 'Sent to ' + q.name); addMoney(q, amt, 'Received from ' + p.name);
+    toast(`💸 Sent ${fmtN(amt)} to ${q.name}`); send(q.ws, { t: 'toast', text: `💰 ${p.name} sent you ${fmtN(amt)}` });
+    send(q.ws, { t: 'x_dm', from: p.id, name: p.name, text: `💸 Sent you ${fmtN(amt)}`, ts: now, sys: true });
+  } else if (m.t === 'order') {
+    const it = ITEMS[m.id]; if (!it || it.cat !== 'food') return true;
+    if (!cooldown(p, 'order', 2500)) return toast('Slow down, one order at a time'), true;
+    if (!charge(p, it.price + 150, 'Food delivery: ' + it.name)) return true;
+    toast(`🛵 Rider is bringing your ${it.name}...`);
+    setTimeout(() => { if (!R.players[p.id]) return; applyFx(p, it.fx); toast(`🍽️ ${it.name} delivered!`); sendLife(p, R); }, 6000);
+  } else if (m.t === 'hire') {
+    if (m.svc === 'cook') {
+      if (!cooldown(p, 'cook', 20000)) return toast('Your cook is still cleaning the kitchen'), true;
+      if (!charge(p, 800, 'Hired a cook')) return true;
+      applyFx(p, { food: 70, fun: 6 }); toast('👩🏾‍🍳 Your cook made a hot meal. Food +70'); sendLife(p, R);
+    } else if (m.svc === 'guard') {
+      if (!charge(p, 3500, 'Hired a bodyguard')) return true;
+      E.guardUntil = Math.min(now + 30 * 60000, Math.max(now, E.guardUntil) + 10 * 60000);
+      toast('🕶️ Bodyguard hired. Thieves cannot rob you for ' + Math.round((E.guardUntil - now) / 60000) + ' min');
+    }
+  } else if (m.t === 'decor') {
+    if (m.op === 'buy') {
+      const d = DECOR[m.id]; if (!d) return true;
+      if (!charge(p, d.price, 'Bought ' + d.name)) return true;
+      E.decorInv[m.id] = Math.min(200, (E.decorInv[m.id] || 0) + 1); toast(`🛍️ ${d.name} bought. Go home and place it!`);
+    } else if (m.op === 'place' || m.op === 'remove') {
+      const info = p.inside && placeInfo(p.inside);
+      if (!info || !info.house || !ownsHouse(p, info.unit)) return toast('Go inside your own home first'), true;
+      const list = E.decor[info.unit] = E.decor[info.unit] || [];
+      if (m.op === 'place') {
+        if (!DECOR[m.id] || (E.decorInv[m.id] || 0) < 1) return toast('You do not own that item'), true;
+        if (list.length >= 60) return toast('Your home is full'), true;
+        list.push({ id: m.id, x: clampN(m.x, 8), z: clampN(m.z, 8), ry: +m.ry || 0 }); E.decorInv[m.id]--; if (E.decorInv[m.id] <= 0) delete E.decorInv[m.id];
+      } else {
+        const i = Math.floor(+m.n); if (!(i >= 0 && i < list.length)) return true;
+        const [x] = list.splice(i, 1); E.decorInv[x.id] = (E.decorInv[x.id] || 0) + 1;
+      }
+    }
+    sendDecor(p); savePlayer(room, p);
+  }
+  return true;
+}
 
 (async () => {
   await loadStore();
