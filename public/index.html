@@ -945,8 +945,8 @@ function makeBikeProc(){                      // okada motorbike with a rider
   const add=(w,hh,d,m,x,y,z)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,hh,d),m);o.position.set(x,y,z);o.castShadow=true;g.add(o);return o};
   add(0.35,0.4,1.5,red,0,0.85,0.1);add(0.4,0.12,0.9,blackMat,0,1.12,-0.45);add(0.5,0.1,0.1,blackMat,0,1.35,0.95);
   add(0.18,0.18,0.07,headMat,0,1.05,1.0);add(0.2,0.1,0.06,tailMat,0,1.0,-1.0);
-  add(0.4,0.75,0.28,shirt,0,1.6,-0.35).userData.rider=true;
-  const head=new THREE.Mesh(new THREE.SphereGeometry(0.2,10,8),skin);head.position.set(0,2.15,-0.3);head.userData.rider=true;g.add(head);
+  add(0.4,0.75,0.28,shirt,0,1.6,-0.35);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.2,10,8),skin);head.position.set(0,2.15,-0.3);g.add(head);
   const wg=new THREE.CylinderGeometry(0.4,0.4,0.18,14);wg.rotateZ(Math.PI/2);
   for(const z of [0.95,-0.95]){const w=new THREE.Mesh(wg,tireMat);w.position.set(0,0.4,z);w.castShadow=true;g.add(w)}
   return g;
@@ -965,17 +965,11 @@ function makeKeke(){                        // three-wheeler (keke napep)
 
 // =============== 3D models (GLB) with automatic fallback ===============
 // If a model or the loader fails to load, the built-in boxy cars/people keep working.
-const MODEL_FILES={sedan:'models/sedan.glb',suv:'models/suv.glb',police:'models/police.glb',man:'models/man.glb',woman:'models/woman.glb',gtr:'models/gtr.glb',lambo:'models/lambo.glb',bmw:'models/bmw_light.glb',suit:'models/suit.glb',
-  challenger:'models/challenger.glb',fireengine:'models/fireengine.glb',okada:'models/okada.glb',punk:'models/punk.glb',
-  airplane:'models/airplane.glb',closet:'models/closet.glb',dryer:'models/dryer.glb',computer:'models/computer.glb'};
+const MODEL_FILES={sedan:'models/sedan.glb',suv:'models/suv.glb',police:'models/police.glb',man:'models/man.glb',woman:'models/woman.glb',gtr:'models/gtr.glb',lambo:'models/lambo.glb',bmw:'models/bmw_light.glb',suit:'models/suit.glb'};
 // len = target length (cars) or height (people) in game units; yaw = extra turn in degrees if a model faces the wrong way
 const MODEL_CFG={
   sedan:{len:4.6,body:/lightblue/i},suv:{len:4.8,body:/^white$/i},police:{len:4.7},gtr:{len:4.7,body:/chasis/i},
-  lambo:{len:4.9,yaw:0},bmw:{len:4.8},man:{len:2.55,person:1},woman:{len:2.45,person:1},suit:{len:2.55,person:1},
-  // v0.8 models. okada is modelled facing -z so it gets a 180 turn. prop:1 = keep the model's own orientation, only apply yaw and scale by height h (or length len).
-  challenger:{len:4.9},fireengine:{len:6.4},okada:{len:2.3,yaw:180},punk:{len:2.55,person:1},
-  airplane:{prop:1,len:34,yaw:17.5},          // the file is tilted about 17.5 degrees off its own axis
-  closet:{prop:1,h:2.1},dryer:{prop:1,h:0.95},computer:{prop:1,h:0.55}
+  lambo:{len:4.9,yaw:0},bmw:{len:4.8},man:{len:2.55,person:1},woman:{len:2.45,person:1},suit:{len:2.55,person:1}
 };
 const MODELS={},modelWait={};
 function whenModel(key,fn){if(MODELS[key])fn(MODELS[key]);else(modelWait[key]=modelWait[key]||[]).push(fn)}
@@ -1030,7 +1024,7 @@ function prepareModel(key,gltf){
   fixMaterials(sc);sc.updateMatrixWorld(true);
   let box=boxOf(sc),size=box.getSize(new THREE.Vector3());
   let yaw=(cfg.yaw||0)*Math.PI/180;
-  if(!cfg.person&&!cfg.prop){
+  if(!cfg.person){
     const axis=size.x>size.z?'x':'z';
     if(axis==='x')yaw+=Math.PI/2;           // car is lying along x: turn it to run along z
     // decide front/back
@@ -1040,7 +1034,7 @@ function prepareModel(key,gltf){
   }
   const wrap=new THREE.Group();wrap.add(sc);wrap.rotation.y=yaw;
   box=boxOf(wrap);size=box.getSize(new THREE.Vector3());
-  const k=cfg.person?cfg.len/size.y:cfg.h?cfg.h/size.y:cfg.len/Math.max(size.x,size.z);
+  const k=cfg.person?cfg.len/size.y:cfg.len/Math.max(size.x,size.z);
   const ctr=box.getCenter(new THREE.Vector3());
   const root=new THREE.Group();root.add(wrap);
   wrap.position.set(-ctr.x,-box.min.y,-ctr.z);
@@ -1054,7 +1048,7 @@ function cloneModel(key){
 }
 if(THREE.GLTFLoader){
   const loader=new THREE.GLTFLoader();
-  const order=['man','woman','suit','sedan','suv','police','gtr','lambo','bmw','okada','challenger','fireengine','punk','airplane','closet','dryer','computer'];
+  const order=['man','woman','suit','sedan','suv','police','gtr','lambo','bmw'];
   order.forEach((key,i)=>setTimeout(()=>loader.load(MODEL_FILES[key],g=>{
     try{prepareModel(key,g);(modelWait[key]||[]).forEach(fn=>fn(MODELS[key]));modelWait[key]=[]}catch(e){console.warn('model failed',key,e)}
   },undefined,e=>console.warn('could not load',key)),700+i*450));
@@ -1067,13 +1061,10 @@ function makeCar(col,role){
 }
 function attachCarModel(g,col,role){
   let key=null;
-  if(col===5||col===6)return;
+  if(col===5||col===6||col===8)return;
   if(role==='police')key='police';
   else if(col===7)key='lambo';
   else if(col===9)key='bmw';
-  else if(col===8)key='okada';
-  else if(col===10)key='challenger';
-  else if(col===11)key='fireengine';
   else if(role==='taxi')key='sedan';
   else if(col>=0&&col<5)key=['sedan','suv','gtr','sedan','suv'][col];
   if(!key)return;
@@ -1088,8 +1079,7 @@ function attachCarModel(g,col,role){
         o.material=Array.isArray(o.material)?nm:nm[0];
       });
     }
-    // the okada keeps its procedural rider (tagged in makeBikeProc); everything else of the old placeholder is hidden
-    g.children.slice().forEach(c=>{c.visible=key==='okada'&&!!c.userData.rider;if(c.visible)c.position.y-=0.3});
+    g.children.slice().forEach(c=>c.visible=false);
     g.userData.siren=null;
     g.add(car);g.userData.model=car;
     if(role==='taxi'){const s=new THREE.Mesh(new THREE.BoxGeometry(0.7,0.22,0.3),new THREE.MeshBasicMaterial({color:0xffe066}));s.position.set(0,1.62,-0.1);g.add(s)}
@@ -1127,7 +1117,7 @@ function addHeadgear(body,H,lk,role){
 function attachCharModel(g,body,role,name,look){
   look=look&&look.length?look:null;
   let h=0;for(const ch of name||'')h=(h*31+ch.charCodeAt(0))>>>0;
-  const female=look?look[4]===1:(h%2===1),key=role==='lawyer'?'suit':(role==='thief'&&!female?'punk':(female?'woman':'man'));
+  const female=look?look[4]===1:(h%2===1),key=role==='lawyer'?'suit':(female?'woman':'man');
   whenModel(key,()=>{
     if(g.userData.modelDone)return;
     try{
@@ -1166,10 +1156,6 @@ const rd=v=>{const r=Math.round(v/40);return r*BLOCK+(v-r*40)};
 [[3,24,0],[-3,40,0]].forEach(([x,z,ry])=>{const g=makeCar(7);g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);parked.push({g,x,z,ry,col:7})});
 // BMW M4s and okada bikes for sale
 [[3,-24,0,9],[-3,-40,0,9],[2,-12,0,8],[-2,-52,0,8],[2,-96,0,8]].forEach(([x,z,ry,col])=>{const g=makeCar(col);g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);parked.push({g,x,z,ry,col})});
-// v0.8: Dodge Challengers (10) and a Fire Engine (11) for sale on the same strip
-[[3,-64,0,10],[-3,-80,0,10],[2,-112,0,11]].forEach(([x,z,ry,col])=>{const g=makeCar(col);g.position.set(x,0,z);g.rotation.y=ry;scene.add(g);parked.push({g,x,z,ry,col})});
-// v0.8: the cute airplane parked on the airport apron (added once its model has loaded)
-whenModel('airplane',()=>{const p=cloneModel('airplane');p.position.set(-218,0,350);p.rotation.y=Math.PI;scene.add(p);solid(-218,350,16,17)});
 
 // =============== characters ===============
 function makeLabel(text,color,y,sx){
@@ -1861,7 +1847,7 @@ function loop(now){
       if(myCol>=0){
         const thr=-iy;
         if(thr>0.1)speed+=thr*22*dt;else if(thr<-0.1)speed+=thr*26*dt;else speed*=(1-1.6*dt);
-        const vmax=myCol===6?17:myCol===5?22:myCol===7?38:myCol===8?32:myCol===9?36:myCol===10?38:myCol===11?24:28;speed=Math.max(-8,Math.min(vmax,speed));
+        const vmax=myCol===6?17:myCol===5?22:myCol===7?38:myCol===8?32:myCol===9?36:28;speed=Math.max(-8,Math.min(vmax,speed));
         pos.ry-=ix*1.9*dt*Math.min(1,Math.abs(speed)/6)*(speed>=0?1:-1);
         const nx=pos.x+Math.sin(pos.ry)*speed*dt,nz=pos.z+Math.cos(pos.ry)*speed*dt;
         if(!collide(nx,nz)){pos.x=nx;pos.z=nz}
@@ -2267,12 +2253,6 @@ function decorMesh(id){
     case 'chandelier':cy(0.03,0.03,0.9,L(0x444444),0,3.0,0);{const s=new THREE.Mesh(new THREE.SphereGeometry(0.45,10,8),new THREE.MeshPhongMaterial({color:0xd4af37,shininess:100}));s.position.y=2.4;s.scale.y=0.6;g.add(s)}for(let i=0;i<6;i++){const a=i/6*Math.PI*2;cy(0.05,0.05,0.2,B(0xffffcc),Math.cos(a)*0.45,2.6,Math.sin(a)*0.45)}break;
     case 'trophy':bx(0.5,0.3,0.5,L(0x333333),0,0.15,0);cy(0.08,0.08,0.4,L(0xd4af37),0,0.5,0);cy(0.3,0.1,0.35,L(0xd4af37),0,0.9,0);break;
     case 'painting':bx(0.08,1.5,0.08,L(0x5d4037),-0.5,0.75,0);bx(0.08,1.5,0.08,L(0x5d4037),0.5,0.75,0);bx(1.4,1.0,0.07,L(0x4e342e),0,1.35,0);bx(1.2,0.8,0.08,L(0x2e86c1),0,1.35,0.01);bx(0.5,0.4,0.09,L(0xf4d03f),0.2,1.3,0.02);break;
-    case 'closet':case 'dryer':case 'computer':{
-      // GLB furniture: filled in once the model has loaded (the group is returned empty until then)
-      if(id==='computer'){bx(1.5,0.06,0.9,L(0x6d4c41),0,0.72,0);bx(0.06,0.72,0.8,L(0x4e342e),-0.68,0.36,0);bx(0.06,0.72,0.8,L(0x4e342e),0.68,0.36,0)}
-      const holder=new THREE.Group();g.add(holder);
-      whenModel(id,()=>{const m=cloneModel(id);if(id==='computer')m.position.y=0.75;holder.add(m)});
-      break}
     case 'desk':bx(1.6,0.08,0.8,L(0x6d4c41),0,0.75,0);bx(0.08,0.75,0.7,L(0x4e342e),-0.75,0.37,0);bx(0.08,0.75,0.7,L(0x4e342e),0.75,0.37,0);bx(0.7,0.45,0.05,L(0x111111),0,1.05,-0.15);bx(0.1,0.3,0.1,L(0x333333),0,0.9,-0.15);break;
     default:return null;
   }
