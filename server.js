@@ -232,7 +232,7 @@ HOUSES.forEach(h => { h.price = h.rent; h.units = h.kind === 'flat' ? 20 : h.kin
 const UNITS = [];
 HOUSES.forEach(h => { h.first = UNITS.length; for (let k = 0; k < h.units; k++) UNITS.push({ id: UNITS.length, house: h.id, k }); });
 const SHOPS = [[-4,-3],[-3,-2],[-4,2],[-3,3]].map(([bx,bz],i) => ({ id: i, x: cx(bx)+13, z: cx(bz)-12 }));
-const JAIL = { x: -533, z: 533 };   // moved to the new corner of the bigger map
+const JAIL = { x: -800, z: 800 };   // moved to the new corner of the bigger map
 // places you can walk into. Their insides are built far away from the city (x = 1000).
 const BANK_DOOR = { x: 32, z: 43 }, BANK_OUT = { x: 32, z: 47 };
 const MALL_DOOR = { x: 32, z: 174.5 }, MALL_OUT = { x: 32, z: 179 };
