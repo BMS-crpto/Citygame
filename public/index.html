@@ -301,15 +301,15 @@ Object.entries(ROLES).forEach(([k,r])=>{
 });
 
 // =============== renderer, sky, light ===============
-const HORIZON=0xdcd3c4;
+const HORIZON=0xcfe0ee;
 const scene=new THREE.Scene();
-scene.fog=new THREE.Fog(HORIZON,70,210);
+scene.fog=new THREE.Fog(HORIZON,95,270);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,0.1,320);
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
 renderer.setSize(innerWidth,innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.75));
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25; // lower = darker, higher = brighter
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12; // lower = darker, higher = brighter
 
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
@@ -339,8 +339,8 @@ sunSprite.scale.set(110,110,1);sunSprite.position.copy(SUNDIR).multiplyScalar(22
 
 const hemi=new THREE.HemisphereLight(0xcfe3ff,0x7a7a5a,0.78);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffe7c2,0.95);
-sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);
-const shc=sun.shadow.camera;shc.left=-48;shc.right=48;shc.top=48;shc.bottom=-48;shc.near=1;shc.far=180;
+sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+const shc=sun.shadow.camera;shc.left=-62;shc.right=62;shc.top=62;shc.bottom=-62;shc.near=1;shc.far=180;
 sun.shadow.bias=-0.0007;
 scene.add(sun);scene.add(sun.target);
 
@@ -377,25 +377,25 @@ function winTex(rx,ry){const k=rx+'x'+ry;return winCache[k]||(winCache[k]=tx(win
 function litTex(rx,ry){const k=rx+'x'+ry;return litCache[k]||(litCache[k]=tx(winLitBase,rx,ry))}
 
 // =============== world ===============
-const ROAD=12,BLOCK=64,GN=8,BOUND=GN*BLOCK+44;   // GN 6->8: the city is now bigger (far districts: Epe, Ikorodu, Ojota, Ojo, Festac, Apapa, Badagry)
+const ROAD=12,BLOCK=64,GN=12,BOUND=GN*BLOCK+44;   // GN 6->8: the city is now bigger (far districts: Epe, Ikorodu, Ojota, Ojo, Festac, Apapa, Badagry)
 const solids=[];
 function inst(geo,mat,list,cast){
   const m=new THREE.InstancedMesh(geo,mat,list.length);const d=new THREE.Object3D();
   list.forEach((p,i)=>{d.position.set(p[0],p[1],p[2]);d.rotation.set(0,p[3]||0,0);d.scale.set(p[4]||1,p[5]||1,p[4]||1);d.updateMatrix();m.setMatrixAt(i,d.matrix)});
   m.instanceMatrix.needsUpdate=true;m.castShadow=!!cast;m.receiveShadow=true;m.frustumCulled=false;scene.add(m);return m;
 }
-const ground=new THREE.Mesh(new THREE.PlaneGeometry(1200,1200),new THREE.MeshLambertMaterial({map:tx(grassBase,300,300)}));
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(2*BOUND+500,2*BOUND+500),new THREE.MeshLambertMaterial({map:tx(grassBase,Math.round((2*BOUND+500)/4),Math.round((2*BOUND+500)/4))}));
 ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 
 const roadMatH=new THREE.MeshLambertMaterial({map:tx(asphaltBase,Math.round(113*GN/6),1.5),polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});
 const roadMatV=new THREE.MeshLambertMaterial({map:tx(asphaltBase,1.5,Math.round(113*GN/6)),polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
 const lineMat=new THREE.MeshLambertMaterial({color:0xffc107,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4});
 for(let i=-GN-1;i<=GN+1;i++){
-  const h=new THREE.Mesh(new THREE.PlaneGeometry(900,ROAD),roadMatH);h.rotation.x=-Math.PI/2;h.position.set(0,0.02,i*BLOCK);h.receiveShadow=true;scene.add(h);
-  const v=new THREE.Mesh(new THREE.PlaneGeometry(ROAD,900),roadMatV);v.rotation.x=-Math.PI/2;v.position.set(i*BLOCK,0.02,0);v.receiveShadow=true;scene.add(v);
+  const h=new THREE.Mesh(new THREE.PlaneGeometry(2*BOUND+200,ROAD),roadMatH);h.rotation.x=-Math.PI/2;h.position.set(0,0.02,i*BLOCK);h.receiveShadow=true;scene.add(h);
+  const v=new THREE.Mesh(new THREE.PlaneGeometry(ROAD,2*BOUND+200),roadMatV);v.rotation.x=-Math.PI/2;v.position.set(i*BLOCK,0.02,0);v.receiveShadow=true;scene.add(v);
   for(const o of [-0.25,0.25]){
-    const l1=new THREE.Mesh(new THREE.PlaneGeometry(900,0.18),lineMat);l1.rotation.x=-Math.PI/2;l1.position.set(0,0.03,i*BLOCK+o);scene.add(l1);
-    const l2=new THREE.Mesh(new THREE.PlaneGeometry(0.18,900),lineMat);l2.rotation.x=-Math.PI/2;l2.position.set(i*BLOCK+o,0.03,0);scene.add(l2);
+    const l1=new THREE.Mesh(new THREE.PlaneGeometry(2*BOUND+200,0.18),lineMat);l1.rotation.x=-Math.PI/2;l1.position.set(0,0.03,i*BLOCK+o);scene.add(l1);
+    const l2=new THREE.Mesh(new THREE.PlaneGeometry(0.18,2*BOUND+200),lineMat);l2.rotation.x=-Math.PI/2;l2.position.set(i*BLOCK+o,0.03,0);scene.add(l2);
   }
 }
 // dashed lane lines + crosswalks
@@ -546,7 +546,7 @@ const palms=[],treesA=[],treesB=[];
 const lampPos=[];for(let i=-GN;i<=GN;i++)for(let j=-GN;j<=GN;j++)lampPos.push([i*BLOCK+7.5,0,j*BLOCK+7.5],[i*BLOCK+7.5+32,0,j*BLOCK+7.5],[i*BLOCK+7.5,0,j*BLOCK+7.5+32]);
 
 function villa(x,z){                       // Lekki: modern white villa in a walled compound
-  T.set(x,z,1.8,1.35);
+  T.set(x,z,1.35,0.94);
   const col=pick([0xf4efe6,0xefe3d0,0xe7ecef,0xdad4c8]);
   addFacade(x,z,8,4.2,8,col);
   addFacade(x+1,z-0.4,6.6,3.2,7,col,4.2);
@@ -568,7 +568,7 @@ function villa(x,z){                       // Lekki: modern white villa in a wal
 }
 function palmBatch(){palms.forEach(([x,z])=>{bx_(x,3,z,0.3,6,0.3,0x8a6a3f);for(const r of [0,Math.PI/2,Math.PI/4,-Math.PI/4])bx_(x,6.2,z,4,0.14,0.9,0x2f8f3a,r);bx_(x,6.3,z,1,0.8,1,0x3a9a42)})}
 function office(x,z,nm){                   // Ikeja office block
-  T.set(x,z,1.5,1.5);
+  T.set(x,z,1.12,1.05);
   const h=8+sr()*8,col=pick([0xe9e4d8,0xd8e1e6,0xe9d9c8]);
   addFacade(x,z,10,h,10,col);bx_(x,h+0.2,z,10.6,0.4,10.6,0x555a60);
   bx_(x+2,h+1.5,z-2,2.2,2.2,2.2,0x3b7dd8);bx_(x+2,h+0.6,z-2,0.2,1.2,2,0x444);          // rooftop water tank
@@ -580,7 +580,7 @@ function office(x,z,nm){                   // Ikeja office block
   T.off();
 }
 function shopStrip(x,z,nm,bg){             // small commercial building with awning
-  T.set(x,z,1.5,1.3);
+  T.set(x,z,1.12,0.91);
   const col=pick([0xf2c14e,0xe9724c,0x5aa9a3,0xd9a05b,0xe8e0cf]);
   addFacade(x,z,10,4.2,9,col);bx_(x,4.35,z,10.6,0.3,9.6,0x5a4a3c);
   bx_(x,3.1,z+5.5,10,0.2,1.9,pick([0xc62828,0x1565c0,0x2e7d32,0xef6c00]));
@@ -591,7 +591,7 @@ function shopStrip(x,z,nm,bg){             // small commercial building with awn
   T.off();
 }
 function bungalow(x,z){                    // Surulere family home with pitched roof and fence
-  T.set(x,z,1.6,1.3);
+  T.set(x,z,1.20,0.91);
   const col=pick([0xe9d8b4,0xd8c6a5,0xe5c1b8,0xc6d8c9]);
   addFacade(x,z,10,4,8,col);
   (sr()<0.5?pitchedA:pitchedB).push([T.X(x),T.Y(5.2),T.Z(z),Math.PI/4,1.0*T.kx,T.ky]);
@@ -603,7 +603,7 @@ function bungalow(x,z){                    // Surulere family home with pitched 
   T.off();
 }
 function localShop(x,z,nm){                // Surulere kiosk-style shop
-  T.set(x,z,1.5,1.3);
+  T.set(x,z,1.12,0.91);
   addFacade(x,z,8,3.8,7,pick([0x5aa9a3,0xe8b04b,0xd97b66,0xa3c4a0]));
   bx_(x,3.95,z,8.7,0.3,7.7,0x8a5a3c);bx_(x,0.55,z+4.2,6,1.1,0.8,0xb8863b);
   bx_(x,3.0,z+4.6,7,0.2,1.8,0x2e9e5b);bx_(x-2.6,1.2,z+4.1,0.15,2.4,0.15,0xdddddd);bx_(x+2.6,1.2,z+4.1,0.15,2.4,0.15,0xdddddd);
@@ -694,7 +694,7 @@ for(let bx=-GN;bx<GN;bx++)for(let bz=-GN;bz<GN;bz++){
     localShop(cx+13,cz-12,pick(NAMES.surulere));
     [[ -4,-20],[4,19],[-21,-14]].forEach(t=>(sr()<0.5?treesA:treesB).push([cx+t[0],0,cz+t[1],0,0.8+sr()*0.4]));
   }else{ // market
-    for(const r of [-15,-6,6,15])for(let k=0;k<7;k++){const sx=cx-19.2+k*6.4,sz=cz+r;T.set(sx,sz,1.25,1.15);stall(sx,sz);T.off()}
+    for(const r of [-15,-6,6,15])for(let k=0;k<7;k++){const sx=cx-19.2+k*6.4,sz=cz+r;T.set(sx,sz,0.94,0.85);stall(sx,sz);T.off()}
     bx_(cx-6,4,cz+23.5,0.5,8,0.5,0x555);bx_(cx+6,4,cz+23.5,0.5,8,0.5,0x555);bx_(cx,7.6,cz+23.5,13,0.6,0.6,0x555);
     addSign(NAMES.market[(bx+bz+8)%3],cx,6.4,cz+23.6,0,10,pick(SIGNBG));
   }
@@ -753,7 +753,7 @@ function buildMallInside(){
   addSign('GRAND MARKET',x0,5.8,z0-15.9,0,14,'#e65100');
   bx_(x0,0.6,z0-12.5,10,1.2,1.4,0x6b4a2b);bx_(x0+2,1.45,z0-12.5,0.8,0.5,0.6,0x333);solid(x0,z0-12.5,5.2,0.9);
   bx_(x0,1.7,z0-13.6,1.0,1.4,0.5,0x37474f);bx_(x0,2.6,z0-13.6,0.5,0.5,0.5,0x8d5524);
-  for(const zi of [-5,5])for(let xi=-16;xi<=16;xi+=8){T.set(x0+xi,z0+zi,1.3,1.2);stall(x0+xi,z0+zi);T.off()}
+  for(const zi of [-5,5])for(let xi=-16;xi<=16;xi+=8){T.set(x0+xi,z0+zi,0.98,0.85);stall(x0+xi,z0+zi);T.off()}
   bx_(x0+20.4,0.6,z0-8,1.4,1.2,6,0x6b4a2b);solid(x0+20.4,z0-8,0.8,3.1);
   for(const dz of [-1.5,0,1.5]){bx_(x0+20.4,1.5,z0-8+dz,0.9,0.6,0.9,0x555555);bx_(x0+20.4,1.85,z0-8+dz,1,0.1,1,0xb0b0b0)}
   addSign('MAMA PUT FOOD',x0+21.9,3.6,z0-8,-Math.PI/2,5,'#b71c1c');
@@ -835,7 +835,7 @@ const starGeo=new THREE.BufferGeometry();starGeo.setAttribute('position',new THR
 const stars=new THREE.Points(starGeo,new THREE.PointsMaterial({color:0xffffff,size:2.2,sizeAttenuation:false,transparent:true,opacity:0,fog:false,depthWrite:false}));
 stars.frustumCulled=false;skyGroup.add(stars);
 const C=h=>new THREE.Color(h);
-const SKY={dTop:C(0x3a74b8),dMid:C(0x9dbfdc),dHor:C(0xdcd3c4),nTop:C(0x0b1636),nMid:C(0x1b3266),nHor:C(0x34457d),warm:C(0xff9a5c)};
+const SKY={dTop:C(0x2a74cc),dMid:C(0x8cc2ee),dHor:C(0xcfe0ee),nTop:C(0x0b1636),nMid:C(0x1b3266),nHor:C(0x34457d),warm:C(0xff9a5c)};
 const _t1=new THREE.Color(),_t2=new THREE.Color(),_t3=new THREE.Color();
 const DAY_LEN=480,clamp01=v=>Math.max(0,Math.min(1,v));
 let clockText='';let inside=null;let rainF=0;
@@ -850,15 +850,15 @@ function updateTime(){
   skyMat.uniforms.mid.value.copy(_t2.copy(SKY.nMid).lerp(SKY.dMid,dayF));
   _t3.copy(SKY.nHor).lerp(SKY.dHor,dayF).lerp(SKY.warm,warm*0.65);
   skyMat.uniforms.hor.value.copy(_t3);scene.fog.color.copy(_t3);
-  hemi.intensity=0.55+0.4*dayF;
-  sun.intensity=0.3+0.68*dayF;sun.color.setHex(0xffe7c2).lerp(SKY.warm,warm*0.6).lerp(_t1.setHex(0x8a9bd8),nightF*0.8);
+  hemi.intensity=0.5+0.36*dayF;
+  sun.intensity=0.3+0.95*dayF;sun.color.setHex(0xffe7c2).lerp(SKY.warm,warm*0.6).lerp(_t1.setHex(0x8a9bd8),nightF*0.8);
   if(inside){hemi.intensity=1.05;sun.intensity=0}
   facadeList.forEach(m=>m.emissiveIntensity=nightF*0.95);
   lampBulbMat.color.setHex(0x55554a).lerp(_t1.setHex(0xfff0c0),nightF);
   glowPts.material.opacity=nightF*0.85;stars.material.opacity=nightF;
   rainF=clamp01((-Math.sin(((Date.now()/1000)%900)/900*Math.PI*2)-0.7)*4);
   if(rainF>0){const G=_t1.setHex(0x7d8791);skyMat.uniforms.top.value.lerp(G,rainF*0.6);skyMat.uniforms.mid.value.lerp(G,rainF*0.6);skyMat.uniforms.hor.value.lerp(G,rainF*0.6);scene.fog.color.lerp(G,rainF*0.6);if(!inside){hemi.intensity*=1-0.25*rainF;sun.intensity*=1-0.5*rainF}}
-  scene.fog.near=70-30*rainF;scene.fog.far=210-60*rainF;
+  scene.fog.near=95-40*rainF;scene.fog.far=270-80*rainF;
   rain.visible=rainF>0.02&&!inside;rain.material.opacity=0.5*rainF;
   const hr=lagosHours(),hh=Math.floor(hr),mm=Math.floor((hr-hh)*60);
   clockText=((hh+11)%12+1)+':'+String(mm).padStart(2,'0')+(hh<12?' AM':' PM')+(rainF>0.3?' 🌧️':'');
@@ -972,9 +972,9 @@ const MODEL_FILES={sedan:'models/sedan.glb',suv:'models/suv.glb',police:'models/
 // len = target length (cars) or height (people) in game units; yaw = extra turn in degrees if a model faces the wrong way
 const MODEL_CFG={
   sedan:{len:4.6,body:/lightblue/i},suv:{len:4.8,body:/^white$/i},police:{len:4.7},gtr:{len:4.7,body:/chasis/i},
-  lambo:{len:4.9,yaw:0},bmw:{len:4.8},man:{len:2.55,person:1},woman:{len:2.45,person:1},suit:{len:2.55,person:1},
+  lambo:{len:4.9,yaw:0},bmw:{len:4.8},man:{len:1.78,person:1},woman:{len:1.68,person:1},suit:{len:1.78,person:1},
   // v0.8 models. okada is modelled facing -z so it gets a 180 turn. prop:1 = keep the model's own orientation, only apply yaw and scale by height h (or length len).
-  challenger:{len:4.9},fireengine:{len:6.4},okada:{len:2.3,yaw:180},punk:{len:2.55,person:1},
+  challenger:{len:4.9},fireengine:{len:6.4},okada:{len:2.3,yaw:180},punk:{len:1.78,person:1},
   chiron:{len:4.55},dominusrl:{len:4.4},car3d:{len:4.9},   // v0.9: Bugatti Chiron (12), Dominus (13), 3d_car (14)
   airplane:{prop:1,len:34,yaw:17.5},          // the file is tilted about 17.5 degrees off its own axis
   closet:{prop:1,h:2.1},dryer:{prop:1,h:0.95},computer:{prop:1,h:0.55}
@@ -1143,7 +1143,7 @@ function attachCharModel(g,body,role,name,look){
       recolorChar(ch,lk);
       if(key==='suit')ch.traverse(o=>{if(!o.isMesh)return;(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>{if(/Hair_Brown/i.test(m.name||''))m.visible=false})});
       body.children.slice().forEach(c=>{c.visible=false});
-      body.add(ch);g.userData.modelDone=true;
+      body.add(ch);body.scale.setScalar(1);g.userData.modelDone=true;
       addHeadgear(body,H,lk,role);
       const clips=MODELS[key].anims,pick_=re=>clips.find(c=>re.test(c.name));
       const walk=pick_(/walk$/i),idle=pick_(/idle$/i)||pick_(/standing$/i);
@@ -1230,8 +1230,9 @@ function makeCharacter(role,name,look,noLabel){
   if(role==='nurse'){cyl(0.23,0.26,0.14,M(0xffffff),0,2.72,0.02);box(0.3,0.08,0.03,M(0xe53935),0.25,1.75,0.29);box(0.08,0.3,0.03,M(0xe53935),0.25,1.75,0.29)}
   if(role==='lawyer'){box(0.34,0.16,0.03,M(0xffffff),0,1.95,0.29);box(0.12,0.55,0.03,M(0xc62828),0,1.6,0.3);box(0.55,0.42,0.16,M(0x6d4c41),0.1,-1.25,0,armR)}
   if(role==='taxi'){sph(0.3,0.14,0.31,M(L.hat),0,2.68,0);sph(0.24,0.025,0.2,M(0x222222),0,2.6,0.3);box(1.02,0.12,0.57,M(0x333333),0,1.75,0)}
-  if(!noLabel)g.add(makeLabel(`${(ROLES[role]||{emoji:'💬'}).emoji} ${name}`,'#fff'));
+  if(!noLabel)g.add(makeLabel(`${(ROLES[role]||{emoji:'💬'}).emoji} ${name}`,'#fff',2.55));
   g.userData={body,legL,legR,armL,armR,t:0,carG:null,curCar:-1,carRole:null};
+  body.scale.setScalar(0.7);
   attachCharModel(g,body,role,name,look);
   return g;
 }
@@ -1647,6 +1648,7 @@ function collide(nx,nz){
   if(inside){const R=ROOMS[inside];if(Math.abs(nx-R.x0)>R.hw-0.9||Math.abs(nz-R.z0)>R.hd-0.9)return true}
   else if(Math.abs(nx)>BOUND||Math.abs(nz)>BOUND)return true;
   for(const s of solids)if(Math.abs(nx-s.x)<s.hw&&Math.abs(nz-s.z)<s.hd)return true;
+  if(!inside&&myCol>=0&&trafficBlocks(nx,nz))return true;
   return false;
 }
 function npcNear(near){for(const o of npcObjs){if((o.n.place||null)!==(inside||null))continue;if(near(o.n.x,o.n.z,3.8))return o.n}return null}
@@ -1855,6 +1857,86 @@ let last=performance.now(),uc=0,tAcc=0,dustT=0,tc=0;
 function wrap(a){return ((a+Math.PI*3)%(Math.PI*2))-Math.PI}
 const _lgEl=document.getElementById('login'),_mnEl=document.getElementById('menu');
 const _ovUp=()=>(_lgEl&&_lgEl.style.display!=='none')||(_mnEl&&_mnEl.style.display!=='none');
+/* ===== v1.0: living city - NPC drivers and pedestrians (client side, ambient) ===== */
+const TR={cars:[],peds:[],ready:false},LANE=3.2,SW=9.6,DIRS=[[1,0],[-1,0],[0,1],[0,-1]];
+const rnd=(a,b)=>a+Math.random()*(b-a),ri=n=>Math.floor(Math.random()*n);
+const nodeOK=(i,j)=>Math.abs(i)<=GN&&Math.abs(j)<=GN&&!(Math.abs(i*BLOCK+288)<100&&Math.abs(j*BLOCK-320)<66);   // keep off the airport
+const lanePt=(i,j,d)=>[i*BLOCK-d[1]*LANE,j*BLOCK+d[0]*LANE];                                              // drive on the right
+const TKINDS=[[0,''],[1,''],[2,''],[3,''],[4,''],[0,'taxi'],[3,'taxi'],[5,''],[6,''],[8,''],[1,''],[0,'']];
+function carNext(c){
+  const o=DIRS.filter(d=>!(d[0]===-c.d[0]&&d[1]===-c.d[1])&&nodeOK(c.ni+d[0],c.nj+d[1]));
+  if(!o.length)return[-c.d[0],-c.d[1]];
+  const s=o.find(d=>d[0]===c.d[0]&&d[1]===c.d[1]);
+  return(s&&Math.random()<0.6)?s:o[ri(o.length)];
+}
+function spawnCar(){
+  for(let t=0;t<40;t++){
+    const i=ri(2*GN+1)-GN,j=ri(2*GN+1)-GN,d=DIRS[ri(4)];
+    if(!nodeOK(i,j)||!nodeOK(i+d[0],j+d[1]))continue;
+    const a=lanePt(i,j,d),b=lanePt(i+d[0],j+d[1],d),f=rnd(0.15,0.85),x=a[0]+(b[0]-a[0])*f,z=a[1]+(b[1]-a[1])*f;
+    if(Math.hypot(x-pos.x,z-pos.z)<30||TR.cars.some(c=>Math.hypot(c.x-x,c.z-z)<14))continue;
+    const k=TKINDS[ri(TKINDS.length)],g=makeCar(k[0],k[1]);g.position.set(x,0,z);g.rotation.y=Math.atan2(d[0],d[1]);scene.add(g);
+    const slow=k[0]===6?0.65:k[0]===5?0.85:1;
+    TR.cars.push({g,x,z,ry:g.rotation.y,v:0,vmax:rnd(8,13)*slow,ni:i+d[0],nj:j+d[1],d,stuck:0,free:0});return;
+  }
+}
+function pedPt(p){return[p.pi*BLOCK+p.sx*SW,p.pj*BLOCK+p.sz*SW]}
+function pedNext(p){
+  const c=[];
+  const ax=[p.pi+p.sx,p.pj,-p.sx,p.sz],az=[p.pi,p.pj+p.sz,p.sx,-p.sz],cx_=[p.pi,p.pj,-p.sx,p.sz],cz_=[p.pi,p.pj,p.sx,-p.sz];
+  for(const [n,w] of [[ax,3],[az,3],[cx_,1],[cz_,1]])if(nodeOK(n[0],n[1])&&!(n[0]===p.ppi&&n[1]===p.ppj&&n[2]===p.psx&&n[3]===p.psz))for(let k=0;k<w;k++)c.push(n);
+  return c.length?c[ri(c.length)]:[p.ppi,p.ppj,p.psx,p.psz];
+}
+function spawnPed(){
+  for(let t=0;t<30;t++){
+    const i=ri(2*GN+1)-GN,j=ri(2*GN+1)-GN,sx=ri(2)?1:-1,sz=ri(2)?1:-1;if(!nodeOK(i,j))continue;
+    const look=[ri(5),ri(5),ri(8),ri(5),ri(2),ri(6)],g=makeCharacter('npc','Walker'+ri(999),look,true);
+    const p={g,pi:i,pj:j,sx,sz,ppi:i,ppj:j,psx:sx,psz:sz,x:i*BLOCK+sx*SW,z:j*BLOCK+sz*SW,ry:0,sp:rnd(1.6,2.6)};
+    const n=pedNext(p);p.ppi=p.pi;p.ppj=p.pj;p.psx=p.sx;p.psz=p.sz;p.pi=n[0];p.pj=n[1];p.sx=n[2];p.sz=n[3];
+    g.position.set(p.x,0,p.z);g.visible=false;scene.add(g);TR.peds.push(p);return;
+  }
+}
+// the player's own car/body blocks traffic, and traffic blocks the player's car (not people on foot)
+function trafficBlocks(nx,nz){
+  for(const c of TR.cars){const dn=Math.hypot(nx-c.x,nz-c.z);if(dn<2.7&&dn<Math.hypot(pos.x-c.x,pos.z-c.z))return true}
+  return false;
+}
+function trafficUpdate(dt){
+  if(!me)return;
+  if(!TR.ready){TR.ready=true;const nc=quality==='low'?16:quality==='high'?46:32,np=quality==='low'?18:quality==='high'?56:38;for(let i=0;i<nc;i++)spawnCar();for(let i=0;i<np;i++)spawnPed()}
+  if(inside){for(const c of TR.cars)c.g.visible=false;for(const p of TR.peds)p.g.visible=false;return}
+  for(const c of TR.cars){
+    const sy=Math.sin(c.ry),cy=Math.cos(c.ry);
+    const S=lanePt(c.ni-c.d[0],c.nj-c.d[1],c.d),E=lanePt(c.ni,c.nj,c.d),len=Math.hypot(E[0]-S[0],E[1]-S[1]);
+    let t=(c.x-S[0])*c.d[0]+(c.z-S[1])*c.d[1];
+    if(t>len-4.5){const nd=carNext(c);c.ni+=nd[0];c.nj+=nd[1];c.d=nd;continue}
+    const S2=lanePt(c.ni-c.d[0],c.nj-c.d[1],c.d);t=Math.max(0,t);const la=Math.min(len,t+6+c.v*0.35);
+    const tx=S2[0]+c.d[0]*la+(c.d[0]===0?0:0),tz=S2[1]+c.d[1]*la;
+    const err=wrap(Math.atan2(tx-c.x,tz-c.z)-c.ry),turn=Math.min(2.4,Math.abs(err)*3.5);
+    c.ry+=Math.max(-turn*dt,Math.min(turn*dt,err));
+    // look ahead for anything in the way: other cars, people on the road, the player
+    let want=c.vmax*(1-Math.min(0.65,Math.abs(err)));
+    if(Math.hypot(c.x-pos.x,c.z-pos.z)<110){
+      const test=(ox,oz,gap,wid)=>{const dx=ox-c.x,dz=oz-c.z,f=dx*sy+dz*cy,s=Math.abs(dx*cy-dz*sy);if(f>0.5&&f<gap&&s<wid){const k=Math.max(0,(f-5)/(gap-5));want=Math.min(want,c.vmax*k)}};
+      if(c.free<=0)for(const o of TR.cars)if(o!==c)test(o.x,o.z,13,2.5);
+      for(const p of TR.peds)if(Math.abs(p.x-c.x)<16&&Math.abs(p.z-c.z)<16)test(p.x,p.z,11,1.9);
+      test(pos.x,pos.z,13,2.3);
+    }
+    c.v+=(want-c.v)*Math.min(1,dt*(want<c.v?3.2:1.2));
+    c.stuck=c.v<0.4?c.stuck+dt:0;if(c.stuck>5){c.free=3.5;c.stuck=0}if(c.free>0)c.free-=dt;
+    c.x+=Math.sin(c.ry)*c.v*dt;c.z+=Math.cos(c.ry)*c.v*dt;
+    c.g.position.set(c.x,0,c.z);c.g.rotation.y=c.ry;
+    c.g.visible=Math.hypot(c.x-pos.x,c.z-pos.z)<190;
+  }
+  for(const p of TR.peds){
+    const tg=pedPt(p),dx=tg[0]-p.x,dz=tg[1]-p.z,dd=Math.hypot(dx,dz);
+    if(dd<0.6){const n=pedNext(p);p.ppi=p.pi;p.ppj=p.pj;p.psx=p.sx;p.psz=p.sz;p.pi=n[0];p.pj=n[1];p.sx=n[2];p.sz=n[3];continue}
+    p.x+=dx/dd*p.sp*dt;p.z+=dz/dd*p.sp*dt;p.ry+=wrap(Math.atan2(dx,dz)-p.ry)*Math.min(1,dt*6);
+    const vis=Math.hypot(p.x-pos.x,p.z-pos.z)<80;p.g.visible=vis;
+    if(vis){p.g.position.set(p.x,0,p.z);p.g.rotation.y=p.ry;animate(p.g,true,dt)}
+  }
+}
+
 function loop(now){
   requestAnimationFrame(loop);
   const dt=Math.min(0.05,(now-last)/1000);last=now;tAcc+=dt;
@@ -1900,7 +1982,7 @@ function loop(now){
     if(!camInit){camera.position.set(gx,ch,gz);camInit=true}
     const k=Math.min(1,dt*9);
     camera.position.x+=(gx-camera.position.x)*k;camera.position.y+=(ch-camera.position.y)*k;camera.position.z+=(gz-camera.position.z)*k;
-    camera.lookAt(pos.x,2,pos.z);
+    camera.lookAt(pos.x,1.4,pos.z);
     sun.position.set(pos.x+SUNV.x*80,SUNV.y*80,pos.z+SUNV.z*80);sun.target.position.set(pos.x,0,pos.z);
     if(++uc%6===0)updateUse();
     if(++tc%20===0){updateTime();updateDistrict()}
@@ -1925,7 +2007,7 @@ function loop(now){
   const sirenOf=g=>g&&g.userData.carG&&g.userData.carG.userData.siren;
   let s=sirenOf(me);if(s){s[0].visible=ph;s[1].visible=!ph}
   for(const id in others){s=sirenOf(others[id].g);if(s){s[0].visible=ph;s[1].visible=!ph}}
-  updateDust(dt);updateRain(dt);
+  trafficUpdate(dt);updateDust(dt);updateRain(dt);
   renderer.render(scene,camera);
 }
 requestAnimationFrame(loop);
