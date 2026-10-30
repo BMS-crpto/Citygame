@@ -797,9 +797,7 @@ const VEHICLES = {
   4: { name: 'Lexus RX SUV', icon: '🚙', price: 6500000 },
   2: { name: 'Nissan GT-R', icon: '🏎️', price: 12000000 },
   9: { name: 'BMW M4 Competition', icon: '🚘', price: 18000000 },
-  7: { name: 'Lamborghini', icon: '🏎️', price: 28000000 },
-  10: { name: 'Dodge Challenger', icon: '🏎️', price: 15000000 },
-  11: { name: 'Fire Engine', icon: '🚒', price: 9000000 }
+  7: { name: 'Lamborghini', icon: '🏎️', price: 28000000 }
 };
 const LICENSE_PRICE = 20000;
 RIDES.driver = { name: 'Private Driver', rate: 0.12, min: 150, speed: 36 };
@@ -825,9 +823,7 @@ const DECOR = {
   tv: { name: 'Smart TV', icon: '📺', price: 120000 }, bed: { name: 'King Bed', icon: '🛏️', price: 150000 },
   fridge: { name: 'Fridge', icon: '🧊', price: 95000 }, speaker: { name: 'Sound System', icon: '🔊', price: 60000 },
   chandelier: { name: 'Chandelier', icon: '🕯️', price: 250000 }, trophy: { name: 'Trophy', icon: '🏆', price: 20000 },
-  painting: { name: 'Painting', icon: '🖼️', price: 40000 }, desk: { name: 'Work Desk', icon: '🖥️', price: 70000 },
-  closet: { name: 'Wardrobe', icon: '🚪', price: 110000 }, dryer: { name: 'Washer-Dryer', icon: '🧺', price: 90000 },
-  computer: { name: 'Gaming PC', icon: '💻', price: 180000 }
+  painting: { name: 'Painting', icon: '🖼️', price: 40000 }, desk: { name: 'Work Desk', icon: '🖥️', price: 70000 }
 };
 const clampN = (v, m) => Math.max(-m, Math.min(m, +v || 0));
 function loadExt(s) {
