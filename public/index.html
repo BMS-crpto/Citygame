@@ -826,7 +826,7 @@ function rebuildLot(force){
 }
 function syncBay(){rebuildLot(true)}
 function openShowCard(col){
-  const v=(PX.carList||[]).find(c=>c.col===col)||{name:'Vehicle',price:0},sp=SPECS[col]||[v.name,'-','-','-'],own=PX.cars.includes(col);
+  const v=(PX.carList||[]).find(c=>c.col===col)||{name:'Vehicle',price:25000000},sp=SPECS[col]||[v.name,'-','-','-'],own=PX.cars.includes(col);
   let el=document.getElementById('showCard');if(el)el.remove();
   el=document.createElement('div');el.id='showCard';
   el.style.cssText='position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(340px,92vw);background:#111827ee;color:#fff;border:1px solid #d4af37;border-radius:14px;padding:14px;z-index:60;font:14px sans-serif';
@@ -1905,7 +1905,7 @@ function updateUse(){
     else if(inside.startsWith('house')&&!R.model&&near(R.x0+8.5,R.z0+5,4)){t={type:'paint'};label='🎨 PAINT ₦300'}
     else if(inside.startsWith('house')&&near(R.eat?R.eat.x:R.x0-9,R.eat?R.eat.z:R.z0-0.5,R.eat?4.6:3.5)){t={type:'eat'};label='🍳 EAT AT HOME'}
     else if(inside==='mall'&&near(R.x0+19,R.z0-8,4.5)){t={type:'eat'};label='🍲 BUY FOOD ₦40'}
-    else if(inside==='dealer'&&(ensureCarList(),showCars.some(s=>near(s.x,s.z,4.2)))){const s=showCars.find(s=>near(s.x,s.z,4.2)),v=(typeof PX!=='undefined'&&PX.carList.find(c=>c.col===s.col))||{name:'car',price:0};t={type:'xshow',col:s.col};label='🔑 '+v.name+' '+fmtK(v.price)+' - VIEW / BUY'}
+    else if(inside==='dealer'&&(ensureCarList(),showCars.some(s=>near(s.x,s.z,4.2)))){const s=showCars.find(s=>near(s.x,s.z,4.2)),v=(typeof PX!=='undefined'&&PX.carList.find(c=>c.col===s.col))||{name:'car',price:25000000};t={type:'xshow',col:s.col};label='🔑 '+v.name+' '+fmtK(v.price)+' - VIEW / BUY'}
     else if(R.spot&&near(R.spot.x,R.spot.z,R.spot.r)){t={type:'venue'};label=R.spot.act}
     else if(npcNear(near)){const n=npcNear(near);t={type:'npc',id:n.id};label='💬 TALK to '+n.name}
     else if(near(R.exit.x,R.exit.z,3.6)){t={type:'out'};label='🚪 GO OUTSIDE'}
@@ -2567,7 +2567,7 @@ guard('cars',()=>{
     _uu();
     guard('gate',()=>{
       if(!useTarget||useTarget.type!=='enter')return;
-      const col=useTarget.car.col,v=PX.carList.find(c=>c.col===col)||{name:'vehicle',price:0};
+      const col=useTarget.car.col,v=PX.carList.find(c=>c.col===col)||{name:'vehicle',price:25000000};
       let lbl=null;
       if(!PX.license){useTarget={type:'xlic'};lbl='🪪 GET DRIVER LICENSE ₦20k'}
       else if(!PX.cars.includes(col)){useTarget={type:'xbuy',col};lbl='💰 BUY '+v.name+' '+fmtK(v.price)}
