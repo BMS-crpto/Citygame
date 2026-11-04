@@ -1,23 +1,12 @@
 {
   "name": "lagos-life-online",
-  "version": "0.6.0",
+  "version": "0.7.0",
+  "description": "Multiplayer 3D Lagos life sim. Dependency-free Node server + Three.js browser client.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "postinstall": "node -e \"try{require('./scripts/copy-libs.js')}catch(e){console.log('copy-libs skipped:',e.code)}\""
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=18"
-  },
-  "dependencies": {
-    "three": "^0.160.0",
-    "cannon-es": "^0.20.0",
-    "@dimforge/rapier3d-compat": "^0.12.0",
-    "howler": "^2.2.4",
-    "gsap": "^3.12.5",
-    "nipplejs": "^0.10.2",
-    "idb": "^8.0.0",
-    "simplex-noise": "^4.0.1",
-    "pathfinding": "^0.4.18"
   }
 }

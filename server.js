@@ -384,6 +384,8 @@ function onConnection(ws) {
       p.ride = d.id; p.moving = false;
       send(ws, { t: 'toast', text: "🚗 You joined " + d.name + "'s car. Use the quick-chat button to talk!" });
       send(d.ws, { t: 'toast', text: '🚗 ' + p.name + ' joined your car' });
+    } else if (m.t === 'rideend') {
+      // taxi/jet arrival is timed by the server (p.travelUntil); the client's "we have arrived" ping needs no action
     } else if (m.t === 'ridestop') {
       if (!p.ride) return;
       const RR = rooms[room], d = RR && Object.values(RR.players).find(q => q.id === p.ride);
@@ -615,7 +617,7 @@ const MISSIONS = [
   { id: 'shift3', name: 'Complete 3 shifts', reward: 600, ok: p => p.life.shifts >= 3 },
   { id: 'save5k', name: 'Save ₦5,000 in the bank', reward: 1000, ok: p => p.bank >= 5000 },
   { id: 'house', name: 'Rent a villa or penthouse (₦200,000+/week)', reward: 20000, ok: p => { const h = myHouse(p); return !!h && h.rent >= 200000; } },
-  { id: 'empire', path: 'nepo', name: 'Grow the inheritance into ₦5,000,000', reward: 250000, ok: p => p.money + p.bank >= 5000000 },
+  { id: 'empire', path: 'nepo', name: 'Grow the inheritance into ₦250,000,000', reward: 250000, ok: p => p.money + p.bank >= 250000000 },   // 5x START.nepo; keep in step with it
   { id: 'ownname', path: 'lapo', name: 'Earn ₦300,000 from your own shifts and jobs', reward: 100000, ok: p => (p.life.earned || 0) >= 300000 },
   { id: 'promo', name: 'Get promoted', reward: 2000, ok: p => !!p.life.promoted },
   { id: 'rich', name: 'Hold ₦25,000 in total', reward: 5000, ok: p => p.money + p.bank >= 25000 }
@@ -644,7 +646,7 @@ const INCOME_MULT = 25;   // every shift/delivery pays 25x so the big cars are r
 const START = { nepo: 50000000, lapo: 1500000 };      // starting cash
 const DADDY = 0.6;                                    // Lapo babes: daddy pays 60% of every cost
 const PATHS = {
-  nepo: { name: 'Nepo baby', emoji: '👑', goal: 'Mummy and Daddy left you ₦1,000,000. Turn it into an empire: grow your wealth to ₦5,000,000 and make your own name in Lagos.' },
+  nepo: { name: 'Nepo baby', emoji: '👑', goal: 'Mummy and Daddy left you ₦50,000,000. Turn it into an empire: grow your wealth to ₦250,000,000 and make your own name in Lagos.' },
   lapo: { name: 'Lapo babe', emoji: '💖', goal: 'Born into a rich family. Daddy pays 60% of every bill you have: rent, food, rides and shopping. Live the soft life, then prove yourself: earn ₦300,000 from your own hustle.' }
 };
 const pKey = p => saveKey('CITY1', p);

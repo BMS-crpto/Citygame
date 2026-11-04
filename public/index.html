@@ -267,6 +267,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/utils/SkeletonUtils.js"></script>
+<script src="/buildings.js"></script>
 <script>
 const ROLES = {
   police:{emoji:'🚔',label:'Police',desc:'Arrest thieves'},
@@ -896,7 +897,121 @@ function buildAjahInside(unit){
     g.position.set(x0+ox,0,z0+oz);scene.add(g);
   });
 }
+// =============== every other building you can walk into: restaurants, clubs, offices, homes... ===============
+// The list of buildings (doors, names, what you can do inside) comes from buildings.js, the same file the server uses.
+const BUILD=window.Buildings,BLD=BUILD?BUILD.list():[];
+let venueName='';
+const VFLOOR={wood:woodBase,checker:checkerBase,tile:tileBase};
+const vSignCache={};
+function venueSign(text,bg,x,y,z,ry,w){       // like addSign, but shrinks long names so they fit
+  const k=text+bg;let mt=vSignCache[k];
+  if(!mt){
+    const t=canvasTex(512,128,(g,W,H)=>{
+      g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.28)';g.fillRect(0,H-9,W,9);
+      g.fillStyle='#fff';g.textAlign='center';g.textBaseline='middle';
+      let fs=54;g.font='bold '+fs+'px sans-serif';
+      while(g.measureText(text).width>W-28&&fs>20){fs-=2;g.font='bold '+fs+'px sans-serif'}
+      g.fillText(text,W/2,H/2-3);
+    });
+    t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;mt=vSignCache[k]=new THREE.MeshBasicMaterial({map:t});
+  }
+  const s=new THREE.Mesh(new THREE.PlaneGeometry(w,w/4),mt);s.position.set(x,y,z);s.rotation.y=ry||0;scene.add(s);return s;
+}
+function buildVenueInside(k){
+  const t=BUILD.TYPES[k],X=t.room.x,Z=t.room.z,hw=t.hw,hd=t.hd;
+  const R=makeRoom('v_'+k,X,Z,hw,hd,t.h,VFLOOR[t.floor]||tileBase,t.wall);
+  R.spot={x:X+t.spot.dx,z:Z+t.spot.dz,r:t.spot.r,act:t.act};
+  const F=(dx,dz,w,h,d,c)=>{bx_(X+dx,h/2,Z+dz,w,h,d,c);solid(X+dx,Z+dz,w/2+0.1,d/2+0.1)};   // furniture you cannot walk through
+  const D=(dx,dz,w,h,d,c,y)=>bx_(X+dx,y===undefined?h/2:y,Z+dz,w,h,d,c);                          // decoration, or things sitting on top
+  addSign(t.label.toUpperCase(),X,t.h-1.4,Z-hd+0.12,0,Math.min(8,hw*0.7),t.bg);
+  switch(k){
+    case 'restaurant':
+      F(-3,-7.8,10,1.3,1.1,0x6d4c41);D(-3,-7.8,10.3,0.1,1.3,0x3e2723,1.35);D(-3,-8.8,9,0.5,0.3,0xffb300,2.1);
+      for(const dx of [-7.5,7.5])for(const dz of [-2.5,1.5,5.5]){F(dx,dz,1.9,0.85,1.9,0x8d6e63);D(dx-1.5,dz,0.6,0.5,0.6,0xc62828);D(dx+1.5,dz,0.6,0.5,0.6,0xc62828)}
+      break;
+    case 'club':{
+      const a=new THREE.Mesh(new THREE.CylinderGeometry(5,5,0.05,32),new THREE.MeshBasicMaterial({color:0x5e35b1}));a.position.set(X,0.07,Z);scene.add(a);
+      const b=new THREE.Mesh(new THREE.CylinderGeometry(2.8,2.8,0.05,32),new THREE.MeshBasicMaterial({color:0xd81b60}));b.position.set(X,0.1,Z);scene.add(b);
+      F(0,-7.3,7,1.2,1.2,0x212121);D(0,-7.3,6.6,0.1,1.0,0x00e5ff,1.25);
+      F(-10,-9.5,1.8,3.2,1.8,0x111111);F(10,-9.5,1.8,3.2,1.8,0x111111);
+      F(11.4,2.5,1.2,1.2,9,0x4a148c);for(const dz of [-1,1.5,4,6.5])D(9.9,dz,0.55,0.7,0.55,0xe91e63);
+      F(-11.6,-1,1.6,1.0,3.4,0x6a1b9a);F(-11.6,3,1.6,1.0,3.4,0x6a1b9a);F(-11.6,7,1.6,1.0,3.4,0x6a1b9a);
+      D(-6,0,0.2,0.1,18,0xff1744,t.h-0.3);D(0,0,0.2,0.1,18,0x00e5ff,t.h-0.3);D(6,0,0.2,0.1,18,0x76ff03,t.h-0.3);
+      break}
+    case 'pharmacy':
+      F(-3,-6.2,8,1.0,1.2,0xeceff1);D(-3,-6.2,8.2,0.1,1.3,0x2e7d32,1.25);
+      for(const s of [-1,1]){F(s*8.2,-1,1.0,2.4,9,0xf5f5f5);[0xef5350,0x42a5f5,0xffee58,0x66bb6a].forEach((c,i)=>D(s*7.6,-4.5+i*2.4,0.15,0.5,1.2,c,1.3))}
+      D(6,-7.95,1.6,0.35,0.1,0x43a047,2.6);D(6,-7.95,0.35,1.6,0.1,0x43a047,2.6);
+      break;
+    case 'supermarket':
+      [-7.5,-4,-0.5].forEach((dz,i)=>{F(-4,dz,14,1.8,1.0,0xcfd8dc);D(-4,dz,13.6,0.25,0.5,[0xef5350,0xffca28,0x66bb6a][i],1.95)});
+      F(11,5,1.4,1.0,5.5,0x37474f);D(11,5,1.2,0.05,5.3,0x90a4ae,1.02);F(6,-9.2,8,2.2,1.2,0xb3e5fc);D(-9,7.5,1,0.5,1,0xd32f2f);
+      break;
+    case 'gym':
+      for(const x of [-9,-5.5,-2]){F(x,-8,1.5,1.2,2.8,0x424242);D(x,-8.9,1.5,1.6,0.2,0x212121,1.8)}
+      F(11,-5,1.4,1.5,6,0x263238);D(10.4,-5,0.3,0.25,5.6,0xb0bec5,1.65);
+      F(7,6,2.6,0.6,1.2,0x1a1a1a);D(7,6,3.2,0.12,0.12,0xcfd8dc,1.3);D(-4,-5,2,0.03,5,0xd32f2f,0.05);D(-11.85,0,0.1,2.8,14,0xb3e5fc,2.2);
+      break;
+    case 'church':
+      for(let i=0;i<4;i++){const dz=-2+i*3.6;F(-5,dz,6,0.9,1.0,0x5d4037);F(5,dz,6,0.9,1.0,0x5d4037);D(-5,dz+0.5,6,0.9,0.15,0x3e2723,1.3);D(5,dz+0.5,6,0.9,0.15,0x3e2723,1.3)}
+      D(0,-12.2,12,0.3,4,0xd7ccc8,0.15);F(0,-12.9,3,1.1,1,0xf5f5f5);D(0,-13.9,0.35,2.8,0.1,0xffca28,2.2);D(0,-13.9,1.8,0.3,0.1,0xffca28,2.6);
+      [0xe53935,0x1e88e5,0xfdd835].forEach((c,i)=>{D(10.9,-8+i*6,0.1,3.2,1.8,c,3.2);D(-10.9,-8+i*6,0.1,3.2,1.8,c,3.2)});
+      break;
+    case 'salon':
+      D(2,-7.9,10,2.2,0.1,0xb3e5fc,2.2);
+      for(const x of [4.5,7.5]){F(x,-5,1.2,1.0,1.2,0x37474f);D(x,-5.6,1.2,1.2,0.15,0x263238,1.2)}
+      F(-8,2,1.2,1.0,4,0xeceff1);
+      break;
+    case 'office':
+      F(-2,-7.2,10,1.1,1.2,0x546e7a);D(-2,-7.2,10.2,0.1,1.3,0x90a4ae,1.15);
+      for(const dx of [-8,-4,4,8])for(const dz of [-0.5,3.5]){F(dx,dz,3,0.8,1.6,0xbcaaa4);D(dx,dz-0.3,0.9,0.5,0.1,0x212121,1.1);D(dx,dz+1.4,0.9,0.5,0.9,0x37474f)}
+      D(10.8,-7.8,0.7,1.5,0.7,0x4fc3f7);
+      break;
+    case 'tower':
+      F(-3,-8.3,10,1.2,1.3,0x263238);D(-3,-8.3,10.2,0.1,1.4,0x90a4ae,1.25);
+      F(-9.5,1,3.6,0.9,1.6,0x37474f);F(9.5,1,3.6,0.9,1.6,0x37474f);F(-7,-1,1.2,6,1.2,0xeceff1);F(7,-1,1.2,6,1.2,0xeceff1);
+      for(const x of [-12.3,12.3])for(const z of [-9,9]){D(x,z,0.8,0.5,0.8,0x5d4037);D(x,z,0.9,1.0,0.9,0x2e7d32,1.0)}
+      D(13.8,-3,0.2,3.2,2.6,0xb0bec5,1.6);D(13.8,2,0.2,3.2,2.6,0xb0bec5,1.6);
+      break;
+    case 'hotel':
+      F(-2,-8.2,10,1.2,1.3,0x4e342e);D(-2,-8.2,10.2,0.1,1.4,0xd7ccc8,1.25);D(-2,-9.85,8,2,0.1,0x3e2723,2.4);
+      D(0,1,9,0.03,6,0xb71c1c,0.05);F(-8,2,2,0.9,4,0x00796b);F(8,2,2,0.9,4,0x00796b);F(-5,2,1.2,0.5,2.2,0x5d4037);
+      D(-6,-9,0.5,1.8,0.5,0xffe082);D(6,-9,0.5,1.8,0.5,0xffe082);
+      break;
+    case 'home':
+      D(-3,-2,5,0.03,5,0xc62828,0.05);F(-6.8,-2,1.6,1.0,4.2,0x8d6e63);D(-7.7,-2,0.3,1.4,4.2,0x6d4c41,1.1);D(-8.85,-2,0.15,1.2,3,0x111111,1.7);
+      F(-4.8,-2,1.2,0.5,2.2,0x5d4037);F(3,3,2.6,0.9,1.6,0x8d6e63);F(2,-7.6,10,1.0,1.1,0xeceff1);F(7.8,-7.2,1.2,2.1,1.2,0xeceff1);
+      break;
+    case 'market':
+      for(const dx of [-12,-6])for(const dz of [-8,-2.5,3,8.5]){F(dx,dz,4.2,1.0,2.0,0x8d6e63);D(dx-1,dz,1.2,0.3,1.4,0xef6c00,1.15);D(dx+1,dz,1.2,0.3,1.4,0x7cb342,1.15);D(dx,dz,4.6,0.1,2.4,[0xe53935,0x1e88e5,0xfdd835,0x43a047][(dz+dx|0)&3],3.4)}
+      for(const dz of [4,9]){F(5.5,dz,4.2,1.0,2.0,0x8d6e63);D(5.5,dz,1.4,0.3,1.4,0xffb300,1.15)}
+      F(15.3,-5,1.4,1.0,4.2,0xe65100);D(15.3,-5,1.2,0.3,3.8,0xfdd835,1.15);
+      break;
+    case 'terminal':
+      F(1,-8.0,8,1.3,1.1,0x37474f);D(1,-8.0,8.2,0.1,1.2,0x90a4ae,1.35);F(-13,-9,10,1.3,1.1,0x455a64);F(14.5,-9,8,1.3,1.1,0x455a64);
+      for(const dx of [-9,9])for(const dz of [2,6]){F(dx,dz,6,0.5,1.0,0x1565c0);D(dx,dz+0.5,6,0.9,0.15,0x0d47a1,0.95)}
+      D(0,-11.85,10,2.5,0.1,0x111111,3.8);D(0,-11.78,9,0.25,0.05,0xffb300,4.4);D(0,-11.78,9,0.25,0.05,0xffb300,3.6);
+      for(const z of [-6,-1,4])D(19.85,z,0.1,3,3,0x81d4fa,2.6);
+      break;
+  }
+  const ring=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,0.05,28),new THREE.MeshBasicMaterial({color:0xffd54a,transparent:true,opacity:0.5}));
+  ring.position.set(R.spot.x,0.08,R.spot.z);scene.add(ring);      // glowing ring where you do the activity
+  return R;
+}
+// a canopy, doormat and sign with the real name at every building door (the building fronts all face +z)
+const bldMk=[];let bldTick=0;
+for(const b of BLD){
+  const t=BUILD.TYPES[b.type],dx=b.door.x,dz=b.door.z,col=parseInt(t.bg.slice(1),16);
+  bx_(dx,3.3,dz+0.9,5.4,0.28,2.4,col);bx_(dx-2.4,1.65,dz+1.9,0.22,3.3,0.22,0xeeeeee);bx_(dx+2.4,1.65,dz+1.9,0.22,3.3,0.22,0xeeeeee);
+  bx_(dx,0.05,dz+0.4,3.6,0.1,2.2,0xffd54a);
+  bldMk.push({s:venueSign(t.icon+' '+b.name,t.bg,dx,4.4,dz+2.15,0,6.6),x:dx,z:dz});
+}
+flushBatch();
+function bldCull(){if((bldTick++&15)!==0)return;for(const d of bldMk)d.s.visible=Math.hypot(d.x-pos.x,d.z-pos.z)<190}   // only draw door signs near you
+function nearBldDoor(x,z,r){let best=null,bd=r;for(const b of BLD){const d=Math.hypot(b.door.x-x,b.door.z-z);if(d<bd){bd=d;best=b}}return best}
 function ensureRoom(place){
+  const vm=/^v_(\w+)$/.exec(place||'');
+  if(vm){const vt=BUILD&&BUILD.TYPES[vm[1]];if(vt&&!ROOMS[place]){roomFit(vt.room.x,vt.room.z,()=>buildVenueInside(vm[1]));flushBatch()}return}
   const m=/^house(\d+)$/.exec(place||'');if(!m||ROOMS[place])return;
   {const hid=+m[1];if(AJAH_UNITS.includes(hid))buildAjahInside(hid);else roomFit(1000,400+hid*40,()=>buildHouseInside(hid))}flushBatch();
   const R=ROOMS[place];if(R&&lastPaint[m[1]]!==undefined){R.col=lastPaint[m[1]];R.wallMat.color.setHex(WALLC[R.col%WALLC.length])}
@@ -981,7 +1096,7 @@ updateTime();
 // =============== district banner & graphics quality ===============
 let curDist=null;
 function updateDistrict(){
-  const n=inside?(inside==='bank'?'Lagoon Bank':inside==='mall'?'Grand Market Hall':'Your Home'):(districtAt(pos.x,pos.z)||'City Outskirts');
+  const n=inside?(inside==='bank'?'Lagoon Bank':inside==='mall'?'Grand Market Hall':/^v_/.test(inside)?(venueName||'Inside'):'Your Home'):(districtAt(pos.x,pos.z)||'City Outskirts');
   if(n!==curDist){
     curDist=n;const b=document.getElementById('banner');b.textContent='📍 '+n;b.classList.remove('bshow');void b.offsetWidth;b.classList.add('bshow');
   }
@@ -1696,7 +1811,7 @@ document.getElementById('play').onclick=()=>{
       if(inside){inside=null;updateTime();updateDistrict()}
       closeATM();hideRide();
     }
-    else if(m.t==='int'){ensureRoom(m.place);inside=m.place;pos.x=m.x;pos.z=m.z;pos.ry=Math.PI;camYaw=Math.PI;speed=0;camInit=false;updateTime();updateDistrict();sfx.buy()}
+    else if(m.t==='int'){ensureRoom(m.place);venueName=m.name||'';inside=m.place;pos.x=m.x;pos.z=m.z;pos.ry=Math.PI;camYaw=Math.PI;speed=0;camInit=false;updateTime();updateDistrict();sfx.buy()}
     else if(m.t==='ride'){showRide(m)}
     else if(m.t==='job'){setJob(m.job)}
     else if(m.t==='state'){
@@ -1769,6 +1884,7 @@ useBtn.onclick=()=>{
   else if(useTarget.type==='atm')showATM();
   else if(useTarget.type==='paint')ws.send(JSON.stringify({t:'paint'}));
   else if(useTarget.type==='eat')ws.send(JSON.stringify({t:'eat'}));
+  else if(useTarget.type==='venue')ws.send(JSON.stringify({t:'venue'}));
 };
 
 function collide(nx,nz){
@@ -1780,7 +1896,7 @@ function collide(nx,nz){
 }
 function npcNear(near){for(const o of npcObjs){if((o.n.place||null)!==(inside||null))continue;if(near(o.n.x,o.n.z,3.8))return o.n}return null}
 function updateUse(){
-  let t=null,label='';
+  let t=null,label='';bldCull();
   const near=(x,z,r)=>Math.hypot(x-pos.x,z-pos.z)<r;
   if(myCol>=0){t={type:'exit'};label='EXIT CAR'}
   else if(inside){
@@ -1790,6 +1906,7 @@ function updateUse(){
     else if(inside.startsWith('house')&&near(R.eat?R.eat.x:R.x0-9,R.eat?R.eat.z:R.z0-0.5,R.eat?4.6:3.5)){t={type:'eat'};label='🍳 EAT AT HOME'}
     else if(inside==='mall'&&near(R.x0+19,R.z0-8,4.5)){t={type:'eat'};label='🍲 BUY FOOD ₦40'}
     else if(inside==='dealer'&&(ensureCarList(),showCars.some(s=>near(s.x,s.z,4.2)))){const s=showCars.find(s=>near(s.x,s.z,4.2)),v=(typeof PX!=='undefined'&&PX.carList.find(c=>c.col===s.col))||{name:'car',price:0};t={type:'xshow',col:s.col};label='🔑 '+v.name+' '+fmtK(v.price)+' - VIEW / BUY'}
+    else if(R.spot&&near(R.spot.x,R.spot.z,R.spot.r)){t={type:'venue'};label=R.spot.act}
     else if(npcNear(near)){const n=npcNear(near);t={type:'npc',id:n.id};label='💬 TALK to '+n.name}
     else if(near(R.exit.x,R.exit.z,3.6)){t={type:'out'};label='🚪 GO OUTSIDE'}
     if(!t)closeATM();
@@ -1803,6 +1920,7 @@ function updateUse(){
     else if(near(BANK_DOOR.x,BANK_DOOR.z,5)){t={type:'in',place:'bank'};label='🏦 ENTER BANK'}
     else if(near(MALL_DOOR.x,MALL_DOOR.z,5)){t={type:'in',place:'mall'};label='🛒 ENTER MARKET'}
     else if(near(DEALER_DOOR.x,DEALER_DOOR.z,5)){t={type:'in',place:'dealer'};label='🚘 ENTER AUTO GALLERY'}
+    else if(nearBldDoor(pos.x,pos.z,5.5)){const b=nearBldDoor(pos.x,pos.z,5.5);t={type:'in',place:'b'+b.id};label=BUILD.TYPES[b.type].icon+' ENTER '+b.name.toUpperCase()}
     else if(npcNear(near)){const n=npcNear(near);t={type:'npc',id:n.id};label='💬 TALK to '+n.name}
     else if(world){
       for(const h of world.houses){
