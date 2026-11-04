@@ -826,7 +826,7 @@ function rebuildLot(force){
 }
 function syncBay(){rebuildLot(true)}
 function openShowCard(col){
-  const v=(PX.carList||[]).find(c=>c.col===col)||{name:'Vehicle',price:25000000},sp=SPECS[col]||[v.name,'-','-','-'],own=PX.cars.includes(col);
+  const v=(PX.carList||[]).find(c=>c.col===col)||{name:'Vehicle',price:0},sp=SPECS[col]||[v.name,'-','-','-'],own=PX.cars.includes(col);
   let el=document.getElementById('showCard');if(el)el.remove();
   el=document.createElement('div');el.id='showCard';
   el.style.cssText='position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(340px,92vw);background:#111827ee;color:#fff;border:1px solid #d4af37;border-radius:14px;padding:14px;z-index:60;font:14px sans-serif';
@@ -876,6 +876,10 @@ flushBatch();
 const AJAH_UNITS=[316,317,318];
 const AJAH_META={"A":{"door":[-0.52,5.06],"spawn":[-0.52,3.61],"rects":[[0.48,-5.14,3.4,0.05],[0.33,-5.04,3.25,0.05],[3.83,-0.04,0.05,5.05],[-1.52,-4.14,0.1,0.85],[-1.07,-4.94,0.15,0.05],[-0.52,-4.94,0.1,0.05],[0.28,-4.94,0.4,0.05],[1.28,-4.94,0.1,0.05],[1.83,-4.94,0.15,0.05],[2.38,-4.94,0.1,0.05],[2.88,-4.94,0.1,0.05],[3.53,0.01,0.05,5.0],[-0.07,-4.79,0.05,0.1],[0.33,-4.09,0.05,0.8],[0.58,-4.09,0.1,0.8],[0.13,-4.74,0.15,0.05],[0.43,-4.74,0.05,0.05],[-1.22,-4.64,0.1,0.05],[-3.87,0.36,0.05,4.75],[-3.47,0.36,0.05,4.75],[-1.27,-4.34,0.15,0.05],[-0.72,-4.19,0.1,0.1],[-0.67,-3.94,0.05,0.15],[-0.77,-3.84,0.05,0.05],[0.08,-3.64,0.2,0.05],[0.43,-3.64,0.05,0.05],[-2.87,-3.49,0.55,0.1],[-1.67,-3.49,0.05,0.1],[-1.22,-3.49,0.2,0.1],[-0.07,-3.49,0.05,0.1],[0.13,-3.39,0.15,0.1],[0.43,-3.39,0.05,0.1],[0.08,-3.19,0.1,0.1],[-2.47,-2.74,0.15,0.05],[-2.57,-1.59,0.05,1.1],[-2.37,-1.59,0.05,1.1],[-2.47,-1.54,0.05,1.05],[-1.22,-2.04,0.1,0.55],[-1.82,-2.39,0.5,0.1],[0.08,-1.94,0.1,0.45],[0.48,-2.19,0.3,0.1],[2.48,-2.19,1.0,0.1],[3.63,-2.19,0.05,0.1],[1.88,-1.74,0.1,0.35],[3.23,-1.64,0.25,0.05],[3.63,-1.54,0.05,0.15],[0.98,-1.49,0.8,0.1],[2.18,-1.49,0.2,0.1],[3.03,-1.49,0.05,0.1],[0.13,-1.44,0.05,0.05],[3.28,-1.44,0.2,0.05],[3.68,-1.24,0.1,0.05],[3.68,-0.94,0.1,0.05],[-1.22,-0.64,0.1,0.25],[3.43,-0.79,0.05,0.1],[0.08,1.01,0.1,1.8],[-3.02,-0.59,0.4,0.1],[-1.82,-0.59,0.5,0.1],[3.43,-0.24,0.05,0.05],[-1.22,0.56,0.1,0.35],[-2.37,0.41,1.05,0.1],[-1.02,0.41,0.1,0.1],[-0.12,0.41,0.1,0.1],[3.68,0.46,0.1,0.05],[-3.02,0.96,0.1,0.45],[1.83,1.11,1.65,0.1],[3.63,1.11,0.05,0.1],[-3.27,1.31,0.15,0.1],[1.08,1.96,0.1,0.75],[-2.72,1.51,0.1,0.1],[-2.92,1.56,0.1,0.05],[2.03,1.56,0.25,0.05],[-2.97,1.66,0.05,0.05],[2.08,1.66,0.2,0.05],[2.18,1.76,0.1,0.05],[2.13,1.86,0.05,0.05],[-2.97,2.16,0.05,0.25],[-3.32,2.61,0.1,0.1],[-2.02,2.61,0.1,0.1],[0.93,2.61,0.05,0.1],[1.48,2.61,0.3,0.1],[2.98,2.61,0.5,0.1],[3.63,2.61,0.05,0.1],[-3.37,3.31,0.05,0.6],[0.13,3.56,0.15,0.05],[0.03,4.21,0.05,0.6],[0.23,4.21,0.05,0.6],[-1.97,3.81,0.05,0.1],[-3.27,3.86,0.05,0.05],[-2.07,3.86,0.05,0.05],[-3.17,4.06,0.15,0.05],[-3.27,4.31,0.05,0.2],[-3.07,4.31,0.05,0.2],[-3.17,4.46,0.05,0.05],[-3.57,4.86,0.05,0.25],[-2.22,4.66,1.2,0.05],[0.13,4.71,0.05,0.1],[1.88,4.66,1.6,0.05],[3.68,4.66,0.1,0.05],[-2.87,4.86,0.05,0.15],[-0.42,4.81,0.1,0.1],[2.43,4.86,0.05,0.15],[3.43,4.86,0.05,0.15],[-3.17,4.96,0.25,0.05],[-1.92,4.96,0.9,0.05],[1.18,4.96,1.2,0.05],[2.93,4.96,0.45,0.05],[3.68,4.96,0.1,0.05],[-3.72,5.06,0.1,0.05]],"half":[3.92,5.19]},"B":{"door":[0.08,4.94],"spawn":[0.08,3.79],"rects":[[-1.52,-5.11,0.4,0.1],[0.03,-5.06,0.15,0.15],[3.38,-5.16,0.1,0.05],[-2.92,-5.06,1.0,0.05],[-0.62,-5.06,0.5,0.05],[1.58,-5.06,1.4,0.05],[-3.87,0.09,0.05,5.1],[-3.22,-4.91,0.1,0.1],[-2.47,-4.86,0.05,0.15],[-1.97,-4.91,0.05,0.1],[-1.07,-4.91,0.05,0.1],[-0.37,-4.91,0.05,0.1],[-3.57,-4.86,0.25,0.05],[-2.82,-4.86,0.3,0.05],[-2.22,-4.86,0.2,0.05],[-0.72,-4.86,0.3,0.05],[-0.12,-4.86,0.2,0.05],[-3.57,-1.71,0.05,3.1],[-3.32,-4.76,0.1,0.05],[-2.87,-4.76,0.05,0.05],[-2.27,-4.76,0.15,0.05],[-0.67,-2.76,0.05,2.05],[-0.47,-2.76,0.05,2.05],[-2.22,-4.16,0.1,0.55],[3.53,0.59,0.05,4.6],[3.83,0.59,0.05,4.6],[-2.37,-3.66,0.05,0.15],[-2.52,-3.61,0.1,0.1],[-2.67,-3.46,0.05,0.15],[-2.27,-3.56,0.05,0.05],[-2.82,-3.36,0.1,0.15],[-2.57,-3.46,0.05,0.05],[-3.22,-3.31,0.3,0.1],[-3.12,-2.81,0.1,0.4],[-3.37,-2.46,0.15,0.05],[-3.72,-2.31,0.1,0.1],[-3.07,-2.31,0.05,0.1],[-2.47,-2.31,0.15,0.1],[-3.32,-2.26,0.2,0.05],[-3.67,-1.46,0.05,0.75],[-2.52,-1.06,0.1,1.15],[-3.07,-1.06,0.45,0.05],[-3.07,-0.76,0.45,0.05],[-3.07,-0.56,0.45,0.05],[-3.72,-0.46,0.1,0.05],[1.98,-0.36,1.5,0.05],[-3.72,-0.26,0.1,0.05],[-3.07,-0.26,0.45,0.05],[-0.77,-0.21,0.05,0.1],[0.53,-0.16,0.05,0.15],[3.63,1.39,0.05,1.7],[-2.07,-0.06,0.35,0.15],[0.43,-0.11,0.05,0.1],[0.78,0.09,0.1,0.3],[1.48,0.14,0.1,0.35],[-3.67,0.84,0.05,0.95],[-3.07,-0.06,0.45,0.05],[-1.67,-0.01,0.05,0.1],[-0.87,-0.01,0.05,0.1],[0.63,-0.06,0.05,0.05],[1.13,-0.06,0.25,0.05],[2.53,-0.06,0.95,0.05],[-0.97,0.04,0.05,0.05],[-0.77,0.09,0.05,0.1],[-2.57,0.69,0.05,0.6],[1.08,0.29,0.2,0.1],[1.33,0.39,0.05,0.1],[1.88,0.34,0.3,0.05],[2.48,0.34,0.2,0.05],[1.23,0.44,0.05,0.05],[1.88,0.44,0.1,0.05],[0.68,0.79,0.1,0.1],[0.53,0.94,0.05,0.15],[0.98,0.89,0.2,0.1],[-3.77,0.94,0.05,0.05],[-1.87,1.09,0.05,0.2],[1.83,0.99,0.65,0.1],[2.93,1.14,0.05,0.25],[3.33,0.99,0.15,0.1],[-1.97,1.14,0.05,0.15],[-1.77,1.09,0.05,0.1],[0.43,1.09,0.05,0.1],[1.08,1.04,0.1,0.05],[-3.77,1.44,0.05,0.35],[-3.07,1.19,0.45,0.1],[-2.27,1.19,0.25,0.1],[0.33,1.24,0.05,0.15],[1.23,1.14,0.15,0.05],[2.13,1.14,0.15,0.05],[2.43,1.54,0.05,0.45],[0.23,1.29,0.05,0.1],[1.33,1.29,0.15,0.1],[2.08,1.44,0.1,0.25],[2.33,1.34,0.05,0.15],[3.33,1.29,0.15,0.1],[-3.27,1.34,0.15,0.05],[0.48,1.39,0.1,0.1],[1.53,1.49,0.05,0.2],[2.23,1.39,0.05,0.1],[-3.37,1.54,0.15,0.15],[0.68,1.49,0.1,0.1],[1.28,1.64,0.1,0.25],[1.63,1.54,0.05,0.15],[0.83,1.59,0.05,0.1],[1.43,1.59,0.05,0.1],[1.83,1.59,0.15,0.1],[2.83,1.79,0.05,0.3],[3.38,1.59,0.1,0.1],[1.03,1.64,0.15,0.05],[2.28,1.64,0.1,0.05],[-3.47,1.79,0.15,0.1],[1.08,1.74,0.1,0.05],[-1.17,1.84,0.95,0.05],[1.13,1.84,0.05,0.05],[1.83,1.84,0.45,0.05],[-3.52,1.94,0.1,0.05],[-1.97,1.99,0.15,0.1],[-0.37,1.99,0.15,0.1],[2.28,1.94,0.1,0.05],[3.33,1.99,0.05,0.1],[-3.57,3.59,0.05,1.6],[-1.17,2.04,0.65,0.05],[3.43,2.04,0.05,0.05],[-2.07,2.34,0.05,0.25],[-1.87,2.34,0.05,0.25],[-0.47,2.34,0.05,0.25],[-0.27,2.34,0.05,0.25],[2.93,2.54,0.05,0.35],[3.33,2.64,0.15,0.35],[-2.92,2.54,0.4,0.15],[-1.97,2.54,0.05,0.05],[-0.37,2.54,0.05,0.05],[-3.17,3.44,0.15,0.75],[-2.57,3.44,0.05,0.75],[-2.82,3.29,0.2,0.1],[-2.82,4.04,0.2,0.15],[-2.72,4.74,0.4,0.05],[-0.72,4.79,0.3,0.1],[1.93,4.94,0.05,0.25],[2.13,4.79,0.05,0.1],[2.58,4.79,0.1,0.1],[3.03,4.79,0.05,0.1],[3.23,4.79,0.05,0.1],[-3.67,4.99,0.05,0.2],[-3.22,4.84,0.3,0.05],[-2.57,4.84,0.05,0.05],[-1.07,4.84,0.05,0.05],[1.23,4.84,0.65,0.05],[2.03,4.84,0.05,0.05],[2.33,4.84,0.15,0.05],[2.83,4.84,0.15,0.05],[3.13,4.99,0.05,0.2],[3.38,4.84,0.1,0.05],[3.68,4.84,0.1,0.05],[-2.97,5.04,0.05,0.15],[-1.82,4.99,0.1,0.1],[-0.47,5.04,0.05,0.15],[-3.77,5.14,0.05,0.05],[-3.27,5.14,0.25,0.05],[0.73,5.14,1.15,0.05],[2.53,5.14,0.55,0.05],[3.33,5.14,0.15,0.05],[3.68,5.14,0.1,0.05]],"half":[3.92,5.21]},"C":{"door":[-0.77,5.29],"spawn":[-0.77,3.84],"rects":[[0.48,-5.21,3.45,0.05],[3.63,-4.96,0.1,0.2],[3.88,0.04,0.05,5.2],[0.28,-4.81,3.25,0.05],[3.58,0.09,0.05,4.85],[-3.92,0.54,0.05,4.7],[-3.52,0.54,0.05,4.7],[-1.12,-1.46,1.25,0.1],[-2.27,-0.66,0.1,0.7],[0.03,-0.46,0.1,0.9],[3.73,-1.01,0.1,0.05],[-1.67,-0.06,0.5,0.1],[-0.37,-0.11,0.3,0.05],[1.83,-0.11,1.7,0.05],[-0.62,0.14,0.05,0.2],[0.73,0.49,0.1,0.55],[-0.32,0.29,0.25,0.05],[0.38,0.29,0.25,0.05],[2.18,0.29,1.35,0.05],[-2.47,0.89,1.0,0.05],[0.88,0.89,0.05,0.05],[1.83,0.89,0.4,0.05],[-1.52,1.04,0.05,0.1],[1.68,1.54,0.05,0.6],[1.88,1.54,0.05,0.6],[-2.52,1.09,0.95,0.05],[1.78,1.39,0.05,0.15],[2.73,1.29,0.8,0.05],[2.43,1.44,0.5,0.1],[3.23,1.49,0.3,0.05],[-2.07,1.69,0.9,0.05],[-2.82,1.84,0.15,0.1],[-1.32,1.84,0.15,0.1],[-2.07,1.89,0.6,0.05],[1.43,1.99,0.1,0.15],[-2.92,2.19,0.05,0.25],[-2.72,2.19,0.05,0.25],[-1.42,2.19,0.05,0.25],[-1.22,2.19,0.05,0.25],[0.83,3.44,0.1,1.5],[1.58,2.09,0.05,0.05],[1.78,2.09,0.05,0.05],[2.08,2.09,0.15,0.05],[3.38,2.09,0.15,0.05],[-2.82,2.39,0.05,0.05],[-1.32,2.39,0.05,0.05],[0.48,2.49,0.25,0.05],[0.28,3.29,0.05,0.75],[0.68,3.29,0.05,0.75],[-2.12,2.89,0.55,0.05],[-2.62,3.29,0.05,0.35],[-1.62,3.29,0.05,0.35],[0.48,2.99,0.15,0.05],[-2.12,3.59,0.45,0.05],[0.48,3.59,0.15,0.05],[0.48,3.99,0.15,0.05],[-2.97,4.84,0.1,0.1],[-2.47,4.84,0.1,0.1],[-0.17,4.84,0.1,0.1],[0.33,4.84,0.1,0.1],[2.08,5.04,0.05,0.3],[2.53,4.84,0.1,0.1],[2.98,5.04,0.05,0.3],[-3.27,4.89,0.2,0.05],[-2.72,4.89,0.15,0.05],[-2.22,4.94,0.15,0.1],[0.08,4.89,0.15,0.05],[0.58,4.89,0.15,0.05],[1.48,4.89,0.55,0.05],[2.28,4.89,0.15,0.05],[2.78,4.89,0.15,0.05],[3.28,4.89,0.25,0.05],[3.73,4.89,0.1,0.05],[-3.22,5.09,0.05,0.15],[-1.22,4.99,0.85,0.05],[0.48,5.09,0.05,0.15],[1.98,5.14,0.05,0.2],[3.08,5.14,0.05,0.2],[-2.32,5.14,0.05,0.1],[-2.12,5.14,0.05,0.1],[-0.62,5.09,0.05,0.05],[-0.42,5.09,0.05,0.05],[-3.72,5.19,0.15,0.05],[-3.37,5.19,0.1,0.05],[-2.77,5.19,0.4,0.05],[-2.22,5.19,0.05,0.05],[0.08,5.19,0.35,0.05],[1.23,5.19,0.7,0.05],[2.53,5.24,0.4,0.1],[3.48,5.19,0.35,0.05],[1.88,5.29,0.05,0.05]],"half":[3.97,5.26]}};
 let ajahGLB=null,ajahWait=[];
+const AJAH_S=2.2,AJAH_SY=1.4;
+// the villa model is 3.9 MB, so start downloading it quietly once you are near the Ajah villas (not only when you press ENTER)
+let ajahTick=0;
+function ajahWarm(){if(ajahGLB||(ajahTick++&63)!==0||!world||inside)return;for(const h of world.houses)if(h.kind==='villa'&&h.area==='Ajah'&&Math.hypot(h.x-pos.x,h.z-pos.z)<160){withAjahGLB(()=>{});return}}
 function withAjahGLB(fn){
   if(ajahGLB)return fn(ajahGLB);
   ajahWait.push(fn);if(ajahWait.length>1)return;
@@ -883,18 +887,25 @@ function withAjahGLB(fn){
 }
 function buildAjahInside(unit){
   const x0=1000,z0=400+unit*40,key='ABC'[AJAH_UNITS.indexOf(unit)%3],M=AJAH_META[key];
-  const ox=-M.spawn[0],oz=5-M.spawn[1];                       // the model is placed so that the server's spawn point (x0, z0+5) is just inside its front door
-  const R={x0,z0,hw:11,hd:9,h:3,model:true};ROOMS['house'+unit]=R;
+  // The raw model is only about 8 x 10 metres, which feels tiny. AJAH_S enlarges it (rooms 2.2x wider and longer, ceilings 1.4x higher).
+  // The model is placed so the server's spawn point (x0, z0+5) is still just inside the front door, whatever the scale.
+  const S=AJAH_S,SY=AJAH_SY,sx=M.spawn[0],sz=M.spawn[1];
+  const wx=lx=>x0+(lx-sx)*S,wz=lz=>z0+5+(lz-sz)*S;           // model coordinates -> world coordinates
+  const R={x0,z0,hw:11,hd:16,h:3,model:true};ROOMS['house'+unit]=R;   // hd 16: the enlarged house is longer than the old 9
   R.wallMat=new THREE.MeshBasicMaterial();                    // (paint is not used in these houses)
-  R.exit={x:x0,z:z0+oz+M.door[1]};R.eat={x:x0+ox,z:z0+oz};
-  for(const [rx,rz,hw,hd] of M.rects)solid(x0+ox+rx,z0+oz+rz,hw,hd);   // walls and big furniture
-  solid(x0+ox+M.door[0],R.exit.z+0.55,M.half[0]+1,0.5);       // nothing outside the front door
+  R.exit={x:wx(M.door[0]),z:wz(M.door[1])};R.eat={x:x0,z:z0+5};
+  for(const [rx,rz,hw,hd] of M.rects)solid(wx(rx),wz(rz),hw*S,hd*S);   // walls and big furniture
+  solid(wx(M.door[0]),R.exit.z+0.55,(M.half[0]+1)*S,0.5);     // nothing outside the front door
+  // thick invisible walls around the whole house, so you can never walk out of it except through the door
+  {const cx_=wx(0),cz_=wz(0),bx=M.half[0]*S+0.5,bz=M.half[1]*S+0.5;
+   solid(cx_,cz_-bz,bx+0.6,0.5);solid(cx_-bx,cz_,0.5,bz+0.6);solid(cx_+bx,cz_,0.5,bz+0.6);}
+  if(!ajahGLB)toast('🏠 Loading the house, one moment...');
   withAjahGLB(root=>{
     const src=root.getObjectByName(key);if(!src)return;
     const g=src.clone();
     g.traverse(o=>{if(!o.isMesh)return;const m=o.material,tr=m.transparent||m.opacity<1;
       o.material=new THREE.MeshLambertMaterial({color:m.color,emissive:m.color.clone().multiplyScalar(0.28),transparent:tr,opacity:m.opacity,side:THREE.DoubleSide,depthWrite:!tr});o.frustumCulled=true});
-    g.position.set(x0+ox,0,z0+oz);scene.add(g);
+    g.scale.set(S,SY,S);g.position.set(wx(0),0,wz(0));scene.add(g);
   });
 }
 // =============== every other building you can walk into: restaurants, clubs, offices, homes... ===============
@@ -981,7 +992,6 @@ function buildVenueInside(k){
     case 'home':
       D(-3,-2,5,0.03,5,0xc62828,0.05);F(-6.8,-2,1.6,1.0,4.2,0x8d6e63);D(-7.7,-2,0.3,1.4,4.2,0x6d4c41,1.1);D(-8.85,-2,0.15,1.2,3,0x111111,1.7);
       F(-4.8,-2,1.2,0.5,2.2,0x5d4037);F(3,3,2.6,0.9,1.6,0x8d6e63);F(2,-7.6,10,1.0,1.1,0xeceff1);F(7.8,-7.2,1.2,2.1,1.2,0xeceff1);
-      F(-5,5,3.2,0.6,2.0,0x1e88e5);F(-5,5,3.0,0.25,1.8,0xffffff);F(-5,8.2,3.4,0.5,0.3,0x5d4037);F(-5,8.2,0.4,0.9,0.4,0x5d4037);F(5,-5,2.2,0.8,1.0,0xc62828);F(5,-3.5,2.2,0.8,1.0,0xc62828);F(5,-4.2,1.0,0.4,0.6,0x5d4037);F(0,0,3.0,0.15,2.0,0xfdd835);F(8,6,1.0,1.0,1.0,0x43a047);F(-8,-6,1.6,0.9,0.8,0xeeeeee);
       break;
     case 'market':
       for(const dx of [-12,-6])for(const dz of [-8,-2.5,3,8.5]){F(dx,dz,4.2,1.0,2.0,0x8d6e63);D(dx-1,dz,1.2,0.3,1.4,0xef6c00,1.15);D(dx+1,dz,1.2,0.3,1.4,0x7cb342,1.15);D(dx,dz,4.6,0.1,2.4,[0xe53935,0x1e88e5,0xfdd835,0x43a047][(dz+dx|0)&3],3.4)}
@@ -1389,7 +1399,9 @@ function attachCharModel(g,body,role,name,look){
       if(walk){
         const mixer=new THREE.AnimationMixer(ch),wa=mixer.clipAction(walk),ia=idle?mixer.clipAction(idle):null;
         wa.timeScale=1.15;wa.play();if(ia){ia.play();ia.setEffectiveWeight(1);wa.setEffectiveWeight(0)}
-        g.userData.mixer=mixer;g.userData.wa=wa;g.userData.ia=ia;g.userData.mixW=0;
+        const sit=pick_(/sitting$/i),sa=sit?mixer.clipAction(sit):null;     // the man and woman models come with a real sitting animation
+        if(sa){sa.play();sa.setEffectiveWeight(0)}
+        g.userData.mixer=mixer;g.userData.wa=wa;g.userData.ia=ia;g.userData.sa=sa;g.userData.mixW=0;
       }
     }catch(e){console.warn('character model failed',e)}
   });
@@ -1476,10 +1488,16 @@ function setCarMode(g,col,role){
 }
 function animate(g,mv,dt){
   const u=g.userData;
+  // sleeping: the whole body eases down until it lies flat on its back (u.pose is set by startPose / the server)
+  const lieT=u.pose==='sleep'?1:0;u.lie=(u.lie||0)+(lieT-(u.lie||0))*Math.min(1,dt*4);
+  if(u.lie>0.002||lieT){u.body.rotation.x=-Math.PI/2*u.lie;u.body.position.set(0,0.62*u.lie,0.85*u.lie)}
+  else if(u.body.rotation.x!==0){u.body.rotation.x=0;u.body.position.set(0,0,0)}
   if(u.mixer){
     u.mixer.update(dt);
-    const target=mv?1:0;u.mixW+=(target-u.mixW)*Math.min(1,dt*10);
-    u.wa.setEffectiveWeight(u.mixW);if(u.ia)u.ia.setEffectiveWeight(1-u.mixW);
+    const sitT=(u.pose==='sit'&&u.sa)?1:0;u.sitW=(u.sitW||0)+(sitT-(u.sitW||0))*Math.min(1,dt*8);
+    const target=(mv&&!u.pose)?1:0;u.mixW+=(target-u.mixW)*Math.min(1,dt*10);
+    u.wa.setEffectiveWeight(u.mixW*(1-u.sitW));if(u.sa)u.sa.setEffectiveWeight(u.sitW);
+    if(u.ia)u.ia.setEffectiveWeight((1-u.mixW)*(1-u.sitW));
     return;
   }
   if(mv){u.t+=dt*10;const s=Math.sin(u.t)*0.7;u.legL.rotation.x=s;u.legR.rotation.x=-s;u.armL.rotation.x=-s;u.armR.rotation.x=s}
@@ -1487,6 +1505,53 @@ function animate(g,mv,dt){
 }
 
 
+// ---- acting out sleeping and watching TV: you SEE the character lie in a bed, or sit on a sofa in front of a TV playing a movie ----
+let myPose=null,myPoseUntil=0;
+const poseProps={};                    // player id (or 'me') -> temporary bed / sofa+TV that exists while they do it
+function pBox(par,w,h,d,c,x,y,z){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshLambertMaterial({color:c}));m.position.set(x,y,z);par.add(m);return m}
+function makePoseProps(pose){
+  const g=new THREE.Group();
+  if(pose==='sleep'){
+    pBox(g,2.3,0.35,2.7,0x5d4037,0,0.18,0);            // bed frame
+    pBox(g,2.1,0.22,2.5,0xe8eef7,0,0.46,0);            // mattress
+    pBox(g,0.95,0.16,0.5,0xffffff,0,0.65,-1.0);        // pillow (the head rests here)
+    pBox(g,2.0,0.14,1.35,0x3f6fb5,0,0.8,0.62);         // blanket over the legs
+    const z=makeLabel('💤 Zzz','#cfe8ff',2.3,2.2);g.add(z);g.userData.zz=z;
+  }else{
+    pBox(g,1.9,0.4,1.0,0x8d6e4a,0,0.2,-0.05);          // sofa seat
+    pBox(g,1.9,0.85,0.22,0x7a5c3a,0,0.62,-0.6);        // sofa back
+    pBox(g,0.22,0.6,1.0,0x6f5236,-0.95,0.5,-0.05);pBox(g,0.22,0.6,1.0,0x6f5236,0.95,0.5,-0.05);   // arm rests
+    pBox(g,2.4,0.5,0.5,0x3b2a1e,0,0.25,3.4);           // TV stand
+    pBox(g,2.25,1.3,0.08,0x10151c,0,1.2,3.45);         // TV frame
+    const sc=new THREE.Mesh(new THREE.PlaneGeometry(2.05,1.1),new THREE.MeshBasicMaterial({color:0x3366aa}));
+    sc.position.set(0,1.2,3.4);sc.rotation.y=Math.PI;g.add(sc);g.userData.screen=sc.material;   // the "movie": colours that keep changing
+  }
+  return g;
+}
+function setPoseFor(key,g,pose){
+  const u=g.userData,cur=poseProps[key];
+  if((u.pose||'')===(pose||'')&&(!pose||cur))return;
+  u.pose=pose||'';
+  if(cur){scene.remove(cur.g);delete poseProps[key]}
+  if(pose){const pg=makePoseProps(pose);pg.position.set(g.position.x,0,g.position.z);pg.rotation.y=(g===me)?pos.ry:g.rotation.y;scene.add(pg);poseProps[key]={g:pg}}
+}
+function animatePoseProps(){
+  for(const k in poseProps){const u=poseProps[k].g.userData;
+    if(u.screen)u.screen.color.setHSL((Math.floor(tAcc/1.6)*0.173)%1,0.6,0.42+0.1*Math.sin(tAcc*6));
+    if(u.zz)u.zz.position.y=2.3+Math.sin(tAcc*2)*0.12}
+}
+function startPose(pose,secs){
+  if(!me||!pose)return;
+  myPose=pose;myPoseUntil=performance.now()+(secs||10)*1000;speed=0;moving=false;
+  me.rotation.y=pos.ry;setPoseFor('me',me,pose);closePhone();
+  toast(pose==='sleep'?'😴 Sleeping... tap WAKE UP or move to get up':'🛋️ Watching a movie... tap STAND UP or move to get up');
+}
+function endPose(tell){
+  if(!myPose)return;myPose=null;if(me)setPoseFor('me',me,'');
+  if(tell&&ws&&ws.readyState===1)ws.send(JSON.stringify({t:'pose',pose:''}));
+  const nx=pos.x+Math.sin(pos.ry)*1.7,nz=pos.z+Math.cos(pos.ry)*1.7;   // step off the bed or sofa
+  if(!collide(nx,nz)){pos.x=nx;pos.z=nz}
+}
 // ---- rental buildings for the new areas (ids 16 and up). The first 16 are the Lekki villas that were always there ----
 function flatBuilding(h){
   const x=h.x,z=h.z,poor=h.rent<=35000,W=13,D=9.6,H=poor?3.5:6.8,dz=z+D/2;
@@ -1806,6 +1871,7 @@ document.getElementById('play').onclick=()=>{
     else if(m.t==='npcsay')showNpc(m);
     else if(m.t==='speaker')showSpeaker(m);
     else if(m.t==='chat')chatLine(m.name,m.text);
+    else if(m.t==='pose')startPose(m.pose,m.secs);
     else if(m.t==='tp'){
       if(carObj){const pc=carObj;pc.x=pos.x;pc.z=pos.z;pc.ry=pos.ry;pc.g.position.set(pc.x,0,pc.z);pc.g.rotation.y=pc.ry;scene.add(pc.g);carObj=null;myCol=-1;if(me)setCarMode(me,-1)}
       pos.x=m.x;pos.z=m.z;speed=0;camInit=false;
@@ -1836,8 +1902,9 @@ document.getElementById('play').onclick=()=>{
         if(!o){o={g:makeCharacter(p.role,p.name,p.look),tx:p.x,tz:p.z,try:0,moving:false,role:p.role};o.g.position.set(p.x,0,p.z);scene.add(o.g);others[p.id]=o}
         o.tx=p.x;o.tz=p.z;o.try=p.ry;o.moving=p.moving;o.role=p.role;o.name=p.name;o.bay=p.bay||[];o.g.visible=!p.hidden&&!p.ride;
         if(o.g.userData.curCar!==p.car)setCarMode(o.g,p.car,p.role);
+        if((o.g.userData.pose||'')!==(p.pose||''))setPoseFor(p.id,o.g,p.pose||'');   // everyone sees you sleeping or watching TV
       });
-      for(const id in others)if(!seen[id]){scene.remove(others[id].g);delete others[id]}
+      for(const id in others)if(!seen[id]){scene.remove(others[id].g);delete others[id];if(poseProps[id]){scene.remove(poseProps[id].g);delete poseProps[id]}}
       try{rebuildLot()}catch(e){}
       updateOwners(m.owners||{},m.occ||{});if(m.paint)lastPaint=m.paint;
       if(m.paint)for(const id in m.paint){const R=ROOMS['house'+id];if(R&&R.col!==m.paint[id]){R.col=m.paint[id];R.wallMat.color.setHex(WALLC[R.col%WALLC.length])}}
@@ -1886,6 +1953,7 @@ useBtn.onclick=()=>{
   else if(useTarget.type==='paint')ws.send(JSON.stringify({t:'paint'}));
   else if(useTarget.type==='eat')ws.send(JSON.stringify({t:'eat'}));
   else if(useTarget.type==='venue')ws.send(JSON.stringify({t:'venue'}));
+  else if(useTarget.type==='getup')endPose(true);
 };
 
 function collide(nx,nz){
@@ -1897,16 +1965,17 @@ function collide(nx,nz){
 }
 function npcNear(near){for(const o of npcObjs){if((o.n.place||null)!==(inside||null))continue;if(near(o.n.x,o.n.z,3.8))return o.n}return null}
 function updateUse(){
-  let t=null,label='';bldCull();
+  let t=null,label='';bldCull();ajahWarm();
   const near=(x,z,r)=>Math.hypot(x-pos.x,z-pos.z)<r;
-  if(myCol>=0){t={type:'exit'};label='EXIT CAR'}
+  if(myPose){t={type:'getup'};label=myPose==='sleep'?'⏰ WAKE UP':'🛋️ STAND UP'}
+  else if(myCol>=0){t={type:'exit'};label='EXIT CAR'}
   else if(inside){
     const R=ROOMS[inside];
     if(inside==='bank'&&near(R.x0-11,R.z0,5.5)){t={type:'atm'};label='💳 USE ATM'}
     else if(inside.startsWith('house')&&!R.model&&near(R.x0+8.5,R.z0+5,4)){t={type:'paint'};label='🎨 PAINT ₦300'}
     else if(inside.startsWith('house')&&near(R.eat?R.eat.x:R.x0-9,R.eat?R.eat.z:R.z0-0.5,R.eat?4.6:3.5)){t={type:'eat'};label='🍳 EAT AT HOME'}
     else if(inside==='mall'&&near(R.x0+19,R.z0-8,4.5)){t={type:'eat'};label='🍲 BUY FOOD ₦40'}
-    else if(inside==='dealer'&&(ensureCarList(),showCars.some(s=>near(s.x,s.z,4.2)))){const s=showCars.find(s=>near(s.x,s.z,4.2)),v=(typeof PX!=='undefined'&&PX.carList.find(c=>c.col===s.col))||{name:'car',price:25000000};t={type:'xshow',col:s.col};label='🔑 '+v.name+' '+fmtK(v.price)+' - VIEW / BUY'}
+    else if(inside==='dealer'&&(ensureCarList(),showCars.some(s=>near(s.x,s.z,4.2)))){const s=showCars.find(s=>near(s.x,s.z,4.2)),v=(typeof PX!=='undefined'&&PX.carList.find(c=>c.col===s.col))||{name:'car',price:0};t={type:'xshow',col:s.col};label='🔑 '+v.name+' '+fmtK(v.price)+' - VIEW / BUY'}
     else if(R.spot&&near(R.spot.x,R.spot.z,R.spot.r)){t={type:'venue'};label=R.spot.act}
     else if(npcNear(near)){const n=npcNear(near);t={type:'npc',id:n.id};label='💬 TALK to '+n.name}
     else if(near(R.exit.x,R.exit.z,3.6)){t={type:'out'};label='🚪 GO OUTSIDE'}
@@ -2325,8 +2394,10 @@ function loop(now){
   if(keys.q)camYaw+=dt*2;if(keys.e)camYaw-=dt*2;
   const mag=Math.min(1,Math.hypot(ix,iy));
   moving=false;
+  if(myPose&&(mag>0.3||now>myPoseUntil))endPose(true);   // moving, or the sleep/movie running out, gets you up
   if(me){
-    if(!jailed){
+    if(!jailed&&myPose){speed=0;me.rotation.y=pos.ry}      // lying or sitting: you stay put
+    else if(!jailed){
       if(myCol>=0){
         const thr=-iy;
         if(thr>0.1)speed+=thr*22*dt;else if(thr<-0.1)speed+=thr*26*dt;else speed*=(1-1.6*dt);
@@ -2354,7 +2425,7 @@ function loop(now){
     if(rideSc)updateRideScene();
     if(ridingId>0){const d=others[ridingId];if(d){pos.x=d.g.position.x;pos.z=d.g.position.z;pos.ry=d.g.rotation.y;speed=0}else ridingId=0}
     me.rotation.y=myCol>=0?pos.ry:me.rotation.y+wrap(pos.ry-me.rotation.y)*0.2;
-    animate(me,moving&&myCol<0,dt);
+    animate(me,moving&&myCol<0,dt);animatePoseProps();
     for(const o of npcObjs){const vis=(o.n.place||null)===(inside||null)&&Math.hypot(o.n.x-pos.x,o.n.z-pos.z)<(inside?60:70);o.g.visible=vis;if(vis)animate(o.g,false,dt)}
     const inCar=myCol>=0||ridingId>0||!!rideSc,cd=inside?(ROOMS[inside]&&ROOMS[inside].model?5.4:3.4):inCar?9:3.5,ch=inside?(ROOMS[inside]&&ROOMS[inside].model?Math.max(6.2,camH*0.9):Math.min(2.8,camH*0.3)):inCar?Math.max(3.4,camH*0.55):Math.max(1.7,camH*0.27);
     if(rideSc&&rideSc.cabin){   // inside view: eyes in the vehicle, looking where it is heading
@@ -2568,7 +2639,7 @@ guard('cars',()=>{
     _uu();
     guard('gate',()=>{
       if(!useTarget||useTarget.type!=='enter')return;
-      const col=useTarget.car.col,v=PX.carList.find(c=>c.col===col)||{name:'vehicle',price:25000000};
+      const col=useTarget.car.col,v=PX.carList.find(c=>c.col===col)||{name:'vehicle',price:0};
       let lbl=null;
       if(!PX.license){useTarget={type:'xlic'};lbl='🪪 GET DRIVER LICENSE ₦20k'}
       else if(!PX.cars.includes(col)){useTarget={type:'xbuy',col};lbl='💰 BUY '+v.name+' '+fmtK(v.price)}

@@ -384,6 +384,8 @@ function onConnection(ws) {
       p.ride = d.id; p.moving = false;
       send(ws, { t: 'toast', text: "🚗 You joined " + d.name + "'s car. Use the quick-chat button to talk!" });
       send(d.ws, { t: 'toast', text: '🚗 ' + p.name + ' joined your car' });
+    } else if (m.t === 'pose') {
+      p.pose = ''; p.poseUntil = 0;               // the player got up
     } else if (m.t === 'rideend') {
       // taxi/jet arrival is timed by the server (p.travelUntil); the client's "we have arrived" ping needs no action
     } else if (m.t === 'ridestop') {
@@ -592,7 +594,8 @@ setInterval(() => {
     for (const id in tenants) { const t = activeTenant(id), u = UNITS[+id]; if (!t || !u) continue; const h = HOUSES[u.house]; occ[h.id] = (occ[h.id] || 0) + 1; if (h.units === 1) owners[h.id] = t.name; }
     const list = Object.values(R.players).map(p => ({
       id: p.id, name: p.name, role: p.role, x: p.x, z: p.z, ry: p.ry, moving: p.moving,
-      car: p.car, money: p.money, bank: p.bank, food: p.food, look: p.look, hidden: p.travelUntil > now, jailed: p.jailUntil > now, ride: p.ride || 0, bay: (p.ext && p.ext.cars) || [], phone: !!p.phone, mic: !!p.mic, guard: !!(p.ext && p.ext.guardUntil > now)
+      car: p.car, money: p.money, bank: p.bank, food: p.food, look: p.look, hidden: p.travelUntil > now, jailed: p.jailUntil > now, ride: p.ride || 0, bay: (p.ext && p.ext.cars) || [], phone: !!p.phone, mic: !!p.mic, guard: !!(p.ext && p.ext.guardUntil > now),
+      pose: (p.poseUntil > now && p.pose) ? p.pose : ''
     }));
     broadcast(code, { t: 'state', players: list, owners, occ, paint: R.paint });
   }
@@ -623,6 +626,8 @@ const MISSIONS = [
   { id: 'rich', name: 'Hold ₦25,000 in total', reward: 5000, ok: p => p.money + p.bank >= 25000 }
 ];
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+// sleeping / watching TV is acted out: the client shows the character lying in a bed or sitting on a sofa, and everyone nearby sees it
+function setPose(p, pose, ms) { p.pose = pose; p.poseUntil = Date.now() + ms; send(p.ws, { t: 'pose', pose, secs: ms / 1000 }); }
 const newLife = () => ({ earned: 0, energy: 100, hygiene: 100, fun: 100, career: null, shifts: 0, bought: 0, promoted: false, done: {} });
 function restoreLife(L, s) {
   L.energy = clamp(+s.energy || 0, 0, 100); L.hygiene = clamp(+s.hygiene || 0, 0, 100); L.fun = clamp(+s.fun || 0, 0, 100);
@@ -740,7 +745,7 @@ function lifeOp(room, p, m) {
   } else if (m.op === 'sleep') {
     if (!ownHome) return me('Go inside your own house to sleep 🛏️');
     if (!cooldown(p, 'sleep', 20000)) return me('You are not sleepy yet');
-    L.energy += 50; me('😴 You slept. Energy restored');
+    L.energy += 50; me('😴 You slept. Energy restored'); setPose(p, 'sleep', 9000);
   } else if (m.op === 'shower') {
     if (!ownHome) return me('Go inside your own house to shower 🚿');
     if (!cooldown(p, 'shower', 10000)) return me('Already clean');
@@ -749,7 +754,7 @@ function lifeOp(room, p, m) {
     if (!(ownHome || p.inside === 'mall')) return me('Relax at home or in the Grand Market');
     if (!cooldown(p, 'fun', 10000)) return me('Take a short break first');
     if (!charge(p, 50, 'Entertainment')) return;
-    L.fun += 30; me('🎮 That was fun!');
+    L.fun += 30; me('🎮 That was fun!'); if (ownHome) setPose(p, 'sit', 12000);
   }
   L.energy = clamp(L.energy, 0, 100); L.hygiene = clamp(L.hygiene, 0, 100); L.fun = clamp(L.fun, 0, 100);
   checkMissions(p, R); sendLife(p, R);
