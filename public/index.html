@@ -208,7 +208,7 @@
   <div class="card"><div class="tabs"><button id="tabReg" class="on">Create account</button><button id="tabLog">Log in</button></div>
   <div id="regOnly"><label>Your name</label><input id="rName" placeholder="e.g. Tolu Adebayo" maxlength="30"></div>
   <label>Username</label><input id="aUser" placeholder="tolu_eko" maxlength="14" autocapitalize="none" autocomplete="username">
-  <label>Password</label><input id="aPass" type="password" placeholder="8+ characters" autocomplete="current-password">
+  <label>Password</label><div style="display:flex;gap:6px"><input id="aPass" type="password" placeholder="8+ characters" autocomplete="current-password" style="flex:1"><button type="button" onclick="var i=document.getElementById('aPass');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁️':'🙈'" style="padding:8px 10px;border-radius:10px;border:0;background:#ffffff22;color:#fff">👁️</button></div>
   <div id="regOnly2"><label>Email (optional)</label><input id="aMail" type="email" placeholder="you@email.com">
   <label>Date of birth</label><input id="aDob" type="date">
   <label class="chk"><input id="aAgree" type="checkbox"> <span>I'm 18+ and agree to the Terms and Community Guidelines</span></label></div>
