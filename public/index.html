@@ -2144,7 +2144,7 @@ function openApp(n){
   if(n==='Settings')appview.innerHTML=`<div class="card">Graphics:<br>${['low','med','high'].map(q=>`<button class="pb q ${quality===q?'sel':''}" onclick="setQuality('${q}')">${q}</button>`).join('')}</div><div class="card">Sound: <button class="pb q" onclick="$('mutebtn').click();openApp('Settings')">${muted?'🔇 Off':'🔊 On'}</button></div><div class="card" style="font-size:11px">To change how you look, reload the page and pick your look on the first screen.</div>`;
 }
 function setQuality(q){quality=q;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===q));applyQuality();openApp('Settings')}
-function dailyKey(){return 'citylife-daily-'+new Date().toISOString().slice(0,10)}
+function dailyKey(){const d=new Date();return 'citylife-daily-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function dailyTasks(){
   const day=Math.floor(Date.now()/86400000);
   const choices=[
