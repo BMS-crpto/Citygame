@@ -316,11 +316,11 @@
         box.style.cssText='position:fixed;left:10px;right:10px;bottom:12px;z-index:99999;background:#260d12;color:#fff;border:1px solid #ff6b6b;border-radius:12px;padding:12px;font:12px/1.45 system-ui;white-space:pre-wrap;max-height:35vh;overflow:auto;box-shadow:0 8px 30px #0009';
         document.body.appendChild(box);
       }
-      box.textContent='CITYGAME STARTUP ERROR\\n'+String(message).slice(0,1200);
+      box.textContent='CITYGAME STARTUP ERROR\n'+String(message).slice(0,1200);
     }catch(e){}
   }
   window.addEventListener('error',function(e){
-    report((e.message||'JavaScript error')+'\\nFile: '+(e.filename||'unknown')+'\\nLine: '+(e.lineno||'?')+':'+(e.colno||'?'));
+    report((e.message||'JavaScript error')+'\nFile: '+(e.filename||'unknown')+'\nLine: '+(e.lineno||'?')+':'+(e.colno||'?'));
   });
   window.addEventListener('unhandledrejection',function(e){
     var r=e.reason;report('Unhandled promise rejection: '+(r&&r.stack||r&&r.message||r||'unknown'));
