@@ -380,7 +380,7 @@ renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05; // lower = darker, higher = brighter
 
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.domElement.style.filter='contrast(1.05) saturate(1.12)';document.body.appendChild(renderer.domElement);
+renderer.domElement.style.filter='contrast(1.08) saturate(1.16)';document.body.appendChild(renderer.domElement);
 addEventListener('resize',()=>{renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()});
 
 const SUNDIR=new THREE.Vector3(-0.5,0.55,0.65).normalize();
@@ -405,7 +405,7 @@ const sunSprite=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,transpare
 const SUNV=SUNDIR.clone();
 sunSprite.scale.set(110,110,1);sunSprite.position.copy(SUNDIR).multiplyScalar(225);sunSprite.renderOrder=-9;skyGroup.add(sunSprite);
 
-const hemi=new THREE.HemisphereLight(0xdcebff,0x80765a,0.8);scene.add(hemi);
+const hemi=new THREE.HemisphereLight(0xe4efff,0x82745b,0.9);scene.add(hemi);
 const sun=new THREE.DirectionalLight(0xffdfb0,0.95);
 sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
 const shc=sun.shadow.camera;shc.left=-62;shc.right=62;shc.top=62;shc.bottom=-62;shc.near=1;shc.far=180;
@@ -597,7 +597,7 @@ const facadeMats={},facadeList=[];
 const cgFacadeWindows=[];
 function cgCollectFacadeWindows(cx,cz,w,h,d,y0,col){
   if(h<3.8||w<5||d<5)return;
-  const palette=[0x456b87,0x6489a5,0x2e4c63,0x8aa7b8,0x526e83];
+  const palette=[0x355d78,0x547d98,0x29475f,0x7899ad,0x45677f];
   const tint=palette[(Math.abs(Math.round(col))+Math.round(cx*0.13+cz*0.17))%palette.length|0];
   const levels=Math.max(1,Math.floor((h-1.1)/3.25));
   const frontN=Math.max(1,Math.floor((w-1.5)/2.65));
@@ -625,7 +625,7 @@ function cgFlushFacadeWindows(){
 }
 function facadeMat(col,rx,ry){
   const k=col+'_'+rx+'_'+ry;
-  if(!facadeMats[k]){const m=new THREE.MeshLambertMaterial({color:new THREE.Color(col).lerp(new THREE.Color(0xa99e88),0.3),map:winTex(rx,ry),emissive:0xffffff,emissiveMap:litTex(rx,ry),emissiveIntensity:0});facadeMats[k]=m;facadeList.push(m)}
+  if(!facadeMats[k]){const m=new THREE.MeshLambertMaterial({color:new THREE.Color(col).lerp(new THREE.Color(0xb9b1a3),0.14),map:winTex(rx,ry),emissive:0xffffff,emissiveMap:litTex(rx,ry),emissiveIntensity:0});facadeMats[k]=m;facadeList.push(m)}
   return facadeMats[k];
 }
 
@@ -638,7 +638,7 @@ const lgRoofGeo=new THREE.ConeGeometry(1,1,4,1);lgRoofGeo.rotateY(Math.PI/4);lgR
 const lgRoofMat=new THREE.MeshLambertMaterial({map:lgRoofTex,color:0xffffff});
 const lgTankGeo=new THREE.CylinderGeometry(0.9,0.9,1.8,10);
 const lgTankMat=new THREE.MeshLambertMaterial({color:0xffffff});
-const LGROOFCOLS=[0xa8553a,0x8f4a35,0x7a3f2e,0x6f7b80,0x9c6b4a].map(c=>new THREE.Color(c));
+const LGROOFCOLS=[0xa85e43,0x914b3b,0x754638,0x747b7b,0x9c7454,0x6d777e].map(c=>new THREE.Color(c));
 function lgFinishRoofs(){
   if(lgRoofs.length){
     const m=new THREE.InstancedMesh(lgRoofGeo,lgRoofMat,lgRoofs.length),d=new THREE.Object3D();
@@ -692,7 +692,7 @@ const lampPos=[];for(let i=-GN;i<=GN;i++)for(let j=-GN;j<=GN;j++)lampPos.push([i
 
 function villa(x,z){                       // Lekki: modern white villa in a walled compound
   T.set(x,z,1.35,0.94);
-  const col=pick([0xf4efe6,0xefe3d0,0xe7ecef,0xdad4c8]);
+  const col=pick([0xf2eadb,0xe6d6bd,0xdce5e5,0xcfc7b8,0xd8c6b2]);
   addFacade(x,z,8,4.2,8,col);
   addFacade(x+1,z-0.4,6.6,3.2,7,col,4.2);
   bx_(x,4.25,z,8.6,0.3,8.6,0x383b40);bx_(x+1,7.55,z-0.4,7.2,0.35,7.6,0x30343a);
@@ -715,7 +715,7 @@ function palmBatch(){}
 function palmBatchBoxes(){palms.forEach(([x,z])=>{bx_(x,3,z,0.3,6,0.3,0x7a6a55);for(const r of [0,Math.PI/2,Math.PI/4,-Math.PI/4])bx_(x,6.2,z,4,0.14,0.9,0x2f8f3a,r);bx_(x,6.3,z,1,0.8,1,0x4a7a32)})}
 function office(x,z,nm){                   // Ikeja office block
   T.set(x,z,1.12,1.05);
-  const h=8+sr()*8,col=pick([0xe9e4d8,0xd8e1e6,0xe9d9c8]);
+  const h=8+sr()*8,col=pick([0xe7e0d2,0xcbd8df,0xd9c9b6,0xbfcbd0,0xe4d7c4]);
   addFacade(x,z,10,h,10,col);bx_(x,h+0.2,z,10.6,0.4,10.6,0x555a60);
   bx_(x+2,h+1.5,z-2,2.2,2.2,2.2,0x3b7dd8);bx_(x+2,h+0.6,z-2,0.2,1.2,2,0x444);          // rooftop water tank
   bx_(x-2.5,h+0.9,z+2,1.4,1,1.2,0xcfd4d8);
@@ -727,7 +727,7 @@ function office(x,z,nm){                   // Ikeja office block
 }
 function shopStrip(x,z,nm,bg){             // small commercial building with awning
   T.set(x,z,1.12,0.91);
-  const col=pick([0xf2c14e,0xe9724c,0x5aa9a3,0xd9a05b,0xe8e0cf]);
+  const col=pick([0xd6ad63,0xc87958,0x648f89,0xb98b5c,0xd8d0bd,0x9eaa91]);
   addFacade(x,z,10,4.2,9,col);bx_(x,4.35,z,10.6,0.3,9.6,0x5a4a3c);
   bx_(x,3.1,z+5.5,10,0.2,1.9,pick([0xc62828,0x1565c0,0x2e7d32,0xef6c00]));
   bx_(x,0.5,z+4.9,8,1,0.7,0xb48a52);
@@ -738,7 +738,7 @@ function shopStrip(x,z,nm,bg){             // small commercial building with awn
 }
 function bungalow(x,z){                    // Surulere family home with pitched roof and fence
   T.set(x,z,1.20,0.91);
-  const col=pick([0xe9d8b4,0xd8c6a5,0xe5c1b8,0xc6d8c9]);
+  const col=pick([0xe5d4b6,0xcbb99b,0xd9b7a9,0xb9cbb9,0xd8d0c2]);
   addFacade(x,z,10,4,8,col);
   (sr()<0.5?pitchedA:pitchedB).push([T.X(x),T.Y(5.2),T.Z(z),Math.PI/4,1.0*T.kx,T.ky]);
   bx_(x-1.6,1.2,z+4.03,1.4,2.4,0.1,0x4a3226);bx_(x+2.2,1.9,z+4.03,1.8,1.2,0.1,0x9fd6e8);
@@ -750,7 +750,7 @@ function bungalow(x,z){                    // Surulere family home with pitched 
 }
 function localShop(x,z,nm){                // Surulere kiosk-style shop
   T.set(x,z,1.12,0.91);
-  addFacade(x,z,8,3.8,7,pick([0x5aa9a3,0xe8b04b,0xd97b66,0xa3c4a0]));
+  addFacade(x,z,8,3.8,7,pick([0x6d9b91,0xd5ad62,0xc77f69,0x9caf91,0xd4c7ad]));
   bx_(x,3.95,z,8.7,0.3,7.7,0x8a5a3c);bx_(x,0.55,z+4.2,6,1.1,0.8,0xb8863b);
   bx_(x,3.0,z+4.6,7,0.2,1.8,0x2e9e5b);bx_(x-2.6,1.2,z+4.1,0.15,2.4,0.15,0xdddddd);bx_(x+2.6,1.2,z+4.1,0.15,2.4,0.15,0xdddddd);
   addSign(nm,x,3.6,z+3.53,0,4.4,'#1b5e20');
@@ -833,7 +833,7 @@ for(let bx=-GN;bx<GN;bx++)for(let bz=-GN;bz<GN;bz++){
   else if(bx===0&&bz===2)mallBuilding(cx,cz);
   else if(dk==='vi'){
     const w=20+sr()*8,d=20+sr()*8,h=22+sr()*40,nm=pick(NAMES.vi);
-    addFacade(cx,cz,w,h,d,pick([0x9fb4c7,0xb7c4cf,0x8fa6b8,0xc9d3da]));
+    addFacade(cx,cz,w,h,d,pick([0x8fa9ba,0xa9bac5,0x7f9aaa,0xc2cdd2,0x9eafb9]));
     bx_(cx,1.6,cz,w+2.4,3.2,d+2.4,0x4b5560);                         // podium
     bx_(cx,h+0.4,cz,w+0.8,0.8,d+0.8,0x59616b);bx_(cx,h+2,cz,w*0.5,2.4,d*0.5,0x7b838d);bx_(cx+w*0.2,h+5.5,cz,0.2,5,0.2,0x333333);
     bx_(cx,3.9,cz+d/2+1.7,6.2,0.3,3.4,0x2f343b);bx_(cx-2.6,1.9,cz+d/2+3,0.4,3.8,0.4,0xe8e8e8);bx_(cx+2.6,1.9,cz+d/2+3,0.4,3.8,0.4,0xe8e8e8);
