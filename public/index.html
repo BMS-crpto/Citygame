@@ -365,8 +365,8 @@ Object.entries(ROLES).forEach(([k,r])=>{
 
 // =============== renderer, sky, light ===============
 const HORIZON=0xd2e4f1;   // clear bright Lagos day
-const scene=new THREE.Scene();
-window.scene=scene; // Explicit scene bridge for isolated add-on scripts
+var scene=new THREE.Scene();
+window.scene=scene; // Explicit global scene bridge for isolated add-on scripts
 scene.fog=new THREE.Fog(HORIZON,75,265);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,0.1,320);
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
