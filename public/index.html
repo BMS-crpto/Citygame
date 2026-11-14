@@ -1096,14 +1096,14 @@ function buildVenueInside(k){
   R.multiFloor=multiFloor;R.floorRise=floorRise;R.floorAccess={stairs:{x:X+hw-3.2,z:Z+hd-4.2},lift:{x:X-hw+3.2,z:Z-hd+3.2}};
   if(multiFloor){
     const deck=new THREE.Mesh(new THREE.BoxGeometry(hw*2-0.5,0.32,hd*2-0.5),new THREE.MeshStandardMaterial({color:0xd9e0e5,roughness:0.82}));deck.position.set(X,floorRise,Z);scene.add(deck);
-    for(let n=0;n<10;n++){const step=new THREE.Mesh(new THREE.BoxGeometry(3.1,0.42,1.05),new THREE.MeshStandardMaterial({color:0x87939c,roughness:0.8}));step.position.set(X+hw-3.2,0.22+n*0.7,Z+hd-8.8+n*0.82);scene.add(step)}
+    for(let n=0;n<10;n++){const step=new THREE.Mesh(new THREE.BoxGeometry(3.1,0.42,1.05),new THREE.MeshStandardMaterial({color:0x87939c,roughness:0.8}));step.position.set(X+hw-3.2,0.22+n*0.78,Z+hd-8.8+n*0.82);scene.add(step)}
     bx_(X-hw+3.2,3.5,Z-hd+3.2,3.1,7,3.1,0x455a64);bx_(X-hw+3.2,7.15,Z-hd+3.2,3.4,0.18,3.4,0x90a4ae);
     addSign('LIFT',X-hw+3.2,5.1,Z-hd+1.5,0,2.4,'#263238');
     const upperBox=(x,y,z,w,hh,d,c)=>bx_(x,y,z,w,hh,d,c);
     for(const dx of [-7,-2,3,8])for(const dz of [-1,4]){upperBox(X+dx,floorRise+0.55,Z+dz,3.2,1.1,1.7,0x795548);upperBox(X+dx,floorRise+1.25,Z+dz-0.12,1.15,0.75,0.12,0x263238);upperBox(X+dx,floorRise+0.35,Z+dz+1.45,0.8,0.7,0.8,0x455a64)}
     upperBox(X,floorRise+0.55,Z-6,7,1.1,3.2,0x5d4037);upperBox(X,floorRise+1.15,Z-6,6.6,0.12,2.8,0x90a4ae);
     for(const dx of [-10,10])upperBox(X+dx,floorRise+1.5,Z+7,0.18,3,10,0x80cbc4);
-    const floorSign=makeLabel(k==='tower'?'EXECUTIVE FLOOR':'UPSTAIRS OFFICE','#263238',4.5,2.5);floorSign.position.set(X,floorRise+3.2,Z-hd+0.5);scene.add(floorSign);
+    const floorSign=makeLabel(k==='tower'?'EXECUTIVE FLOOR':'UPSTAIRS OFFICE','#263238',4.5,2.5);floorSign.position.set(X,floorRise+3.2,Z-hd+0.5);scene.add(floorSign);\n    const staff=[{id:'exec_'+k,name:'Tomi the Analyst',title:'Business analyst',x:X-5,z:Z+1,ry:0,look:[1,0,4,1,1,0]},{id:'mgr_'+k,name:'Mr Ade the Manager',title:'Office manager',x:X+5,z:Z+5,ry:Math.PI,look:[3,0,2,1,0,0]}];\n    staff.forEach(n=>{n.place='v_'+k;n.floor=1;const g=makeCharacter('lawyer',n.name,n.look);g.position.set(n.x,floorRise+0.16,n.z);g.rotation.y=n.ry;scene.add(g);npcObjs.push({n,g})});
   }
   R.spot={x:X+t.spot.dx,z:Z+t.spot.dz,r:t.spot.r,act:t.act};
   const F=(dx,dz,w,h,d,c)=>{bx_(X+dx,h/2,Z+dz,w,h,d,c);solid(X+dx,Z+dz,w/2+0.1,d/2+0.1)};   // furniture you cannot walk through
@@ -2076,7 +2076,7 @@ document.getElementById('play').onclick=()=>{
     else if(m.t==='pose')startPose(m.pose,m.secs);else if(m.t==='wallet'&&window.LG2)LG2.wallet(m);else if((m.t==='daily'||m.t==='gig')&&window.LG3)LG3.msg(m);
     else if(m.t==='tp'){
       if(carObj){const pc=carObj;pc.x=pos.x;pc.z=pos.z;pc.ry=pos.ry;pc.g.position.set(pc.x,0,pc.z);pc.g.rotation.y=pc.ry;scene.add(pc.g);carObj=null;myCol=-1;if(me)setCarMode(me,-1)}
-      pos.x=m.x;pos.z=m.z;speed=0;camInit=false;
+      pos.x=m.x;pos.z=m.z;pos.floor=0;speed=0;camInit=false;
       if(inside){inside=null;updateTime();updateDistrict()}
       closeATM();hideRide();
     }
@@ -2102,7 +2102,7 @@ document.getElementById('play').onclick=()=>{
         }
         let o=others[p.id];
         if(!o){o={g:makeCharacter(p.role,p.name,p.look),tx:p.x,tz:p.z,try:0,moving:false,role:p.role};o.g.position.set(p.x,0,p.z);scene.add(o.g);others[p.id]=o}
-        o.tx=p.x;o.tz=p.z;o.ty=(Number(p.floor)||0)*7.4;o.try=p.ry;o.moving=p.moving;o.role=p.role;o.name=p.name;o.bay=p.bay||[];o.g.visible=!p.hidden&&!p.ride;
+        o.tx=p.x;o.tz=p.z;o.ty=(Number(p.floor)||0)*7.56;o.try=p.ry;o.moving=p.moving;o.role=p.role;o.name=p.name;o.bay=p.bay||[];o.g.visible=!p.hidden&&!p.ride;
         if(o.g.userData.curCar!==p.car)setCarMode(o.g,p.car,p.role);
         if((o.g.userData.pose||'')!==(p.pose||''))setPoseFor(p.id,o.g,p.pose||'');   // everyone sees you sleeping or watching TV
       });
@@ -2166,7 +2166,7 @@ function collide(nx,nz){
   if(!inside&&myCol>=0&&trafficBlocks(nx,nz))return true;
   return false;
 }
-function npcNear(near){for(const o of npcObjs){if((o.n.place||null)!==(inside||null))continue;if(near(o.n.x,o.n.z,3.8))return o.n}return null}
+function npcNear(near){for(const o of npcObjs){if((o.n.place||null)!==(inside||null)||(Number(o.n.floor)||0)!==(pos.floor||0))continue;if(near(o.n.x,o.n.z,3.8))return o.n}return null}
 function updateUse(){
   let t=null,label='';bldCull();ajahWarm();
   const near=(x,z,r)=>Math.hypot(x-pos.x,z-pos.z)<r;
@@ -2694,13 +2694,13 @@ function loop(now){
         pos.ry=Math.atan2(vx,vz);moving=true;
       }
     }
-    me.position.set(pos.x,(pos.floor?7.4:0)+(myPose?poseY:0),pos.z);
+    me.position.set(pos.x,(pos.floor?7.56:0)+(myPose?poseY:0),pos.z);
     if(rideSc)updateRideScene();
     if(ridingId>0){const d=others[ridingId];if(d){pos.x=d.g.position.x;pos.z=d.g.position.z;pos.ry=d.g.rotation.y;speed=0}else ridingId=0}
     me.rotation.y=myCol>=0?pos.ry:me.rotation.y+wrap(pos.ry-me.rotation.y)*0.2;
     animate(me,moving&&myCol<0,dt);animatePoseProps();
-    for(const o of npcObjs){const vis=(o.n.place||null)===(inside||null)&&Math.hypot(o.n.x-pos.x,o.n.z-pos.z)<(inside?60:70);o.g.visible=vis;if(vis)animate(o.g,false,dt)}
-    const inCar=myCol>=0||ridingId>0||!!rideSc,levelY=(inside&&pos.floor?7.4:0),cd=inside?(ROOMS[inside]&&ROOMS[inside].model?5.4:3.4):inCar?9:3.5,ch=inside?(ROOMS[inside]&&ROOMS[inside].model?Math.max(6.2,camH*0.9):Math.min(2.8,camH*0.3)):inCar?Math.max(3.4,camH*0.55):Math.max(1.7,camH*0.27);
+    for(const o of npcObjs){const vis=(o.n.place||null)===(inside||null)&&(Number(o.n.floor)||0)===(pos.floor||0)&&Math.hypot(o.n.x-pos.x,o.n.z-pos.z)<(inside?60:70);o.g.visible=vis;if(vis)animate(o.g,false,dt)}
+    const inCar=myCol>=0||ridingId>0||!!rideSc,levelY=(inside&&pos.floor?7.56:0),cd=inside?(ROOMS[inside]&&ROOMS[inside].model?5.4:3.4):inCar?9:3.5,ch=inside?(ROOMS[inside]&&ROOMS[inside].model?Math.max(6.2,camH*0.9):Math.min(2.8,camH*0.3)):inCar?Math.max(3.4,camH*0.55):Math.max(1.7,camH*0.27);
     if(rideSc&&rideSc.cabin){   // inside view: eyes in the vehicle, looking where it is heading
       const yw=rideSc.cy,fx=Math.sin(yw),fz=Math.cos(yw),lx=-Math.cos(yw),lz=Math.sin(yw),big=rideSc.col===5,bike=rideSc.col===8;
       camera.position.set(pos.x+lx*(bike?0:0.38)+fx*(bike?-0.1:0.1),bike?1.6:big?1.65:1.3,pos.z+lz*(bike?0:0.38)+fz*(bike?-0.1:0.1));
