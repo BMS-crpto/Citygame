@@ -39,7 +39,7 @@
   window.WebSocket.prototype=OldWS.prototype;
   ['CONNECTING','OPEN','CLOSING','CLOSED'].forEach(k=>window.WebSocket[k]=OldWS[k]);
   function show3DEmote(m){
-    if(typeof THREE==='undefined'||typeof scene==='undefined')return;
+    if(typeof THREE==='undefined'||typeof window.scene==='undefined')return;
     const canvas=document.createElement('canvas');canvas.width=256;canvas.height=128;
     const ctx=canvas.getContext('2d');ctx.clearRect(0,0,256,128);
     ctx.fillStyle='rgba(8,14,28,.82)';ctx.beginPath();ctx.roundRect(18,12,220,100,28);ctx.fill();
@@ -47,13 +47,13 @@
     const em=EMOTES.find(e=>e[0]===m.emote);ctx.font='70px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(em?em[1]:'✨',128,62);
     const tex=new THREE.CanvasTexture(canvas);tex.needsUpdate=true;
     const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false}));
-    sp.scale.set(3.3,1.65,1);sp.position.set(+m.x||0,2.9,+m.z||0);sp.renderOrder=1000;scene.add(sp);
+    sp.scale.set(3.3,1.65,1);sp.position.set(+m.x||0,2.9,+m.z||0);sp.renderOrder=1000;window.scene.add(sp);
     const labelCanvas=document.createElement('canvas');labelCanvas.width=256;labelCanvas.height=64;
     const lc=labelCanvas.getContext('2d');lc.font='bold 28px sans-serif';lc.textAlign='center';lc.fillStyle='#fff';lc.strokeStyle='#000';lc.lineWidth=5;lc.strokeText(String(m.name||'Player').slice(0,18),128,42);lc.fillText(String(m.name||'Player').slice(0,18),128,42);
     const lt=new THREE.CanvasTexture(labelCanvas);const lab=new THREE.Sprite(new THREE.SpriteMaterial({map:lt,transparent:true,depthTest:false}));
-    lab.scale.set(2.8,.7,1);lab.position.set(sp.position.x,sp.position.y+1.15,sp.position.z);lab.renderOrder=1001;scene.add(lab);
+    lab.scale.set(2.8,.7,1);lab.position.set(sp.position.x,sp.position.y+1.15,sp.position.z);lab.renderOrder=1001;window.scene.add(lab);
     const start=performance.now(),base=sp.position.y;
-    const anim=()=>{if(!sp.parent)return;const t=(performance.now()-start)/1000;sp.position.y=base+Math.sin(t*5)*.18;lab.position.y=sp.position.y+1.15;sp.material.opacity=Math.max(0,1-t/2.8);lab.material.opacity=sp.material.opacity;if(t>=2.8){scene.remove(sp);scene.remove(lab);tex.dispose();lt.dispose();sp.material.dispose();lab.material.dispose();return}requestAnimationFrame(anim)};
+    const anim=()=>{if(!sp.parent)return;const t=(performance.now()-start)/1000;sp.position.y=base+Math.sin(t*5)*.18;lab.position.y=sp.position.y+1.15;sp.material.opacity=Math.max(0,1-t/2.8);lab.material.opacity=sp.material.opacity;if(t>=2.8){window.scene.remove(sp);window.scene.remove(lab);tex.dispose();lt.dispose();sp.material.dispose();lab.material.dispose();return}requestAnimationFrame(anim)};
     requestAnimationFrame(anim);
   }
 })();
