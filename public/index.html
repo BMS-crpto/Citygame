@@ -51,13 +51,17 @@
   #needs .bar i{display:block;height:100%;background:#7CFC8A;width:100%}
   #tasks{position:fixed;left:8px;top:max(104px,calc(env(safe-area-inset-top) + 96px));font-size:12px;z-index:5;pointer-events:none;max-width:62%}
   #tasks div{background:#000a;padding:3px 9px;border-radius:10px;margin-bottom:3px}
-  #phone{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#000a;z-index:9}
-  .pbox{background:linear-gradient(#4a148c,#1a237e);border:3px solid #ffffff80;border-radius:26px;padding:12px 14px;width:min(92vw,330px);max-height:92vh;overflow:auto;text-align:center}
-  .pgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
-  .app{background:#ffffff25;border-radius:14px;padding:8px 2px;font-size:11px;color:#fff;font-weight:600}
-  .app b{display:block;font-size:24px}
-  #appview{margin:10px 0 6px;font-size:13px;text-align:left}
-  #appview .card{background:#00000040;border-radius:12px;padding:8px 10px;margin-bottom:6px}
+  #phone{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#000d;z-index:9;padding:8px}
+  .pbox{position:relative;background:#080a10;border:2px solid #596071;border-radius:30px;padding:12px;width:min(94vw,390px);height:min(88vh,760px);max-height:92vh;overflow:auto;text-align:center;box-shadow:0 0 0 3px #151824,0 0 32px #7c3aed55;color:#f5f6ff}
+  .pbox:before{content:'21:50  ◉  ▰  5G  ▰';display:block;text-align:left;font-size:10px;letter-spacing:.4px;color:#d7d9e4;padding:1px 8px 12px}
+  .pbox:after{content:'';display:block;width:88px;height:4px;border-radius:9px;background:#e5e7eb66;margin:12px auto 2px}
+  .pgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px 2px;border-bottom:1px solid #ffffff12}
+  .app{background:linear-gradient(145deg,#242936,#10131b);border:1px solid #343b4c;border-radius:13px;padding:9px 2px;font-size:10px;color:#e9ebf5;font-weight:600;min-height:64px}
+  .app b{display:block;font-size:23px;margin-bottom:3px}
+  .app:active{transform:scale(.96);background:#32224b}
+  #appview{margin:10px 0 6px;font-size:13px;text-align:left;min-height:90px}
+  #appview .card{background:#171b25;border:1px solid #292f40;border-radius:12px;padding:10px;margin-bottom:7px}
+  #phx{background:#252a36;color:#e5e7eb;border:1px solid #454b5a;padding:9px 22px;font-size:13px;border-radius:20px}
   .pb{padding:9px 14px;font-size:14px;border-radius:10px;margin:3px}
   #bigmap{position:fixed;inset:0;background:#0b1424;display:none;z-index:9;flex-direction:row}
   #bigmap canvas{flex:none;touch-action:none}
@@ -266,7 +270,7 @@
 <div id="toast"></div>
 <canvas id="mm"></canvas>
 <div id="needs">🍲 <div class="bar"><i id="foodbar"></i></div></div><div id="tasks"></div>
-<div id="phone"><div class="pbox"><div class="pgrid" id="pgrid"></div><div id="appview"></div><button class="q" id="phx">Close ✖</button></div></div>
+<div id="phone"><div class="pbox"><div style="display:flex;align-items:center;justify-content:space-between;padding:0 6px 8px"><div style="text-align:left"><small style="color:#a6adbd;font-size:9px;letter-spacing:2px">LAGOS • DIGITAL LIFE</small><div style="font-size:20px;font-weight:800;letter-spacing:-.5px">CITY PHONE <span style="color:#a78bfa">◆</span></div></div><button class="q" id="phx" style="padding:7px 11px;font-size:12px">✕</button></div><div class="pgrid" id="pgrid"></div><div id="appview"><div class="card" style="text-align:center;color:#aab2c4">Select an app to open</div></div></div></div>
 <div id="bigmap"><canvas id="bmc"></canvas><div id="mapside"></div></div>
 <div id="ride"><div id="ridetxt"></div><div class="rb"><i id="ridebar"></i></div><div style="font-size:13px;opacity:.8">Sit tight, Lagos traffic... 😅</div></div>
 <div id="atm"><div class="box"><h2>🏦 Lagoon Bank ATM</h2><div class="bal">Cash on you: <b id="atmcash">₦0</b> &nbsp;•&nbsp; In bank: <b id="atmbank">₦0</b></div><div class="row"><span>Save:</span><button data-op="dep" data-amt="100">₦100</button><button data-op="dep" data-amt="500">₦500</button><button data-op="dep" data-amt="1000">₦1000</button><button data-op="dep" data-amt="all">ALL</button></div><div class="row"><span>Take out:</span><button data-op="wd" data-amt="100">₦100</button><button data-op="wd" data-amt="500">₦500</button><button data-op="wd" data-amt="1000">₦1000</button><button data-op="wd" data-amt="all">ALL</button></div><div style="font-size:11px;opacity:.8;margin-top:4px">Money in the bank cannot be robbed. It also earns interest!</div><button id="atmx">Close</button></div></div>
@@ -2128,7 +2132,7 @@ function placesList(){
 }
 const fareOf=(r,d)=>Math.max(r.min,Math.round(d*r.rate));
 // ---- phone ----
-const APPS=[['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['🏆','Progress'],['🗓️','Daily'],['🎉','Social'],['💬','Chat'],['⚙️','Settings']];
+const APPS=[['📰','News'],['📒','Yellow Pages'],['💳','Account'],['🗞️','Feed'],['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['🏆','Progress'],['🗓️','Daily'],['🎉','Social'],['💬','Chat'],['⚙️','Settings'],['🖼️','Gallery'],['🧮','Calculator'],['🛍️','Market'],['👤','Avatar']];
 $('pgrid').innerHTML=APPS.map(a=>`<button class="app" data-app="${a[1]}"><b>${a[0]}</b>${a[1]}</button>`).join('');
 function openPhone(){if(!me)return;phone.style.display='flex';appview.innerHTML='<div class="card">Tap an app 👆</div>'}
 function closePhone(){phone.style.display='none'}
@@ -2137,6 +2141,14 @@ $('pgrid').onclick=e=>{const b=e.target.closest('[data-app]');if(b)openApp(b.dat
 function openApp(n){
   if(n==='GPS'){renderGps();return}
   if(n==='Chat'){closePhone();const t=prompt('Say something:');if(t&&ws)ws.send(JSON.stringify({t:'chat',text:t}));return}
+  if(n==='News')appview.innerHTML='<div class="card"><b>📰 LAGOS CITY NEWS</b><p>Latest city updates, events and opportunities.</p><small>News feed preview • More stories coming soon</small></div>';
+  if(n==='Yellow Pages')appview.innerHTML='<div class="card"><b>📒 YELLOW PAGES</b><p>Find city services and destinations.</p><button class="pb q" onclick="setGps(\'bank\')">🏦 Lagoon Bank</button><button class="pb q" onclick="renderGps()">📍 Explore map</button></div>';
+  if(n==='Account')appview.innerHTML='<div class="card"><b>💳 ACCOUNT OVERVIEW</b><h2 style="color:#a78bfa">₦'+(myMoney||0)+'</h2><small>Cash balance</small><hr style="border-color:#292f40"><b>Bank balance: ₦'+myBank+'</b></div>';
+  if(n==='Feed')renderSocial();
+  if(n==='Gallery')appview.innerHTML='<div class="card"><b>🖼️ CITY GALLERY</b><p>Your in-game photo gallery interface.</p><small>Gallery features can be connected to screenshots later.</small></div>';
+  if(n==='Calculator')appview.innerHTML='<div class="card"><b>🧮 QUICK CALCULATOR</b><input id="calcinput" placeholder="Example: 250+75" style="width:100%;background:#0d111a;color:white;border:1px solid #343b4c;border-radius:8px;margin:8px 0"><button class="pb q" onclick="try{ $(\'calcresult\').textContent=Function(\'return (\'+$(\'calcinput\').value+\')\')()}catch(e){$(\'calcresult\').textContent=\'Invalid expression\'}">Calculate</button><div id="calcresult" style="padding:8px;color:#a78bfa;font-weight:bold"></div></div>';
+  if(n==='Market')appview.innerHTML='<div class="card"><b>🛍️ CITY MARKET</b><p>Browse items and city services.</p><small>Market screen preview</small></div>';
+  if(n==='Avatar')appview.innerHTML='<div class="card"><b>👤 AVATAR STUDIO</b><p>Customize your character from the main menu.</p><button class="pb q" onclick="closePhone();location.href=\'avatar-studio.html\'">Open Avatar Studio</button></div>';
   if(n==='Progress')renderProgress();
   if(n==='Daily')renderDaily();
   if(n==='Social')renderSocial();
