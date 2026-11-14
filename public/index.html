@@ -2128,7 +2128,7 @@ function placesList(){
 }
 const fareOf=(r,d)=>Math.max(r.min,Math.round(d*r.rate));
 // ---- phone ----
-const APPS=[['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['💬','Chat'],['⚙️','Settings']];
+const APPS=[['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['🏆','Progress'],['💬','Chat'],['⚙️','Settings']];
 $('pgrid').innerHTML=APPS.map(a=>`<button class="app" data-app="${a[1]}"><b>${a[0]}</b>${a[1]}</button>`).join('');
 function openPhone(){if(!me)return;phone.style.display='flex';appview.innerHTML='<div class="card">Tap an app 👆</div>'}
 function closePhone(){phone.style.display='none'}
@@ -2137,11 +2137,27 @@ $('pgrid').onclick=e=>{const b=e.target.closest('[data-app]');if(b)openApp(b.dat
 function openApp(n){
   if(n==='GPS'){renderGps();return}
   if(n==='Chat'){closePhone();const t=prompt('Say something:');if(t&&ws)ws.send(JSON.stringify({t:'chat',text:t}));return}
+  if(n==='Progress')renderProgress();
   if(n==='Jobs')renderJobs();
   if(n==='Bank')appview.innerHTML=`<div class="card">💵 Cash on you: <b>₦${myMoney||0}</b><br>🏦 In the bank: <b>₦${myBank}</b></div><div class="card">Save money at an ATM inside the Lagoon Bank. Saved money cannot be robbed and earns interest!</div><button class="pb q" onclick="setGps('bank')">📍 Show me the bank</button>`;
   if(n==='Settings')appview.innerHTML=`<div class="card">Graphics:<br>${['low','med','high'].map(q=>`<button class="pb q ${quality===q?'sel':''}" onclick="setQuality('${q}')">${q}</button>`).join('')}</div><div class="card">Sound: <button class="pb q" onclick="$('mutebtn').click();openApp('Settings')">${muted?'🔇 Off':'🔊 On'}</button></div><div class="card" style="font-size:11px">To change how you look, reload the page and pick your look on the first screen.</div>`;
 }
 function setQuality(q){quality=q;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===q));applyQuality();openApp('Settings')}
+function renderProgress(){
+  const cash=Math.max(0,Number(myMoney)||0),bank=Math.max(0,Number(myBank)||0),total=cash+bank;
+  const food=Math.max(0,Math.min(100,Number(myFood)||0)),role=ROLES[myRole]||{emoji:'🌆',label:'Citizen',desc:'Explore Lagos'};
+  const milestone=v=>v<1000?1000:v<10000?10000:v<50000?50000:100000;
+  const cashGoal=milestone(cash),bankGoal=milestone(bank);
+  const bar=(v,g)=>'<div style="height:7px;background:#ffffff22;border-radius:8px;overflow:hidden;margin:6px 0"><i style="display:block;height:100%;width:'+Math.min(100,Math.round(v/g*100))+'%;background:linear-gradient(90deg,#ff8a1f,#ffd54a)"></i></div>';
+  const badge=(ok,t)=>'<span style="display:inline-block;padding:5px 8px;margin:3px;border-radius:18px;background:'+(ok?'#1b7848':'#ffffff18')+'">'+(ok?'🏅 ':'🔒 ')+t+'</span>';
+  appview.innerHTML='<div class="card"><b>🏆 CITY LIFE PROGRESS</b><br><small>Your profile and milestones</small></div>'
+  +'<div class="card"><b>'+role.emoji+' '+role.label+'</b><br>'+role.desc+'<br>Player: '+String(myName||lotName||'Citizen').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</div>'
+  +'<div class="card">💵 Cash: <b>₦'+cash.toLocaleString()+'</b><br>Next milestone: ₦'+cashGoal.toLocaleString()+bar(cash,cashGoal)+'</div>'
+  +'<div class="card">🏦 Savings: <b>₦'+bank.toLocaleString()+'</b><br>Next milestone: ₦'+bankGoal.toLocaleString()+bar(bank,bankGoal)+'</div>'
+  +'<div class="card">💰 Total wealth: <b>₦'+total.toLocaleString()+'</b><br>🍲 Food: <b>'+food+'%</b>'+bar(food,100)+'</div>'
+  +'<div class="card"><b>Milestone badges</b><br>'+badge(total>=1000,'₦1K Starter')+badge(total>=10000,'₦10K Builder')+badge(total>=50000,'₦50K Lagos Legend')+badge(bank>=10000,'Smart Saver')+badge(food>=80,'Well Fed')+'</div>'
+  +'<button class="pb q" onclick="openApp(\'Bank\')">🏦 Manage money</button><button class="pb q" onclick="openApp(\'Jobs\')">💼 Find work</button>';
+}
 function renderJobs(){
   if(phone.style.display!=='flex')return;
   if(jobInfo){const l=Math.max(0,Math.round((jobInfo.until-Date.now())/1000));
