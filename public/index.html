@@ -567,6 +567,36 @@ function cullChunks(px,pz){
 }
 // buildings with windows that light up at night
 const facadeMats={},facadeList=[];
+// Real 3D inset glass panes are instanced across every procedural city facade.
+const cgFacadeWindows=[];
+function cgCollectFacadeWindows(cx,cz,w,h,d,y0,col){
+  if(h<3.8||w<5||d<5)return;
+  const palette=[0x456b87,0x6489a5,0x2e4c63,0x8aa7b8,0x526e83];
+  const tint=palette[(Math.abs(Math.round(col))+Math.round(cx*0.13+cz*0.17))%palette.length|0];
+  const levels=Math.max(1,Math.floor((h-1.1)/3.25));
+  const frontN=Math.max(1,Math.floor((w-1.5)/2.65));
+  const sideN=Math.max(1,Math.floor((d-1.5)/2.65));
+  for(let level=0;level<levels;level++){
+    const y=y0+1.9+level*3.25;if(y+0.75>y0+h-0.35)continue;
+    for(let j=0;j<frontN;j++){
+      const x=cx-w/2+0.95+(j+0.5)*(w-1.9)/frontN;
+      cgFacadeWindows.push([x,y,cz+d/2+0.075,1.25,1.55,0,tint]);
+      cgFacadeWindows.push([x,y,cz-d/2-0.075,1.25,1.55,Math.PI,tint]);
+    }
+    for(let j=0;j<sideN;j++){
+      const z=cz-d/2+0.95+(j+0.5)*(d-1.9)/sideN;
+      cgFacadeWindows.push([cx+w/2+0.075,y,z,1.25,1.55,Math.PI/2,tint]);
+      cgFacadeWindows.push([cx-w/2-0.075,y,z,1.25,1.55,-Math.PI/2,tint]);
+    }
+  }
+}
+function cgFlushFacadeWindows(){
+  if(!cgFacadeWindows.length)return;
+  const geo=new THREE.BoxGeometry(1,1,0.08),mat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.24,metalness:0.18,emissive:0x0b1822,emissiveIntensity:0.18});
+  const mesh=new THREE.InstancedMesh(geo,mat,cgFacadeWindows.length),o=new THREE.Object3D(),c=new THREE.Color();
+  cgFacadeWindows.forEach((p,i)=>{o.position.set(p[0],p[1],p[2]);o.rotation.set(0,p[5],0);o.scale.set(p[3],p[4],1);o.updateMatrix();mesh.setMatrixAt(i,o.matrix);c.setHex(p[6]);mesh.setColorAt(i,c)});
+  mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;mesh.castShadow=false;mesh.receiveShadow=true;mesh.frustumCulled=false;scene.add(mesh);cgFacadeWindows.length=0;
+}
 function facadeMat(col,rx,ry){
   const k=col+'_'+rx+'_'+ry;
   if(!facadeMats[k]){const m=new THREE.MeshLambertMaterial({color:new THREE.Color(col).lerp(new THREE.Color(0xa99e88),0.3),map:winTex(rx,ry),emissive:0xffffff,emissiveMap:litTex(rx,ry),emissiveIntensity:0});facadeMats[k]=m;facadeList.push(m)}
@@ -599,7 +629,7 @@ function addFacade(cx,cz,w,h,d,col,y0){
   cx=T.X(cx);cz=T.Z(cz);w=T.SX(w);h=T.SY(h);d=T.SX(d);y0=T.SY(y0||0);
   const rx=Math.max(1,Math.round(w/10)),ry=Math.max(1,Math.round(h/9));
   const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),facadeMat(col,rx,ry));
-  m.position.set(cx,y0+h/2,cz);m.castShadow=true;m.receiveShadow=true;scene.add(m);
+  m.position.set(cx,y0+h/2,cz);m.castShadow=true;m.receiveShadow=true;scene.add(m);\n  cgCollectFacadeWindows(cx,cz,w,h,d,y0||0,col);
   {const hv=lgHash(cx,cz),top=y0+h;
    batch.push([cx,y0+0.45,cz,w+0.5,0.9,d+0.5,0x7d776c,0]);
    batch.push([cx,top+0.3,cz,w+0.7,0.6,d+0.7,0xcdc7ba,0]);
@@ -804,7 +834,7 @@ for(let bx=-GN;bx<GN;bx++)for(let bz=-GN;bz<GN;bz++){
     }
   }
 }
-palmBatch();
+cgFlushFacadeWindows();\npalmBatch();
 // Lagos roadside billboards (fictional adverts) at some crossings
 {const ADS=['PURE WATER  ₦100  COLD!','EKO FRESH JOLLOF  OPEN 24/7','NAIJA FIBRE  FAST NET FOR ALL','GO-SLOW? ENJOY THE RIDE','AGBADA & ASOEBI  LEKKI','OGA RIDES  BOOK A KEKE','WELCOME TO LAGOS','LASTMA SAYS: DRIVE WELL','BUKKA HUT  PEPPER SOUP'];
  for(let i=-GN;i<=GN;i++)for(let j=-GN;j<=GN;j++){
