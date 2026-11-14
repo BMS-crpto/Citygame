@@ -329,7 +329,8 @@ function onConnection(ws) {
       room = 'CITY1'; // one shared world for every player
       const role = ROLES.includes(m.role) ? m.role : 'citizen';
       id = nextId++;
-      rooms[room] = rooms[room] || { players: {}, owners: {}, paint: {}, feed: [] };\n      rooms[room].feed = rooms[room].feed || [];
+      rooms[room] = rooms[room] || { players: {}, owners: {}, paint: {}, feed: [] };
+      rooms[room].feed = rooms[room].feed || [];
       rooms[room].players[id] = {
         ws, id, name: String(m.name || 'Player').slice(0, 14), role, money: 500, bank: 0, inside: null, food: 100, job: null, travelUntil: 0, dest: null, look: (Array.isArray(m.look) ? m.look : []).slice(0, 6).concat([0,0,0,0,0,0]).slice(0, 6).map((v, i) => Math.max(0, Math.min(MAXLOOK[i], Math.floor(+v) || 0))), car: -1, jailUntil: 0, cd: {},
         x: (Math.random() - 0.5) * 8, z: (Math.random() - 0.5) * 8, ry: 0, moving: false
@@ -394,7 +395,24 @@ function onConnection(ws) {
       const RR = rooms[room], d = RR && Object.values(RR.players).find(q => q.id === p.ride);
       p.ride = null; if (d) { p.x = d.x + 3; p.z = d.z + 1; }
       send(ws, { t: 'tp', x: p.x, z: p.z });
-    } else if (m.t === 'social_get') {\n      send(ws, { t: 'social_feed', posts: (R.feed || []).slice(-30).reverse() });\n    } else if (m.t === 'social_post') {\n      const text = String(m.text || '').replace(/[\\u0000-\\u001f<>]/g, '').trim().slice(0, 180);\n      if (!text) return;\n      if (!cooldown(p, 'social_post', 12000)) return send(ws, { t: 'toast', text: '📱 Wait a little before posting again' });\n      R.feed = R.feed || []; const post = { id: Date.now() + '-' + p.id, name: p.name, text, ts: now, area: p.inside || 'Lagos City' };\n      R.feed.push(post); if (R.feed.length > 50) R.feed.shift();\n      p.ext.socialPosts = (p.ext.socialPosts || 0) + 1;\n      broadcast(room, { t: 'social_new', post }); checkMissions(p, R); savePlayer(room, p);\n    } else if (m.t === 'emote') {\n      const em = ['wave','dance','cheer','laugh','heart','flex','sit']; if (!em.includes(m.id)) return;\n      if (p.jailUntil > now || p.inside || p.travelUntil > now) return send(ws, { t: 'toast', text: 'You cannot emote right now' });\n      if (!cooldown(p, 'emote', 1800)) return;\n      p.ext.emotes = (p.ext.emotes || 0) + 1;\n      broadcast(room, { t: 'emote_fx', id: p.id, name: p.name, emote: m.id, x: p.x, z: p.z, ry: p.ry });\n      checkMissions(p, R); savePlayer(room, p);\n    } else if (m.t === 'chat') {
+    } else if (m.t === 'social_get') {
+      send(ws, { t: 'social_feed', posts: (R.feed || []).slice(-30).reverse() });
+    } else if (m.t === 'social_post') {
+      const text = String(m.text || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 180);
+      if (!text) return;
+      if (!cooldown(p, 'social_post', 12000)) return send(ws, { t: 'toast', text: '📱 Wait a little before posting again' });
+      R.feed = R.feed || []; const post = { id: Date.now() + '-' + p.id, name: p.name, text, ts: now, area: p.inside || 'Lagos City' };
+      R.feed.push(post); if (R.feed.length > 50) R.feed.shift();
+      p.ext.socialPosts = (p.ext.socialPosts || 0) + 1;
+      broadcast(room, { t: 'social_new', post }); checkMissions(p, R); savePlayer(room, p);
+    } else if (m.t === 'emote') {
+      const em = ['wave','dance','cheer','laugh','heart','flex','sit']; if (!em.includes(m.id)) return;
+      if (p.jailUntil > now || p.inside || p.travelUntil > now) return send(ws, { t: 'toast', text: 'You cannot emote right now' });
+      if (!cooldown(p, 'emote', 1800)) return;
+      p.ext.emotes = (p.ext.emotes || 0) + 1;
+      broadcast(room, { t: 'emote_fx', id: p.id, name: p.name, emote: m.id, x: p.x, z: p.z, ry: p.ry });
+      checkMissions(p, R); savePlayer(room, p);
+    } else if (m.t === 'chat') {
       broadcast(room, { t: 'chat', name: p.name, text: String(m.text || '').slice(0, 80) });
     } else if (m.t === 'rent' || m.t === 'buy') {
       if (p.jailUntil > now) return send(ws, { t: 'toast', text: 'You are in jail!' });
@@ -676,7 +694,8 @@ const MISSIONS = [
   { id: 'empire', path: 'nepo', name: 'Grow the inheritance into ₦250,000,000', reward: 250000, ok: p => p.money + p.bank >= 250000000 },   // 5x START.nepo; keep in step with it
   { id: 'ownname', path: 'lapo', name: 'Earn ₦300,000 from your own shifts and jobs', reward: 100000, ok: p => (p.life.earned || 0) >= 300000 },
   { id: 'promo', name: 'Get promoted', reward: 2000, ok: p => !!p.life.promoted },
-  { id: 'rich', name: 'Hold ₦25,000 in total', reward: 5000, ok: p => p.money + p.bank >= 25000 },\n  { id: 'garage', name: 'Own a vehicle', reward: 2500, ok: p => !!(p.ext && p.ext.cars.length) },\n  { id: 'homeStyle', name: 'Place furniture in your 3D home', reward: 1500, ok: p => !!(p.ext && Object.values(p.ext.decor).some(a => a.length > 0)) },\n  { id: 'social', name: 'Share 3 city feed posts', reward: 1000, ok: p => !!(p.ext && p.ext.socialPosts >= 3) },\n  { id: 'emote', name: 'Use 5 character emotes', reward: 750, ok: p => !!(p.ext && p.ext.emotes >= 5) }
+  { id: 'rich', name: 'Hold ₦25,000 in total', reward: 5000, ok: p => p.money + p.bank >= 25000 },
+  { id: 'garage', name: 'Own a vehicle', reward: 2500, ok: p => !!(p.ext && p.ext.cars.length) },\n  { id: 'homeStyle', name: 'Place furniture in your 3D home', reward: 1500, ok: p => !!(p.ext && Object.values(p.ext.decor).some(a => a.length > 0)) },\n  { id: 'social', name: 'Share 3 city feed posts', reward: 1000, ok: p => !!(p.ext && p.ext.socialPosts >= 3) },\n  { id: 'emote', name: 'Use 5 character emotes', reward: 750, ok: p => !!(p.ext && p.ext.emotes >= 5) }
 ];
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 // sleeping / watching TV is acted out: the client shows the character lying in a bed or sitting on a sofa, and everyone nearby sees it
