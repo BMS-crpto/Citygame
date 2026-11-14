@@ -41,6 +41,15 @@ document.documentElement.style.setProperty('--skin',v.skin);document.documentEle
 document.getElementById('hairTop').setAttribute('fill',v.hair);document.getElementById('hairBack').setAttribute('fill',v.hair);
 const top=document.getElementById('hairTop');if(v.style==='afro')top.setAttribute('d','M65 75 Q52 4 120 4 Q188 4 175 75 Q150 42 120 48 Q90 42 65 75Z');else if(v.style==='fade')top.setAttribute('d','M78 62 Q78 25 120 25 Q162 25 162 62 Q143 45 120 49 Q97 45 78 62Z');else top.setAttribute('d','M77 62 Q74 18 120 18 Q166 18 163 62 Q145 43 120 48 Q95 43 77 62Z');}
 ids.forEach(id=>document.getElementById(id).addEventListener('input',apply));
-document.getElementById('save').addEventListener('click',()=>{const v=Object.fromEntries(ids.map(id=>[id,document.getElementById(id).value]));localStorage.setItem('citylife-avatar',JSON.stringify(v));document.getElementById('status').textContent='Character saved locally ✓';});
+function rgb(hex){hex=hex.replace('#','');return [parseInt(hex.slice(0,2),16),parseInt(hex.slice(2,4),16),parseInt(hex.slice(4,6),16)];}
+function nearest(hex,palette){const c=rgb(hex);let best=0,dist=Infinity;palette.forEach((p,i)=>{const q=rgb(p),d=(c[0]-q[0])**2+(c[1]-q[1])**2+(c[2]-q[2])**2;if(d<dist){dist=d;best=i;}});return best;}
+document.getElementById('save').addEventListener('click',()=>{const v=Object.fromEntries(ids.map(id=>[id,document.getElementById(id).value]));localStorage.setItem('citylife-avatar',JSON.stringify(v));
+let look=[1,0,1,1,0,0];try{const prior=JSON.parse(localStorage.getItem('look')||'null');if(Array.isArray(prior)&&prior.length>=6)look=prior.slice(0,6).map(n=>n|0);}catch(e){}
+look[0]=nearest(v.skin,['#f1c27d','#c68642','#8d5524','#e0ac69','#5c3a21']);
+look[1]=v.style==='afro'?1:0;
+look[2]=nearest(v.shirt,['#e53935','#1e88e5','#43a047','#fdd835','#ffffff','#8e24aa','#ff7043','#212121']);
+look[3]=nearest(v.pants,['#1a237e','#212121','#5d4037','#455a64','#827717']);
+look[5]=nearest(v.hair,['#0d0b0a','#2b1a10','#5a3a22','#c9a24a','#9b2d20','#9a9a9a']);
+localStorage.setItem('look',JSON.stringify(look));document.getElementById('status').textContent='Saved! Return to Lagos Life and refresh the character menu ✓';});
 try{const saved=JSON.parse(localStorage.getItem('citylife-avatar')||'null');if(saved)ids.forEach(id=>{if(saved[id])document.getElementById(id).value=saved[id];});}catch(e){}apply();
 </script></body></html>
