@@ -3347,6 +3347,8 @@ guard('mmroute',()=>{
   });
 });
 
+// Public bridge for separately loaded phone-app modules.
+window.LAGOS_PHONE = { APPR, X, PX, S, phoneOpen, openApp: n => openApp(n), appview };
 console.log('Lagos Life v0.7 add-on loaded');
 })();
 
