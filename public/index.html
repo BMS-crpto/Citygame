@@ -63,6 +63,20 @@
   #appview .card{background:#171b25;border:1px solid #292f40;border-radius:12px;padding:10px;margin-bottom:7px}
   #phx{background:#252a36;color:#e5e7eb;border:1px solid #454b5a;padding:9px 22px;font-size:13px;border-radius:20px}
   .pb{padding:9px 14px;font-size:14px;border-radius:10px;margin:3px}
+  /* City Life OS phone refresh */
+  .pbox{width:min(96vw,430px);height:min(91vh,790px);padding:14px;background:linear-gradient(165deg,#111827 0%,#080b13 42%,#090612 100%);border:1px solid #697386;border-radius:34px;box-shadow:0 0 0 4px #171b27,0 22px 80px #000c,0 0 36px #8b5cf633}
+  .pbox:before{content:'9:41  ◉  ▰  5G  ▰';padding:2px 10px 14px;color:#e7eaf3;font-weight:700;letter-spacing:.7px}
+  .pbox:after{margin:14px auto 3px;background:#e5e7eb80}
+  .pgrid{gap:9px;padding:12px 3px 14px;border-bottom:1px solid #ffffff18}
+  .app{min-height:70px;border-radius:17px;background:linear-gradient(145deg,#252c3b,#121722);border:1px solid #343d50;box-shadow:inset 0 1px #ffffff0b;font-size:10px;transition:transform .14s,border-color .14s}
+  .app b{font-size:25px;line-height:1.2}
+  .app:active{transform:scale(.93);border-color:#a78bfa}
+  #phoneSearch{display:block;width:100%;margin:7px 0 3px;padding:10px 13px;background:#161b27;color:#f5f6ff;border:1px solid #343b4c;border-radius:13px;font-size:13px;text-align:left;outline:none}
+  #phoneSearch::placeholder{color:#8d96a8}
+  #appview{margin:8px 0 4px;min-height:100px}
+  #appview .card{background:linear-gradient(145deg,#191f2c,#11151e);border:1px solid #2b3445;border-radius:15px;padding:12px;box-shadow:0 5px 16px #0002}
+  #phx{background:#292f3d;border-color:#505a6d;border-radius:13px;padding:8px 12px}
+  @media(max-height:650px){.pbox{height:96vh;padding:9px}.pgrid{gap:5px;padding:6px 2px}.app{min-height:55px}.app b{font-size:20px}#phoneSearch{padding:7px}}
   #bigmap{position:fixed;inset:0;background:#0b1424;display:none;z-index:9;flex-direction:row}
   #bigmap canvas{flex:none;touch-action:none}
   #mapside{flex:1;overflow:auto;padding:8px 10px;font-size:13px}
@@ -270,7 +284,7 @@
 <div id="toast"></div>
 <canvas id="mm"></canvas>
 <div id="needs">🍲 <div class="bar"><i id="foodbar"></i></div></div><div id="tasks"></div>
-<div id="phone"><div class="pbox"><div style="display:flex;align-items:center;justify-content:space-between;padding:0 6px 8px"><div style="text-align:left"><small style="color:#a6adbd;font-size:9px;letter-spacing:2px">LAGOS • DIGITAL LIFE</small><div style="font-size:20px;font-weight:800;letter-spacing:-.5px">CITY PHONE <span style="color:#a78bfa">◆</span></div></div><button class="q" id="phx" style="padding:7px 11px;font-size:12px">✕</button></div><div class="pgrid" id="pgrid"></div><div id="appview"><div class="card" style="text-align:center;color:#aab2c4">Select an app to open</div></div></div></div>
+<div id="phone"><div class="pbox"><div style="display:flex;align-items:center;justify-content:space-between;padding:0 6px 8px"><div style="text-align:left"><small style="color:#a6adbd;font-size:9px;letter-spacing:2px">LAGOS • DIGITAL LIFE</small><div style="font-size:20px;font-weight:800;letter-spacing:-.5px">CITY LIFE OS <span style="color:#a78bfa">◆</span></div><small id="phonePlayer" style="color:#98a4b8;font-size:10px">PLAYER • CONNECTED</small></div><button class="q" id="phx" style="padding:7px 11px;font-size:12px">✕</button></div><div class="pgrid" id="pgrid"></div><input id="phoneSearch" type="search" placeholder="⌕ Search apps..." autocomplete="off"><div id="appview"><div class="card" style="text-align:center;color:#aab2c4">Select an app to open</div></div></div></div>
 <div id="bigmap"><canvas id="bmc"></canvas><div id="mapside"></div></div>
 <div id="ride"><div id="ridetxt"></div><div class="rb"><i id="ridebar"></i></div><div style="font-size:13px;opacity:.8">Sit tight, Lagos traffic... 😅</div></div>
 <div id="atm"><div class="box"><h2>🏦 Lagoon Bank ATM</h2><div class="bal">Cash on you: <b id="atmcash">₦0</b> &nbsp;•&nbsp; In bank: <b id="atmbank">₦0</b></div><div class="row"><span>Save:</span><button data-op="dep" data-amt="100">₦100</button><button data-op="dep" data-amt="500">₦500</button><button data-op="dep" data-amt="1000">₦1000</button><button data-op="dep" data-amt="all">ALL</button></div><div class="row"><span>Take out:</span><button data-op="wd" data-amt="100">₦100</button><button data-op="wd" data-amt="500">₦500</button><button data-op="wd" data-amt="1000">₦1000</button><button data-op="wd" data-amt="all">ALL</button></div><div style="font-size:11px;opacity:.8;margin-top:4px">Money in the bank cannot be robbed. It also earns interest!</div><button id="atmx">Close</button></div></div>
@@ -2132,14 +2146,22 @@ function placesList(){
 }
 const fareOf=(r,d)=>Math.max(r.min,Math.round(d*r.rate));
 // ---- phone ----
-const APPS=[['📰','News'],['📒','Yellow Pages'],['💳','Account'],['🗞️','Feed'],['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['🏆','Progress'],['🗓️','Daily'],['🎉','Social'],['💬','Chat'],['⚙️','Settings'],['🖼️','Gallery'],['🧮','Calculator'],['🛍️','Market'],['👤','Avatar']];
+const APPS=[['📰','News'],['📒','Yellow Pages'],['💳','Account'],['🗞️','Feed'],['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['🏆','Progress'],['🗓️','Daily'],['🎉','Social'],['💬','Chat'],['⚙️','Settings'],['🖼️','Gallery'],['🧮','Calculator'],['🛍️','Market'],['👤','Avatar'],['📋','Life'],['🏘️','Properties']];
 $('pgrid').innerHTML=APPS.map(a=>`<button class="app" data-app="${a[1]}"><b>${a[0]}</b>${a[1]}</button>`).join('');
-function openPhone(){if(!me)return;phone.style.display='flex';appview.innerHTML='<div class="card">Tap an app 👆</div>'}
+function openPhone(){if(!me)return;phone.style.display='flex';const p=$('phonePlayer');if(p)p.textContent=(myName||lotName||'PLAYER').toUpperCase()+' • ₦'+Math.round(myMoney||0).toLocaleString('en-NG');$('phoneSearch').value='';document.querySelectorAll('#pgrid .app').forEach(b=>b.style.display='');appview.innerHTML='<div class="card"><b>Welcome back 👋</b><p>Choose an app to manage your Lagos life.</p><small>GPS • Work • Banking • Properties</small></div>'}
 function closePhone(){phone.style.display='none'}
 $('phonebtn').onclick=openPhone;$('phx').onclick=closePhone;
 $('pgrid').onclick=e=>{const b=e.target.closest('[data-app]');if(b)openApp(b.dataset.app)};
+$('phoneSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('#pgrid .app').forEach(b=>b.style.display=b.dataset.app.toLowerCase().includes(q)?'':'none')});
+function gpsToHouse(h){if(!h)return;gps={x:h.x,z:h.z,name:h.name||('Property '+h.id)};closePhone();toast('📍 GPS set to '+gps.name)}
+function renderProperties(){if(!world){appview.innerHTML='<div class="card">🏘️ Property listings load after you enter the city.</div>';return}
+ const homes=[...world.houses].sort((a,b)=>Math.hypot(a.x-pos.x,a.z-pos.z)-Math.hypot(b.x-pos.x,b.z-pos.z)).slice(0,18);
+ appview.innerHTML='<div class="card"><b>🏘️ LAGOS PROPERTY FINDER</b><p>Browse nearby homes. Walk to a property entrance and use the in-world RENT interaction to secure a home.</p><small>Availability markers: green = open, grey = occupied, gold = your home.</small></div>'+homes.map(h=>{const taken=houseTaken(h),mine=myHome&&myHome.id===h.id,d=Math.round(Math.hypot(h.x-pos.x,h.z-pos.z));return '<div class="card"><b>'+(h.kind==='villa'?'🏡 Villa':h.kind==='lobby'?'🏢 Apartment lobby':'🏠 Flat')+' · '+(h.area||('District '+h.id))+'</b><br><b style="color:'+(mine?'#ffd54a':taken?'#9aa4b2':'#5ee28b')+'">'+(mine?'YOUR HOME':taken?'OCCUPIED':'AVAILABLE')+'</b><br><small>Weekly rent: ₦'+Math.round(h.rent).toLocaleString('en-NG')+' · '+(d>=1000?(d/1000).toFixed(1)+' km':d+' m')+'</small><br><button class="pb q" onclick="gpsToHouse(world.houses.find(x=>x.id=== '+h.id+'))">📍 Navigate</button></div>'}).join('');
+}
 function openApp(n){
   if(n==='GPS'){renderGps();return}
+  if(n==='Properties'){renderProperties();return}
+  if(n==='Life'){closePhone();const b=$('lifeBtn');if(b)b.click();return}
   if(n==='Chat'){closePhone();const t=prompt('Say something:');if(t&&ws)ws.send(JSON.stringify({t:'chat',text:t}));return}
   if(n==='News')appview.innerHTML='<div class="card"><b>📰 LAGOS CITY NEWS</b><p>Latest city updates, events and opportunities.</p><small>News feed preview • More stories coming soon</small></div>';
   if(n==='Yellow Pages')appview.innerHTML='<div class="card"><b>📒 YELLOW PAGES</b><p>Find city services and destinations.</p><button class="pb q" onclick="setGps(\'bank\')">🏦 Lagoon Bank</button><button class="pb q" onclick="renderGps()">📍 Explore map</button></div>';
@@ -2154,7 +2176,7 @@ function openApp(n){
   if(n==='Social')renderSocial();
   if(n==='Jobs')renderJobs();
   if(n==='Bank')appview.innerHTML=`<div class="card">💵 Cash on you: <b>₦${myMoney||0}</b><br>🏦 In the bank: <b>₦${myBank}</b></div><div class="card">Save money at an ATM inside the Lagoon Bank. Saved money cannot be robbed and earns interest!</div><button class="pb q" onclick="setGps('bank')">📍 Show me the bank</button>`;
-  if(n==='Settings')appview.innerHTML=`<div class="card">Graphics:<br>${['low','med','high'].map(q=>`<button class="pb q ${quality===q?'sel':''}" onclick="setQuality('${q}')">${q}</button>`).join('')}</div><div class="card">Sound: <button class="pb q" onclick="$('mutebtn').click();openApp('Settings')">${muted?'🔇 Off':'🔊 On'}</button></div><div class="card" style="font-size:11px">To change how you look, reload the page and pick your look on the first screen.</div>`;
+  if(n==='Settings')appview.innerHTML=`<div class="card"><b>⚙️ CITY PHONE SETTINGS</b><br>Graphics:<br>${['low','med','high'].map(q=>`<button class="pb q ${quality===q?'sel':''}" onclick="setQuality('${q}')">${q.toUpperCase()}</button>`).join('')}</div><div class="card">Sound: <button class="pb q" onclick="$('mutebtn').click();openApp('Settings')">${muted?'🔇 Off':'🔊 On'}</button><br>Character appearance:<br><button class="pb q" onclick="closePhone();location.href='avatar-studio.html'">👤 Open Avatar Studio</button></div><div class="card"><b>Quick access</b><br><button class="pb q" onclick="openApp('Properties')">🏘️ Property finder</button><button class="pb q" onclick="openApp('Life')">📋 Career & Life</button><button class="pb q" onclick="openApp('GPS')">📍 GPS</button></div>`;
 }
 function setQuality(q){quality=q;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===q));applyQuality();openApp('Settings')}
 function renderSocial(){
@@ -2202,7 +2224,7 @@ function renderJobs(){
   if(phone.style.display!=='flex')return;
   if(jobInfo){const l=Math.max(0,Math.round((jobInfo.until-Date.now())/1000));
     appview.innerHTML=`<div class="card">📦 <b>Delivery run</b><br>${jobInfo.label}<br>Pay: <b>₦${jobInfo.pay}</b> • Time left: ${Math.floor(l/60)}:${String(l%60).padStart(2,'0')}<br>Follow the yellow beam and the 📦 on your minimap.</div><button class="pb q" onclick="sendJob('cancel')">Cancel job</button>`}
-  else appview.innerHTML=`<div class="card">📦 <b>Delivery run</b><br>Pick up a package at a shop and bring it to an address. The farther you go, the more you earn!</div><button class="pb" style="background:#43a047;color:#fff" onclick="sendJob('start')">Start delivery</button><div class="card" style="font-size:11px">Other jobs depend on your role: police arrest thieves, nurses heal, lawyers free people from jail, taxi drivers pick up riders (ACTION button).</div>`;
+  else appview.innerHTML=`<div class="card"><b>💼 LAGOS CAREER CENTER</b><p>Build your career, earn a steady income, and progress through the city economy.</p><button class="pb q" onclick="closePhone();$('lifeBtn').click()">📋 Open Career & Life</button></div><div class="card">📦 <b>Delivery run</b><br>Pick up a package at a shop and bring it to an address. Distance affects your reward.</div><button class="pb" style="background:#43a047;color:#fff" onclick="sendJob('start')">Start delivery</button><div class="card" style="font-size:11px">Special roles have unique actions: police, nurse, lawyer, and taxi driver. Your career shifts, needs, inventory, missions, and money history are in My Life.</div>`;
 }
 function sendJob(op){if(ws)ws.send(JSON.stringify({t:'job',op}));closePhone()}
 function setJob(j){
