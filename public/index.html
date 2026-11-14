@@ -1402,7 +1402,7 @@ if(THREE.GLTFLoader){
   // If the deployment rewrites the page URL, retry from the site root before leaving the procedural fallback.
   function loadModelAsset(key,attempt=0){
     const rel=MODEL_FILES[key];
-    const urls=[new URL(rel,document.baseURI).href,new URL('/'+rel.replace(/^\\//,''),location.origin).href];
+    const urls=[new URL(rel,document.baseURI).href,new URL('/'+(rel.startsWith('/')?rel.slice(1):rel),location.origin).href];
     const url=urls[attempt]||urls[0];
     loader.load(url,g=>{
       try{
