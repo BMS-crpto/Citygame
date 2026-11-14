@@ -382,7 +382,7 @@ function onConnection(ws) {
       if (p.jailUntil > now) return;
       if (p.ride) return;                 // passengers are carried by the driver's car
       p.x = +m.x || 0; p.z = +m.z || 0; p.ry = +m.ry || 0; p.moving = !!m.moving;
-      if (!p.inside || !/^v_(office|tower)$/.test(p.inside)) p.floor = 0; else p.floor = Number(m.floor) === 1 ? 1 : 0;
+      if (!p.inside || !/^v_(office|tower)$/.test(p.inside)) p.floor = 0;
       p.car = Number.isInteger(m.car) && VEHICLES[m.car] && p.ext && p.ext.license && p.ext.cars.includes(m.car) ? m.car : -1;
       if (p.job && !p.inside) {
         const j = p.job;
@@ -495,7 +495,10 @@ function onConnection(ws) {
       p.inside = m.place; p.car = -1; p.x = info.room.x; p.z = info.room.z + info.room.hd - 4;
       send(ws, { t: 'int', place: p.inside, x: p.x, z: p.z });
     } else if (m.t === 'floor') {
-      if (!/^v_(office|tower)$/.test(p.inside || '') || (m.floor !== 0 && m.floor !== 1)) return send(ws, { t: 'toast', text: 'Floor access is not available here' });
+      const fm = /^v_(office|tower)$/.exec(p.inside || ''), ft = fm && BUILD.TYPES[fm[1]];
+      if (!ft || (m.floor !== 0 && m.floor !== 1)) return send(ws, { t: 'toast', text: 'Floor access is not available here' });
+      const stair = { x: ft.room.x + ft.hw - 3.2, z: ft.room.z + ft.hd - 4.2 }, lift = { x: ft.room.x - ft.hw + 3.2, z: ft.room.z - ft.hd + 3.2 };
+      if (Math.min(dist(p, stair), dist(p, lift)) > 5) return send(ws, { t: 'toast', text: 'Walk to the stairs or elevator first' });
       p.floor = m.floor; p.moving = false;
     } else if (m.t === 'exit') {
       if (!p.inside) return;
