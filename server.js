@@ -118,7 +118,7 @@ const server = http.createServer((req, res) => {
   let url;
   try { url = decodeURIComponent(new URL(req.url, 'http://localhost').pathname); }
   catch (e) { res.writeHead(400); return res.end(); }
-  const route = url.replace(/\\/+$/, '') || '/';
+  const route = url.replace(/[/]+$/, '') || '/';
   if (req.method === 'POST' && (route === '/api/register' || route === '/api/login')) return authApi(req, res);
   if (req.method === 'GET' && route === '/api/health') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ ok: true, storage: UP_ON ? (dbWritesOk ? 'upstash (accounts are permanent)' : 'upstash unreachable - using temporary files') : 'temporary file (accounts are WIPED when Render restarts or redeploys)', accounts: Object.keys(accounts).length - 1, lastError: dbLastError })); }
   if (req.method === 'GET' && route === '/config.json') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ googleClientId: GOOGLE_CLIENT_ID, turn: process.env.TURN_URL ? { urls: process.env.TURN_URL.split(','), username: process.env.TURN_USER || '', credential: process.env.TURN_PASS || '' } : null })); }
