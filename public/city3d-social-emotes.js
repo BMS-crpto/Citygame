@@ -1,25 +1,27 @@
 /* Lagos Life 3D social feed + character emotes */
 (function(){
+  const bridge=window.LAGOS_PHONE;
+  if(!bridge){console.error('Social/emotes module unavailable: phone bridge not initialized');return;}
   const esc3=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const EMOTES=[['wave','👋','Wave'],['dance','🕺','Dance'],['cheer','🎉','Cheer'],['laugh','😂','Laugh'],['heart','❤️','Heart'],['flex','💪','Flex'],['sit','🧘','Chill']];
   let feed=[];
   const renderFeed=()=>{
     const rows=feed.map(p=>'<div class="card" style="border-left:3px solid #f6c84c"><b>👤 '+esc3(p.name)+'</b><small style="display:block;color:#9ca3af;margin:3px 0">'+esc3(p.area||'Lagos City')+' • '+new Date(p.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</small><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc3(p.text)+'</div></div>').join('');
-    appview.innerHTML='<div class="card" style="background:linear-gradient(135deg,#0e7490,#312e81)"><b>📸 LAGOS LIFE • CITY FEED</b><p>Share your moment with players in this city.</p><button class="xbtn gold" data-x="socialPost">＋ Create post</button> <button class="xbtn gray" data-x="socialRefresh">↻ Refresh</button></div>'+ (rows||'<div class="card">No posts yet. Be the first to post!</div>');
+    bridge.appview.innerHTML='<div class="card" style="background:linear-gradient(135deg,#0e7490,#312e81)"><b>📸 LAGOS LIFE • CITY FEED</b><p>Share your moment with players in this city.</p><button class="xbtn gold" data-x="socialPost">＋ Create post</button> <button class="xbtn gray" data-x="socialRefresh">↻ Refresh</button></div>'+ (rows||'<div class="card">No posts yet. Be the first to post!</div>');
   };
-  APPR.Social=function(){renderFeed();S({t:'social_get'})};
-  X.socialPost=()=>{const text=prompt('Write a city feed post (max 180 characters):');if(text&&text.trim())S({t:'social_post',text:text.trim().slice(0,180)})};
-  X.socialRefresh=()=>S({t:'social_get'});
-  APPR.Emotes=function(){
-    appview.innerHTML='<div class="card" style="background:linear-gradient(135deg,#7c3aed,#db2777)"><b>🎭 3D CHARACTER EMOTES</b><p>Trigger a floating 3D effect above your avatar. Nearby players see it live.</p></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'+EMOTES.map(e=>'<button class="app" data-x="emote" data-id="'+e[0]+'" style="min-height:76px"><b style="font-size:32px">'+e[1]+'</b>'+e[2]+'</button>').join('')+'</div>';
+  bridge.APPR.Social=function(){renderFeed();bridge.S({t:'social_get'})};
+  bridge.X.socialPost=()=>{const text=prompt('Write a city feed post (max 180 characters):');if(text&&text.trim())bridge.S({t:'social_post',text:text.trim().slice(0,180)})};
+  bridge.X.socialRefresh=()=>bridge.S({t:'social_get'});
+  bridge.APPR.Emotes=function(){
+    bridge.appview.innerHTML='<div class="card" style="background:linear-gradient(135deg,#7c3aed,#db2777)"><b>🎭 3D CHARACTER EMOTES</b><p>Trigger a floating 3D effect above your avatar. Nearby players see it live.</p></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'+EMOTES.map(e=>'<button class="app" data-x="emote" data-id="'+e[0]+'" style="min-height:76px"><b style="font-size:32px">'+e[1]+'</b>'+e[2]+'</button>').join('')+'</div>';
   };
-  X.emote=b=>S({t:'emote',id:b.dataset.id});
+  bridge.X.emote=b=>bridge.S({t:'emote',id:b.dataset.id});
   // New phone app tiles, added after the original grid has been drawn.
   const grid=document.getElementById('pgrid');
   if(grid){
     [['📸','Social'],['🎭','Emotes']].forEach(([ico,name])=>{
       const btn=document.createElement('button');btn.className='app';btn.dataset.app=name;btn.innerHTML='<b>'+ico+'</b>'+name;
-      btn.addEventListener('click',()=>openApp(name));grid.appendChild(btn);
+      btn.addEventListener('click',()=>bridge.openApp(name));grid.appendChild(btn);
     });
   }
   // Listen for server-authoritative shared feed and emote events.
@@ -28,7 +30,7 @@
     const sock=protos?new OldWS(url,protos):new OldWS(url);
     sock.addEventListener('message',ev=>{
       let m;try{m=JSON.parse(ev.data)}catch(e){return}
-      if(m.t==='social_feed'){feed=Array.isArray(m.posts)?m.posts.slice(0,30):[];if(PX.app==='Social'&&phoneOpen())renderFeed()}
+      if(m.t==='social_feed'){feed=Array.isArray(m.posts)?m.posts.slice(0,30):[];if(bridge.PX.app==='Social'&&bridge.phoneOpen())renderFeed()}
       if(m.t==='social_new'&&m.post){feed.unshift(m.post);feed=feed.slice(0,30);if(PX.app==='Social'&&phoneOpen())renderFeed()}
       if(m.t==='emote_fx')show3DEmote(m);
     });
