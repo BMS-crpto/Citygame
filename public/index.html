@@ -1091,7 +1091,20 @@ function venueSign(text,bg,x,y,z,ry,w){       // like addSign, but shrinks long 
 }
 function buildVenueInside(k){
   const t=BUILD.TYPES[k],X=t.room.x,Z=t.room.z,hw=t.hw,hd=t.hd;
-  const R=makeRoom('v_'+k,X,Z,hw,hd,t.h,VFLOOR[t.floor]||tileBase,t.wall);
+  const multiFloor=(k==='office'||k==='tower'),floorRise=7.4;
+  const R=makeRoom('v_'+k,X,Z,hw,hd,multiFloor?14:t.h,VFLOOR[t.floor]||tileBase,t.wall);
+  R.multiFloor=multiFloor;R.floorRise=floorRise;R.floorAccess={stairs:{x:X+hw-3.2,z:Z+hd-4.2},lift:{x:X-hw+3.2,z:Z-hd+3.2}};
+  if(multiFloor){
+    const deck=new THREE.Mesh(new THREE.BoxGeometry(hw*2-0.5,0.32,hd*2-0.5),new THREE.MeshStandardMaterial({color:0xd9e0e5,roughness:0.82}));deck.position.set(X,floorRise,Z);scene.add(deck);
+    for(let n=0;n<10;n++){const step=new THREE.Mesh(new THREE.BoxGeometry(3.1,0.42,1.05),new THREE.MeshStandardMaterial({color:0x87939c,roughness:0.8}));step.position.set(X+hw-3.2,0.22+n*0.7,Z+hd-8.8+n*0.82);scene.add(step)}
+    bx_(X-hw+3.2,3.5,Z-hd+3.2,3.1,7,3.1,0x455a64);bx_(X-hw+3.2,7.15,Z-hd+3.2,3.4,0.18,3.4,0x90a4ae);
+    addSign('LIFT',X-hw+3.2,5.1,Z-hd+1.5,0,2.4,'#263238');
+    const upperBox=(x,y,z,w,hh,d,c)=>bx_(x,y,z,w,hh,d,c);
+    for(const dx of [-7,-2,3,8])for(const dz of [-1,4]){upperBox(X+dx,floorRise+0.55,Z+dz,3.2,1.1,1.7,0x795548);upperBox(X+dx,floorRise+1.25,Z+dz-0.12,1.15,0.75,0.12,0x263238);upperBox(X+dx,floorRise+0.35,Z+dz+1.45,0.8,0.7,0.8,0x455a64)}
+    upperBox(X,floorRise+0.55,Z-6,7,1.1,3.2,0x5d4037);upperBox(X,floorRise+1.15,Z-6,6.6,0.12,2.8,0x90a4ae);
+    for(const dx of [-10,10])upperBox(X+dx,floorRise+1.5,Z+7,0.18,3,10,0x80cbc4);
+    const floorSign=makeLabel(k==='tower'?'EXECUTIVE FLOOR':'UPSTAIRS OFFICE','#263238',4.5,2.5);floorSign.position.set(X,floorRise+3.2,Z-hd+0.5);scene.add(floorSign);
+  }
   R.spot={x:X+t.spot.dx,z:Z+t.spot.dz,r:t.spot.r,act:t.act};
   const F=(dx,dz,w,h,d,c)=>{bx_(X+dx,h/2,Z+dz,w,h,d,c);solid(X+dx,Z+dz,w/2+0.1,d/2+0.1)};   // furniture you cannot walk through
   const D=(dx,dz,w,h,d,c,y)=>bx_(X+dx,y===undefined?h/2:y,Z+dz,w,h,d,c);                          // decoration, or things sitting on top
@@ -1839,7 +1852,7 @@ function popMoney(d){const e=document.createElement('div');e.className='pop';e.t
 
 // =============== state & input ===============
 let ridingId=0,lotName='';const others={};let myId=null,ws=null,me=null,myMoney=null,jailed=false;
-const pos={x:0,z:0,ry:0};
+const pos={x:0,z:0,ry:0,floor:0};
 let joy={x:0,y:0};let camYaw=0,camH=7,camInit=false;
 let myCol=-1,carObj=null,speed=0,moving=false,myBank=0,myFood=100;
 
@@ -2067,7 +2080,7 @@ document.getElementById('play').onclick=()=>{
       if(inside){inside=null;updateTime();updateDistrict()}
       closeATM();hideRide();
     }
-    else if(m.t==='int'){ensureRoom(m.place);venueName=m.name||'';inside=m.place;pos.x=m.x;pos.z=m.z;pos.ry=Math.PI;camYaw=Math.PI;speed=0;camInit=false;updateTime();updateDistrict();sfx.buy()}
+    else if(m.t==='int'){ensureRoom(m.place);venueName=m.name||'';inside=m.place;pos.x=m.x;pos.z=m.z;pos.floor=0;pos.ry=Math.PI;camYaw=Math.PI;speed=0;camInit=false;updateTime();updateDistrict();sfx.buy()}
     else if(m.t==='ride'){showRide(m)}
     else if(m.t==='job'){setJob(m.job)}
     else if(m.t==='state'){
@@ -2075,7 +2088,7 @@ document.getElementById('play').onclick=()=>{
       m.players.forEach(p=>{
         seen[p.id]=1;
         if(p.id===myId){
-          if(!me){me=makeCharacter(p.role,p.name+' (you)',p.look);scene.add(me);pos.x=p.x;pos.z=p.z}
+          pos.floor=Number(p.floor)||0;if(!me){me=makeCharacter(p.role,p.name+' (you)',p.look);scene.add(me);pos.x=p.x;pos.z=p.z}
           if(myMoney!==null&&p.money!==myMoney){const d=p.money-myMoney;popMoney(d);if(d>0)sfx.coin();else sfx.lose()}
           if(!jailed&&p.jailed)sfx.siren();
           myMoney=p.money;jailed=p.jailed;
@@ -2089,7 +2102,7 @@ document.getElementById('play').onclick=()=>{
         }
         let o=others[p.id];
         if(!o){o={g:makeCharacter(p.role,p.name,p.look),tx:p.x,tz:p.z,try:0,moving:false,role:p.role};o.g.position.set(p.x,0,p.z);scene.add(o.g);others[p.id]=o}
-        o.tx=p.x;o.tz=p.z;o.try=p.ry;o.moving=p.moving;o.role=p.role;o.name=p.name;o.bay=p.bay||[];o.g.visible=!p.hidden&&!p.ride;
+        o.tx=p.x;o.tz=p.z;o.ty=(Number(p.floor)||0)*7.4;o.try=p.ry;o.moving=p.moving;o.role=p.role;o.name=p.name;o.bay=p.bay||[];o.g.visible=!p.hidden&&!p.ride;
         if(o.g.userData.curCar!==p.car)setCarMode(o.g,p.car,p.role);
         if((o.g.userData.pose||'')!==(p.pose||''))setPoseFor(p.id,o.g,p.pose||'');   // everyone sees you sleeping or watching TV
       });
@@ -2101,7 +2114,7 @@ document.getElementById('play').onclick=()=>{
     }
   };
   ws.onclose=()=>toast('Disconnected');
-  setInterval(()=>{if(ws.readyState===1&&me)ws.send(JSON.stringify({t:'move',x:pos.x,z:pos.z,ry:pos.ry,moving:moving,car:myCol}))},66);
+  setInterval(()=>{if(ws.readyState===1&&me)ws.send(JSON.stringify({t:'move',x:pos.x,z:pos.z,ry:pos.ry,moving:moving,car:myCol,floor:pos.floor}))},66);
 };
 document.getElementById('act').onclick=()=>{audioInit();ws&&ws.send(JSON.stringify({t:'action'}))};
 (function(){
@@ -2137,6 +2150,7 @@ useBtn.onclick=()=>{
   else if(useTarget.type==='xjoin')ws.send(JSON.stringify({t:'ridejoin',id:useTarget.id}));
   else if(useTarget.type==='xleave')ws.send(JSON.stringify({t:'ridestop'}));
   else if(useTarget.type==='in')ws.send(JSON.stringify({t:'enter',place:useTarget.place}));
+  else if(useTarget.type==='floor'){pos.floor=useTarget.floor;ws.send(JSON.stringify({t:'floor',floor:pos.floor}));camInit=false;toast(useTarget.method==='lift'?'🛗 Elevator arrived':'🪜 You changed floors');}
   else if(useTarget.type==='out')ws.send(JSON.stringify({t:'exit'}));
   else if(useTarget.type==='atm')showATM();
   else if(useTarget.type==='paint')ws.send(JSON.stringify({t:'paint'}));
@@ -2160,7 +2174,9 @@ function updateUse(){
   else if(myCol>=0){t={type:'exit'};label='EXIT CAR'}
   else if(inside){
     const R=ROOMS[inside];
-    if(inside==='bank'&&near(R.x0-11,R.z0,5.5)){t={type:'atm'};label='💳 USE ATM'}
+    if(R.multiFloor&&near(R.floorAccess.lift.x,R.floorAccess.lift.z,3.4)){t={type:'floor',floor:pos.floor?0:1,method:'lift'};label=pos.floor?'🛗 LIFT TO LOBBY':'🛗 TAKE LIFT UP'}
+    else if(R.multiFloor&&near(R.floorAccess.stairs.x,R.floorAccess.stairs.z,3.8)){t={type:'floor',floor:pos.floor?0:1,method:'stairs'};label=pos.floor?'⬇️ GO DOWNSTAIRS':'⬆️ CLIMB STAIRS'}
+    else if(inside==='bank'&&near(R.x0-11,R.z0,5.5)){t={type:'atm'};label='💳 USE ATM'}
     else if(inside.startsWith('house')&&!R.model&&near(R.x0+8.5,R.z0+5,4)){t={type:'paint'};label='🎨 PAINT ₦300'}
     else if(inside.startsWith('house')&&near(R.eat?R.eat.x:R.x0-9,R.eat?R.eat.z:R.z0-0.5,R.eat?4.6:3.5)){t={type:'eat'};label='🍳 EAT AT HOME'}
     else if(inside==='mall'&&near(R.x0+19,R.z0-8,4.5)){t={type:'eat'};label='🍲 BUY FOOD ₦40'}
@@ -2678,13 +2694,13 @@ function loop(now){
         pos.ry=Math.atan2(vx,vz);moving=true;
       }
     }
-    me.position.set(pos.x,myPose?poseY:0,pos.z);
+    me.position.set(pos.x,(pos.floor?7.4:0)+(myPose?poseY:0),pos.z);
     if(rideSc)updateRideScene();
     if(ridingId>0){const d=others[ridingId];if(d){pos.x=d.g.position.x;pos.z=d.g.position.z;pos.ry=d.g.rotation.y;speed=0}else ridingId=0}
     me.rotation.y=myCol>=0?pos.ry:me.rotation.y+wrap(pos.ry-me.rotation.y)*0.2;
     animate(me,moving&&myCol<0,dt);animatePoseProps();
     for(const o of npcObjs){const vis=(o.n.place||null)===(inside||null)&&Math.hypot(o.n.x-pos.x,o.n.z-pos.z)<(inside?60:70);o.g.visible=vis;if(vis)animate(o.g,false,dt)}
-    const inCar=myCol>=0||ridingId>0||!!rideSc,cd=inside?(ROOMS[inside]&&ROOMS[inside].model?5.4:3.4):inCar?9:3.5,ch=inside?(ROOMS[inside]&&ROOMS[inside].model?Math.max(6.2,camH*0.9):Math.min(2.8,camH*0.3)):inCar?Math.max(3.4,camH*0.55):Math.max(1.7,camH*0.27);
+    const inCar=myCol>=0||ridingId>0||!!rideSc,levelY=(inside&&pos.floor?7.4:0),cd=inside?(ROOMS[inside]&&ROOMS[inside].model?5.4:3.4):inCar?9:3.5,ch=inside?(ROOMS[inside]&&ROOMS[inside].model?Math.max(6.2,camH*0.9):Math.min(2.8,camH*0.3)):inCar?Math.max(3.4,camH*0.55):Math.max(1.7,camH*0.27);
     if(rideSc&&rideSc.cabin){   // inside view: eyes in the vehicle, looking where it is heading
       const yw=rideSc.cy,fx=Math.sin(yw),fz=Math.cos(yw),lx=-Math.cos(yw),lz=Math.sin(yw),big=rideSc.col===5,bike=rideSc.col===8;
       camera.position.set(pos.x+lx*(bike?0:0.38)+fx*(bike?-0.1:0.1),bike?1.6:big?1.65:1.3,pos.z+lz*(bike?0:0.38)+fz*(bike?-0.1:0.1));
@@ -2692,10 +2708,10 @@ function loop(now){
     }else{
     let gx=pos.x-Math.sin(camYaw)*cd,gz=pos.z-Math.cos(camYaw)*cd;
     if(inside){const R=ROOMS[inside];gx=Math.max(R.x0-R.hw+0.7,Math.min(R.x0+R.hw-0.7,gx));gz=Math.max(R.z0-R.hd+0.7,Math.min(R.z0+R.hd-0.7,gz))}
-    if(!camInit){camera.position.set(gx,ch,gz);camInit=true}
+    if(!camInit){camera.position.set(gx,ch+levelY,gz);camInit=true}
     const k=Math.min(1,dt*9);
-    camera.position.x+=(gx-camera.position.x)*k;camera.position.y+=(ch-camera.position.y)*k;camera.position.z+=(gz-camera.position.z)*k;
-    camera.lookAt(pos.x,myCol>=0?1.2:1.45,pos.z);
+    camera.position.x+=(gx-camera.position.x)*k;camera.position.y+=((ch+levelY)-camera.position.y)*k;camera.position.z+=(gz-camera.position.z)*k;
+    camera.lookAt(pos.x,levelY+(myCol>=0?1.2:1.45),pos.z);
     }
     sun.position.set(pos.x+SUNV.x*80,SUNV.y*80,pos.z+SUNV.z*80);sun.target.position.set(pos.x,0,pos.z);
     if(++uc%6===0)updateUse();
@@ -2710,7 +2726,7 @@ function loop(now){
   for(const c of clouds){c.position.x+=dt*1.6;if(c.position.x>230)c.position.x=-230}
   for(const id in others){
     const o=others[id];
-    o.g.position.x+=(o.tx-o.g.position.x)*0.25;o.g.position.z+=(o.tz-o.g.position.z)*0.25;
+    o.g.position.x+=(o.tx-o.g.position.x)*0.25;o.g.position.z+=(o.tz-o.g.position.z)*0.25;o.g.position.y+=((o.ty||0)-o.g.position.y)*0.25;
     o.g.rotation.y+=wrap(o.try-o.g.rotation.y)*0.2;
     const inCar=o.g.userData.curCar>=0;
     animate(o.g,o.moving&&!inCar,dt);
