@@ -6,14 +6,14 @@
    // Explicit color pipeline makes material colors and textures more consistent across Android browsers.
    if('outputColorSpace' in renderer&&THREE.SRGBColorSpace)renderer.outputColorSpace=THREE.SRGBColorSpace;else if(THREE.sRGBEncoding)renderer.outputEncoding=THREE.sRGBEncoding;
    renderer.toneMapping=THREE.ACESFilmicToneMapping;
-   renderer.toneMappingExposure=1.03;
+   renderer.toneMappingExposure=1.08;
    renderer.shadowMap.enabled=true;
    renderer.shadowMap.type=THREE.PCFSoftShadowMap;
    // Two low-intensity practical fill lights add depth to the existing city materials without
    // changing gameplay positions, collisions, or server-authoritative player state.
-   const fillA=new THREE.PointLight(0x72d9e5,0.24,105,2);
+   const fillA=new THREE.PointLight(0x8bdde8,0.32,125,2);
    fillA.position.set(18,18,24);fillA.castShadow=false;scene.add(fillA);
-   const fillB=new THREE.PointLight(0xffbd72,0.18,90,2);
+   const fillB=new THREE.PointLight(0xffc887,0.24,110,2);
    fillB.position.set(-30,12,-18);fillB.castShadow=false;scene.add(fillB);
    // Refine reflective materials already used by cars, character accessories and premium props.
    scene.traverse(o=>{
@@ -25,12 +25,12 @@
          if(m.specular&&m.specular.getHex()===0)m.specular.setHex(0x252a30);
        }
        if(m&&m.isMeshStandardMaterial){
-         m.roughness=Math.max(0.48,Math.min(0.92,m.roughness||0.7));
-         m.metalness=Math.max(0,Math.min(0.18,m.metalness||0));
+         m.roughness=Math.max(0.38,Math.min(0.88,m.roughness==null?0.68:m.roughness));
+         m.metalness=Math.max(0,Math.min(0.22,m.metalness==null?0:m.metalness));
        }
      });
    });
    // Keep the scene treatment subtle on smaller devices: retain the current renderer DPR cap.
-   renderer.domElement.style.filter='contrast(1.035) saturate(1.08)';
+   renderer.domElement.style.filter='contrast(1.045) saturate(1.10) brightness(1.015)';
  }catch(err){console.warn('Lagos 3D polish safely skipped:',err)}
 })();
