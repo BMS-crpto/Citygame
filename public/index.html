@@ -2699,6 +2699,95 @@ function loop(now){
 }
 requestAnimationFrame(loop);
 </script>
+<script id="citygame-auth-click-guard">
+/* CITYGAME_AUTH_CLICK_GUARD
+   Isolated auth controls: still attaches if an earlier game initializer throws.
+   Server-side age and account validation remain authoritative. */
+(function () {
+  'use strict';
+  var regMode = true;
+  function el(id) { return document.getElementById(id); }
+  function showError(message) {
+    var out = el('aErr');
+    if (out) out.textContent = message;
+  }
+  function setMode(reg) {
+    regMode = reg;
+    var regTab = el('tabReg'), logTab = el('tabLog');
+    var one = el('regOnly'), two = el('regOnly2'), go = el('aGo');
+    if (regTab) regTab.classList.toggle('on', reg);
+    if (logTab) logTab.classList.toggle('on', !reg);
+    if (one) one.style.display = reg ? '' : 'none';
+    if (two) two.style.display = reg ? '' : 'none';
+    if (go) go.textContent = reg ? "Sign up · it's free" : 'Log in';
+    showError('');
+  }
+  function finish(token, username) {
+    try {
+      if (typeof useAccount === 'function') {
+        useAccount(token, username);
+        return;
+      }
+    } catch (e) { console.warn('Existing account handoff failed:', e); }
+    try {
+      localStorage.setItem('ll_tok', token);
+      localStorage.setItem('ll_user', username);
+    } catch (e) {}
+    var name = el('name');
+    if (name) { name.value = username; name.readOnly = true; }
+    var login = el('login');
+    if (login) login.style.display = 'none';
+    var menu = el('menu');
+    if (menu) menu.style.display = 'flex';
+    try { if (typeof pvStart === 'function') pvStart(); } catch (e) { console.warn(e); }
+  }
+  document.addEventListener('click', function (event) {
+    var target = event.target && event.target.closest ? event.target.closest('#tabReg,#tabLog,#aGo') : null;
+    if (!target) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if (target.id === 'tabReg') { setMode(true); return; }
+    if (target.id === 'tabLog') { setMode(false); return; }
+    if (target.disabled) return;
+    var username = (el('aUser') && el('aUser').value || '').trim().toLowerCase();
+    var password = el('aPass') && el('aPass').value || '';
+    if (!username || !password) { showError('Enter your username and password.'); return; }
+    var body = { username: username, password: password };
+    if (regMode) {
+      body.name = (el('rName') && el('rName').value || '').trim();
+      body.email = (el('aMail') && el('aMail').value || '').trim();
+      body.dob = el('aDob') && el('aDob').value || '';
+      body.agree = !!(el('aAgree') && el('aAgree').checked);
+    }
+    var button = el('aGo');
+    button.disabled = true;
+    button.textContent = 'Connecting…';
+    showError('');
+    fetch(regMode ? '/api/register' : '/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      cache: 'no-store',
+      credentials: 'same-origin',
+      body: JSON.stringify(body)
+    }).then(function (response) {
+      return response.text().then(function (raw) {
+        var data;
+        try { data = JSON.parse(raw); }
+        catch (e) { throw new Error('Server returned an invalid response (HTTP ' + response.status + ').'); }
+        if (!response.ok) throw new Error(data.error || ('Request failed (HTTP ' + response.status + ').'));
+        if (!data.token || !data.username) throw new Error('Server response is missing login credentials. Please retry.');
+        finish(data.token, data.username);
+      });
+    }).catch(function (error) {
+      showError(error && error.message ? error.message : 'Connection failed. Check your internet and try again.');
+    }).finally(function () {
+      button.disabled = false;
+      button.textContent = regMode ? "Sign up · it's free" : 'Log in';
+    });
+  }, true);
+  setMode(true);
+})();
+</script>
 <script id="plus">
 /* ===== Lagos Life v0.7 add-on =====
    Runs after the main game script. If anything in here fails, the base game keeps working. */
