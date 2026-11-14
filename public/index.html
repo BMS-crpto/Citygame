@@ -2128,7 +2128,7 @@ function placesList(){
 }
 const fareOf=(r,d)=>Math.max(r.min,Math.round(d*r.rate));
 // ---- phone ----
-const APPS=[['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['🏆','Progress'],['💬','Chat'],['⚙️','Settings']];
+const APPS=[['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['🏆','Progress'],['🗓️','Daily'],['💬','Chat'],['⚙️','Settings']];
 $('pgrid').innerHTML=APPS.map(a=>`<button class="app" data-app="${a[1]}"><b>${a[0]}</b>${a[1]}</button>`).join('');
 function openPhone(){if(!me)return;phone.style.display='flex';appview.innerHTML='<div class="card">Tap an app 👆</div>'}
 function closePhone(){phone.style.display='none'}
@@ -2138,11 +2138,28 @@ function openApp(n){
   if(n==='GPS'){renderGps();return}
   if(n==='Chat'){closePhone();const t=prompt('Say something:');if(t&&ws)ws.send(JSON.stringify({t:'chat',text:t}));return}
   if(n==='Progress')renderProgress();
+  if(n==='Daily')renderDaily();
   if(n==='Jobs')renderJobs();
   if(n==='Bank')appview.innerHTML=`<div class="card">💵 Cash on you: <b>₦${myMoney||0}</b><br>🏦 In the bank: <b>₦${myBank}</b></div><div class="card">Save money at an ATM inside the Lagoon Bank. Saved money cannot be robbed and earns interest!</div><button class="pb q" onclick="setGps('bank')">📍 Show me the bank</button>`;
   if(n==='Settings')appview.innerHTML=`<div class="card">Graphics:<br>${['low','med','high'].map(q=>`<button class="pb q ${quality===q?'sel':''}" onclick="setQuality('${q}')">${q}</button>`).join('')}</div><div class="card">Sound: <button class="pb q" onclick="$('mutebtn').click();openApp('Settings')">${muted?'🔇 Off':'🔊 On'}</button></div><div class="card" style="font-size:11px">To change how you look, reload the page and pick your look on the first screen.</div>`;
 }
 function setQuality(q){quality=q;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===q));applyQuality();openApp('Settings')}
+function dailyKey(){return 'citylife-daily-'+new Date().toISOString().slice(0,10)}
+function dailyTasks(){
+  const day=Math.floor(Date.now()/86400000);
+  const choices=[
+    [{title:'Explore a new destination',desc:'Use GPS to visit a landmark.',app:'GPS',xp:25},{title:'Check your finances',desc:'Review your cash and bank balance.',app:'Bank',xp:25},{title:'Start a delivery shift',desc:'Try a delivery job from the Jobs app.',app:'Jobs',xp:25}],
+    [{title:'Plan your Lagos route',desc:'Choose a destination using GPS.',app:'GPS',xp:25},{title:'Build your savings',desc:'Visit the bank and review your savings.',app:'Bank',xp:25},{title:'Find honest work',desc:'Open Jobs and explore available work.',app:'Jobs',xp:25}],
+    [{title:'Navigate across the city',desc:'Set a destination in the GPS app.',app:'GPS',xp:25},{title:'Review your progress',desc:'Open your profile milestones.',app:'Progress',xp:25},{title:'Take a work opportunity',desc:'Open Jobs and start a delivery run.',app:'Jobs',xp:25}]
+  ];return choices[day%choices.length];
+}
+function dailyState(){try{const s=JSON.parse(localStorage.getItem(dailyKey())||'{}');return s&&typeof s==='object'?s:{}}catch(e){return {}}}
+function toggleDailyChallenge(i){const s=dailyState();s[i]=!s[i];localStorage.setItem(dailyKey(),JSON.stringify(s));renderDaily()}
+function renderDaily(){
+ const tasks=dailyTasks(),state=dailyState(),done=tasks.filter((t,i)=>state[i]).length,xp=done*25;
+ const cards=tasks.map((t,i)=>'<div class="card" style="border:1px solid '+(state[i]?'#37c982':'#ffffff20')+';margin:8px 0"><b>'+(state[i]?'✅ ':'🎯 ')+t.title+'</b><br><small>'+t.desc+'</small><br><span style="color:#ffd54a;font-weight:800">+'+t.xp+' XP</span><br><button class="pb q" style="width:100%;margin-top:8px" onclick="toggleDailyChallenge('+i+')">'+(state[i]?'Undo completion':'Mark complete')+'</button><button class="pb q" style="width:100%;margin-top:5px" onclick="openApp(\''+t.app+'\')">Open '+t.app+'</button></div>').join('');
+ appview.innerHTML='<div class="card"><b>🗓️ DAILY CITY CHALLENGES</b><br><small>Fresh tasks each day. Completion and XP are saved on this device.</small><div style="height:8px;background:#ffffff22;border-radius:8px;margin:10px 0"><div style="height:100%;width:'+Math.round(done/tasks.length*100)+'%;background:#37c982;border-radius:8px"></div></div><b>'+done+'/'+tasks.length+' completed · '+xp+' XP earned</b></div>'+cards;
+}
 function renderProgress(){
   const cash=Math.max(0,Number(myMoney)||0),bank=Math.max(0,Number(myBank)||0),total=cash+bank;
   const food=Math.max(0,Math.min(100,Number(myFood)||0)),role=ROLES[myRole]||{emoji:'🌆',label:'Citizen',desc:'Explore Lagos'};
