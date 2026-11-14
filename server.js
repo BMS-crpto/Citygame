@@ -346,7 +346,7 @@ function onConnection(ws) {
       rooms[room].feed = rooms[room].feed || [];
       rooms[room].players[id] = {
         ws, id, name: String(m.name || 'Player').slice(0, 14), role, money: 500, bank: 0, inside: null, food: 100, job: null, travelUntil: 0, dest: null, look: (Array.isArray(m.look) ? m.look : []).slice(0, 6).concat([0,0,0,0,0,0]).slice(0, 6).map((v, i) => Math.max(0, Math.min(MAXLOOK[i], Math.floor(+v) || 0))), car: -1, jailUntil: 0, cd: {},
-        x: (Math.random() - 0.5) * 8, z: (Math.random() - 0.5) * 8, ry: 0, moving: false
+        x: (Math.random() - 0.5) * 8, z: (Math.random() - 0.5) * 8, ry: 0, moving: false, floor: 0
       };
       const np = rooms[room].players[id]; if (gu) { np.email = gu.email; np.acct = gu.acct; if (gu.acct) np.name = gu.acct; else if (!m.name) np.name = String(gu.name).slice(0, 14); }
       const sv = saves[saveKey(room, np)];
@@ -382,6 +382,7 @@ function onConnection(ws) {
       if (p.jailUntil > now) return;
       if (p.ride) return;                 // passengers are carried by the driver's car
       p.x = +m.x || 0; p.z = +m.z || 0; p.ry = +m.ry || 0; p.moving = !!m.moving;
+      if (!p.inside || !/^v_(office|tower)$/.test(p.inside)) p.floor = 0; else p.floor = Number(m.floor) === 1 ? 1 : 0;
       p.car = Number.isInteger(m.car) && VEHICLES[m.car] && p.ext && p.ext.license && p.ext.cars.includes(m.car) ? m.car : -1;
       if (p.job && !p.inside) {
         const j = p.job;
@@ -493,8 +494,12 @@ function onConnection(ws) {
       if (info.house && !ownsHouse(p, info.unit)) return send(ws, { t: 'toast', text: 'Only the tenant can go inside' });
       p.inside = m.place; p.car = -1; p.x = info.room.x; p.z = info.room.z + info.room.hd - 4;
       send(ws, { t: 'int', place: p.inside, x: p.x, z: p.z });
+    } else if (m.t === 'floor') {
+      if (!/^v_(office|tower)$/.test(p.inside || '') || (m.floor !== 0 && m.floor !== 1)) return send(ws, { t: 'toast', text: 'Floor access is not available here' });
+      p.floor = m.floor; p.moving = false;
     } else if (m.t === 'exit') {
       if (!p.inside) return;
+      p.floor = 0;
       const vb = /^v_/.test(p.inside) && p.bld != null ? BLD[p.bld] : null;
       const info = vb ? { out: vb.out } : placeInfo(p.inside); p.inside = null; p.bld = null;
       if (info) { p.x = info.out.x; p.z = info.out.z; send(ws, { t: 'tp', x: p.x, z: p.z }); }
@@ -677,7 +682,7 @@ setInterval(() => {
     const owners = {}, occ = {};
     for (const id in tenants) { const t = activeTenant(id), u = UNITS[+id]; if (!t || !u) continue; const h = HOUSES[u.house]; occ[h.id] = (occ[h.id] || 0) + 1; if (h.units === 1) owners[h.id] = t.name; }
     const list = Object.values(R.players).map(p => ({
-      id: p.id, name: p.name, role: p.role, x: p.x, z: p.z, ry: p.ry, moving: p.moving,
+      id: p.id, name: p.name, role: p.role, x: p.x, z: p.z, ry: p.ry, moving: p.moving, floor: p.floor || 0,
       car: p.car, money: p.money, bank: p.bank, food: p.food, look: p.look, hidden: p.travelUntil > now, jailed: p.jailUntil > now, ride: p.ride || 0, bay: (p.ext && p.ext.cars) || [], phone: !!p.phone, mic: !!p.mic, guard: !!(p.ext && p.ext.guardUntil > now),
       pose: (p.poseUntil > now && p.pose) ? p.pose : ''
     }));
