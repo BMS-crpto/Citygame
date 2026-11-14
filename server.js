@@ -695,7 +695,10 @@ const MISSIONS = [
   { id: 'ownname', path: 'lapo', name: 'Earn ₦300,000 from your own shifts and jobs', reward: 100000, ok: p => (p.life.earned || 0) >= 300000 },
   { id: 'promo', name: 'Get promoted', reward: 2000, ok: p => !!p.life.promoted },
   { id: 'rich', name: 'Hold ₦25,000 in total', reward: 5000, ok: p => p.money + p.bank >= 25000 },
-  { id: 'garage', name: 'Own a vehicle', reward: 2500, ok: p => !!(p.ext && p.ext.cars.length) },\n  { id: 'homeStyle', name: 'Place furniture in your 3D home', reward: 1500, ok: p => !!(p.ext && Object.values(p.ext.decor).some(a => a.length > 0)) },\n  { id: 'social', name: 'Share 3 city feed posts', reward: 1000, ok: p => !!(p.ext && p.ext.socialPosts >= 3) },\n  { id: 'emote', name: 'Use 5 character emotes', reward: 750, ok: p => !!(p.ext && p.ext.emotes >= 5) }
+  { id: 'garage', name: 'Own a vehicle', reward: 2500, ok: p => !!(p.ext && p.ext.cars.length) },
+  { id: 'homeStyle', name: 'Place furniture in your 3D home', reward: 1500, ok: p => !!(p.ext && Object.values(p.ext.decor).some(a => a.length > 0)) },
+  { id: 'social', name: 'Share 3 city feed posts', reward: 1000, ok: p => !!(p.ext && p.ext.socialPosts >= 3) },
+  { id: 'emote', name: 'Use 5 character emotes', reward: 750, ok: p => !!(p.ext && p.ext.emotes >= 5) }
 ];
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 // sleeping / watching TV is acted out: the client shows the character lying in a bed or sitting on a sofa, and everyone nearby sees it
