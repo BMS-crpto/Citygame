@@ -4,7 +4,7 @@
  try{
    if(typeof THREE==='undefined'||typeof scene==='undefined'||typeof renderer==='undefined')return;
    // Explicit color pipeline makes material colors and textures more consistent across Android browsers.
-   if('outputColorSpace' in renderer&&THREE.SRGBColorSpace)renderer.outputColorSpace=THREE.SRGBColorSpace;
+   if('outputColorSpace' in renderer&&THREE.SRGBColorSpace)renderer.outputColorSpace=THREE.SRGBColorSpace;else if(THREE.sRGBEncoding)renderer.outputEncoding=THREE.sRGBEncoding;
    renderer.toneMapping=THREE.ACESFilmicToneMapping;
    renderer.toneMappingExposure=1.03;
    renderer.shadowMap.enabled=true;
