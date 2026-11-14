@@ -1104,7 +1104,8 @@ function buildVenueInside(k){
     upperBox(X,floorRise+0.55,Z-6,7,1.1,3.2,0x5d4037);upperBox(X,floorRise+1.15,Z-6,6.6,0.12,2.8,0x90a4ae);
     for(const dx of [-10,10])upperBox(X+dx,floorRise+1.5,Z+7,0.18,3,10,0x80cbc4);
     const floorSign=makeLabel(k==='tower'?'EXECUTIVE FLOOR':'UPSTAIRS OFFICE','#263238',4.5,2.5);floorSign.position.set(X,floorRise+3.2,Z-hd+0.5);scene.add(floorSign);
-    const staff=[{id:'exec_'+k,name:'Tomi the Analyst',title:'Business analyst',x:X-5,z:Z+1,ry:0,look:[1,0,4,1,1,0]},{id:'mgr_'+k,name:'Mr Ade the Manager',title:'Office manager',x:X+5,z:Z+5,ry:Math.PI,look:[3,0,2,1,0,0]}];\n    staff.forEach(n=>{n.place='v_'+k;n.floor=1;const g=makeCharacter('lawyer',n.name,n.look);g.position.set(n.x,floorRise+0.16,n.z);g.rotation.y=n.ry;scene.add(g);npcObjs.push({n,g})});
+    const staff=[{id:'exec_'+k,name:'Tomi the Analyst',title:'Business analyst',x:X-5,z:Z+1,ry:0,look:[1,0,4,1,1,0]},{id:'mgr_'+k,name:'Mr Ade the Manager',title:'Office manager',x:X+5,z:Z+5,ry:Math.PI,look:[3,0,2,1,0,0]}];
+    staff.forEach(n=>{n.place='v_'+k;n.floor=1;const g=makeCharacter('lawyer',n.name,n.look);g.position.set(n.x,floorRise+0.16,n.z);g.rotation.y=n.ry;scene.add(g);npcObjs.push({n,g})});
   }
   R.spot={x:X+t.spot.dx,z:Z+t.spot.dz,r:t.spot.r,act:t.act};
   const F=(dx,dz,w,h,d,c)=>{bx_(X+dx,h/2,Z+dz,w,h,d,c);solid(X+dx,Z+dz,w/2+0.1,d/2+0.1)};   // furniture you cannot walk through
