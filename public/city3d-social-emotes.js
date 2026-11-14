@@ -31,7 +31,7 @@
     sock.addEventListener('message',ev=>{
       let m;try{m=JSON.parse(ev.data)}catch(e){return}
       if(m.t==='social_feed'){feed=Array.isArray(m.posts)?m.posts.slice(0,30):[];if(bridge.PX.app==='Social'&&bridge.phoneOpen())renderFeed()}
-      if(m.t==='social_new'&&m.post){feed.unshift(m.post);feed=feed.slice(0,30);if(PX.app==='Social'&&phoneOpen())renderFeed()}
+      if(m.t==='social_new'&&m.post){feed.unshift(m.post);feed=feed.slice(0,30);if(bridge.PX.app==='Social'&&bridge.phoneOpen())renderFeed()}
       if(m.t==='emote_fx')show3DEmote(m);
     });
     return sock;
