@@ -94,3 +94,31 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 }
 @media(max-height:650px){.pbox{height:96vh;padding:9px}.pgrid{gap:5px;padding:6px 2px}.app{min-height:55px}.app b{font-size:20px}#phoneSearch{padding:7px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ===== Reference pass: Lagos Life screenshot-inspired mobile shell =====
+/* Gold-rimmed handset, emerald app launcher, navy individual apps. */
+#phone{background:rgba(1,5,8,.72)!important;backdrop-filter:blur(5px)!important}
+#phone .pbox{width:min(92vw,390px)!important;height:min(88dvh,760px)!important;max-height:94dvh!important;position:relative!important;overflow:hidden!important;display:flex!important;flex-direction:column!important;background:linear-gradient(155deg,#172b34 0%,#0b1820 70%,#101f28)!important;border:3px solid #d8b85d!important;border-radius:38px!important;padding:14px 12px 12px!important;box-shadow:0 0 0 3px #302719,0 0 0 5px #e8d28a66,0 22px 60px #000c!important;color:#f4f7fa!important}
+#phone .pbox:before{content:"";position:absolute;top:9px;left:50%;transform:translateX(-50%);width:88px;height:22px;border-radius:20px;background:#05080c;border:1px solid #35404a;box-shadow:inset 0 1px 4px #000;pointer-events:none;z-index:2}
+#phone .pbox>div:first-child{padding:14px 7px 8px!important;min-height:58px!important}
+#phonePlayer{color:#9cc4b6!important}
+#pgrid{background:linear-gradient(160deg,#087a55 0%,#0ba66d 44%,#d5f3e6 100%)!important;border:1px solid #4ad4a277!important;border-radius:24px!important;padding:12px 8px!important;box-shadow:inset 0 1px 0 #ffffff33,0 7px 18px #0004!important;gap:9px!important}
+#pgrid .app{background:linear-gradient(145deg,#32d69a,#087e5c)!important;border:1px solid #c6ffe033!important;border-radius:15px!important;box-shadow:0 1px 0 #ffffff44 inset,0 -3px 0 #064e3c inset,0 5px 0 #064d3b,0 8px 13px #0004!important;color:#f3fff9!important;text-shadow:0 1px 3px #003b2c!important}
+#pgrid .app:nth-child(4n+2){background:linear-gradient(145deg,#5a9dff,#2454d8)!important;box-shadow:0 1px 0 #ffffff44 inset,0 -3px 0 #163d9b inset,0 5px 0 #183a8b,0 8px 13px #0004!important}
+#pgrid .app:nth-child(4n+3){background:linear-gradient(145deg,#42d9b0,#167d70)!important}
+#pgrid .app:nth-child(4n){background:linear-gradient(145deg,#78e5e7,#318eae)!important}
+#pgrid .app b{filter:drop-shadow(0 2px 4px #003b2c88)!important}
+#phoneSearch{flex:none!important;background:linear-gradient(180deg,#d9f7e9,#b8e9d4)!important;border:1px solid #8fe0bd!important;color:#124b38!important;border-radius:999px!important;box-shadow:inset 0 2px 5px #17644822!important;margin:8px 0 10px!important}
+#phoneSearch::placeholder{color:#4b9275!important}
+#appview{flex:1 1 auto!important;min-height:0!important;background:linear-gradient(155deg,#122631,#0b1821)!important;border:1px solid #28404c!important;border-radius:22px!important;padding:10px 8px 18px!important;margin:0 0 3px!important}
+#appview .card{background:linear-gradient(145deg,#1c3440,#11232d)!important;border:1px solid #35505b!important;border-radius:17px!important;box-shadow:0 1px 0 #ffffff0b inset,0 6px 14px #0004!important}
+#appview .card:has(>b:first-child){border-color:#3c6256!important}
+#appview h2,#appview h3{letter-spacing:.15px!important}
+#appview button:not(.app){border-radius:999px!important;padding:10px 14px!important;background:linear-gradient(145deg,#29434e,#162a35)!important;border:1px solid #3b5661!important;color:#eaf6f8!important;box-shadow:0 1px 0 #ffffff12 inset,0 -2px 0 #07121a inset,0 3px 0 #08131b,0 6px 10px #0004!important}
+#appview button.gold,#appview .gold{background:linear-gradient(145deg,#f4d98a,#c69c3c)!important;color:#211a08!important;border-color:#fff0b2!important}
+#appview .xrow{background:linear-gradient(145deg,#1c3440,#11232d)!important;border-radius:16px!important}
+#bigmap{background:linear-gradient(145deg,#152d39,#08151d)!important}
+#mapside{background:linear-gradient(155deg,#172e3a,#0b1821)!important;border-left:1px solid #39505a!important}
+#mapside .pl,#mapside .det{border-radius:15px!important;background:linear-gradient(145deg,#213b47,#12242e)!important}
+#atm .box{background:linear-gradient(145deg,#172f3b,#0b1821)!important;border-color:#d8b85d77!important}
+@media(max-width:600px){#phone .pbox{width:min(94vw,390px)!important;border-radius:34px!important;padding:12px 10px!important}#pgrid{padding:9px 6px!important;gap:7px!important}#pgrid .app{border-radius:13px!important}}
