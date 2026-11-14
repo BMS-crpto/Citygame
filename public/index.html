@@ -2128,7 +2128,7 @@ function placesList(){
 }
 const fareOf=(r,d)=>Math.max(r.min,Math.round(d*r.rate));
 // ---- phone ----
-const APPS=[['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['🏆','Progress'],['🗓️','Daily'],['💬','Chat'],['⚙️','Settings']];
+const APPS=[['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['🏆','Progress'],['🗓️','Daily'],['🎉','Social'],['💬','Chat'],['⚙️','Settings']];
 $('pgrid').innerHTML=APPS.map(a=>`<button class="app" data-app="${a[1]}"><b>${a[0]}</b>${a[1]}</button>`).join('');
 function openPhone(){if(!me)return;phone.style.display='flex';appview.innerHTML='<div class="card">Tap an app 👆</div>'}
 function closePhone(){phone.style.display='none'}
@@ -2139,11 +2139,22 @@ function openApp(n){
   if(n==='Chat'){closePhone();const t=prompt('Say something:');if(t&&ws)ws.send(JSON.stringify({t:'chat',text:t}));return}
   if(n==='Progress')renderProgress();
   if(n==='Daily')renderDaily();
+  if(n==='Social')renderSocial();
   if(n==='Jobs')renderJobs();
   if(n==='Bank')appview.innerHTML=`<div class="card">💵 Cash on you: <b>₦${myMoney||0}</b><br>🏦 In the bank: <b>₦${myBank}</b></div><div class="card">Save money at an ATM inside the Lagoon Bank. Saved money cannot be robbed and earns interest!</div><button class="pb q" onclick="setGps('bank')">📍 Show me the bank</button>`;
   if(n==='Settings')appview.innerHTML=`<div class="card">Graphics:<br>${['low','med','high'].map(q=>`<button class="pb q ${quality===q?'sel':''}" onclick="setQuality('${q}')">${q}</button>`).join('')}</div><div class="card">Sound: <button class="pb q" onclick="$('mutebtn').click();openApp('Settings')">${muted?'🔇 Off':'🔊 On'}</button></div><div class="card" style="font-size:11px">To change how you look, reload the page and pick your look on the first screen.</div>`;
 }
 function setQuality(q){quality=q;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===q));applyQuality();openApp('Settings')}
+function renderSocial(){
+ const messages=['Who is online in Lagos? 👋','Anyone want to cruise? 🚗','Meet me at the city center 📍','Let’s do a delivery run 📦','Good vibes in Lagos! 🎉','Anyone at the mall? 🛍️'];
+ appview.innerHTML='<div class="card"><b>🎉 CITY SOCIAL HUB</b><br><small>Quick messages to connect with players in your room.</small></div>'+messages.map((m,i)=>'<button class="pb q" style="width:100%;margin:6px 0;text-align:left" onclick="sendSocialMessage('+i+')">'+m+'</button>').join('')+'<div class="card"><small>Messages are sent to your current multiplayer room using the game chat.</small></div>';
+}
+function sendSocialMessage(i){
+ const messages=['Who is online in Lagos? 👋','Anyone want to cruise? 🚗','Meet me at the city center 📍','Let’s do a delivery run 📦','Good vibes in Lagos! 🎉','Anyone at the mall? 🛍️'];
+ if(!Number.isInteger(i)||i<0||i>=messages.length)return;
+ if(!ws){toast('Connect to multiplayer first');return}
+ ws.send(JSON.stringify({t:'chat',text:messages[i]}));toast('Message sent to room chat');
+}
 function dailyKey(){const d=new Date();return 'citylife-daily-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function dailyTasks(){
   const day=Math.floor(Date.now()/86400000);
