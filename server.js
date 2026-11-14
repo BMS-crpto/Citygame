@@ -96,7 +96,15 @@ function authApi(req, res) {
       return;
     }
     const a = accounts[u];
-    const ok = a && crypto.timingSafeEqual(Buffer.from(hashPw(pw, a.salt), 'hex'), Buffer.from(a.hash, 'hex'));
+    let ok = false;
+    // Defensive verification: corrupted/legacy account records must not crash the auth request.
+    if (a && typeof a.salt === 'string' && typeof a.hash === 'string') {
+      try {
+        const actual = Buffer.from(hashPw(pw, a.salt), 'hex');
+        const expected = Buffer.from(a.hash, 'hex');
+        ok = actual.length === expected.length && actual.length === 64 && crypto.timingSafeEqual(actual, expected);
+      } catch (e) { ok = false; }
+    }
     if (!ok) return out(401, { error: 'Wrong username or password' });
     out(200, { token: makeToken(u), username: u });
   });
