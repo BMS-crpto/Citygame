@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>City Life — Avatar Studio</title>
+<style>
+:root{color-scheme:dark;--bg:#10141d;--panel:#1b2330;--accent:#ffb22e;--muted:#9aa8bb}
+*{box-sizing:border-box}body{margin:0;font:16px system-ui;background:radial-gradient(circle at top,#26354b,#10141d 55%);color:#f5f7fb;min-height:100vh}
+header{padding:22px;text-align:center}header h1{margin:0;color:var(--accent)}header p{color:var(--muted);margin:6px}
+main{max-width:900px;margin:auto;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:16px}.panel{background:var(--panel);border:1px solid #344154;border-radius:18px;padding:18px;box-shadow:0 12px 35px #0004}
+.preview{min-height:390px;display:grid;place-items:center;background:linear-gradient(#34475e,#18202b);border-radius:14px;position:relative;overflow:hidden}.preview:after{content:"";position:absolute;bottom:0;height:28%;width:100%;background:linear-gradient(#293543,#111820);border-top:2px solid #566271}
+svg{height:330px;width:240px;z-index:1;filter:drop-shadow(0 8px 8px #0006)}label{display:block;margin:13px 0 6px;color:#d8e0ec;font-weight:600}select,input[type=color]{width:100%;padding:10px;border-radius:10px;border:1px solid #445268;background:#111923;color:white}button{width:100%;margin-top:16px;padding:12px;border:0;border-radius:11px;background:var(--accent);font-weight:800;color:#211707}small{color:var(--muted)}@media(max-width:650px){main{grid-template-columns:1fr}.preview{min-height:350px}}
+</style></head><body>
+<header><h1>👤 AVATAR STUDIO</h1><p>Customize your City Life character</p></header>
+<main><section class="panel"><div class="preview"><svg viewBox="0 0 240 340" aria-label="Character preview">
+<ellipse cx="120" cy="318" rx="65" ry="12" fill="#080c12" opacity=".6"/>
+<path id="hairBack" d="M76 62 Q70 15 120 15 Q170 15 164 62 L158 95 L82 95Z" fill="#24170e"/>
+<path d="M88 75 Q120 52 152 75 L160 132 L145 155 L95 155 L80 132Z" fill="var(--skin)"/>
+<path id="hairTop" d="M77 62 Q74 18 120 18 Q166 18 163 62 Q145 43 120 48 Q95 43 77 62Z" fill="#24170e"/>
+<circle cx="103" cy="83" r="4" fill="#202020"/><circle cx="137" cy="83" r="4" fill="#202020"/><path d="M108 108 Q120 114 132 108" fill="none" stroke="#783b31" stroke-width="3" stroke-linecap="round"/>
+<path d="M86 142 L154 142 L170 224 L70 224Z" fill="var(--shirt)"/>
+<path d="M86 145 L105 165 L120 150 L135 165 L154 145" fill="none" stroke="#ffffff" opacity=".4" stroke-width="3"/>
+<path d="M70 155 L52 211 L69 219 L91 169 M170 155 L188 211 L171 219 L149 169" fill="var(--skin)"/>
+<path d="M76 220 L164 220 L155 292 L125 292 L120 246 L115 292 L85 292Z" fill="var(--pants)"/>
+<path d="M85 290 L125 290 L123 319 L78 319 Q73 306 85 290 M125 290 L155 290 L165 319 L121 319Z" fill="var(--shoes)"/>
+</svg></div><small>Preview updates instantly. Your choices are saved on this device.</small></section>
+<section class="panel"><h2>Appearance</h2>
+<label for="skin">Skin tone</label><select id="skin"><option value="#f1c7a5">Light</option><option value="#c98e65">Medium</option><option value="#8d5638" selected>Deep</option><option value="#573321">Dark</option></select>
+<label for="hair">Hair color</label><select id="hair"><option value="#24170e">Black</option><option value="#55301b">Brown</option><option value="#b87928">Blonde</option><option value="#8b2635">Burgundy</option></select>
+<label for="style">Hair style</label><select id="style"><option value="short">Short</option><option value="fade">Fade</option><option value="afro">Afro</option></select>
+<label for="shirt">Shirt color</label><input type="color" id="shirt" value="#e14c37">
+<label for="pants">Trousers color</label><input type="color" id="pants" value="#263f75">
+<label for="shoes">Shoes color</label><input type="color" id="shoes" value="#f2f2f2">
+<label for="path">Life path</label><select id="path"><option>Nepo Baby</option><option>LAPO Baby</option></select>
+<button id="save">Save character</button><p id="status" aria-live="polite"></p>
+</section></main>
+<script>
+const ids=['skin','hair','style','shirt','pants','shoes','path'];
+function apply(){const v=Object.fromEntries(ids.map(id=>[id,document.getElementById(id).value]));
+document.documentElement.style.setProperty('--skin',v.skin);document.documentElement.style.setProperty('--shirt',v.shirt);document.documentElement.style.setProperty('--pants',v.pants);document.documentElement.style.setProperty('--shoes',v.shoes);
+document.getElementById('hairTop').setAttribute('fill',v.hair);document.getElementById('hairBack').setAttribute('fill',v.hair);
+const top=document.getElementById('hairTop');if(v.style==='afro')top.setAttribute('d','M65 75 Q52 4 120 4 Q188 4 175 75 Q150 42 120 48 Q90 42 65 75Z');else if(v.style==='fade')top.setAttribute('d','M78 62 Q78 25 120 25 Q162 25 162 62 Q143 45 120 49 Q97 45 78 62Z');else top.setAttribute('d','M77 62 Q74 18 120 18 Q166 18 163 62 Q145 43 120 48 Q95 43 77 62Z');}
+ids.forEach(id=>document.getElementById(id).addEventListener('input',apply));
+document.getElementById('save').addEventListener('click',()=>{const v=Object.fromEntries(ids.map(id=>[id,document.getElementById(id).value]));localStorage.setItem('citylife-avatar',JSON.stringify(v));document.getElementById('status').textContent='Character saved locally ✓';});
+try{const saved=JSON.parse(localStorage.getItem('citylife-avatar')||'null');if(saved)ids.forEach(id=>{if(saved[id])document.getElementById(id).value=saved[id];});}catch(e){}apply();
+</script></body></html>
