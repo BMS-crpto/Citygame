@@ -113,10 +113,15 @@ function authApi(req, res) {
 const PUB = path.join(__dirname, 'public');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.wasm': 'application/wasm', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.wav': 'audio/wav', '.ktx2': 'image/ktx2', '.bin': 'application/octet-stream' };
 const server = http.createServer((req, res) => {
-  if (req.method === 'POST' && (req.url === '/api/register' || req.url === '/api/login')) return authApi(req, res);
-  if (req.url === '/api/health') { res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ ok: true, storage: UP_ON ? (dbWritesOk ? 'upstash (accounts are permanent)' : 'upstash unreachable - using temporary files') : 'temporary file (accounts are WIPED when Render restarts or redeploys)', accounts: Object.keys(accounts).length - 1, lastError: dbLastError })); }
-  if (req.url === '/config.json') { res.writeHead(200, { 'Content-Type': 'application/json' }); return res.end(JSON.stringify({ googleClientId: GOOGLE_CLIENT_ID, turn: process.env.TURN_URL ? { urls: process.env.TURN_URL.split(','), username: process.env.TURN_USER || '', credential: process.env.TURN_PASS || '' } : null })); }
-  let url; try { url = decodeURIComponent(req.url.split('?')[0]); } catch (e) { res.writeHead(400); return res.end(); }
+  // Normalize the URL path once so query strings and trailing slashes do not
+  // accidentally send API requests into the static-file handler.
+  let url;
+  try { url = decodeURIComponent(new URL(req.url, 'http://localhost').pathname); }
+  catch (e) { res.writeHead(400); return res.end(); }
+  const route = url.replace(/\\/+$/, '') || '/';
+  if (req.method === 'POST' && (route === '/api/register' || route === '/api/login')) return authApi(req, res);
+  if (req.method === 'GET' && route === '/api/health') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ ok: true, storage: UP_ON ? (dbWritesOk ? 'upstash (accounts are permanent)' : 'upstash unreachable - using temporary files') : 'temporary file (accounts are WIPED when Render restarts or redeploys)', accounts: Object.keys(accounts).length - 1, lastError: dbLastError })); }
+  if (req.method === 'GET' && route === '/config.json') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ googleClientId: GOOGLE_CLIENT_ID, turn: process.env.TURN_URL ? { urls: process.env.TURN_URL.split(','), username: process.env.TURN_USER || '', credential: process.env.TURN_PASS || '' } : null })); }
   if (url === '/') url = '/index.html';
   const file = path.normalize(path.join(PUB, url));
   if (!file.startsWith(PUB + path.sep)) { res.writeHead(403); return res.end(); }
