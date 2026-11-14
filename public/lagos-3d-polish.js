@@ -2,7 +2,7 @@
 (function(){
  'use strict';
  try{
-   if(typeof THREE==='undefined'||typeof scene==='undefined'||typeof renderer==='undefined')return;
+   if(typeof THREE==='undefined'||typeof window.scene==='undefined'||typeof renderer==='undefined')return;
    // Explicit color pipeline makes material colors and textures more consistent across Android browsers.
    if('outputColorSpace' in renderer&&THREE.SRGBColorSpace)renderer.outputColorSpace=THREE.SRGBColorSpace;else if(THREE.sRGBEncoding)renderer.outputEncoding=THREE.sRGBEncoding;
    renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -12,11 +12,11 @@
    // Two low-intensity practical fill lights add depth to the existing city materials without
    // changing gameplay positions, collisions, or server-authoritative player state.
    const fillA=new THREE.PointLight(0x8bdde8,0.32,125,2);
-   fillA.position.set(18,18,24);fillA.castShadow=false;scene.add(fillA);
+   fillA.position.set(18,18,24);fillA.castShadow=false;window.scene.add(fillA);
    const fillB=new THREE.PointLight(0xffc887,0.24,110,2);
-   fillB.position.set(-30,12,-18);fillB.castShadow=false;scene.add(fillB);
+   fillB.position.set(-30,12,-18);fillB.castShadow=false;window.scene.add(fillB);
    // Refine reflective materials already used by cars, character accessories and premium props.
-   scene.traverse(o=>{
+   window.scene.traverse(o=>{
      if(!o.isMesh||!o.material)return;
      const mats=Array.isArray(o.material)?o.material:[o.material];
      mats.forEach(m=>{
