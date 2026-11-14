@@ -328,6 +328,10 @@
 })();
 </script>
 <script>
+// Create the one shared Three.js scene before game or add-on initialization.
+window.scene = window.scene || new THREE.Scene();
+</script>
+<script>
 const ROLES = {
   police:{emoji:'🚔',label:'Police',desc:'Arrest thieves'},
   thief:{emoji:'🦹',label:'Thief',desc:'Rob shops'},
@@ -365,8 +369,8 @@ Object.entries(ROLES).forEach(([k,r])=>{
 
 // =============== renderer, sky, light ===============
 const HORIZON=0xd2e4f1;   // clear bright Lagos day
-var scene=new THREE.Scene();
-window.scene=scene; // Explicit global scene bridge for isolated add-on scripts
+var scene=window.scene;
+window.scene=scene; // Keep the single shared scene instance
 scene.fog=new THREE.Fog(HORIZON,75,265);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,0.1,320);
 const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
@@ -2814,6 +2818,9 @@ requestAnimationFrame(loop);
 /* ===== Lagos Life v0.7 add-on =====
    Runs after the main game script. If anything in here fails, the base game keeps working. */
 (function(){
+// Bind the shared scene locally; never depend on an outer lexical `scene` binding.
+const scene=window.scene;
+if(!scene)throw new Error("Shared Three.js scene was not initialized before phone add-ons");
 const PX={cars:[],license:false,carList:[],cert:null,mk:null,decor:{shop:[],inv:{},placed:{}},role:'citizen',players:{},
   threads:{},cur:null,app:null,catalog:[],myName:'',guard:false,route:null,routeLen:0,mapQ:''};
 const S=o=>{try{if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}catch(e){}};
