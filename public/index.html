@@ -1324,7 +1324,7 @@ function fixMaterials(root){
     o.castShadow=true;o.receiveShadow=true;o.frustumCulled=false;
     const ms=Array.isArray(o.material)?o.material:[o.material];
     ms.forEach(m=>{
-      if(m.map){m.map.encoding=THREE.LinearEncoding;m.map.needsUpdate=true}
+      if(m.map){m.map.needsUpdate=true}
       else if(m.color&&m.color.convertLinearToSRGB)m.color.convertLinearToSRGB();
       if(m.metalness!==undefined){m.metalness=Math.min(m.metalness,0.3);m.roughness=Math.max(m.roughness,0.4)}
       if(m.emissive&&m.emissive.getHex()>0&&!m.emissiveMap)m.emissive.convertLinearToSRGB&&m.emissive.convertLinearToSRGB();
