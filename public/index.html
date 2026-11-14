@@ -2163,7 +2163,7 @@ useBtn.onclick=()=>{
 function collide(nx,nz){
   if(inside){const R=ROOMS[inside];if(Math.abs(nx-R.x0)>R.hw-0.9||Math.abs(nz-R.z0)>R.hd-0.9)return true}
   else if(Math.abs(nx)>BOUND||Math.abs(nz)>BOUND)return true;
-  for(const s of solids)if(Math.abs(nx-s.x)<s.hw&&Math.abs(nz-s.z)<s.hd)return true;
+  if(!(inside&&pos.floor&&ROOMS[inside]&&ROOMS[inside].multiFloor))for(const s of solids)if(Math.abs(nx-s.x)<s.hw&&Math.abs(nz-s.z)<s.hd)return true;
   if(!inside&&myCol>=0&&trafficBlocks(nx,nz))return true;
   return false;
 }
