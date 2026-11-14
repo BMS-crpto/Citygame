@@ -655,7 +655,8 @@ function addFacade(cx,cz,w,h,d,col,y0){
   cx=T.X(cx);cz=T.Z(cz);w=T.SX(w);h=T.SY(h);d=T.SX(d);y0=T.SY(y0||0);
   const rx=Math.max(1,Math.round(w/10)),ry=Math.max(1,Math.round(h/9));
   const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),facadeMat(col,rx,ry));
-  m.position.set(cx,y0+h/2,cz);m.castShadow=true;m.receiveShadow=true;scene.add(m);\n  cgCollectFacadeWindows(cx,cz,w,h,d,y0||0,col);
+  m.position.set(cx,y0+h/2,cz);m.castShadow=true;m.receiveShadow=true;scene.add(m);
+  cgCollectFacadeWindows(cx,cz,w,h,d,y0||0,col);
   {const hv=lgHash(cx,cz),top=y0+h;
    batch.push([cx,y0+0.45,cz,w+0.5,0.9,d+0.5,0x7d776c,0]);
    batch.push([cx,top+0.3,cz,w+0.7,0.6,d+0.7,0xcdc7ba,0]);
