@@ -1,96 +1,96 @@
-/* Lagos Life: original premium 3D interface skin — no borrowed block-game UI */
+/* CITYGAME — premium 3D Lagos-inspired interface skin v2
+   Responsive, tactile HUD and all phone/app surfaces. Original styling for Citygame. */
 :root{
-  --ll-ink:#071018;--ll-panel:rgba(8,17,27,.88);--ll-panel2:rgba(13,27,40,.92);
-  --ll-line:rgba(105,226,226,.28);--ll-cyan:#67e8e8;--ll-gold:#f4bd63;--ll-white:#eaf6fb;
+ --cg-ink:#061018;--cg-panel:#0b1824;--cg-panel-hi:#142a3b;--cg-edge:#31566b;
+ --cg-cyan:#55e6e2;--cg-teal:#19b8ad;--cg-gold:#ffd166;--cg-white:#effaff;
+ --cg-muted:#9db5c7;--cg-shadow:0 18px 44px #0009,0 3px 0 #02080d;
 }
-html,body{background:#06111b;color:var(--ll-white);font-family:Inter,"Poppins",system-ui,sans-serif}
-#login,#menu{
-  background:linear-gradient(180deg,rgba(3,10,18,.54),rgba(5,14,23,.78))!important;
-  backdrop-filter:blur(1.5px);-webkit-backdrop-filter:blur(1.5px);
-}
-#login::before,#menu::before{opacity:.28!important}
-.skyline{display:none!important}
-#login .stage,#menu .stage{filter:drop-shadow(0 18px 30px rgba(0,0,0,.38))}
-#login .brand h1,#menu .brand h1{letter-spacing:4px!important;text-shadow:0 2px 0 #071018,0 8px 22px #000!important}
-.brand h1 span{background:linear-gradient(110deg,#eafcff,#67e8e8 42%,#f4bd63 88%)!important;-webkit-background-clip:text!important;background-clip:text!important}
-.flagbar{box-shadow:0 0 16px rgba(103,232,232,.25)}
-#login .card,#menu .card{
- background:linear-gradient(145deg,rgba(17,34,48,.94),rgba(5,13,22,.96))!important;
- border:1px solid rgba(103,232,232,.22)!important;border-radius:18px!important;
- box-shadow:0 1px 0 rgba(255,255,255,.08) inset,0 18px 44px rgba(0,0,0,.48),0 0 24px rgba(103,232,232,.06)!important;
- backdrop-filter:blur(14px)!important;-webkit-backdrop-filter:blur(14px)!important;
-}
-#login input:not([type=checkbox]),#menu input,#phoneSearch,select,#waIn{
- background:linear-gradient(180deg,#0d1b29,#07111b)!important;color:#eaf6fb!important;
- border:1px solid rgba(103,232,232,.22)!important;border-radius:10px!important;
- box-shadow:inset 0 2px 7px #0008,0 1px 0 #ffffff08!important;
-}
+html,body{background:#06111b;color:var(--cg-white);font-family:Inter,"Poppins",system-ui,sans-serif}
+button,.xbtn,.q,.hc,.pb,.app,.pl,.det{transition:transform .14s ease,filter .14s ease,box-shadow .14s ease,border-color .14s ease}
+button:active,.xbtn:active{transform:translateY(2px) scale(.985)!important;filter:brightness(1.14)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--cg-cyan)!important;outline-offset:2px}
+#login,#menu{background:linear-gradient(180deg,rgba(3,10,18,.54),rgba(5,14,23,.82))!important;backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+#login::before,#menu::before{opacity:.28!important}.skyline{display:none!important}
+#login .stage,#menu .stage{filter:drop-shadow(0 18px 30px #0008)}
+#login .brand h1,#menu .brand h1{letter-spacing:3px!important;text-shadow:0 2px 0 #071018,0 8px 22px #000!important}
+.brand h1 span{background:linear-gradient(110deg,#efffff,#55e6e2 42%,#ffd166 88%)!important;-webkit-background-clip:text!important;background-clip:text!important}
+.flagbar{box-shadow:0 0 16px #55e6e233}
+#login .card,#menu .card{background:linear-gradient(145deg,#142a3bF2,#06111bf5)!important;border:1px solid #55e6e233!important;border-radius:18px!important;box-shadow:0 1px 0 #ffffff12 inset,0 18px 44px #0008,0 0 24px #55e6e20b!important;backdrop-filter:blur(14px)!important}
+#login input:not([type=checkbox]),#menu input,#phoneSearch,select,#waIn,input[type=text],input[type=password]{background:linear-gradient(180deg,#102233,#07121d)!important;color:#effaff!important;border:1px solid #55e6e233!important;border-radius:11px!important;box-shadow:inset 0 2px 7px #0008,0 1px 0 #ffffff08!important}
 #login .tabs{background:#07121d!important;border:1px solid #ffffff12!important}
 #login .tabs button.on{background:linear-gradient(145deg,#1d6470,#123b4a)!important;color:#eaffff!important;box-shadow:0 4px 0 #08212a,0 8px 18px #0006!important}
-#login .go,#guestbtn,#play,#fgo{
- color:#06121b!important;background:linear-gradient(145deg,#c8ffff 0%,#67e8e8 35%,#d6a75a 100%)!important;
- border:1px solid #e7ffff66!important;border-radius:12px!important;
- box-shadow:0 1px 0 #ffffffb0 inset,0 -3px 0 rgba(0,0,0,.22) inset,0 12px 26px #0007,0 0 22px #67e8e82a!important;
- text-shadow:0 1px #ffffff50!important;letter-spacing:1px!important;
-}
-#play{transform:perspective(700px) rotateX(2deg);animation:none!important}
-#menu .role{
- background:linear-gradient(145deg,rgba(22,43,58,.95),rgba(7,17,27,.96))!important;
- border:1px solid rgba(103,232,232,.16)!important;border-radius:12px!important;
- box-shadow:0 1px 0 #ffffff0b inset,0 5px 0 #030a10,0 9px 14px #0004!important;
-}
-#menu .role.sel{border-color:#f4bd63!important;background:linear-gradient(145deg,#29434a,#15232b)!important;box-shadow:0 1px 0 #ffffff20 inset,0 0 0 1px #f4bd6344,0 5px 0 #030a10,0 0 22px #f4bd6320!important;transform:translateY(-2px)!important}
-#menu .studio-link{background:linear-gradient(145deg,#173e4b,#0b1b28)!important;border:1px solid #67e8e844!important;border-radius:10px!important;box-shadow:0 4px 0 #030a10,0 8px 16px #0005!important}
-button,.xbtn,.q,.hc,.pb{
- border-radius:10px!important;transition:transform .12s ease,filter .12s ease,box-shadow .12s ease!important;
-}
-button:active,.xbtn:active{transform:translateY(2px) scale(.985)!important;filter:brightness(1.15)}
-#hud div,#district,#needs,#tasks div,#chatlog div,#toast,#jailmsg,#npcbox,#spkbar{
- background:linear-gradient(145deg,rgba(12,28,40,.94),rgba(4,12,20,.92))!important;
- border:1px solid rgba(103,232,232,.2)!important;border-radius:9px!important;
- box-shadow:0 1px 0 #ffffff0b inset,0 8px 20px #0005!important;backdrop-filter:blur(10px)!important;
-}
-#hud{gap:7px!important;font-weight:700;letter-spacing:.2px}
-#money{color:#8af4ca!important;text-shadow:0 0 12px #35d6a544}
-#mm{border:2px solid #67e8e8!important;box-shadow:0 0 0 3px #071018,0 0 18px #67e8e844!important}
-#needs .bar{background:#ffffff18!important;border-radius:2px!important}
-#needs .bar i{background:linear-gradient(90deg,#67e8e8,#8af4ca)!important}
-#tasks div{border-left:2px solid #f4bd63!important}
-#navbar{background:linear-gradient(145deg,#102c3b,#07131d)!important;border:1px solid #67e8e833!important;box-shadow:0 6px 0 #02070c,0 10px 18px #0006!important}
-#stick{background:radial-gradient(circle at 35% 25%,rgba(103,232,232,.2),rgba(7,17,27,.8) 70%)!important;border:1px solid #67e8e855!important;box-shadow:0 1px 0 #ffffff18 inset,0 12px 28px #0007!important;backdrop-filter:blur(5px)!important}
-#knob{background:radial-gradient(circle at 35% 25%,#e8ffff,#67e8e8 58%,#287c88)!important;border:1px solid #ffffff90!important;box-shadow:0 2px 0 #ffffffa0 inset,0 -3px 0 #16414b inset,0 6px 14px #0008!important}
-#act{background:linear-gradient(145deg,#ff9b79,#df4b38 60%,#8d241e)!important;border:1px solid #ffd6c877!important;box-shadow:0 2px 0 #ffffff45 inset,0 -4px 0 #651b15 inset,0 10px 24px #0008!important}
+#login .go,#guestbtn,#play,#fgo{color:#06121b!important;background:linear-gradient(145deg,#eaffff,#55e6e2 38%,#ffd166 100%)!important;border:1px solid #e7ffff66!important;border-radius:12px!important;box-shadow:0 1px 0 #ffffffb0 inset,0 -3px 0 #0003 inset,0 12px 26px #0007,0 0 22px #55e6e22a!important;font-weight:900!important;letter-spacing:.6px!important}
+#play{transform:perspective(700px) rotateX(3deg)}
+#menu .role{background:linear-gradient(145deg,#19394b,#07131d)!important;border:1px solid #55e6e21c!important;border-radius:13px!important;box-shadow:0 1px 0 #ffffff0b inset,0 5px 0 #030a10,0 9px 14px #0005!important}
+#menu .role.sel{border-color:#ffd166!important;background:linear-gradient(145deg,#29434a,#15232b)!important;box-shadow:0 1px 0 #ffffff20 inset,0 0 0 1px #ffd16644,0 5px 0 #030a10,0 0 22px #ffd16620!important;transform:translateY(-2px)!important}
+#menu .studio-link{background:linear-gradient(145deg,#173e4b,#0b1b28)!important;border:1px solid #55e6e244!important;border-radius:10px!important;box-shadow:0 4px 0 #030a10,0 8px 16px #0005!important}
+/* HUD and the minimap */
+#hud{gap:7px!important;font-weight:800;letter-spacing:.2px}
+#hud div,#district,#needs,#tasks div,#chatlog div,#toast,#jailmsg,#npcbox,#spkbar{background:linear-gradient(145deg,#122b3cf2,#06111df2)!important;border:1px solid #55e6e222!important;border-radius:11px!important;box-shadow:0 1px 0 #ffffff0b inset,0 8px 20px #0006!important;backdrop-filter:blur(10px)!important}
+#money{color:#91ffd0!important;text-shadow:0 0 14px #35d6a544;font-variant-numeric:tabular-nums}
+#mm{border:3px solid #55e6e2!important;border-radius:50%!important;box-shadow:0 0 0 3px #071018,0 0 0 5px #ffd1668a,0 0 22px #55e6e844!important;background:#0b1b28!important}
+#needs .bar{background:#ffffff18!important;border-radius:8px!important;overflow:hidden}
+#needs .bar i{background:linear-gradient(90deg,#55e6e2,#91ffd0)!important;border-radius:8px!important;box-shadow:0 0 10px #55e65544}
+#tasks div{border-left:3px solid #ffd166!important}
+#navbar{background:linear-gradient(145deg,#153849,#07131d)!important;border:1px solid #55e6e233!important;box-shadow:0 6px 0 #02070c,0 10px 18px #0006!important}
+/* Controls: raised, beveled, luminous but readable */
+#stick{background:radial-gradient(circle at 32% 22%,#55e6e22b,#07111bdc 72%)!important;border:1px solid #55e6e255!important;box-shadow:0 1px 0 #ffffff18 inset,0 12px 28px #0008!important;backdrop-filter:blur(5px)!important}
+#knob{background:radial-gradient(circle at 35% 25%,#efffff,#55e6e2 58%,#287c88)!important;border:1px solid #ffffff90!important;box-shadow:0 2px 0 #ffffffa0 inset,0 -3px 0 #16414b inset,0 6px 14px #0008!important}
+#act{background:linear-gradient(145deg,#ffb38c,#df4b38 60%,#8d241e)!important;border:1px solid #ffd6c877!important;box-shadow:0 2px 0 #ffffff45 inset,0 -4px 0 #651b15 inset,0 10px 24px #0008!important}
 #use{background:linear-gradient(145deg,#baffd9,#28bd91 60%,#126a58)!important;color:#031b16!important;border:1px solid #d7ffeb88!important;box-shadow:0 2px 0 #ffffff66 inset,0 -4px 0 #084a3b inset,0 8px 20px #0007!important}
-.sbtn{background:linear-gradient(145deg,#183647,#07131d)!important;border:1px solid #67e8e866!important;box-shadow:0 1px 0 #ffffff20 inset,0 5px 0 #030a10,0 8px 16px #0007!important}
-#phonebtn{background:linear-gradient(145deg,#1d6470,#0c2634)!important}
-#chatbtn{background:linear-gradient(145deg,#276d8b,#102b42)!important}
-#speedo{background:linear-gradient(145deg,rgba(7,17,27,.96),rgba(14,35,48,.96))!important;border:1px solid #67e8e866!important;box-shadow:0 0 0 2px #02080d,0 0 24px #67e8e822!important;color:#dfffff!important;font-variant-numeric:tabular-nums}
-#speedo small{color:#f4bd63!important}
-#phone{background:radial-gradient(ellipse at center,rgba(14,39,54,.65),rgba(1,5,10,.93))!important;backdrop-filter:blur(8px)!important}
-.pbox{
- background:linear-gradient(150deg,#182c3b 0%,#07111c 32%,#09101a 100%)!important;
- border:1px solid #8de7e766!important;border-radius:24px!important;
- box-shadow:0 1px 0 #ffffff25 inset,0 -2px 0 #0009 inset,0 0 0 3px #02070c,0 24px 70px #000d,0 0 32px #67e8e81a!important;
-}
-.pbox:before{content:'LAGOS LIFE  •  LTE  •  ◉  ▰'!important;color:#9eeef0!important;letter-spacing:1.4px!important;font-size:9px!important}
-.pbox:after{width:58px!important;height:3px!important;background:#67e8e866!important}
-.pgrid{border-bottom:1px solid #67e8e81c!important}
-.app{
- background:linear-gradient(145deg,#203746 0%,#10212e 48%,#08131d 100%)!important;
- border:1px solid #67e8e82b!important;border-radius:11px!important;
- box-shadow:0 1px 0 #ffffff14 inset,0 -2px 0 #02070c inset,0 4px 0 #030a10,0 8px 14px #0004!important;
- color:#e9fcff!important;transform:perspective(450px) translateZ(0)!important;
-}
-.app b{filter:drop-shadow(0 2px 3px #0008)}
-.app:active{transform:perspective(450px) translateY(2px)!important;border-color:#67e8e8!important}
-#appview .card{background:linear-gradient(145deg,#142b3a,#08131d)!important;border:1px solid #67e8e82c!important;border-radius:12px!important;box-shadow:0 1px 0 #ffffff10 inset,0 6px 14px #0005!important}
-#phx,.pb{background:linear-gradient(145deg,#1b3748,#0b1b29)!important;border:1px solid #67e8e833!important;color:#eafcff!important;box-shadow:0 1px 0 #ffffff12 inset,0 3px 0 #030a10!important}
-#bigmap,#mapside{background:#06111b!important}
-.pl,.det{background:linear-gradient(145deg,#142b3a,#08131d)!important;border:1px solid #67e8e822!important;border-radius:9px!important}
-.pl.sel{border-color:#f4bd63!important;background:linear-gradient(145deg,#26434a,#0d202a)!important}
-#ride{background:radial-gradient(ellipse at center,#142d3d,#02070c 78%)!important}
-#ride .rb{background:#ffffff18!important;border-radius:2px!important}
-#ride .rb i{background:linear-gradient(90deg,#67e8e8,#f4bd63)!important}
+.sbtn{background:linear-gradient(145deg,#1b3e52,#07131d)!important;border:1px solid #55e6e266!important;box-shadow:0 1px 0 #ffffff20 inset,0 5px 0 #030a10,0 8px 16px #0007!important}
+#phonebtn{background:linear-gradient(145deg,#1d6470,#0c2634)!important}#chatbtn{background:linear-gradient(145deg,#276d8b,#102b42)!important}
+#speedo{background:linear-gradient(145deg,#06111df5,#102b3cf5)!important;border:1px solid #55e6e266!important;box-shadow:0 0 0 2px #02080d,0 0 24px #55e6e822!important;color:#dfffff!important;font-variant-numeric:tabular-nums}
+#speedo small{color:#ffd166!important}
+/* 3D handset and consistent app dashboard design */
+#phone{background:radial-gradient(ellipse at center,#102b3c99,#01050af2)!important;backdrop-filter:blur(9px)!important}
+.pbox{background:linear-gradient(150deg,#1a3447 0%,#07111c 32%,#09101a 100%)!important;border:1px solid #8de7e766!important;border-radius:26px!important;box-shadow:0 1px 0 #ffffff25 inset,0 -2px 0 #0009 inset,0 0 0 3px #02070c,0 24px 70px #000e,0 0 32px #55e6e81a!important;position:relative;isolation:isolate}
+.pbox:before{content:'CITYGAME  •  5G  •  ◉  ▰'!important;color:#9eeef0!important;letter-spacing:1.4px!important;font-size:9px!important}
+.pbox:after{width:58px!important;height:3px!important;background:#55e6e866!important}
+.pgrid{border-bottom:1px solid #55e6e21c!important;gap:9px!important;padding:10px 3px!important}
+.app{background:linear-gradient(145deg,#254354 0%,#10212e 48%,#08131d 100%)!important;border:1px solid #55e6e82b!important;border-radius:13px!important;box-shadow:0 1px 0 #ffffff14 inset,0 -2px 0 #02070c inset,0 4px 0 #030a10,0 8px 14px #0005!important;color:#e9fcff!important;transform:perspective(450px) translateZ(0)!important;font-weight:800!important}
+.app b{filter:drop-shadow(0 2px 3px #0008);text-shadow:0 2px 5px #0006}
+.app:active{transform:perspective(450px) translateY(2px)!important;border-color:#55e6e2!important}
+#phoneSearch{width:100%!important;text-align:left!important;margin:8px 0!important;padding:11px 13px!important}
+#appview{padding:8px 2px 14px!important;overflow-y:auto!important;overscroll-behavior:contain!important;scrollbar-width:thin;scrollbar-color:#31566b transparent}
+#appview .card{background:linear-gradient(145deg,#142d3e,#08131d)!important;border:1px solid #55e6e82c!important;border-radius:14px!important;box-shadow:0 1px 0 #ffffff10 inset,0 6px 14px #0005!important;padding:12px!important;margin:8px 0!important;color:#effaff!important}
+#appview .card b,#appview h2,#appview h3,#appview h4{color:#effaff!important;text-shadow:0 1px 8px #55e6e20a}
+#appview p,#appview small{color:#a9c0d1}
+#appview button:not(.app){border-radius:10px!important;font-weight:800!important;box-shadow:0 1px 0 #ffffff15 inset,0 -2px 0 #0004 inset,0 4px 0 #02070c,0 7px 12px #0004!important}
+#appview .xbtn{border:1px solid #55e6e233!important}
+#appview .xbtn.gold,#appview button.gold{background:linear-gradient(145deg,#ffe39b,#dca53c)!important;color:#17120a!important;border-color:#fff0ba!important}
+#appview .xbtn.gray,#appview button.gray{background:linear-gradient(145deg,#244257,#0c1c29)!important;color:#eafaff!important}
+#appview .xrow{background:linear-gradient(145deg,#142c3d,#08131d)!important;border:1px solid #55e6e222!important;border-radius:12px!important;padding:10px!important;margin:7px 0!important;box-shadow:0 1px 0 #ffffff0b inset,0 4px 0 #02080d,0 8px 12px #0004!important}
+#appview .xrow small{color:#9db5c7!important}
+#appview input,#appview select,#appview textarea{background:linear-gradient(180deg,#102233,#07121d)!important;color:#effaff!important;border:1px solid #55e6e233!important;border-radius:10px!important;padding:10px!important}
+#appview .pill,#appview .badge{border:1px solid #55e6e244!important;border-radius:999px!important;background:linear-gradient(145deg,#173a4a,#0b1b28)!important;color:#cfffff!important;padding:5px 9px!important}
+#phx,.pb{background:linear-gradient(145deg,#1b3748,#0b1b29)!important;border:1px solid #55e6e833!important;color:#eafcff!important;box-shadow:0 1px 0 #ffffff12 inset,0 3px 0 #030a10!important}
+#phx{border-radius:12px!important}
+#appview .bar{background:#ffffff15!important;border-radius:9px!important;overflow:hidden}
+#appview .bar i{background:linear-gradient(90deg,#55e6e2,#ffd166)!important;border-radius:9px!important;box-shadow:0 0 9px #55e6e233}
+/* Full-screen city map + place cards */
+#bigmap{background:radial-gradient(ellipse at top left,#16384b,#06111b 66%)!important}
+#bigmap canvas{border:1px solid #55e6e233!important;box-shadow:inset 0 0 24px #0006,0 0 0 2px #02080c!important}
+#mapside{background:linear-gradient(155deg,#10283aee,#06111bf5)!important;border-left:1px solid #55e6e233!important;box-shadow:-12px 0 35px #0005!important;color:#effaff!important}
+#mapside .mh{color:#effaff!important;text-shadow:0 0 10px #55e6e21a}
+.pl,.det{background:linear-gradient(145deg,#173346,#08131d)!important;border:1px solid #55e6e822!important;border-radius:11px!important;box-shadow:0 1px 0 #ffffff0a inset,0 4px 0 #02080d,0 7px 12px #0004!important;color:#eafaff!important}
+.pl.sel{border-color:#ffd166!important;background:linear-gradient(145deg,#29434a,#0d202a)!important;box-shadow:0 0 0 1px #ffd16633,0 4px 0 #02080d,0 0 15px #ffd16620!important}
+.det{border-radius:13px!important;padding:10px!important}
+#ride{background:radial-gradient(ellipse at center,#142d3df5,#02070cf8 78%)!important}
+#ride .rb{background:#ffffff18!important;border-radius:9px!important;overflow:hidden}
+#ride .rb i{background:linear-gradient(90deg,#55e6e2,#ffd166)!important}
+#atm{background:#02070ccc!important;backdrop-filter:blur(12px)!important}
+#atm .box{background:linear-gradient(145deg,#183447,#07121d)!important;border:1px solid #55e6e255!important;border-radius:20px!important;box-shadow:0 1px 0 #ffffff16 inset,0 0 0 3px #02070c,0 22px 60px #000b!important;color:#effaff!important;padding:18px!important}
+#atm .bal{background:linear-gradient(145deg,#0d2535,#06111b)!important;border:1px solid #55e6e222!important;border-radius:12px!important;padding:10px!important}
+#atm button{background:linear-gradient(145deg,#21465b,#0b1b28)!important;border:1px solid #55e6e233!important;color:#effaff!important;border-radius:9px!important;box-shadow:0 3px 0 #02070c!important}
+#atm button[data-op]{background:linear-gradient(145deg,#dffdf8,#55e6e2)!important;color:#06121b!important;font-weight:900!important}
+#ride,#atm,#bigmap,#phone{color:#effaff!important}
 #mm,#stick,#act,#use,.sbtn,#phonebtn,#chatbtn,#speedo{filter:drop-shadow(0 2px 4px #0006)}
+@media(max-width:600px){
+ #hud div{padding:6px 8px!important;font-size:11px!important}
+ .pbox{border-radius:21px!important}
+ #mapside{padding:7px!important;font-size:12px!important}
+ #appview .card{padding:10px!important}
+}
+@media(max-height:650px){.pbox{height:96vh;padding:9px}.pgrid{gap:5px;padding:6px 2px}.app{min-height:55px}.app b{font-size:20px}#phoneSearch{padding:7px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
-@media(max-width:480px){#hud div{padding:6px 8px!important;font-size:11px!important}.pbox{border-radius:20px!important}}
