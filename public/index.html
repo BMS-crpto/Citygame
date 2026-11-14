@@ -834,7 +834,23 @@ for(let bx=-GN;bx<GN;bx++)for(let bz=-GN;bz<GN;bz++){
     }
   }
 }
-cgFlushFacadeWindows();\npalmBatch();
+cgFlushFacadeWindows();
+// Raised concrete sidewalks with slab joints throughout each non-airport city block.
+(function cgBuildSidewalks(){
+ const bands=[],joints=[];
+ for(let bx=-GN;bx<GN;bx++)for(let bz=-GN;bz<GN;bz++){
+  if(districtOf(bx,bz)==='airport')continue;
+  const cx=bx*BLOCK+BLOCK/2,cz=bz*BLOCK+BLOCK/2;
+  for(const side of [-1,1]){
+   bands.push([cx,0.105,cz+side*24.15,46,0.16,1.75,0xb9b8b2]);
+   bands.push([cx+side*24.15,0.105,cz,1.75,0.16,46,0xb9b8b2]);
+   for(let p=-20;p<=20;p+=5){joints.push([cx+p,0.188,cz+side*24.15,0.035,0.012,1.65,0x777872]);joints.push([cx+side*24.15,0.188,cz+p,1.65,0.012,0.035,0x777872]);}
+  }
+ }
+ function addBoxes(list){if(!list.length)return;const geo=new THREE.BoxGeometry(1,1,1),mat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.92}),m=new THREE.InstancedMesh(geo,mat,list.length),o=new THREE.Object3D(),c=new THREE.Color();list.forEach((p,i)=>{o.position.set(p[0],p[1],p[2]);o.scale.set(p[3],p[4],p[5]);o.updateMatrix();m.setMatrixAt(i,o.matrix);c.setHex(p[6]);m.setColorAt(i,c)});m.instanceMatrix.needsUpdate=true;if(m.instanceColor)m.instanceColor.needsUpdate=true;m.receiveShadow=true;m.castShadow=false;m.frustumCulled=false;scene.add(m)}
+ addBoxes(bands);addBoxes(joints);
+})();
+palmBatch();
 // Lagos roadside billboards (fictional adverts) at some crossings
 {const ADS=['PURE WATER  ₦100  COLD!','EKO FRESH JOLLOF  OPEN 24/7','NAIJA FIBRE  FAST NET FOR ALL','GO-SLOW? ENJOY THE RIDE','AGBADA & ASOEBI  LEKKI','OGA RIDES  BOOK A KEKE','WELCOME TO LAGOS','LASTMA SAYS: DRIVE WELL','BUKKA HUT  PEPPER SOUP'];
  for(let i=-GN;i<=GN;i++)for(let j=-GN;j<=GN;j++){
