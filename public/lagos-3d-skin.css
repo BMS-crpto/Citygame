@@ -122,3 +122,31 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 #mapside .pl,#mapside .det{border-radius:15px!important;background:linear-gradient(145deg,#213b47,#12242e)!important}
 #atm .box{background:linear-gradient(145deg,#172f3b,#0b1821)!important;border-color:#d8b85d77!important}
 @media(max-width:600px){#phone .pbox{width:min(94vw,390px)!important;border-radius:34px!important;padding:12px 10px!important}#pgrid{padding:9px 6px!important;gap:7px!important}#pgrid .app{border-radius:13px!important}}
+
+/* CITYGAME REALISM MODE — coherent premium mobile roleplay interface */
+:root{--cg-bg:#09131b;--cg-panel:#12232e;--cg-panel2:#1a303c;--cg-line:#344b57;--cg-text:#e9f0f3;--cg-muted:#9baeb7;--cg-accent:#38b98a;--cg-gold:#c9a75b}
+/* De-emphasize toy-like neon and excessive glass; use restrained physical UI */
+#phone,#appview,#bigmap,#mapside,#atm,.modal,.dialog,.panel,.card{color:var(--cg-text)!important}
+#phone .pbox{background:linear-gradient(160deg,#182a34,#0a151d 72%)!important;border-color:#bfa45d!important;box-shadow:0 0 0 2px #2b2519,0 24px 54px #000b!important}
+#pgrid{background:linear-gradient(160deg,#126448,#0b4938 65%,#173e32)!important;border-color:#3e8065!important}
+#pgrid .app,#pgrid .app:nth-child(n){background:linear-gradient(145deg,#243b46,#152832)!important;border:1px solid #40545d!important;box-shadow:inset 0 1px #ffffff10,0 3px 0 #07141b,0 5px 9px #0004!important;text-shadow:none!important}
+#pgrid .app:nth-child(4n+1){background:linear-gradient(145deg,#2c5548,#18382e)!important}
+#pgrid .app:nth-child(4n+2){background:linear-gradient(145deg,#344d68,#1b2e43)!important}
+#pgrid .app:nth-child(4n+3){background:linear-gradient(145deg,#5c5140,#302a22)!important}
+#pgrid .app:nth-child(4n){background:linear-gradient(145deg,#42565b,#25363b)!important}
+#phoneSearch{background:#172a34!important;color:#dce8ec!important;border-color:#344b57!important}
+#phoneSearch::placeholder{color:#8fa3ad!important}
+#appview{background:linear-gradient(155deg,#142630,#0b171f)!important;border-color:#2d424d!important}
+#appview .card,#appview .xrow{background:linear-gradient(145deg,#1b303b,#12232c)!important;border-color:#344b56!important;box-shadow:inset 0 1px #ffffff08,0 4px 10px #0003!important}
+#appview button:not(.app){background:linear-gradient(180deg,#2a414c,#1a2d37)!important;border:1px solid #405763!important;box-shadow:inset 0 1px #ffffff0c,0 2px 0 #08131a!important;color:#eaf1f4!important}
+#appview button.gold,#appview .gold{background:linear-gradient(180deg,#d6b96e,#a8893e)!important;color:#201a0d!important;border-color:#e5d19a!important}
+/* HUD / action controls */
+button,.btn,[role=button]{transition:filter .12s ease,transform .12s ease}
+button:active,.btn:active,[role=button]:active{filter:brightness(1.12);transform:translateY(1px)}
+#hud,#topbar,#statusbar,.hud,.toast,.notification{backdrop-filter:blur(10px)!important;background:linear-gradient(180deg,#132630eF,#09151deF)!important;border:1px solid #304650!important;box-shadow:0 4px 14px #0005!important;color:#e5edf0!important}
+#bigmap{background:#101e27!important}
+#mapside{background:linear-gradient(160deg,#172b35,#0c1921)!important;border-color:#344b56!important}
+#mapside .pl,#mapside .det{background:#1b303b!important;border:1px solid #354b56!important}
+.modal,.dialog{background:linear-gradient(155deg,#172b36,#0c1921)!important;border:1px solid #3a505b!important;border-radius:20px!important;box-shadow:0 18px 55px #0009!important}
+/* mobile-safe: maintain touch targets and viewport-fit */
+@media(max-width:600px){#phone .pbox{max-height:calc(100dvh - 18px)!important}#appview button:not(.app){min-height:40px!important}}
