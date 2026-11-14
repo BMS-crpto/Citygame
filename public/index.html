@@ -1871,13 +1871,19 @@ function setMode(reg){regMode=reg;$e('tabReg').className=reg?'on':'';$e('tabLog'
 $e('tabReg').onclick=()=>setMode(true);$e('tabLog').onclick=()=>setMode(false);
 function useAccount(tok,user){authToken=tok;try{localStorage.setItem('ll_tok',tok);localStorage.setItem('ll_user',user)}catch(e){}const n=$e('name');n.value=user;n.readOnly=true;hideLogin()}
 $e('aGo').onclick=async()=>{
-  const body={username:$e('aUser').value,password:$e('aPass').value};
-  if(regMode)Object.assign(body,{name:$e('rName').value,email:$e('aMail').value,dob:$e('aDob').value,agree:$e('aAgree').checked});
-  $e('aGo').disabled=true;$e('aErr').textContent='';
-  try{const r=await fetch(regMode?'/api/register':'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const j=await r.json();
-    if(!r.ok)$e('aErr').textContent=j.error||'Something went wrong';else useAccount(j.token,j.username)}
-  catch(e){$e('aErr').textContent='No connection. Try again.'}
-  $e('aGo').disabled=false;
+  const username=$e('aUser').value.trim().toLowerCase(),password=$e('aPass').value;
+  if(!username||!password){$e('aErr').textContent='Enter your username and password.';return}
+  const body={username,password};
+  if(regMode)Object.assign(body,{name:$e('rName').value.trim(),email:$e('aMail').value.trim(),dob:$e('aDob').value,agree:$e('aAgree').checked});
+  $e('aGo').disabled=true;$e('aErr').textContent='';$e('aGo').textContent='Connecting…';
+  try{
+    const r=await fetch((regMode?'/api/register':'/api/login'),{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},cache:'no-store',credentials:'same-origin',body:JSON.stringify(body)});
+    const raw=await r.text();let j;try{j=JSON.parse(raw)}catch(e){throw new Error('Server returned an invalid response (HTTP '+r.status+'). Check deployment logs.')}
+    if(!r.ok)$e('aErr').textContent=j.error||('Request failed (HTTP '+r.status+')');
+    else if(!j.token||!j.username)$e('aErr').textContent='Server response is missing login credentials. Please retry.';
+    else useAccount(j.token,j.username);
+  }catch(e){$e('aErr').textContent=e.message||'Connection failed. Check internet and try again.'}
+  finally{$e('aGo').disabled=false;$e('aGo').textContent=regMode?"Sign up · it's free":'Log in'}
 };
 $e('guestbtn').onclick=hideLogin;
 try{const t=localStorage.getItem('ll_tok'),u=localStorage.getItem('ll_user');if(t&&u)useAccount(t,u)}catch(e){}
