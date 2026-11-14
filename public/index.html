@@ -2896,7 +2896,7 @@ function syncState(m){
       if(PX._meBuilt===undefined)PX._meBuilt=p.role;
       else if(PX._meBuilt!==p.role&&me){
         const old=me;me=makeCharacter(p.role,p.name+' (you)',p.look);me.position.copy(old.position);me.rotation.copy(old.rotation);
-        holds.delete(old);scene.remove(old);scene.add(me);PX._meBuilt=p.role;myRole=p.role;if(myCol>=0)setCarMode(me,myCol,myRole);
+        holds.delete(old);window.scene.remove(old);window.scene.add(me);PX._meBuilt=p.role;myRole=p.role;if(myCol>=0)setCarMode(me,myCol,myRole);
         toast('💼 You are now: '+(ROLES[p.role]?ROLES[p.role].label:p.role));
       }
       myRole=p.role;
@@ -2907,7 +2907,7 @@ function syncState(m){
     if(o._built===undefined)o._built=p.role;
     else if(o._built!==p.role){
       const old=o.g,g=makeCharacter(p.role,p.name,p.look);g.position.copy(old.position);g.rotation.copy(old.rotation);
-      holds.delete(old);scene.remove(old);scene.add(g);o.g=g;o._built=p.role;
+      holds.delete(old);window.scene.remove(old);window.scene.add(g);o.g=g;o._built=p.role;
     }
     setHold(o.g,!!p.phone);setBadge(o.g,'mic',!!p.mic);
   });
@@ -2960,7 +2960,7 @@ function followLoop(now){
     for(const id in want){
       const tg=(+id===myId)?me:(others[id]&&others[id].g);if(!tg)continue;
       let f=fol[id];
-      if(!f){const g=makeCharacter('citizen','🕶️ Bodyguard',[1,3,darkIdx(LOOKC.top),darkIdx(LOOKC.pants),0,0]);g.position.set(tg.position.x-2,0,tg.position.z-2);scene.add(g);f=fol[id]={g,px:g.position.x,pz:g.position.z}}
+      if(!f){const g=makeCharacter('citizen','🕶️ Bodyguard',[1,3,darkIdx(LOOKC.top),darkIdx(LOOKC.pants),0,0]);g.position.set(tg.position.x-2,0,tg.position.z-2);window.scene.add(g);f=fol[id]={g,px:g.position.x,pz:g.position.z}}
       const ry=(+id===myId)?pos.ry:tg.rotation.y,fx=Math.sin(ry),fz=Math.cos(ry),rx=-Math.cos(ry),rz=Math.sin(ry);
       const tx=tg.position.x-fx*2.2+rx*1.7,tz=tg.position.z-fz*2.2+rz*1.7;
       f.g.position.x+=(tx-f.g.position.x)*Math.min(1,dt*4);f.g.position.z+=(tz-f.g.position.z)*Math.min(1,dt*4);
@@ -2968,7 +2968,7 @@ function followLoop(now){
       f.g.rotation.y=ry;f.g.visible=tg.visible!==false&&!inside&&!(+id===myId&&myCol>=0);
       try{animate(f.g,mv,dt)}catch(e){}
     }
-    for(const id in fol)if(!want[id]){scene.remove(fol[id].g);delete fol[id]}
+    for(const id in fol)if(!want[id]){window.scene.remove(fol[id].g);delete fol[id]}
   });
 }
 requestAnimationFrame(followLoop);
@@ -3293,7 +3293,7 @@ guard('routeRibbon',()=>{
     const k=r.length+'_'+Math.round(r[0].x)+'_'+Math.round(r[0].z)+'_'+Math.round(r[r.length-1].x)+'_'+Math.round(r[r.length-1].z);
     if(k===key&&mesh){mesh.visible=true;return}
     key=k;
-    if(mesh){scene.remove(mesh);mesh.geometry.dispose()}
+    if(mesh){window.scene.remove(mesh);mesh.geometry.dispose()}
     const pts=[{x:pos.x,z:pos.z},...r.slice(1)],v=[],idx=[],W=1.1;
     for(let i=0;i<pts.length;i++){
       const a=pts[Math.max(0,i-1)],c=pts[Math.min(pts.length-1,i+1)];
@@ -3302,7 +3302,7 @@ guard('routeRibbon',()=>{
       if(i)idx.push(2*i-2,2*i-1,2*i,2*i-1,2*i+1,2*i);
     }
     const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(idx);
-    mesh=new THREE.Mesh(g,mat);mesh.frustumCulled=false;mesh.renderOrder=5;scene.add(mesh);
+    mesh=new THREE.Mesh(g,mat);mesh.frustumCulled=false;mesh.renderOrder=5;window.scene.add(mesh);
   }),600);
 });
 guard('mmroute',()=>{
@@ -3447,11 +3447,11 @@ function callUber(stop){
   const B=BLOCK,rx=Math.round(stop[0]/B)*B,rz=Math.round(stop[1]/B)*B,sgn=Math.random()<.5?-1:1;let sx,sz,ex,ez;
   if(Math.abs(stop[0]-rx)<=Math.abs(stop[1]-rz)){ex=rx+(stop[0]>=rx?1:-1)*LANE;ez=stop[1];sx=ex;sz=ez+sgn*70}
   else{ez=rz+(stop[1]>=rz?1:-1)*LANE;ex=stop[0];sz=ez;sx=ex+sgn*70}
-  const g=makeCar(0,'taxi');g.position.set(sx,0,sz);g.rotation.y=Math.atan2(ex-sx,ez-sz);scene.add(g);
+  const g=makeCar(0,'taxi');g.position.set(sx,0,sz);g.rotation.y=Math.atan2(ex-sx,ez-sz);window.scene.add(g);
   Object.assign(U,{s:'coming',g,x:sx,z:sz,ex,ez,stop});
   toast('🚕 Your Uber is on the way. Wait at the bus stop');
 }
-function cancelUber(msg){if(U.g)scene.remove(U.g);U.g=null;U.s='';if(msg)toast(msg)}
+function cancelUber(msg){if(U.g)window.scene.remove(U.g);U.g=null;U.s='';if(msg)toast(msg)}
 function offerRide(){
   const plate='LAG '+(100+Math.floor(Math.random()*900))+' '+String.fromCharCode(65+Math.floor(Math.random()*26),65+Math.floor(Math.random()*26));
   const c=modal('<h3>🚕 Your Uber has arrived</h3><p>Toyota Camry · '+plate+' · Driver Tunde ⭐ 4.8</p><button class="b2" id="ug">Do you want to enter this car?  YES</button><button class="b2 alt" id="un">No, cancel the ride</button>');
@@ -3500,7 +3500,7 @@ function marker(){
     mk=new THREE.Group();
     const beam=new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.8,5,16,1,true),new THREE.MeshBasicMaterial({color:0x35ff7a,transparent:true,opacity:0.28,side:THREE.DoubleSide,depthWrite:false}));beam.position.y=2.5;
     const ring=new THREE.Mesh(new THREE.RingGeometry(0.9,1.25,24),new THREE.MeshBasicMaterial({color:0x35ff7a,transparent:true,opacity:0.9,side:THREE.DoubleSide}));ring.rotation.x=-Math.PI/2;ring.position.y=0.05;
-    const L=makeLabel('🚪 EXIT','#9dffb0',5.8,3.4);L.position.set(0,5.8,0);mk.add(beam,ring,L);mk.userData.b=beam;scene.add(mk);
+    const L=makeLabel('🚪 EXIT','#9dffb0',5.8,3.4);L.position.set(0,5.8,0);mk.add(beam,ring,L);mk.userData.b=beam;window.scene.add(mk);
   }
   mk.visible=true;mk.position.set(R.exit.x,0,R.exit.z);mk.userData.b.material.opacity=0.2+0.12*Math.sin(performance.now()/260);
 }
@@ -3781,7 +3781,7 @@ function boombox(on){
     const body=new THREE.Mesh(new THREE.BoxGeometry(1.0,0.55,0.35),new THREE.MeshLambertMaterial({color:0x222428}));body.position.y=0.3;box.add(body);
     for(const sx of[-0.27,0.27]){const sp=new THREE.Mesh(new THREE.CircleGeometry(0.16,16),new THREE.MeshBasicMaterial({color:0x888c94}));sp.position.set(sx,0.3,0.18);box.add(sp)}
     const led=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.05,0.02),new THREE.MeshBasicMaterial({color:0x35ff7a}));led.position.set(0,0.46,0.18);box.add(led);
-    scene.add(box);box.userData.placed=false;
+    window.scene.add(box);box.userData.placed=false;
   }
   if(!box.userData.placed){box.position.set(pos.x+Math.sin(pos.ry)*1.6,0,pos.z+Math.cos(pos.ry)*1.6);box.rotation.y=pos.ry+Math.PI;box.userData.placed=true}
   box.visible=true;
@@ -3800,7 +3800,7 @@ function clubLights(on){
       m.position.set(T.room.x+(k-2.5)*4,T.h-3,T.room.z-2);m.userData.k=k;g.add(m);cones.push(m)}
     const ball=new THREE.Mesh(new THREE.SphereGeometry(0.7,12,10),new THREE.MeshBasicMaterial({color:0xdfe8ff}));ball.position.set(T.room.x,T.h-0.9,T.room.z);g.add(ball);
     const ring=new THREE.Mesh(new THREE.RingGeometry(1,5,32),new THREE.MeshBasicMaterial({color:0xff1744,transparent:true,opacity:0.4,side:THREE.DoubleSide,depthWrite:false}));ring.rotation.x=-Math.PI/2;ring.position.set(T.room.x,0.12,T.room.z);g.add(ring);
-    scene.add(g);lights={g,cones,ball,ring,cols};
+    window.scene.add(g);lights={g,cones,ball,ring,cols};
   }
   lights.g.visible=true;
   const t=performance.now()/1000;
@@ -3864,7 +3864,7 @@ const ACTS=[
 const NAMES=['Tunde','Chioma','Emeka','Bisi','Ibrahim','Ngozi','Kunle','Amaka','Segun','Hauwa','Dayo','Funke'];
 const sprites={};
 function spriteFor(a){
-  if(!sprites[a.t]){const s=makeLabel(a.i+' '+a.t,'#fff',2.6,4.2);s.visible=false;scene.add(s);sprites[a.t]=s}
+  if(!sprites[a.t]){const s=makeLabel(a.i+' '+a.t,'#fff',2.6,4.2);s.visible=false;window.scene.add(s);sprites[a.t]=s}
   return sprites[a.t];
 }
 function meta(p){if(p.act===undefined){const k=Math.floor(Math.random()*ACTS.length);p.act=k;p.nm=NAMES[Math.floor(Math.random()*NAMES.length)]}return ACTS[p.act]}
@@ -4036,7 +4036,7 @@ function buildPalms(){
   });
   trunks.instanceMatrix.needsUpdate=true;fronds.instanceMatrix.needsUpdate=true;if(fronds.instanceColor)fronds.instanceColor.needsUpdate=true;
   trunks.castShadow=true;trunks.frustumCulled=false;fronds.frustumCulled=false;
-  scene.add(trunks);scene.add(fronds);
+  window.scene.add(trunks);window.scene.add(fronds);
 }
 try{buildPalms()}
 catch(e){console.warn('palms fallback',e);try{palmBatchBoxes();flushBatch()}catch(e2){}}
@@ -4044,7 +4044,7 @@ catch(e){console.warn('palms fallback',e);try{palmBatchBoxes();flushBatch()}catc
 
 </script>
 <script src="/city3d-social-emotes.js?v=202611142243"></script>
-<script src="/city-missions-career.js?v=202611142236"></script>
+<script src="/city-missions-career.js?v=202611142243"></script>
 <script src="/lagos-3d-polish.js?v=202611142243"></script>
 </body>
 </html>
