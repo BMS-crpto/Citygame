@@ -24,10 +24,18 @@ namespace Citygame.Game
             public long totalEarned;
         }
 
+        [Serializable] private class SocialPost
+        {
+            public string author = "You";
+            public string message;
+            public List<string> replies = new List<string>();
+        }
+
         [Serializable] private class SaveData
         {
             public long cash = 1500000;
             public List<OwnedBusiness> businesses = new List<OwnedBusiness>();
+            public List<SocialPost> posts = new List<SocialPost>();
         }
 
         private SaveData save = new SaveData();
@@ -43,6 +51,8 @@ namespace Citygame.Game
         private Vector2 phoneScroll;
         private string activePhoneApp = "Home";
         private string socialDraft = "";
+        private string socialReplyDraft = "";
+        private int replyTarget = -1;
 
         private string SavePath => Path.Combine(Application.persistentDataPath, "citygame-unity-save.json");
 
@@ -193,7 +203,8 @@ namespace Citygame.Game
                 GUI.Label(new Rect(appArea.x + 98f, appArea.y + 2f, appArea.width - 100f, 32f), activePhoneApp.ToUpperInvariant());
                 GUI.color = Color.white;
                 Rect body = new Rect(appArea.x + 4f, appArea.y + 42f, appArea.width - 8f, appArea.height - 46f);
-                phoneScroll = GUI.BeginScrollView(body, phoneScroll, new Rect(0, 0, body.width - 18f, 800f));
+                float contentHeight = activePhoneApp == "Social" ? Mathf.Max(800f, 360f + save.posts.Count * 150f) : 800f;
+                phoneScroll = GUI.BeginScrollView(body, phoneScroll, new Rect(0, 0, body.width - 18f, contentHeight));
                 float x = 0f, y = 0f, w = body.width - 28f;
 
                 if (activePhoneApp == "Business")
@@ -249,13 +260,60 @@ namespace Citygame.Game
                 }
                 else if (activePhoneApp == "Social")
                 {
-                    GUI.Label(new Rect(x, y, w, 32f), "CITY FEED"); y += 34f;
-                    GUI.Label(new Rect(x, y, w, 46f), "Social feed preview — posting requires online backend support."); y += 50f;
-                    GUI.Label(new Rect(x, y, w, 24f), "Create post");
-                    socialDraft = GUI.TextArea(new Rect(x, y + 26f, w, 90f), socialDraft); y += 124f;
-                    GUI.enabled = false;
-                    GUI.Button(new Rect(x, y, w, 42f), "Post (online service not connected)");
-                    GUI.enabled = true;
+                    GUI.Label(new Rect(x, y, w, 32f), "CITY FEED · LOCAL"); y += 34f;
+                    GUI.Label(new Rect(x, y, w, 24f), "What's happening in Lagos?");
+                    socialDraft = GUI.TextArea(new Rect(x, y + 26f, w, 78f), socialDraft); y += 112f;
+                    if (GUI.Button(new Rect(x, y, w, 42f), "Publish post"))
+                    {
+                        string message = socialDraft.Trim();
+                        if (message.Length == 0) notice = "Write something before publishing.";
+                        else
+                        {
+                            save.posts.Insert(0, new SocialPost { author = "You", message = message });
+                            socialDraft = "";
+                            notice = "Post published to your local city feed.";
+                            Save();
+                        }
+                    }
+                    y += 54f;
+                    GUI.Label(new Rect(x, y, w, 28f), "FEED (" + save.posts.Count + ")");
+                    y += 30f;
+                    for (int p = 0; p < save.posts.Count; p++)
+                    {
+                        SocialPost post = save.posts[p];
+                        GUI.Box(new Rect(x, y, w, 118f + post.replies.Count * 26f), GUIContent.none);
+                        GUI.Label(new Rect(x + 8f, y + 6f, w - 16f, 22f), post.author + " · Lagos Life");
+                        GUI.Label(new Rect(x + 8f, y + 30f, w - 16f, 42f), post.message);
+                        if (GUI.Button(new Rect(x + 8f, y + 76f, w - 16f, 32f), "Reply (" + post.replies.Count + ")"))
+                            replyTarget = p;
+                        float replyY = y + 118f;
+                        for (int r = 0; r < post.replies.Count; r++)
+                        {
+                            GUI.Label(new Rect(x + 12f, replyY, w - 20f, 24f), "↳ You: " + post.replies[r]);
+                            replyY += 26f;
+                        }
+                        y += 128f + post.replies.Count * 26f;
+                        if (replyTarget == p)
+                        {
+                            GUI.Label(new Rect(x, y, w, 24f), "Write a reply");
+                            socialReplyDraft = GUI.TextArea(new Rect(x, y + 24f, w, 56f), socialReplyDraft); y += 86f;
+                            if (GUI.Button(new Rect(x, y, w * 0.48f, 36f), "Send reply"))
+                            {
+                                string reply = socialReplyDraft.Trim();
+                                if (reply.Length > 0)
+                                {
+                                    post.replies.Add(reply);
+                                    socialReplyDraft = "";
+                                    replyTarget = -1;
+                                    notice = "Reply added to the local feed.";
+                                    Save();
+                                }
+                            }
+                            if (GUI.Button(new Rect(x + w * 0.52f, y, w * 0.48f, 36f), "Cancel")) { replyTarget = -1; socialReplyDraft = ""; }
+                            y += 44f;
+                        }
+                    }
+                    if (save.posts.Count == 0) GUI.Label(new Rect(x, y, w, 48f), "No posts yet. Publish the first city update.");
                 }
                 else if (activePhoneApp == "Settings")
                 {
@@ -312,6 +370,7 @@ namespace Citygame.Game
                     SaveData loaded = JsonUtility.FromJson<SaveData>(File.ReadAllText(SavePath));
                     if (loaded != null) save = loaded;
                     if (save.businesses == null) save.businesses = new List<OwnedBusiness>();
+                    if (save.posts == null) save.posts = new List<SocialPost>();
                 }
             }
             catch (Exception e) { Debug.LogWarning("Citygame load failed: " + e.Message); }
