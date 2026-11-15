@@ -17,6 +17,8 @@ namespace Citygame.Player
 
         private CharacterController controller;
         private float verticalVelocity;
+        private Vector2 mobileInput;
+        private bool mobileJumpRequested;
 
         private void Awake()
         {
@@ -27,7 +29,8 @@ namespace Citygame.Player
 
         private void Update()
         {
-            Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+            Vector2 keyboard = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+            Vector2 input = mobileInput.sqrMagnitude > 0.001f ? mobileInput : keyboard;
             input = Vector2.ClampMagnitude(input, 1f);
 
             Vector3 forward = cameraTransform != null ? cameraTransform.forward : Vector3.forward;
@@ -50,14 +53,19 @@ namespace Citygame.Player
             if (controller.isGrounded && verticalVelocity < 0f)
                 verticalVelocity = -2f;
 
-            if (controller.isGrounded && Input.GetButtonDown("Jump"))
+            if (controller.isGrounded && (Input.GetButtonDown("Jump") || mobileJumpRequested))
                 verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            mobileJumpRequested = false;
 
             verticalVelocity += gravity * Time.deltaTime;
             Vector3 velocity = move * speed;
             velocity.y = verticalVelocity;
             controller.Move(velocity * Time.deltaTime);
         }
+
+        public void SetMobileInput(Vector2 value) { mobileInput = Vector2.ClampMagnitude(value, 1f); }
+
+        public void MobileJump() { mobileJumpRequested = true; }
 
         public void SetCamera(Transform cameraTarget)
         {
