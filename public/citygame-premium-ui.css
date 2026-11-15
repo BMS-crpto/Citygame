@@ -162,3 +162,46 @@ button:hover,.btn:hover{filter:brightness(1.06)!important}
 #act{background:linear-gradient(180deg,#80d1dc,#54aab9)!important;color:#0b1a21!important;border:1px solid #a4e1e7!important}
 #toast{border-color:#71c5d2!important}
 @media(max-width:600px){#hud{gap:4px!important}#hud div{padding:5px 7px!important;font-size:10px!important}.roles{max-width:100%!important}.role{padding:9px 5px!important}#phone .pbox{width:min(94vw,400px)!important}}
+
+
+/* CITYGAME MOBILE + INTERFACE REFINEMENT — v5 */
+:root{--cg-deep:#08131b;--cg-surface:#142530;--cg-surface-raised:#1c3440;--cg-border:#3d5967;--cg-accent:#68c9b0;--cg-gold:#edc66b;--cg-text:#eef5f5;--cg-muted:#a9bdc5}
+/* Make the phone usable on small screens: the app content scrolls inside the device. */
+#phone{align-items:center!important;justify-content:center!important;padding:env(safe-area-inset-top) 8px env(safe-area-inset-bottom)!important}
+#phone .pbox{display:flex!important;flex-direction:column!important;width:min(94vw,410px)!important;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px)!important;min-height:0!important;overflow:hidden!important}
+#pgrid{flex:0 0 auto!important}
+#phoneSearch{flex:0 0 auto!important;margin:0 2px 8px!important}
+#appview{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding:2px 3px max(12px,env(safe-area-inset-bottom))!important}
+#appview *{max-width:100%;overflow-wrap:anywhere}
+#appview button,#mapside button,#atm button{min-height:40px!important;touch-action:manipulation!important}
+#mapside{overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+#bigmap{overscroll-behavior:contain!important}
+/* More consistent touch feedback and clear visual hierarchy across game panels. */
+#hud div,#tasks div,#needs,#chatlog,#toast,#ride,.modal,.dialog{border:1px solid #466270!important;box-shadow:0 8px 24px #0005,inset 0 1px #ffffff08!important}
+#hud div,#tasks div,#needs{background:linear-gradient(155deg,#142934f5,#091720f5)!important;color:var(--cg-text)!important}
+#money,#atmcash{color:#8fe0bd!important}
+#district{color:#f3d27d!important;text-shadow:0 2px 8px #0008!important}
+#act,#use,.sbtn,.rb button{touch-action:manipulation!important;user-select:none!important;-webkit-user-select:none!important}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--cg-accent)!important;outline-offset:2px!important}
+/* Phone-safe entrance/avatar selection: no clipped cards when Android keyboard opens. */
+#login,#menu{overflow-y:auto!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important;padding-top:max(12px,env(safe-area-inset-top))!important;padding-bottom:max(12px,env(safe-area-inset-bottom))!important}
+#login .stage,#menu .stage{width:min(100%,520px)!important;min-width:0!important}
+#login input,#menu input{font-size:16px!important;min-height:44px!important}
+@media(max-width:600px){
+ #phone{justify-content:flex-end!important}
+ #phone .pbox{width:min(96vw,410px)!important;max-height:calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important}
+ #pgrid{gap:7px!important;padding:10px 2px!important}
+ #pgrid .app{min-height:60px!important}
+ #appview{padding-bottom:16px!important}
+ #mapside{max-height:100dvh!important}
+ #hud{max-width:100vw!important;flex-wrap:wrap!important}
+ #stick{width:118px!important;height:118px!important;left:max(12px,env(safe-area-inset-left))!important;bottom:max(16px,env(safe-area-inset-bottom))!important}
+ #act{right:max(14px,env(safe-area-inset-right))!important;bottom:max(22px,env(safe-area-inset-bottom))!important;min-width:66px!important;min-height:66px!important}
+}
+@media(max-height:520px) and (orientation:landscape){
+ #phone .pbox{max-height:calc(100dvh - 8px)!important;width:min(62vw,430px)!important}
+ #pgrid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+ #stick{width:92px!important;height:92px!important}
+ #act{min-width:56px!important;min-height:56px!important}
+}
+@media(prefers-reduced-motion:reduce){button,.btn,[role=button]{transition:none!important}}
