@@ -10,7 +10,7 @@ This is the parallel Unity 6 migration workspace for Citygame. The existing brow
 - Hire staff (₦10,000 each, max 10 per owned business).
 - Prototype business revenue credited on a 20-second interval.
 - Local JSON save/load for wallet, business roster, staff and accumulated revenue.
-- Phone-style company management overlay with selectable owned companies, category/staff details, hire controls and save button.
+- Phone-style company management overlay with selectable owned companies, paginated roster (all registered businesses can be browsed), category/staff details, hire controls and save button.
 - Street-front interaction markers for business registration.
 - Three greybox parked cars with enter/exit interaction, basic steering/throttle controls, camera target switching and touchscreen driving.
 - Eight simple moving sidewalk pedestrians to make the block feel populated.
