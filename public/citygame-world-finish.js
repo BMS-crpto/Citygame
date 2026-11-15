@@ -4,9 +4,9 @@
  try{
   if(!window.THREE||!window.scene)return;
   const scene=window.scene;
-  const hemi=new THREE.HemisphereLight(0xd9efff,0x675442,0.48);
+  const hemi=new THREE.HemisphereLight(0xd9efff,0x675442,0.10);
   hemi.position.set(0,120,0);scene.add(hemi);
-  const fill=new THREE.DirectionalLight(0xffe2b8,0.28);
+  const fill=new THREE.DirectionalLight(0xffe2b8,0.06);
   fill.position.set(-55,95,42);fill.castShadow=false;scene.add(fill);
   scene.traverse(function(o){
    if(!o.isMesh||o.isInstancedMesh||!o.material)return;
