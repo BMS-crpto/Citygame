@@ -3,6 +3,8 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Citygame.Player;
+using Citygame.Game;
+using Citygame.World;
 
 namespace Citygame.Editor
 {
@@ -14,8 +16,11 @@ namespace Citygame.Editor
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
-            floor.name = "Greybox Ground";
+            floor.name = "Lagos Greybox Ground";
             floor.transform.localScale = new Vector3(12f, 1f, 12f);
+
+            GameObject cityRoot = new GameObject("Lagos Street Block");
+            LagosBlockGenerator.Build(cityRoot.transform);
 
             GameObject player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             player.name = "Player";
@@ -24,7 +29,7 @@ namespace Citygame.Editor
             CharacterController controller = player.AddComponent<CharacterController>();
             controller.height = 1.8f;
             controller.radius = 0.38f;
-            controller.center = new Vector3(0f, 0f, 0f);
+            controller.center = Vector3.zero;
             player.AddComponent<ThirdPersonMotor>();
 
             GameObject cameraObject = new GameObject("Main Camera");
@@ -42,10 +47,16 @@ namespace Citygame.Editor
             light.intensity = 1.15f;
             lightObject.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
 
-            if (!AssetDatabase.IsValidFolder("Assets/Scenes"))\n                AssetDatabase.CreateFolder("Assets", "Scenes");\n\n            EditorSceneManager.SaveScene(scene, "Assets/Scenes/CitygameFoundation.unity");
+            GameObject gameSystems = new GameObject("Citygame Runtime Systems");
+            gameSystems.AddComponent<CitygameRuntime>();
+
+            if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
+                AssetDatabase.CreateFolder("Assets", "Scenes");
+
+            EditorSceneManager.SaveScene(scene, "Assets/Scenes/CitygameFoundation.unity");
             AssetDatabase.SaveAssets();
             Selection.activeGameObject = player;
-            Debug.Log("Citygame foundation scene created. Press Play to test the greybox movement.");
+            Debug.Log("Citygame playable greybox scene generated. Press Play to test movement, touch controls, business registration, hiring and local save.");
         }
     }
 }
