@@ -443,7 +443,7 @@ function onConnection(ws) {
       post.likes = Array.isArray(post.likes) ? post.likes : [];
       const at = post.likes.indexOf(p.id);
       if (at >= 0) post.likes.splice(at, 1); else post.likes.push(p.id);
-      broadcast(room, { t: 'social_update', post });
+      for (const viewer of Object.values(R.players)) send(viewer.ws, { t: 'social_update', post: { ...post, likedByMe: post.likes.includes(viewer.id) } });
     } else if (m.t === 'social_reply') {
       const post = (R.feed || []).find(q => q.id === String(m.id || ''));
       const reply = String(m.text || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 140);
