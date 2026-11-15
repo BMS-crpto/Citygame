@@ -1310,8 +1310,13 @@ let fpsAcc=0,fpsN=0,fpsT=0;
 function fpsGovernor(now){
   if(!fpsT){fpsT=now;return}
   fpsAcc+=now-fpsT;fpsT=now;fpsN++;
-  if(fpsN>=90){const avg=fpsAcc/fpsN;fpsAcc=0;fpsN=0;
-    if(avg>30&&quality!=='low'){quality=quality==='high'?'med':'low';document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===quality));applyQuality()}}
+  if(fpsN>=90){
+    const avg=fpsAcc/fpsN;fpsAcc=0;fpsN=0;
+    let next=quality;
+    if(avg>30&&quality!=='low')next=quality==='high'?'med':'low';
+    else if(avg<22&&quality!=='high')next=quality==='low'?'med':'high';
+    if(next!==quality){quality=next;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===quality));applyQuality()}
+  }
 }
 
 // =============== cars ===============
