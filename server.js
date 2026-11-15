@@ -1145,7 +1145,7 @@ function extraMsg(room, p, m, now) {
     if (m.op === 'collect') {
       const amount=Math.max(0,Math.floor(+owned.balance||0));
       if (!amount) return toast('Your business has no earnings to collect yet'), true;
-      owned.balance=0;addMoney(p,amount,'Business earnings: '+owned.name);saveBusinesses();savePlayer(room,p);sendBusinesses(p);toast('💰 Collected ₦'+fmtN(amount)+' from '+owned.name);return true;
+      owned.balance=0;addMoney(p,amount,'Business earnings: '+owned.name);saveBusinesses();savePlayer(room,p);sendBusinesses(p);toast('💰 Collected '+fmtN(amount)+' from '+owned.name);return true;
     }
     if (m.op === 'rename') {
       const name=String(m.name||'').replace(/[<>\u0000-\u001f]/g,'').trim().slice(0,28);
