@@ -26,6 +26,7 @@
     return 'market';
   }
   function areaName(bx, bz) {
+    if (isAir(bx, bz)) return 'Lagos Airport';
     if (!inCore(bx, bz)) {
       if (bx >= 6) return bz < 0 ? 'Epe' : 'Lekki Phase 2';
       if (bx <= -7) return bz < 0 ? 'Ojo' : 'Festac Town';
@@ -129,7 +130,7 @@
     const out = [];
     const add = (bx, bz, slot, type, name, x, z, dz, outDz) => {
       const blockCode = String(bx + GN + 1).padStart(2, '0') + '-' + String(bz + GN + 1).padStart(2, '0');
-      const uniqueName = areaName(bx, bz) + ' · ' + name + ' ' + blockCode;
+      const uniqueName = areaName(bx, bz) + ' · ' + name + ' ' + blockCode + '-' + String(slot + 1);
       const o = { id: out.length, bx, bz, slot, type, name: uniqueName, area: areaName(bx, bz), door: { x, z: z + dz }, out: { x, z: z + dz + (outDz === undefined ? 2.4 : outDz) } };
       out.push(o); MAP[bx + ',' + bz + ',' + slot] = o; return o;
     };
