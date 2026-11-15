@@ -1148,9 +1148,34 @@ function buildVenueInside(k){
       [0xe53935,0x1e88e5,0xfdd835].forEach((c,i)=>{D(10.9,-8+i*6,0.1,3.2,1.8,c,3.2);D(-10.9,-8+i*6,0.1,3.2,1.8,c,3.2)});
       break;
     case 'salon':
+      // Barber/beauty salon: mirrors, styling stations, swivel chairs and waiting seats.
       D(2,-7.9,10,2.2,0.1,0xb3e5fc,2.2);
-      for(const x of [4.5,7.5]){F(x,-5,1.2,1.0,1.2,0x37474f);D(x,-5.6,1.2,1.2,0.15,0x263238,1.2)}
-      F(-8,2,1.2,1.0,4,0xeceff1);
+      for(const x of [-5,0,5]){D(x,-7.75,2.2,2.5,0.12,0x90caf9,2.5);F(x,-5.1,1.35,1.05,1.35,0x263238);D(x,-5.8,1.45,0.16,1.45,0x111827,1.18);D(x,-4.35,0.18,0.18,0.18,0xcfd8dc,2.3);F(x,-3.7,0.55,0.45,0.55,0x455a64)}
+      F(-8,2,1.2,1.0,4,0xeceff1);D(-8,2,0.18,2.2,2.5,0xffd54f,2.2);
+      F(8,4,3.2,0.7,1.2,0x8d6e63);
+      break;
+    case 'fashion':
+      // Clothing rails, folded stock tables, mannequins and a checkout counter.
+      F(-7,-2,1.0,3.1,7,0x37474f);F(-7,-2,7.4,0.16,0.16,0x90a4ae,3.2);
+      for(let n=0;n<5;n++){D(-7,-5+n*1.45,0.9,1.7,0.08,[0xe91e63,0x1565c0,0xffca28,0x43a047,0x8e24aa][n],2.35)}
+      F(0,1,5.2,1.0,2.6,0x8d6e63);D(0,1,5.3,0.12,2.7,0xd7ccc8,1.08);
+      for(const x of [-4,4]){F(x,5,1.2,2.2,1.2,0xf5f5f5);D(x,5,0.8,1.3,0.82,0x8e24aa,2.2);D(x,5,0.65,0.6,0.7,0xffccbc,3.55)}
+      F(8,-6,4,1.1,1.2,0x5d4037);D(8,-6,4.1,0.12,1.3,0xffca28,1.18);
+      break;
+    case 'carwash':
+      // Open wash bay with a clearly visible car, hose reels and overhead wash gantry.
+      F(0,0,8.5,0.16,15,0x90a4ae);F(0,-7,9,0.3,0.5,0x0288d1);
+      for(const x of [-5,5]){F(x,0,0.22,4.8,0.22,0x0288d1);D(x,0,0.45,0.25,0.45,0x80deea,5.0)}
+      F(0,-1,4.4,0.85,7.2,0x1565c0);D(0,-1,3.5,0.75,4.5,0x90caf9,1.3);
+      for(const x of [-1.45,1.45])for(const z of [-3,1]){const w=new THREE.Mesh(new THREE.CylinderGeometry(0.62,0.62,0.32,16),new THREE.MeshStandardMaterial({color:0x20252b,roughness:0.9}));w.rotation.z=Math.PI/2;w.position.set(X+x,0.65,Z+z);scene.add(w)}
+      F(-9,-6,1.2,2.4,1.2,0x455a64);D(-9,-6,0.3,1.4,0.3,0x80deea,2.8);
+      break;
+    case 'lounge':
+      // Relaxed lounge with sofas, low tables, bar and warm feature lighting.
+      for(const x of [-8,8]){F(x,1,5.2,1.2,2.5,0x5e35b1);D(x,0.25,4.8,0.12,2.1,0xce93d8,1.28)}
+      F(0,-1,5,0.65,2.4,0x8d6e63);D(0,-1,4.7,0.08,2.1,0xffca28,0.75);
+      F(0,-7.5,12,1.1,1.2,0x4e342e);D(0,-7.5,11.8,0.1,1.1,0xffb74d,1.2);
+      for(const x of [-9,-3,3,9])D(x,7,0.35,2.2,0.35,0xffca28,3.7);
       break;
     case 'office':
       F(-2,-7.2,10,1.1,1.2,0x546e7a);D(-2,-7.2,10.2,0.1,1.3,0x90a4ae,1.15);
