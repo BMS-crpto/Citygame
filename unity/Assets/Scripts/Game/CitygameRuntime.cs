@@ -172,6 +172,8 @@ namespace Citygame.Game
                 {
                     selectedBusinessIndex = Mathf.Clamp(selectedBusinessIndex, 0, save.businesses.Count - 1);
                     int pageEnd = Mathf.Min(companyPageOffset + 4, save.businesses.Count);
+                    if (selectedBusinessIndex < companyPageOffset || selectedBusinessIndex >= pageEnd)
+                        selectedBusinessIndex = companyPageOffset;
                     for (int i = companyPageOffset; i < pageEnd; i++)
                     {
                         OwnedBusiness company = save.businesses[i];
