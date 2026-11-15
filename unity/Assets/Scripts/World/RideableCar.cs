@@ -54,7 +54,7 @@ namespace Citygame.World
             if (occupied || player == null || DistanceTo(player.transform.position) > 3.5f) return false;
             occupant = player;
             occupied = true;
-            occupant.enabled = false;
+            occupant.SetRiding(true);
             occupant.transform.SetParent(seatPoint, false);
             occupant.transform.localPosition = Vector3.zero;
             occupant.transform.localRotation = Quaternion.identity;
@@ -67,7 +67,7 @@ namespace Citygame.World
             if (!occupied || occupant == null) return;
             occupant.transform.SetParent(null, true);
             occupant.transform.position = exitPoint.position + Vector3.up * 0.2f;
-            occupant.enabled = true;
+            occupant.SetRiding(false);
             if (followCamera != null) followCamera.SetTarget(occupant.transform);
             occupant = null;
             occupied = false;
