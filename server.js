@@ -1149,7 +1149,7 @@ function extraMsg(room, p, m, now) {
       const name=String(m.name||'').replace(/[<>\u0000-\u001f]/g,'').trim().slice(0,28);
       if(name.length<3)return toast('Use at least 3 characters'),true;
       if(Object.values(businesses).some(x=>x&&x.id!==owned.id&&x.name.toLowerCase()===name.toLowerCase()))return toast('That business name is taken'),true;
-      owned.name=name;saveBusinesses();broadcast(room,{t:'x_businesses',businesses:businessList()});savePlayer(room,p);toast('Business name updated');return true;
+      owned.name=name;saveBusinesses();broadcastBusinesses(room);savePlayer(room,p);toast('Business name updated');return true;
     }
     sendBusinesses(p);return true;
   }
