@@ -2410,10 +2410,17 @@ function drawBigMap(){
   const jj=P(world.jail.x,world.jail.z);g.font='16px sans-serif';g.fillText('⛓️',jj[0]+4,jj[1]-4);
   bmHits=[];
   placesList().forEach(p=>{
-    const a=P(p.x,p.z);bmHits.push({x:a[0],y:a[1],id:p.id});
-    if(selPlace===p.id){g.fillStyle='#ffd54a55';g.beginPath();g.arc(a[0],a[1],20,0,7);g.fill()}
-    g.font='22px sans-serif';g.fillStyle='#fff';g.fillText(p.icon,a[0],a[1]);
-    g.font='bold 11px sans-serif';g.lineWidth=3;g.strokeStyle='#000';g.strokeText(p.name,a[0],a[1]+17);g.fillStyle='#fff';g.fillText(p.name,a[0],a[1]+17);
+    const a=P(p.x,p.z),building=String(p.id).startsWith('b');
+    bmHits.push({x:a[0],y:a[1],id:p.id,building});
+    if(building){
+      g.fillStyle=selPlace===p.id?'#ffd54a':'#f6d365';
+      g.beginPath();g.arc(a[0],a[1],selPlace===p.id?5:2.8,0,7);g.fill();
+      if(selPlace===p.id){g.font='bold 11px sans-serif';g.lineWidth=3;g.strokeStyle='#000';g.strokeText(p.name,a[0],a[1]-11);g.fillStyle='#fff';g.fillText(p.name,a[0],a[1]-11)}
+    }else{
+      if(selPlace===p.id){g.fillStyle='#ffd54a55';g.beginPath();g.arc(a[0],a[1],20,0,7);g.fill()}
+      g.font='22px sans-serif';g.fillStyle='#fff';g.fillText(p.icon,a[0],a[1]);
+      g.font='bold 11px sans-serif';g.lineWidth=3;g.strokeStyle='#000';g.strokeText(p.name,a[0],a[1]+17);g.fillStyle='#fff';g.fillText(p.name,a[0],a[1]+17);
+    }
   });
   if(gps){const a=P(gps.x,gps.z);g.font='22px sans-serif';g.fillText('📍',a[0],a[1]-8)}
   if(jobTarget){const a=P(jobTarget.x,jobTarget.z);g.font='22px sans-serif';g.fillText('📦',a[0],a[1]-8)}
@@ -2422,7 +2429,7 @@ function drawBigMap(){
 }
 bmc.addEventListener('click',e=>{
   const r=bmc.getBoundingClientRect(),x=(e.clientX-r.left)*bmc.width/r.width,y=(e.clientY-r.top)*bmc.height/r.height;
-  let best=null,bd=28;for(const h of bmHits){const d=Math.hypot(h.x-x,h.y-y);if(d<bd){bd=d;best=h}}
+  let best=null,bd=16;for(const h of bmHits){const d=Math.hypot(h.x-x,h.y-y),limit=h.building?10:16;if(d<Math.min(bd,limit)){bd=d;best=h}}
   if(best){selPlace=best.id;renderSide();drawBigMap()}
 });
 function renderSide(){
@@ -2432,7 +2439,7 @@ function renderSide(){
   h+=L.map(p=>`<div class="pl ${selPlace===p.id?'sel':''}" data-act="sel" data-id="${p.id}"><span>${p.icon} ${p.name}</span><span>${p.d}m</span></div>`).join('');
   const sp=L.find(p=>p.id===selPlace);
   if(sp){
-    h+=`<div class="det"><b>${sp.icon} ${sp.name}</b><br><button class="pb q" data-act="gps">📍 Set GPS (free)</button><br>`;
+    h+=`<div class="det"><b>${sp.icon} ${sp.name}</b>${sp.area?`<br><small>${sp.area} · ${sp.type||'Lagos destination'}</small>`:''}<br><button class="pb q" data-act="gps">📍 Set GPS (free)</button><br>`;
     for(const k in world.rides){const r=world.rides[k];h+=`<button class="pb" style="background:#ffd54a;color:#222" data-act="ride" data-ride="${k}">${k==='keke'?'🛺':k==='danfo'?'🚌':k==='jet'?'✈️':'🏍️'} ${r.name} ₦${fareOf(r,sp.d)}</button>`}
     h+=`<div style="font-size:11px;opacity:.8;margin-top:4px">Ride there and pay the fare. Or set GPS and walk or drive!</div></div>`;
   }else h+=`<div class="det" style="font-size:12px">Tap a place on the map or in the list.</div>`;
