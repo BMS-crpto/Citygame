@@ -132,6 +132,21 @@
     #phone .app{min-height:45px;font-size:9px}
     #phone .app b{font-size:17px}
   }
+  /* Native-feeling full-screen phone apps */
+  #phone.app-open .pbox>div:first-child{display:none!important}
+  #phone.app-open #pgrid,#phone.app-open #phoneSearch{display:none!important}
+  #phone.app-open #appview{display:block;min-height:0;margin:0;overflow:visible;text-align:left}
+  #phone.app-open .pbox{display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .phone-appbar{position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:9px;margin:0 -2px 12px;padding:7px 4px 11px;background:#0c111d;border-bottom:1px solid #ffffff20}
+  .phone-appbar>div{flex:1;min-width:0;text-align:left}
+  .phone-appbar b{display:block;font-size:16px}
+  .phone-appbar small{display:block;color:#8f9bb0;font-size:9px;letter-spacing:1px}
+  .phone-appbar .pb{margin:0;padding:8px 11px}
+  #phone.app-open .pbox:after{margin:14px auto 3px}
+  @media (orientation:landscape) and (max-height:600px){
+    #phone.app-open .pbox{width:min(96vw,900px);height:auto!important;max-height:none!important;overflow:visible}
+    #phone.app-open #appview{max-height:none!important;overflow:visible!important}
+  }
   #bigmap{position:fixed;inset:0;background:#0b1424;display:none;z-index:9;flex-direction:row}
   #bigmap canvas{flex:none;touch-action:none}
   #mapside{flex:1;overflow:auto;padding:8px 10px;font-size:13px}
@@ -2392,51 +2407,69 @@ function businessSend(op,data={}){
   if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'business',op,...data}));
 }
 function renderBusinesses(){
-  if(!world){appview.innerHTML='<div class="card">🏪 Enter Lagos to open the business centre.</div>';return}
   const mine=cityBusinesses.find(b=>b.isMine);
   appview.dataset.app='Business';
-  let h='<div class="card"><b>🏪 LAGOS BUSINESS CENTRE</b><p>Start your own player-owned business inside an existing Lagos building. Other players can visit, and customer activity earns business income.</p><b>Registration fee: ₦150,000</b><br><small>Stand outside a building entrance before registering. One business per player.</small></div>';
+  const areas=['Ikeja','Surulere','Lekki','Victoria Island','Ikoyi','Agege','Yaba','Mushin','Ajah','Eko Atlantic'];
+  const areaOptions=areas.map(a=>'<option value="'+a+'">'+a+'</option>').join('');
+  let h='<div class="card"><div style="font-size:12px;color:#a78bfa;font-weight:800;letter-spacing:1.5px">LAGOS LIFE • COMPANY HQ</div><h2 style="margin:7px 0">🏢 Company Manager</h2><p>Register and manage your company from your phone. Pick a Lagos district for your company location—no need to travel to the building.</p><b>One-time registration: ₦150,000</b></div>';
   if(mine){
-    h+='<div class="card"><b style="font-size:17px">'+mine.icon+' '+escapeBusinessText(mine.name)+'</b><br><small>'+escapeBusinessText(mine.kind)+' · '+escapeBusinessText(mine.area)+' · Owned by you</small><h2 style="color:#73e6a0">₦'+Math.round(mine.balance||0).toLocaleString('en-NG')+'</h2><small>Available business earnings</small><br><button class="pb q" id="bizCollect">💰 Collect earnings</button> <button class="pb q" id="bizRename">✏️ Rename</button><br><button class="pb q" id="bizNavigate">📍 Navigate to my business</button></div>';
+    const staff=Array.isArray(mine.staff)?mine.staff:[];
+    h+='<div class="card" style="background:linear-gradient(145deg,#173b34,#111e25)"><small>YOUR COMPANY</small><h2 style="margin:6px 0">'+mine.icon+' '+escapeBusinessText(mine.name)+'</h2><b>'+escapeBusinessText(mine.kind)+'</b><p>📍 '+escapeBusinessText(mine.locationName||mine.area)+' · '+escapeBusinessText(mine.area)+'</p><div style="font-size:26px;color:#73e6a0;font-weight:900">₦'+Math.round(mine.balance||0).toLocaleString('en-NG')+'</div><small>Available company earnings</small><br><button class="pb q" id="bizCollect">💰 Collect earnings</button> <button class="pb q" id="bizRename">✏️ Rename company</button><button class="pb q" id="bizNavigate">📍 Set GPS location</button></div>';
+    h+='<div class="card"><h3>👥 Staff management · '+staff.length+'/10</h3><p>Hire staff to build your company team. Each new hire costs ₦10,000.</p><select id="bizStaffRole" style="width:100%;padding:12px;border-radius:10px;background:#172033;color:white"><option value="cashier">Cashier</option><option value="manager">Manager</option><option value="security">Security</option><option value="cleaner">Cleaner</option><option value="stylist">Stylist</option><option value="chef">Chef</option></select><button class="pb q" id="bizHire" style="width:100%">＋ Hire staff · ₦10,000</button>';
+    h+=staff.length?staff.map((x,i)=>'<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #ffffff18"><span style="font-size:22px">🧑🏽‍💼</span><div style="flex:1;text-align:left"><b>'+escapeBusinessText(x.name||x.role)+'</b><br><small>'+escapeBusinessText(x.role)+'</small></div><button class="pb q" data-biz-fire="'+i+'" style="padding:7px 10px;background:#65333b;color:white">Remove</button></div>').join(''):'<p style="color:#aeb9cc">No staff hired yet. Your company is currently owner-operated.</p>';
+    h+='</div>';
   }else{
-    h+='<div class="card"><b>Register your business</b><input id="bizName" maxlength="28" placeholder="Business name (e.g. Tolu&#39;s Kitchen)" style="width:100%;padding:12px;margin:8px 0;border-radius:9px"><select id="bizKind" style="width:100%;padding:12px;border-radius:9px;background:#172033;color:white"><option value="restaurant">🍲 Restaurant / Buka</option><option value="fashion">👗 Fashion store</option><option value="tech">📱 Phone & tech shop</option><option value="supermarket">🛒 Supermarket</option><option value="salon">💇🏾 Hair salon</option><option value="lounge">🎶 Lounge</option><option value="carwash">🚗 Car wash</option><option value="pharmacy">💊 Pharmacy</option></select><button class="pb q" id="bizCreate" style="width:100%;margin-top:9px">🏪 Open my business · ₦150,000</button></div>';
+    h+='<div class="card"><h3>🚀 Register your company</h3><label>Company name</label><input id="bizName" maxlength="28" placeholder="e.g. Tolu Fashion House" style="width:100%;padding:12px;margin:8px 0;border-radius:9px;text-align:left"><label>Business category</label><select id="bizKind" style="width:100%;padding:12px;margin:7px 0;border-radius:9px;background:#172033;color:white"><option value="restaurant">🍲 Restaurant / Buka</option><option value="fashion">👗 Fashion store</option><option value="tech">📱 Phone & tech shop</option><option value="supermarket">🛒 Supermarket</option><option value="salon">💇🏾 Hair salon</option><option value="lounge">🎶 Lounge</option><option value="carwash">🚗 Car wash</option><option value="pharmacy">💊 Pharmacy</option></select><label>Company location in Lagos</label><select id="bizArea" style="width:100%;padding:12px;margin:7px 0;border-radius:9px;background:#172033;color:white">'+areaOptions+'</select><button class="pb q" id="bizCreate" style="width:100%;margin-top:9px;background:linear-gradient(90deg,#7c3aed,#2563eb);color:white">🏢 Register company · ₦150,000</button><small>Choose a district. The system assigns an available business premises automatically.</small></div>';
   }
-  h+='<div class="card"><b>🏙️ Player businesses in Lagos</b><p>Visit businesses opened by other players.</p></div>';
-  h+=cityBusinesses.length?cityBusinesses.map(b=>'<div class="card"><b>'+b.icon+' '+escapeBusinessText(b.name)+'</b><br><small>'+escapeBusinessText(b.kind)+' · '+escapeBusinessText(b.area)+' · '+escapeBusinessText(b.owner)+'</small><br><button class="pb q" data-biz-gps="'+b.id+'">📍 Visit business</button></div>').join(''):'<div class="card">No player businesses have opened yet. Be the first!</div>';
+  h+='<div class="card"><b>🏙️ Companies across Lagos</b><p>Discover businesses opened by other players.</p></div>';
+  h+=cityBusinesses.length?cityBusinesses.map(b=>'<div class="card"><b>'+b.icon+' '+escapeBusinessText(b.name)+'</b><br><small>'+escapeBusinessText(b.kind)+' · '+escapeBusinessText(b.area)+' · '+escapeBusinessText(b.owner)+'</small><br><button class="pb q" data-biz-gps="'+b.id+'">📍 Set GPS to company</button></div>').join(''):'<div class="card">No player companies have opened yet. Register the first one!</div>';
   appview.innerHTML=h;
-  const create=$('bizCreate');if(create)create.onclick=()=>{const name=$('bizName').value.trim(),kind=$('bizKind').value;if(name.length<3){toast('Enter a business name with at least 3 characters');return}businessSend('create',{name,kind})};
+  const create=$('bizCreate');if(create)create.onclick=()=>{const name=$('bizName').value.trim(),kind=$('bizKind').value,area=$('bizArea').value;if(name.length<3){toast('Enter a company name with at least 3 characters');return}businessSend('create',{name,kind,area})};
   const collect=$('bizCollect');if(collect)collect.onclick=()=>businessSend('collect');
-  const rename=$('bizRename');if(rename)rename.onclick=()=>{const name=prompt('New business name:');if(name)businessSend('rename',{name})};
-  const nav=$('bizNavigate');if(nav&&mine)nav.onclick=()=>{gps={x:mine.x,z:mine.z,name:mine.name};closePhone();toast('📍 GPS set to '+mine.name)};
-  appview.querySelectorAll('[data-biz-gps]').forEach(btn=>btn.onclick=()=>{const b=cityBusinesses.find(x=>x.id===btn.dataset.bizGps);if(b){gps={x:b.x,z:b.z,name:b.name};closePhone();toast('📍 GPS set to '+b.name)}});
+  const rename=$('bizRename');if(rename)rename.onclick=()=>{const name=prompt('New company name:');if(name)businessSend('rename',{name})};
+  const nav=$('bizNavigate');if(nav&&mine)nav.onclick=()=>{gps={x:mine.x,z:mine.z,name:mine.name};toast('📍 GPS set to '+mine.name)};
+  const hire=$('bizHire');if(hire)hire.onclick=()=>businessSend('hire',{role:$('bizStaffRole').value});
+  appview.querySelectorAll('[data-biz-fire]').forEach(btn=>btn.onclick=()=>businessSend('fire',{index:+btn.dataset.bizFire}));
+  appview.querySelectorAll('[data-biz-gps]').forEach(btn=>btn.onclick=()=>{const b=cityBusinesses.find(x=>x.id===btn.dataset.bizGps);if(b){gps={x:b.x,z:b.z,name:b.name};toast('📍 GPS set to '+b.name)}});
 }
 function escapeBusinessText(v){return String(v||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 function renderProperties(){if(!world){appview.innerHTML='<div class="card">🏘️ Property listings load after you enter the city.</div>';return}
  const homes=[...world.houses].sort((a,b)=>Math.hypot(a.x-pos.x,a.z-pos.z)-Math.hypot(b.x-pos.x,b.z-pos.z)).slice(0,18);
  appview.innerHTML='<div class="card"><b>🏘️ LAGOS PROPERTY FINDER</b><p>Browse nearby homes. Walk to a property entrance and use the in-world RENT interaction to secure a home.</p><small>Availability markers: green = open, grey = occupied, gold = your home.</small></div>'+homes.map(h=>{const taken=houseTaken(h),mine=myHome&&myHome.id===h.id,d=Math.round(Math.hypot(h.x-pos.x,h.z-pos.z));return '<div class="card"><b>'+(h.kind==='villa'?'🏡 Villa':h.kind==='lobby'?'🏢 Apartment lobby':'🏠 Flat')+' · '+(h.area||('District '+h.id))+'</b><br><b style="color:'+(mine?'#ffd54a':taken?'#9aa4b2':'#5ee28b')+'">'+(mine?'YOUR HOME':taken?'OCCUPIED':'AVAILABLE')+'</b><br><small>Weekly rent: ₦'+Math.round(h.rent).toLocaleString('en-NG')+' · '+(d>=1000?(d/1000).toFixed(1)+' km':d+' m')+'</small><br><button class="pb q" onclick="gpsToHouse(world.houses.find(x=>x.id=== '+h.id+'))">📍 Navigate</button></div>'}).join('');
 }
+function closeAppView(){
+  phone.classList.remove('app-open');
+  appview.innerHTML='<div class="card" style="text-align:center;color:#aab2c4">Select an app to open</div>';
+  appview.dataset.app='';
+}
 function openApp(n){
   if(n==='Map'){closePhone();openMap();return}
-  if(n==='Business'){renderBusinesses();return}
-  if(n==='GPS'){renderGps();return}
-  if(n==='Properties'){renderProperties();return}
   if(n==='Life'){closePhone();const b=$('lifeBtn');if(b)b.click();return}
   if(n==='Chat'){closePhone();const t=prompt('Say something:');if(t&&ws)ws.send(JSON.stringify({t:'chat',text:t}));return}
-  if(n==='News')appview.innerHTML='<div class="card"><b>📰 LAGOS CITY NEWS</b><p>Latest city updates, events and opportunities.</p><small>News feed preview • More stories coming soon</small></div>';
-  if(n==='Yellow Pages')appview.innerHTML='<div class="card"><b>📒 YELLOW PAGES</b><p>Find city services and destinations.</p><button class="pb q" onclick="setGps(\'bank\')">🏦 Lagoon Bank</button><button class="pb q" onclick="renderGps()">📍 Explore map</button></div>';
-  if(n==='Account')appview.innerHTML='<div class="card"><b>💳 ACCOUNT OVERVIEW</b><h2 style="color:#a78bfa">₦'+(myMoney||0)+'</h2><small>Cash balance</small><hr style="border-color:#292f40"><b>Bank balance: ₦'+myBank+'</b></div>';
-  if(n==='Feed')renderSocial();
-  if(n==='Gallery')appview.innerHTML='<div class="card"><b>🖼️ CITY GALLERY</b><p>Your in-game photo gallery interface.</p><small>Gallery features can be connected to screenshots later.</small></div>';
-  if(n==='Calculator')appview.innerHTML='<div class="card"><b>🧮 QUICK CALCULATOR</b><input id="calcinput" placeholder="Example: 250+75" style="width:100%;background:#0d111a;color:white;border:1px solid #343b4c;border-radius:8px;margin:8px 0"><button class="pb q" onclick="try{ $(\'calcresult\').textContent=Function(\'return (\'+$(\'calcinput\').value+\')\')()}catch(e){$(\'calcresult\').textContent=\'Invalid expression\'}">Calculate</button><div id="calcresult" style="padding:8px;color:#a78bfa;font-weight:bold"></div></div>';
-  if(n==='Market')appview.innerHTML='<div class="card"><b>🛍️ CITY MARKET</b><p>Browse items and city services.</p><small>Market screen preview</small></div>';
-  if(n==='Avatar')appview.innerHTML='<div class="card"><b>👤 AVATAR STUDIO</b><p>Customize your character from the main menu.</p><button class="pb q" onclick="closePhone();location.href=\'avatar-studio.html\'">Open Avatar Studio</button></div>';
-  if(n==='Progress')renderProgress();
-  if(n==='Daily')renderDaily();
-  if(n==='Social')renderSocial();
-  if(n==='Jobs')renderJobs();
-  if(n==='Bank')appview.innerHTML=`<div class="card">💵 Cash on you: <b>₦${myMoney||0}</b><br>🏦 In the bank: <b>₦${myBank}</b></div><div class="card">Save money at an ATM inside the Lagoon Bank. Saved money cannot be robbed and earns interest!</div><button class="pb q" onclick="setGps('bank')">📍 Show me the bank</button>`;
-  if(n==='Settings')appview.innerHTML=`<div class="card"><b>⚙️ CITY PHONE SETTINGS</b><br>Graphics:<br>${['low','med','high'].map(q=>`<button class="pb q ${quality===q?'sel':''}" onclick="setQuality('${q}')">${q.toUpperCase()}</button>`).join('')}</div><div class="card">Sound: <button class="pb q" onclick="$('mutebtn').click();openApp('Settings')">${muted?'🔇 Off':'🔊 On'}</button><br>Character appearance:<br><button class="pb q" onclick="closePhone();location.href='avatar-studio.html'">👤 Open Avatar Studio</button></div><div class="card"><b>Quick access</b><br><button class="pb q" onclick="openApp('Properties')">🏘️ Property finder</button><button class="pb q" onclick="openApp('Life')">📋 Career & Life</button><button class="pb q" onclick="openApp('GPS')">📍 GPS</button></div>`;
+  phone.classList.add('app-open');
+  if(n==='Business')renderBusinesses();
+  else if(n==='GPS')renderGps();
+  else if(n==='Properties')renderProperties();
+  else if(n==='News')appview.innerHTML='<div class="card"><b>📰 LAGOS CITY NEWS</b><p>Latest city updates, events and opportunities.</p><small>News feed preview • More stories coming soon</small></div>';
+  else if(n==='Yellow Pages')appview.innerHTML='<div class="card"><b>📒 YELLOW PAGES</b><p>Find city services and destinations.</p><button class="pb q" onclick="setGps(\'bank\')">🏦 Lagoon Bank</button><button class="pb q" onclick="renderGps()">📍 Explore map</button></div>';
+  else if(n==='Account')appview.innerHTML='<div class="card"><b>💳 ACCOUNT OVERVIEW</b><h2 style="color:#a78bfa">₦'+(myMoney||0)+'</h2><small>Cash balance</small><hr style="border-color:#292f40"><b>Bank balance: ₦'+myBank+'</b></div>';
+  else if(n==='Feed'||n==='Social')renderSocial();
+  else if(n==='Gallery')appview.innerHTML='<div class="card"><b>🖼️ CITY GALLERY</b><p>Your in-game photo gallery.</p><small>Gallery features can be connected to screenshots later.</small></div>';
+  else if(n==='Calculator')appview.innerHTML='<div class="card"><b>🧮 QUICK CALCULATOR</b><input id="calcinput" placeholder="Example: 250+75" style="width:100%;background:#0d111a;color:white;border:1px solid #343b4c;border-radius:8px;margin:8px 0"><button class="pb q" onclick="try{ $(\'calcresult\').textContent=Function(\'return (\'+$(\'calcinput\').value+\')\')()}catch(e){$(\'calcresult\').textContent=\'Invalid expression\'}">Calculate</button><div id="calcresult" style="padding:8px;color:#a78bfa;font-weight:bold"></div></div>';
+  else if(n==='Market')appview.innerHTML='<div class="card"><b>🛍️ CITY MARKET</b><p>Browse items and city services.</p><small>Market screen preview</small></div>';
+  else if(n==='Avatar')appview.innerHTML='<div class="card"><b>👤 AVATAR STUDIO</b><p>Customize your character from the main menu.</p><button class="pb q" onclick="closePhone();location.href=\'avatar-studio.html\'">Open Avatar Studio</button></div>';
+  else if(n==='Progress')renderProgress();
+  else if(n==='Daily')renderDaily();
+  else if(n==='Jobs')renderJobs();
+  else if(n==='Bank')appview.innerHTML=`<div class="card"><b>💳 LAGOON BANK</b><h2>₦${(myMoney||0).toLocaleString('en-NG')}</h2><small>Cash balance</small><p>Bank balance: <b>₦${(+myBank||0).toLocaleString('en-NG')}</b></p><button class="pb q" onclick="setGps('bank')">📍 Find nearest ATM</button></div><div class="card">Use a Lagoon Bank ATM to deposit or withdraw money securely.</div>`;
+  else if(n==='Settings')appview.innerHTML=`<div class="card"><b>⚙️ DISPLAY & GRAPHICS</b><p>Choose your graphics quality.</p>${['low','med','high'].map(q=>`<button class="pb q ${quality===q?'sel':''}" onclick="setQuality('${q}')">${q.toUpperCase()}</button>`).join('')}</div><div class="card"><b>🔊 SOUND</b><button class="pb q" onclick="$('mutebtn').click();openApp('Settings')">${muted?'🔇 Sound off':'🔊 Sound on'}</button></div><div class="card"><b>⚡ QUICK SETTINGS</b><button class="pb q" onclick="openApp('Properties')">🏘️ Properties</button><button class="pb q" onclick="openApp('GPS')">📍 GPS</button></div>`;
+  else appview.innerHTML='<div class="card"><h2>'+escapeBusinessText(n)+'</h2><p>Welcome to '+escapeBusinessText(n)+'.</p></div>';
+  const icons=Object.fromEntries(APPS.map(a=>[a[1],a[0]]));
+  appview.insertAdjacentHTML('afterbegin','<div class="phone-appbar"><button class="pb q" id="appBack">‹ Apps</button><div><b>'+icons[n]+' '+escapeBusinessText(n)+'</b><small> LAGOS LIFE • APP</small></div><button class="pb q" id="appHome">⌂</button></div>');
+  $('appBack').onclick=closeAppView;
+  $('appHome').onclick=closeAppView;
 }
+
 function setQuality(q){quality=q;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===q));applyQuality();openApp('Settings')}
 let socialPosts=[];
 function renderSocialFeed(){
