@@ -14,12 +14,24 @@ namespace Citygame.World
 
             CreateCube("Main Road", root, new Vector3(0, -0.08f, 0), new Vector3(90, 0.12f, 12), road);
             CreateCube("Market Street", root, new Vector3(0, -0.07f, 18), new Vector3(90, 0.12f, 9), road);
-
+            Material laneYellow = MaterialFor(new Color(0.96f, 0.72f, 0.12f));
+            Material laneWhite = MaterialFor(new Color(0.88f, 0.88f, 0.82f));
+            // Lagos-style double yellow center lines and pale road-edge markings.
+            CreateCube("Double yellow center line A", root, new Vector3(0, 0.012f, -0.12f), new Vector3(90, 0.025f, 0.11f), laneYellow);
+            CreateCube("Double yellow center line B", root, new Vector3(0, 0.012f, 0.12f), new Vector3(90, 0.025f, 0.11f), laneYellow);
+            CreateCube("Road edge line left", root, new Vector3(0, 0.012f, -5.45f), new Vector3(90, 0.025f, 0.12f), laneWhite);
+            CreateCube("Road edge line right", root, new Vector3(0, 0.012f, 5.45f), new Vector3(90, 0.025f, 0.12f), laneWhite);
             for (int i = 0; i < 12; i++)
             {
                 float x = (i - 5.5f) * 7.2f;
-                CreateCube("Road lane marking", root, new Vector3(x, 0.01f, 0), new Vector3(3.2f, 0.025f, 0.18f), MaterialFor(Color.white));
+                CreateCube("Market Street dashed lane marking", root, new Vector3(x, 0.01f, 18), new Vector3(3.2f, 0.025f, 0.16f), laneWhite);
             }
+            Material sidewalk = MaterialFor(new Color(0.58f, 0.55f, 0.49f));
+            Material curb = MaterialFor(new Color(0.76f, 0.72f, 0.64f));
+            CreateCube("Main Road sidewalk north", root, new Vector3(0, 0.04f, 7.2f), new Vector3(90, 0.18f, 2.4f), sidewalk);
+            CreateCube("Main Road sidewalk south", root, new Vector3(0, 0.04f, -7.2f), new Vector3(90, 0.18f, 2.4f), sidewalk);
+            CreateCube("Main Road curb north", root, new Vector3(0, 0.14f, 6.05f), new Vector3(90, 0.22f, 0.18f), curb);
+            CreateCube("Main Road curb south", root, new Vector3(0, 0.14f, -6.05f), new Vector3(90, 0.22f, 0.18f), curb);
 
             CreateBuilding(root, "Ikeja Plaza", new Vector3(-20, 0, 13), new Vector3(9, 9, 8), concrete, BusinessCategory.Technology);
             CreateBuilding(root, "Lekki Fashion House", new Vector3(-7, 0, 13), new Vector3(8, 5, 8), paint, BusinessCategory.FashionStore);
