@@ -55,3 +55,41 @@ canvas{outline:none}
  #act{min-width:64px!important;min-height:64px!important;right:20px!important;bottom:max(26px,env(safe-area-inset-bottom))!important}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation-duration:.01ms!important}}
+
+/* v2: fuller LagosLife-style presentation, adapted for Citygame's existing systems */
+#phone .pbox{background:linear-gradient(180deg,#18242d 0%,#101920 58%,#0c151c 100%)!important;border-color:#52636b!important}
+#phone .pbox>div:first-child{padding:4px 7px 12px!important;border-bottom:1px solid #ffffff12!important}
+#phone .pbox>div:first-child small:first-child{color:#b2c1c7!important;letter-spacing:1.8px!important}
+#phone .pbox>div:first-child div{color:#f7f2e7!important;font-size:21px!important;font-weight:850!important}
+#phone .pbox>div:first-child div span{color:#f0c45a!important}
+#phonePlayer{color:#8fd7b6!important;font-weight:700!important;letter-spacing:.04em}
+#pgrid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:9px!important;padding:13px 3px 14px!important}
+#pgrid .app{min-width:0!important;min-height:72px!important;padding:9px 3px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:4px!important;background:linear-gradient(150deg,#263640,#14212a)!important;border:1px solid #3b5059!important;color:#eaf0ee!important;font-size:10px!important;font-weight:700!important;line-height:1.2!important;box-shadow:0 5px 12px #0003,inset 0 1px #ffffff0a!important}
+#pgrid .app b{font-size:25px!important;line-height:1.15!important;margin:0!important;filter:drop-shadow(0 2px 2px #0004)}
+#pgrid .app:nth-child(4n+1){background:linear-gradient(145deg,#24443e,#172c2a)!important;border-color:#3d6559!important}
+#pgrid .app:nth-child(4n+2){background:linear-gradient(145deg,#3c3b2c,#25271e)!important;border-color:#625b3d!important}
+#pgrid .app:nth-child(4n+3){background:linear-gradient(145deg,#293e52,#172a3b)!important;border-color:#405c75!important}
+#pgrid .app:nth-child(4n){background:linear-gradient(145deg,#44333d,#2a2029)!important;border-color:#624858!important}
+#pgrid .app:focus-visible{outline:2px solid var(--cg-gold)!important;outline-offset:2px}
+#phoneSearch{background:#0b151c!important;border:1px solid #3a4d56!important;border-radius:14px!important;color:#f5f0e6!important;min-height:42px!important}
+#phoneSearch:focus{border-color:#dcb951!important;box-shadow:0 0 0 3px #eac75a20!important}
+#appview .card{background:linear-gradient(155deg,#1d2d36,#132129)!important;border:1px solid #354a54!important;border-radius:16px!important;padding:13px!important;box-shadow:0 5px 14px #0002!important;color:#e8efed!important}
+#appview .card b{color:#f4d47b!important}
+#appview small{color:#aebdc3!important}
+#appview .pb,#appview button{background:linear-gradient(135deg,#e8bd52,#ffe19a)!important;color:#17232a!important;border:1px solid #f7d77e!important;font-weight:800!important;box-shadow:0 2px 0 #8c6b25!important}
+#appview .xbtn.gray,#appview button.gray{background:linear-gradient(145deg,#334750,#1c2d35)!important;color:#e6eff0!important;border-color:#4b646e!important;box-shadow:none!important}
+#mapside .mh{color:#f3d47c!important;padding:8px 4px;border-bottom:1px solid #ffffff15}
+#mapside .pl{background:linear-gradient(145deg,#20343e,#14232b)!important;border:1px solid #354d57!important;border-radius:12px!important}
+#mapside .pl.sel{background:#30434b!important;border-color:#f0c65c!important}
+#mapside .det{background:#101d24!important;border:1px solid #344a54!important;border-radius:14px!important}
+#atm .box{background:linear-gradient(155deg,#1c3039,#0e1b23)!important;border:1px solid #506671!important;border-radius:22px!important;box-shadow:0 24px 60px #0009!important;color:#edf2ef!important}
+#atm h2{color:#f3d47c!important}
+#atm button{background:linear-gradient(135deg,#e7bb50,#ffdf91)!important;color:#1c2529!important}
+#chatlog{border-radius:15px!important;backdrop-filter:blur(8px)!important}
+#phonebtn[data-n]:after{background:#e44b4b!important;border:2px solid #f9f1e3!important}
+@media(max-width:600px){
+ #pgrid .app{min-height:66px!important;font-size:9.5px!important}
+ #pgrid .app b{font-size:23px!important}
+ #appview .card{padding:11px!important}
+ #mapside{max-width:48vw!important}
+}
