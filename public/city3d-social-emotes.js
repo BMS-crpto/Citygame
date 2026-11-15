@@ -15,7 +15,19 @@
     bridge.appview.innerHTML='<div class="card" style="background:linear-gradient(135deg,#0e7490,#312e81)"><b>📸 LAGOS LIFE • SOCIAL</b><p>Post updates, like moments and reply to other players.</p><button class="xbtn gold" data-x="socialPost">＋ Create post</button> <button class="xbtn gray" data-x="socialRefresh">↻ Refresh</button></div>'+ (rows||'<div class="card">No posts yet. Be the first to post!</div>');
   };
   bridge.APPR.Social=function(){renderFeed();bridge.S({t:'social_get'})};
-  bridge.X.socialPost=()=>{const text=prompt('Write a city feed post (max 180 characters):');if(text&&text.trim())bridge.S({t:'social_post',text:text.trim().slice(0,180)})};
+  bridge.X.socialPost=()=>{
+    bridge.appview.innerHTML='<div class="card" style="background:linear-gradient(135deg,#0e7490,#312e81)"><b>＋ CREATE A POST</b><p>Share an update with players across Lagos.</p></div><div class="card"><textarea id="socialComposer" maxlength="180" rows="5" placeholder="What is happening in Lagos?" style="box-sizing:border-box;width:100%;padding:12px;border-radius:12px;background:#111827;color:white;border:1px solid #46516a;resize:vertical"></textarea><small id="socialCount">0 / 180</small><div style="display:flex;gap:8px;margin-top:12px"><button class="xbtn gray" data-x="socialCancel">Cancel</button><button class="xbtn gold" data-x="socialPublish">Publish</button></div></div>';
+    const input=bridge.appview.querySelector('#socialComposer'),count=bridge.appview.querySelector('#socialCount');
+    input.addEventListener('input',()=>{count.textContent=input.value.length+' / 180'});
+    input.focus();
+  };
+  bridge.X.socialCancel=()=>renderFeed();
+  bridge.X.socialPublish=()=>{
+    const input=bridge.appview.querySelector('#socialComposer'),text=input&&input.value.trim();
+    if(!text)return;
+    bridge.S({t:'social_post',text:text.slice(0,180)});
+    bridge.appview.innerHTML='<div class="card">Publishing your post…</div>';
+  };
   bridge.X.socialRefresh=()=>bridge.S({t:'social_get'});
   bridge.X.socialLike=b=>bridge.S({t:'social_like',id:b.dataset.id});
   bridge.X.socialReply=b=>{const id=b.dataset.id,input=bridge.appview.querySelector('[data-social-reply="'+id+'"]'),text=input&&input.value.trim();if(!text)return;if(text.length>140)return;if(bridge.S({t:'social_reply',id,text})!==false)input.value=''};
