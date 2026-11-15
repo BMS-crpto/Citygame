@@ -374,9 +374,9 @@ var scene=window.scene;
 window.scene=scene; // Keep the single shared scene instance
 scene.fog=new THREE.Fog(HORIZON,75,265);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,0.1,320);
-const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
-renderer.setSize(innerWidth,innerHeight);
 const CITYGAME_MOBILE=window.matchMedia('(max-width: 700px)').matches||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+const renderer=new THREE.WebGLRenderer({antialias:!CITYGAME_MOBILE,powerPreference:'high-performance'});
+renderer.setSize(innerWidth,innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,CITYGAME_MOBILE?1.25:1.75));
 renderer.shadowMap.enabled=!CITYGAME_MOBILE;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05; // lower = darker, higher = brighter
