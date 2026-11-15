@@ -1130,10 +1130,12 @@ function extraMsg(room, p, m, now) {
       const kinds = { restaurant:['🍲','Restaurant'], fashion:['👗','Fashion store'], tech:['📱','Tech shop'], supermarket:['🛒','Supermarket'], salon:['💇🏾','Salon'], lounge:['🎶','Lounge'], carwash:['🚗','Car wash'], pharmacy:['💊','Pharmacy'] };
       const kind = kinds[String(m.kind||'restaurant')] ? String(m.kind) : 'restaurant';
       const name = String(m.name||'').replace(/[<>\u0000-\u001f]/g,'').trim().slice(0,28);
+      const id='b'+b.q.id;
+      if (businesses[id]) return toast('This building already has a player-owned business. Choose another building.'), true;
       if (name.length < 3) return toast('Business name must be at least 3 characters'), true;
       if (Object.values(businesses).some(x => x && x.name.toLowerCase() === name.toLowerCase())) return toast('That business name is already taken'), true;
       if (!charge(p, 150000, 'Started business: '+name)) return true;
-      const id='b'+b.q.id, [icon,label]=kinds[kind];
+      const [icon,label]=kinds[kind];
       businesses[id]={id,ownerKey:key,ownerName:p.name,name,kind,icon,area:b.q.area||'Lagos',x:Math.round(b.q.out.x),z:Math.round(b.q.out.z),balance:0,created:now};
       saveBusinesses(); broadcastBusinesses(room);
       broadcast(room,{t:'toast',text:'🏪 '+p.name+' opened '+name+' in '+(b.q.area||'Lagos')+'!'});
