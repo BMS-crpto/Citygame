@@ -370,11 +370,11 @@ Object.entries(ROLES).forEach(([k,r])=>{
 });
 
 // =============== renderer, sky, light ===============
-const HORIZON=0xd2e4f1;   // clear bright Lagos day
+const HORIZON=0x91b4cc;   // richer blue Lagos horizon, less washed-out distance
 var scene=window.scene;
 window.scene=scene; // Keep the single shared scene instance
-scene.fog=new THREE.Fog(HORIZON,75,265);
-const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,0.1,320);
+scene.fog=new THREE.Fog(HORIZON,180,520);
+const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,0.1,650);
 const CITYGAME_MOBILE=window.matchMedia('(max-width: 700px)').matches||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const renderer=new THREE.WebGLRenderer({antialias:!CITYGAME_MOBILE,powerPreference:'high-performance'});
 renderer.setSize(innerWidth,innerHeight);
@@ -1302,7 +1302,7 @@ function updateTime(){
   glowPts.material.opacity=nightF*0.85;stars.material.opacity=nightF;
   rainF=clamp01((-Math.sin(((Date.now()/1000)%900)/900*Math.PI*2)-0.7)*4);
   if(rainF>0){const G=_t1.setHex(0x7d8791);skyMat.uniforms.top.value.lerp(G,rainF*0.6);skyMat.uniforms.mid.value.lerp(G,rainF*0.6);skyMat.uniforms.hor.value.lerp(G,rainF*0.6);scene.fog.color.lerp(G,rainF*0.6);if(!inside){hemi.intensity*=1-0.25*rainF;sun.intensity*=1-0.5*rainF}}
-  scene.fog.near=75-35*rainF;scene.fog.far=265-90*rainF;
+  scene.fog.near=180-35*rainF;scene.fog.far=520-70*rainF;
   rain.visible=rainF>0.02&&!inside;rain.material.opacity=0.5*rainF;
   const hr=lagosHours(),hh=Math.floor(hr),mm=Math.floor((hr-hh)*60);
   clockText=((hh+11)%12+1)+':'+String(mm).padStart(2,'0')+(hh<12?' AM':' PM')+(rainF>0.3?' 🌧️':'');
@@ -1340,8 +1340,8 @@ function fpsGovernor(now){
   if(fpsN>=90){
     const avg=fpsAcc/fpsN;fpsAcc=0;fpsN=0;
     let next=quality;
-    if(avg>30&&quality!=='low')next=quality==='high'?'med':'low';
-    else if(avg<22&&quality!=='high')next=quality==='low'?'med':'high';
+    if(avg<22&&quality!=='low')next=quality==='high'?'med':'low';
+    else if(avg>30&&quality!=='high')next=quality==='low'?'med':'high';
     if(next!==quality){quality=next;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===quality));applyQuality()}
   }
 }
@@ -2323,7 +2323,7 @@ function placesList(){
 }
 const fareOf=(r,d)=>Math.max(r.min,Math.round(d*r.rate));
 // ---- phone ----
-const APPS=[['📰','News'],['📒','Yellow Pages'],['💳','Account'],['🗞️','Feed'],['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['🏆','Progress'],['🗓️','Daily'],['🎉','Social'],['💬','Chat'],['⚙️','Settings'],['🖼️','Gallery'],['🧮','Calculator'],['🛍️','Market'],['🏪','Business'],['👤','Avatar'],['📋','Life'],['🏘️','Properties']];
+const APPS=[['📰','News'],['📒','Yellow Pages'],['💳','Account'],['🗞️','Feed'],['🗺️','Map'],['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['🏆','Progress'],['🗓️','Daily'],['🎉','Social'],['💬','Chat'],['⚙️','Settings'],['🖼️','Gallery'],['🧮','Calculator'],['🛍️','Market'],['🏪','Business'],['👤','Avatar'],['📋','Life'],['🏘️','Properties']];
 $('pgrid').innerHTML=APPS.map(a=>`<button class="app" data-app="${a[1]}"><b>${a[0]}</b>${a[1]}</button>`).join('');
 function openPhone(){if(!me)return;phone.style.display='flex';const p=$('phonePlayer');if(p)p.textContent=(myName||lotName||'PLAYER').toUpperCase()+' • ₦'+Math.round(myMoney||0).toLocaleString('en-NG');$('phoneSearch').value='';document.querySelectorAll('#pgrid .app').forEach(b=>b.style.display='');appview.innerHTML='<div class="card"><b>Welcome back 👋</b><p>Choose an app to manage your Lagos life.</p><small>GPS • Work • Banking • Properties</small></div>'}
 function closePhone(){phone.style.display='none'}
@@ -2359,6 +2359,7 @@ function renderProperties(){if(!world){appview.innerHTML='<div class="card">🏘
  appview.innerHTML='<div class="card"><b>🏘️ LAGOS PROPERTY FINDER</b><p>Browse nearby homes. Walk to a property entrance and use the in-world RENT interaction to secure a home.</p><small>Availability markers: green = open, grey = occupied, gold = your home.</small></div>'+homes.map(h=>{const taken=houseTaken(h),mine=myHome&&myHome.id===h.id,d=Math.round(Math.hypot(h.x-pos.x,h.z-pos.z));return '<div class="card"><b>'+(h.kind==='villa'?'🏡 Villa':h.kind==='lobby'?'🏢 Apartment lobby':'🏠 Flat')+' · '+(h.area||('District '+h.id))+'</b><br><b style="color:'+(mine?'#ffd54a':taken?'#9aa4b2':'#5ee28b')+'">'+(mine?'YOUR HOME':taken?'OCCUPIED':'AVAILABLE')+'</b><br><small>Weekly rent: ₦'+Math.round(h.rent).toLocaleString('en-NG')+' · '+(d>=1000?(d/1000).toFixed(1)+' km':d+' m')+'</small><br><button class="pb q" onclick="gpsToHouse(world.houses.find(x=>x.id=== '+h.id+'))">📍 Navigate</button></div>'}).join('');
 }
 function openApp(n){
+  if(n==='Map'){closePhone();openMap();return}
   if(n==='Business'){renderBusinesses();return}
   if(n==='GPS'){renderGps();return}
   if(n==='Properties'){renderProperties();return}
@@ -2382,13 +2383,21 @@ function openApp(n){
 function setQuality(q){quality=q;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===q));applyQuality();openApp('Settings')}
 function renderSocial(){
  const messages=['Who is online in Lagos? 👋','Anyone want to cruise? 🚗','Meet me at the city center 📍','Let’s do a delivery run 📦','Good vibes in Lagos! 🎉','Anyone at the mall? 🛍️'];
- appview.innerHTML='<div class="card"><b>🎉 CITY SOCIAL HUB</b><br><small>Quick messages to connect with players in your room.</small></div>'+messages.map((m,i)=>'<button class="pb q" style="width:100%;margin:6px 0;text-align:left" onclick="sendSocialMessage('+i+')">'+m+'</button>').join('')+'<div class="card"><small>Messages are sent to your current multiplayer room using the game chat.</small></div>';
+ appview.innerHTML='<div class="card"><b>🎉 CITY SOCIAL HUB</b><br><small>Quick messages to connect with players in your room.</small></div><div class="card"><b>Quick messages</b><div id="socialQuick"></div></div><div class="card"><label for="socialText">Write a message</label><input id="socialText" maxlength="180" placeholder="Say something to players..." style="width:100%;padding:11px;border-radius:9px;background:#101827;color:white;border:1px solid #46516a"><button class="pb q" id="socialSend" style="width:100%;margin-top:8px">Send to chat</button><small id="socialStatus">Messages go to your current multiplayer room.</small></div>';
+ const quick=appview.querySelector('#socialQuick');
+ messages.forEach((m,i)=>{const b=document.createElement('button');b.className='pb q';b.style.cssText='width:100%;margin:5px 0;text-align:left';b.textContent=m;b.addEventListener('click',()=>sendSocialMessage(i));quick.appendChild(b)});
+ const send=()=>{const input=appview.querySelector('#socialText');if(input&&input.value.trim()){sendSocialText(input.value.trim());input.value=''}};
+ appview.querySelector('#socialSend').addEventListener('click',send);
+ appview.querySelector('#socialText').addEventListener('keydown',e=>{if(e.key==='Enter')send()});
+}
+function sendSocialText(message){
+ if(!ws||ws.readyState!==1){toast('Multiplayer is reconnecting. Try again when connected.');return false}
+ try{ws.send(JSON.stringify({t:'chat',text:String(message).slice(0,180)}));toast('Message sent to room chat');return true}catch(e){toast('Message could not be sent. Check your connection.');return false}
 }
 function sendSocialMessage(i){
  const messages=['Who is online in Lagos? 👋','Anyone want to cruise? 🚗','Meet me at the city center 📍','Let’s do a delivery run 📦','Good vibes in Lagos! 🎉','Anyone at the mall? 🛍️'];
  if(!Number.isInteger(i)||i<0||i>=messages.length)return;
- if(!ws){toast('Connect to multiplayer first');return}
- ws.send(JSON.stringify({t:'chat',text:messages[i]}));toast('Message sent to room chat');
+ sendSocialText(messages[i]);
 }
 function dailyKey(){const d=new Date();return 'citylife-daily-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function dailyTasks(){
@@ -2447,10 +2456,11 @@ function setGps(id){
 }
 // ---- big map ----
 function openMap(){
-  if(world){openPhone();renderGps();return}
+  if(!world){toast('The Lagos map is loading. Try again in a moment.');return}
   bigmap.style.display='flex';sizeMap();renderSide();drawBigMap();
   clearInterval(mapTimer);mapTimer=setInterval(drawBigMap,500);
 }
+
 function closeMap(){bigmap.style.display='none';clearInterval(mapTimer)}
 function sizeMap(){const S=Math.floor(Math.min(innerHeight-4,innerWidth*0.58));bmc.width=bmc.height=S;bmc.style.width=bmc.style.height=S+'px'}
 function drawBigMap(){
