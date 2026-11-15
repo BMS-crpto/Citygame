@@ -132,3 +132,34 @@ test('phone Chat is a full app screen with live room messaging', () => {
   assert.match(html, /phoneChatAdd\(m\.name,m\.text\)/);
   assert.match(html, /appview\.dataset\.app=n/);
 });
+
+
+test('phone Market uses server-authoritative catalog, inventory, and remote shop transactions', () => {
+  const server = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+  const module = fs.readFileSync(path.join(root, 'public', 'city-app-suite.js'), 'utf8');
+  assert.match(server, /m\.source !== 'phone' && !atShop\(p\)/);
+  assert.match(server, /m\.source !== 'phone' && !atShop\(p\)/);
+  assert.match(module, /APPR\.Market/);
+  assert.match(module, /t:'shop',op:'buy'.*source:'phone'/);
+  assert.match(module, /t:'shop',op:'sell'.*source:'phone'/);
+  assert.match(module, /m\.t==='lifeinfo'/);
+  assert.match(module, /m\.t==='catalog'/);
+});
+
+test('phone Gallery captures and stores local city screenshots', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  const module = fs.readFileSync(path.join(root, 'public', 'city-app-suite.js'), 'utf8');
+  assert.match(html, /capturePhoto:\(\)=>/);
+  assert.match(module, /APPR\.Gallery/);
+  assert.match(module, /capturePhoto\(\)/);
+  assert.match(module, /localStorage\.setItem/);
+  assert.match(module, /data:image\/jpeg/);
+});
+
+test('phone News combines live community posts and player company updates', () => {
+  const module = fs.readFileSync(path.join(root, 'public', 'city-app-suite.js'), 'utf8');
+  assert.match(module, /APPR\.News/);
+  assert.match(module, /m\.t==='social_new'/);
+  assert.match(module, /m\.t==='x_businesses'/);
+  assert.match(module, /Community headlines/);
+});
