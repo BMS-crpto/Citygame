@@ -80,3 +80,17 @@ test('city lighting keeps the original scene from becoming washed out', () => {
   assert.match(finish, /DirectionalLight\(0xffe2b8,0\.06/);
   assert.match(html, /'Uber':0,'Private Jet':0/);
 });
+
+
+test('landscape phone overlay scrolls the full app content on mobile', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  const start = html.indexOf('Reliable Android landscape phone scrolling');
+  const end = html.indexOf('#bigmap{position:fixed', start);
+  assert.ok(start >= 0 && end > start, 'landscape scrolling override is present');
+  const css = html.slice(start, end);
+  assert.match(css, /#phone\s*\{[\s\S]*overflow-y:auto!important/);
+  assert.match(css, /-webkit-overflow-scrolling:touch/);
+  assert.match(css, /justify-content:flex-start/);
+  assert.match(css, /#phone \.pbox\s*\{[\s\S]*height:auto!important/);
+  assert.match(css, /#phone #appview\s*\{[\s\S]*overflow:visible!important/);
+});
