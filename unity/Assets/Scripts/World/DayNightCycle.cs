@@ -5,7 +5,7 @@ namespace Citygame.World
     [DisallowMultipleComponent]
     public sealed class DayNightCycle : MonoBehaviour
     {
-        public enum WeatherPreset { Clear, Cloudy, Overcast, Dusty }
+        public enum WeatherPreset { Clear, Cloudy, Overcast, Dusty, Rain }
 
         [SerializeField] private Light sun;
         [SerializeField, Min(60f)] private float fullDaySeconds = 900f;
@@ -59,7 +59,7 @@ namespace Citygame.World
             float daylight = Mathf.Clamp01(Mathf.Sin((hour - 6f) / 12f * Mathf.PI));
             float weatherLight = weather == WeatherPreset.Clear ? 1f :
                 weather == WeatherPreset.Cloudy ? 0.82f :
-                weather == WeatherPreset.Overcast ? 0.62f : 0.72f;
+                weather == WeatherPreset.Overcast ? 0.62f : weather == WeatherPreset.Rain ? 0.58f : 0.72f;
 
             if (sun != null)
             {
