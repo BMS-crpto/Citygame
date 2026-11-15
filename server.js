@@ -533,6 +533,15 @@ function onConnection(ws) {
       if (vt.cost && !charge(p, vt.cost, vt.label)) return;
       const vpay = vt.pay ? vt.pay * INCOME_MULT : 0;
       if (vpay) addMoney(p, vpay, 'Temp shift: ' + vt.label);
+      // Customers support player-owned venues; earnings accrue safely to the owner's business wallet.
+      const ownedVenue = p.bld != null && businesses['b' + p.bld];
+      if (ownedVenue && ownedVenue.ownerKey !== pKey(p) && cooldown(p, 'biz_' + ownedVenue.id, 300000)) {
+        const cut = Math.max(100, Math.min(2500, Math.round((vt.cost || 500) * 0.12)));
+        ownedVenue.balance = Math.min(1e9, (Math.floor(+ownedVenue.balance) || 0) + cut);
+        saveBusinesses();
+        const owner = Object.values(R.players).find(q => pKey(q) === ownedVenue.ownerKey);
+        if (owner) send(owner.ws, { t:'toast', text:'🏪 '+ownedVenue.name+' earned ₦'+fmtN(cut)+' from a customer' });
+      }
       const fx = vt.fx || {};
       if (fx.food) p.food = Math.max(0, Math.min(100, p.food + fx.food));
       if (L) for (const k of ['energy', 'hygiene', 'fun']) if (fx[k]) L[k] = Math.max(0, Math.min(100, L[k] + fx[k]));
