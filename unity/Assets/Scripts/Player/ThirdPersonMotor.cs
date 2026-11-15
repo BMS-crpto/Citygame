@@ -67,6 +67,13 @@ namespace Citygame.Player
 
         public void MobileJump() { mobileJumpRequested = true; }
 
+        public void SetRiding(bool riding)
+        {
+            if (controller == null) controller = GetComponent<CharacterController>();
+            controller.enabled = !riding;
+            enabled = !riding;
+        }
+
         public void SetCamera(Transform cameraTarget)
         {
             cameraTransform = cameraTarget;
