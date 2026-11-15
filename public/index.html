@@ -2446,6 +2446,7 @@ function openApp(n){
   if(n==='Map'){closePhone();openMap();return}
   if(n==='Life'){closePhone();const b=$('lifeBtn');if(b)b.click();return}
   phone.classList.add('app-open');
+  appview.dataset.app=n;
   if(n==='Business')renderBusinesses();
   else if(n==='GPS')renderGps();
   else if(n==='Properties')renderProperties();
