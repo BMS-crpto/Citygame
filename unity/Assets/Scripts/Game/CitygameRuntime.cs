@@ -157,7 +157,6 @@ namespace Citygame.Game
                 else
                 {
                     selectedBusinessIndex = Mathf.Clamp(selectedBusinessIndex, 0, save.businesses.Count - 1);
-                    float listBottom = y + Mathf.Min(save.businesses.Count, 4) * 46f;
                     for (int i = 0; i < save.businesses.Count && i < 4; i++)
                     {
                         OwnedBusiness company = save.businesses[i];
