@@ -7,6 +7,7 @@ namespace Citygame.World
     {
         public static void Build(Transform root)
         {
+            ConfigureTropicalSky();
             Material road = MaterialFor(new Color(0.16f, 0.17f, 0.18f));
             Material concrete = MaterialFor(new Color(0.68f, 0.62f, 0.50f));
             Material paint = MaterialFor(new Color(0.85f, 0.42f, 0.12f));
@@ -117,6 +118,23 @@ namespace Citygame.World
             BusinessSpot spot = spotObject.AddComponent<BusinessSpot>();
             spot.Configure(name, category);
             CreateCube(name + " sign", root, position + new Vector3(0, size.y + 0.45f, -size.z * 0.51f), new Vector3(size.x * 0.8f, 0.6f, 0.2f), MaterialFor(new Color(0.12f, 0.16f, 0.2f)));
+        }
+
+
+        private static void ConfigureTropicalSky()
+        {
+            Shader skyShader = Shader.Find("Skybox/Procedural");
+            if (skyShader == null) return;
+            Material sky = new Material(skyShader);
+            if (sky.HasProperty("_AtmosphereThickness")) sky.SetFloat("_AtmosphereThickness", 1.15f);
+            if (sky.HasProperty("_SkyTint")) sky.SetColor("_SkyTint", new Color(0.48f, 0.66f, 0.88f));
+            if (sky.HasProperty("_GroundColor")) sky.SetColor("_GroundColor", new Color(0.42f, 0.38f, 0.32f));
+            if (sky.HasProperty("_Exposure")) sky.SetFloat("_Exposure", 1.12f);
+            if (sky.HasProperty("_SunSize")) sky.SetFloat("_SunSize", 0.035f);
+            RenderSettings.skybox = sky;
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Skybox;
+            RenderSettings.ambientIntensity = 1.1f;
+            DynamicGI.UpdateEnvironment();
         }
 
         private static GameObject CreateCube(string name, Transform root, Vector3 position, Vector3 scale, Material material)
