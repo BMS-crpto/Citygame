@@ -61,7 +61,8 @@ namespace Citygame.Game
         private string activePhoneApp = "Home";
         private string socialDraft = "";
         private string socialReplyDraft = "";
-        private int replyTarget = -1;\n        private bool interiorActive;\n        private Vector3 interiorReturnPosition;\n        private BusinessInterior activeInterior;
+        private int replyTarget = -1;
+        private bool interiorActive;\n        private Vector3 interiorReturnPosition;\n        private BusinessInterior activeInterior;
 
         private string SavePath => Path.Combine(Application.persistentDataPath, "citygame-unity-save.json");
 
