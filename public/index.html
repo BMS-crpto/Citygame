@@ -2149,6 +2149,7 @@ document.getElementById('play').onclick=()=>{
     else if(m.t==='chat')chatLine(m.name,m.text);
     else if(m.t==='social_feed'){socialPosts=Array.isArray(m.posts)?m.posts:[];if(appview.dataset.app==='Social')renderSocialFeed()}
     else if(m.t==='social_new'){if(m.post){socialPosts=[m.post,...socialPosts.filter(p=>p.id!==m.post.id)].slice(0,30);if(appview.dataset.app==='Social')renderSocialFeed()}}
+    else if(m.t==='social_update'){if(m.post){socialPosts=socialPosts.map(p=>p.id===m.post.id?m.post:p);if(appview.dataset.app==='Social')renderSocialFeed()}}
     else if(m.t==='pose')startPose(m.pose,m.secs);else if(m.t==='wallet'&&window.LG2)LG2.wallet(m);else if((m.t==='daily'||m.t==='gig')&&window.LG3)LG3.msg(m);
     else if(m.t==='tp'){
       if(carObj){const pc=carObj;pc.x=pos.x;pc.z=pos.z;pc.ry=pos.ry;pc.g.position.set(pc.x,0,pc.z);pc.g.rotation.y=pc.ry;scene.add(pc.g);carObj=null;myCol=-1;if(me)setCarMode(me,-1)}
@@ -2406,7 +2407,13 @@ function setQuality(q){quality=q;document.querySelectorAll('#qrow .q').forEach(x
 let socialPosts=[];
 function renderSocialFeed(){
  const feed=appview.querySelector('#socialFeed');if(!feed)return;
- feed.innerHTML=socialPosts.length?socialPosts.map(p=>'<div class="card"><b>'+escapeBusinessText(p.name||'Player')+'</b><br><small>'+escapeBusinessText(p.area||'Lagos City')+'</small><p style="white-space:pre-wrap;overflow-wrap:anywhere">'+escapeBusinessText(p.text)+'</p></div>').join(''):'<div class="card">No posts yet. Be the first to share something with Lagos!</div>';
+ feed.innerHTML=socialPosts.length?socialPosts.map(p=>{
+  const comments=Array.isArray(p.comments)?p.comments:[];
+  const likes=Array.isArray(p.likes)?p.likes.length:(+p.likes||0);
+  return '<article class="card social-post" style="margin:12px 0;padding:15px;background:linear-gradient(145deg,#20283a,#101722);border:1px solid #ffffff20;border-radius:18px"><div style="display:flex;align-items:center;gap:9px"><span style="font-size:25px">👤</span><div><b>'+escapeBusinessText(p.name||'Player')+'</b><br><small>'+escapeBusinessText(p.area||'Lagos City')+'</small></div><span style="margin-left:auto;font-size:11px;color:#aeb9cc">LAGOS LIFE</span></div><p style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:16px;line-height:1.5;margin:15px 0">'+escapeBusinessText(p.text)+'</p><div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap"><button class="pb q" data-social-like="'+escapeBusinessText(p.id)+'" style="background:'+(p.likedByMe?'#9b3158':'#303b50')+';color:white;padding:9px 13px">❤️ '+(p.likedByMe?'Liked':'Like')+' · '+likes+'</button><span style="font-size:12px;color:#c4cede">💬 '+comments.length+' replies</span></div><div style="margin-top:10px;padding-left:10px;border-left:2px solid #58657c">'+(comments.length?comments.slice(-4).map(c=>'<p style="margin:6px 0;font-size:13px"><b>'+escapeBusinessText(c.name||'Player')+':</b> '+escapeBusinessText(c.text)+'</p>').join(''):'<small style="color:#aeb9cc">Be the first to reply.</small>')+'</div><div style="display:flex;gap:6px;margin-top:10px"><input data-social-reply-input="'+escapeBusinessText(p.id)+'" maxlength="140" placeholder="Write a reply…" style="min-width:0;flex:1;width:0;padding:10px;border-radius:10px;background:#0c1220;color:white;border:1px solid #46516a;text-align:left"><button class="pb q" data-social-reply="'+escapeBusinessText(p.id)+'" style="padding:9px 12px">Reply</button></div></article>';
+ }).join(''):'<div class="card">No posts yet. Be the first to share something with Lagos!</div>';
+ feed.querySelectorAll('[data-social-like]').forEach(btn=>btn.addEventListener('click',()=>{if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'social_like',id:btn.dataset.socialLike}));else toast('Connect to multiplayer to like posts')}));
+ feed.querySelectorAll('[data-social-reply]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.socialReply,input=feed.querySelector('[data-social-reply-input="'+id+'"]'),text=input&&input.value.trim();if(!text)return;if(!ws||ws.readyState!==1){toast('Connect to multiplayer to reply');return}ws.send(JSON.stringify({t:'social_reply',id,text}));input.value=''}));
 }
 function renderSocial(){
  const messages=['Who is online in Lagos? 👋','Anyone want to cruise? 🚗','Meet me at the city center 📍','Let’s do a delivery run 📦','Good vibes in Lagos! 🎉','Anyone at the mall? 🛍️'];
