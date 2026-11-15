@@ -194,7 +194,7 @@ const tenants = saves._tenants = (saves._tenants && typeof saves._tenants === 'o
 // Player-owned businesses are shared across the Lagos server and stored with saved game data.
 const businesses = saves._businesses = (saves._businesses && typeof saves._businesses === 'object') ? saves._businesses : {};
 function saveBusinesses() { saveDirty = true; dirtySaves.add('_businesses'); }
-function businessList(viewerKey) { return Object.values(businesses).filter(b => b && BLD[+String(b.id).replace(/^b/, '')]).map(b => ({ id:b.id, name:b.name, kind:b.kind, icon:b.icon, area:b.area, x:b.x, z:b.z, owner:b.ownerName, isMine:b.ownerKey===viewerKey, balance:b.ownerKey===viewerKey?Math.max(0,Math.floor(+b.balance||0)):0 })); }
+function businessList(viewerKey) { return Object.values(businesses).filter(b => b && BLD[+String(b.id).replace(/^b/, '')]).map(b => ({ id:b.id, name:b.name, kind:b.kind, icon:b.icon, area:b.area, locationName:b.locationName||b.name, x:b.x, z:b.z, owner:b.ownerName, isMine:b.ownerKey===viewerKey, balance:b.ownerKey===viewerKey?Math.max(0,Math.floor(+b.balance||0)):0, staff:b.ownerKey===viewerKey&&Array.isArray(b.staff)?b.staff:[] })); }
 function sendBusinesses(p) { send(p.ws, { t:'x_businesses', businesses:businessList(pKey(p)) }); }
 function broadcastBusinesses(room) { for(const p of Object.values(rooms[room].players)) sendBusinesses(p); }
 function setTenant(id, t) { tenants[id] = t; saveDirty = true; dbPut('tenants', id, JSON.stringify(t)); }
