@@ -2147,6 +2147,8 @@ document.getElementById('play').onclick=()=>{
     else if(m.t==='npcsay')showNpc(m);
     else if(m.t==='speaker')showSpeaker(m);
     else if(m.t==='chat')chatLine(m.name,m.text);
+    else if(m.t==='social_feed'){socialPosts=Array.isArray(m.posts)?m.posts:[];if(appview.dataset.app==='Social')renderSocialFeed()}
+    else if(m.t==='social_new'){if(m.post){socialPosts=[m.post,...socialPosts.filter(p=>p.id!==m.post.id)].slice(0,30);if(appview.dataset.app==='Social')renderSocialFeed()}}
     else if(m.t==='pose')startPose(m.pose,m.secs);else if(m.t==='wallet'&&window.LG2)LG2.wallet(m);else if((m.t==='daily'||m.t==='gig')&&window.LG3)LG3.msg(m);
     else if(m.t==='tp'){
       if(carObj){const pc=carObj;pc.x=pos.x;pc.z=pos.z;pc.ry=pos.ry;pc.g.position.set(pc.x,0,pc.z);pc.g.rotation.y=pc.ry;scene.add(pc.g);carObj=null;myCol=-1;if(me)setCarMode(me,-1)}
@@ -2401,18 +2403,26 @@ function openApp(n){
   if(n==='Settings')appview.innerHTML=`<div class="card"><b>⚙️ CITY PHONE SETTINGS</b><br>Graphics:<br>${['low','med','high'].map(q=>`<button class="pb q ${quality===q?'sel':''}" onclick="setQuality('${q}')">${q.toUpperCase()}</button>`).join('')}</div><div class="card">Sound: <button class="pb q" onclick="$('mutebtn').click();openApp('Settings')">${muted?'🔇 Off':'🔊 On'}</button><br>Character appearance:<br><button class="pb q" onclick="closePhone();location.href='avatar-studio.html'">👤 Open Avatar Studio</button></div><div class="card"><b>Quick access</b><br><button class="pb q" onclick="openApp('Properties')">🏘️ Property finder</button><button class="pb q" onclick="openApp('Life')">📋 Career & Life</button><button class="pb q" onclick="openApp('GPS')">📍 GPS</button></div>`;
 }
 function setQuality(q){quality=q;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===q));applyQuality();openApp('Settings')}
+let socialPosts=[];
+function renderSocialFeed(){
+ const feed=appview.querySelector('#socialFeed');if(!feed)return;
+ feed.innerHTML=socialPosts.length?socialPosts.map(p=>'<div class="card"><b>'+escapeBusinessText(p.name||'Player')+'</b><br><small>'+escapeBusinessText(p.area||'Lagos City')+'</small><p style="white-space:pre-wrap;overflow-wrap:anywhere">'+escapeBusinessText(p.text)+'</p></div>').join(''):'<div class="card">No posts yet. Be the first to share something with Lagos!</div>';
+}
 function renderSocial(){
  const messages=['Who is online in Lagos? 👋','Anyone want to cruise? 🚗','Meet me at the city center 📍','Let’s do a delivery run 📦','Good vibes in Lagos! 🎉','Anyone at the mall? 🛍️'];
- appview.innerHTML='<div class="card"><b>🎉 CITY SOCIAL HUB</b><br><small>Quick messages to connect with players in your room.</small></div><div class="card"><b>Quick messages</b><div id="socialQuick"></div></div><div class="card"><label for="socialText">Write a message</label><input id="socialText" maxlength="180" placeholder="Say something to players..." style="width:100%;padding:11px;border-radius:9px;background:#101827;color:white;border:1px solid #46516a"><button class="pb q" id="socialSend" style="width:100%;margin-top:8px">Send to chat</button><small id="socialStatus">Messages go to your current multiplayer room.</small></div>';
+ appview.dataset.app='Social';
+ appview.innerHTML='<div class="card"><b>🎉 LAGOS SOCIAL FEED</b><br><small>Share a post with everyone in your multiplayer room.</small></div><div class="card"><label for="socialText">Write a post</label><textarea id="socialText" maxlength="180" rows="3" placeholder="What is happening in Lagos?" style="width:100%;padding:11px;border-radius:9px;background:#101827;color:white;border:1px solid #46516a;resize:vertical;text-align:left"></textarea><button class="pb q" id="socialSend" style="width:100%;margin-top:8px">📣 Publish post</button><small id="socialStatus">Posts appear in the feed below. Please wait for server confirmation.</small></div><div class="card"><b>Quick posts</b><div id="socialQuick"></div></div><div id="socialFeed"></div>';
  const quick=appview.querySelector('#socialQuick');
- messages.forEach((m,i)=>{const b=document.createElement('button');b.className='pb q';b.style.cssText='width:100%;margin:5px 0;text-align:left';b.textContent=m;b.addEventListener('click',()=>sendSocialMessage(i));quick.appendChild(b)});
- const send=()=>{const input=appview.querySelector('#socialText');if(input&&input.value.trim()){sendSocialText(input.value.trim());input.value=''}};
+ messages.forEach(m=>{const btn=document.createElement('button');btn.className='pb q';btn.style.cssText='width:100%;margin:5px 0;text-align:left';btn.textContent=m;btn.addEventListener('click',()=>{const input=appview.querySelector('#socialText');if(input){input.value=m;input.focus()}});quick.appendChild(btn)});
+ const send=()=>{const input=appview.querySelector('#socialText'),status=appview.querySelector('#socialStatus'),message=input&&input.value.trim();if(!message)return;if(!ws||ws.readyState!==1){status.textContent='Not connected to multiplayer. Reconnect before posting.';return}try{ws.send(JSON.stringify({t:'social_post',text:message.slice(0,180)}));status.textContent='Posting… waiting for the server.';input.value=''}catch(e){status.textContent='Could not send. Check your connection and try again.'}};
  appview.querySelector('#socialSend').addEventListener('click',send);
- appview.querySelector('#socialText').addEventListener('keydown',e=>{if(e.key==='Enter')send()});
+ appview.querySelector('#socialText').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+ renderSocialFeed();
+ if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'social_get'}));
 }
 function sendSocialText(message){
  if(!ws||ws.readyState!==1){toast('Multiplayer is reconnecting. Try again when connected.');return false}
- try{ws.send(JSON.stringify({t:'chat',text:String(message).slice(0,180)}));toast('Message sent to room chat');return true}catch(e){toast('Message could not be sent. Check your connection.');return false}
+ try{ws.send(JSON.stringify({t:'chat',text:String(message).slice(0,180)}));return true}catch(e){toast('Message could not be sent. Check your connection.');return false}
 }
 function sendSocialMessage(i){
  const messages=['Who is online in Lagos? 👋','Anyone want to cruise? 🚗','Meet me at the city center 📍','Let’s do a delivery run 📦','Good vibes in Lagos! 🎉','Anyone at the mall? 🛍️'];
