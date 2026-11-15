@@ -292,7 +292,11 @@ const NPCS = [
 ];
 // one staff member inside each kind of venue (rooms are built at x = 1300)
 for (const k of BUILD.ORDER) { const t = BUILD.TYPES[k], n = t.npc; NPCS.push({ id: 'v_' + k, name: n.name, title: n.title, place: 'v_' + k, x: t.room.x + n.dx, z: t.room.z + n.dz, ry: n.ry, look: n.look }); }
-BLD.filter(b => b.type === 'club').slice(0, 6).forEach((b, i) => PLACES.push({ id: 'club' + i, name: b.name + ' (Club)', icon: '🪩', x: Math.round(b.out.x), z: Math.round(b.out.z) }));
+// Every generated building is a real GPS and ride destination, not just scenery.
+BLD.forEach(b => {
+  const t = BUILD.TYPES[b.type];
+  PLACES.push({ id: 'b' + b.id, name: b.name, icon: t.icon, type: b.type, area: b.area, x: Math.round(b.out.x), z: Math.round(b.out.z) });
+});
 const WORLD = { houses: HOUSES, shops: SHOPS, jail: JAIL, bankDoor: BANK_DOOR, mallDoor: MALL_DOOR, places: PLACES, rides: RIDES,
   npcs: NPCS.map(n => ({ id: n.id, name: n.name, title: n.title, place: n.place, x: n.x, z: n.z, ry: n.ry, look: n.look })) };
 function newJob(p) {
