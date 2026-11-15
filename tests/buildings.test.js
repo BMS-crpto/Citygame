@@ -19,7 +19,8 @@ test('every generated building has a valid type and usable entrance coordinates'
       assert.ok(Number.isFinite(building.door[axis]), 'invalid door ' + axis + ' for ' + building.name);
       assert.ok(Number.isFinite(building.out[axis]), 'invalid exit ' + axis + ' for ' + building.name);
     }
-    assert.equal(building.area, Buildings.TYPES[building.type] ? building.area : '');
+    assert.equal(typeof building.area, 'string');
+    assert.ok(building.area.length > 0);
   }
 });
 
