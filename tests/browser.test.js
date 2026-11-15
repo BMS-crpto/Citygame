@@ -122,3 +122,13 @@ test('company registration works remotely and supports persistent staff manageme
   assert.match(client, /id="bizHire"/);
   assert.match(client, /data-biz-fire/);
 });
+
+
+test('phone Chat is a full app screen with live room messaging', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  assert.match(html, /else if\(n==='Chat'\)\{appview\.innerHTML=/);
+  assert.match(html, /id="phoneChatFeed"/);
+  assert.match(html, /id="phoneChatSend"/);
+  assert.match(html, /phoneChatAdd\(m\.name,m\.text\)/);
+  assert.match(html, /appview\.dataset\.app=n/);
+});
