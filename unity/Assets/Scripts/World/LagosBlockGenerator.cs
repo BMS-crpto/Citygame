@@ -47,11 +47,14 @@ namespace Citygame.World
         {
             GameObject car = CreateCube(name, root, position, new Vector3(3.4f, 1.1f, 1.8f), bodyMaterial);
             car.AddComponent<Citygame.World.RideableCar>();
-            CreateCube(name + " cabin", root, position + new Vector3(0f, 0.65f, 0f), new Vector3(1.8f, 0.8f, 1.45f), MaterialFor(new Color(0.22f, 0.28f, 0.32f)));
+            GameObject cabin = CreateCube(name + " cabin", root, position + new Vector3(0f, 0.65f, 0f), new Vector3(1.8f, 0.8f, 1.45f), MaterialFor(new Color(0.22f, 0.28f, 0.32f)));
+            cabin.transform.SetParent(car.transform, true);
             for (int side = -1; side <= 1; side += 2)
             {
-                CreateCube(name + " front wheel", root, position + new Vector3(1.05f, -0.35f, side * 0.92f), new Vector3(0.65f, 0.65f, 0.25f), road);
-                CreateCube(name + " rear wheel", root, position + new Vector3(-1.05f, -0.35f, side * 0.92f), new Vector3(0.65f, 0.65f, 0.25f), road);
+                GameObject frontWheel = CreateCube(name + " front wheel", root, position + new Vector3(1.05f, -0.35f, side * 0.92f), new Vector3(0.65f, 0.65f, 0.25f), road);
+                frontWheel.transform.SetParent(car.transform, true);
+                GameObject rearWheel = CreateCube(name + " rear wheel", root, position + new Vector3(-1.05f, -0.35f, side * 0.92f), new Vector3(0.65f, 0.65f, 0.25f), road);
+                rearWheel.transform.SetParent(car.transform, true);
             }
         }
 
