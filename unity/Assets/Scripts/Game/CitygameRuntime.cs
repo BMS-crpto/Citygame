@@ -49,11 +49,12 @@ namespace Citygame.Game
 
         private void Update()
         {
+            Vector3 playerPosition = motor != null ? motor.transform.position : transform.position;
             nearby = null;
             float best = 4.5f;
             foreach (BusinessSpot spot in FindObjectsOfType<BusinessSpot>())
             {
-                float distance = Vector3.Distance(transform.position, spot.transform.position);
+                float distance = Vector3.Distance(playerPosition, spot.transform.position);
                 if (distance < best) { best = distance; nearby = spot; }
             }
 
@@ -73,7 +74,7 @@ namespace Citygame.Game
             float carDistance = 4.5f;
             foreach (RideableCar car in FindObjectsOfType<RideableCar>())
             {
-                float distance = car.DistanceTo(transform.position);
+                float distance = car.DistanceTo(playerPosition);
                 if (distance < carDistance) { carDistance = distance; nearbyCar = car; }
             }
 
