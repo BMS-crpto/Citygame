@@ -254,8 +254,29 @@ namespace Citygame.Game
                 }
                 else if (activePhoneApp == "Map")
                 {
-                    GUI.Label(new Rect(x, y, w, 50f), "LAGOS CITY MAP"); y += 52f;
-                    GUI.Label(new Rect(x, y, w, 100f), "Explore the generated Lagos district.\nNearby business: " + (nearby != null ? nearby.BusinessName : "None") + "\nUse movement controls to navigate."); y += 110f;
+                    GUI.Label(new Rect(x, y, w, 34f), "LAGOS CITY MAP"); y += 38f;
+                    GUI.Label(new Rect(x, y, w, 34f), "Nearby: " + (nearby != null ? nearby.BusinessName : "No storefront in range")); y += 38f;
+                    Rect mapRect = new Rect(x, y, w, 260f);
+                    GUI.color = new Color(0.78f, 0.84f, 0.76f);
+                    GUI.Box(mapRect, GUIContent.none);
+                    GUI.color = new Color(0.25f, 0.27f, 0.29f);
+                    GUI.Box(new Rect(mapRect.x, mapRect.y + 118f, mapRect.width, 28f), GUIContent.none);
+                    GUI.Box(new Rect(mapRect.x + mapRect.width * 0.47f, mapRect.y, mapRect.width * 0.12f, mapRect.height), GUIContent.none);
+                    GUI.color = new Color(0.95f, 0.85f, 0.5f);
+                    GUI.Box(new Rect(mapRect.x, mapRect.y + 131f, mapRect.width, 2f), GUIContent.none);
+                    GUI.Box(new Rect(mapRect.x + mapRect.width * 0.525f, mapRect.y, 2f, mapRect.height), GUIContent.none);
+                    GUI.color = new Color(0.1f, 0.22f, 0.35f);
+                    foreach (BusinessSpot spot in FindObjectsOfType<BusinessSpot>())
+                    {
+                        Vector3 pos = spot.transform.position;
+                        float markerX = mapRect.x + Mathf.Clamp01((pos.x + 40f) / 80f) * (mapRect.width - 82f);
+                        float markerY = mapRect.y + Mathf.Clamp01((20f - pos.z) / 40f) * (mapRect.height - 30f);
+                        if (GUI.Button(new Rect(markerX, markerY, 82f, 28f), spot.BusinessName))
+                            notice = "Map location: " + spot.BusinessName + " (" + spot.Category + ")";
+                    }
+                    GUI.color = Color.white;
+                    y += 270f;
+                    GUI.Label(new Rect(x, y, w, 48f), "Tap a storefront marker for its category. Move through the district to discover businesses."); y += 54f;
                     if (GUI.Button(new Rect(x, y, w, 44f), "Return to city")) activePhoneApp = "Home";
                 }
                 else if (activePhoneApp == "Social")
