@@ -33,3 +33,27 @@ test('every local JavaScript file referenced by the game page exists', () => {
     assert.ok(fs.statSync(target).isFile(), 'script path is not a file: ' + source);
   }
 });
+
+test('phone Social app supports live likes, replies, and in-app post creation', () => {
+  const socialPath = path.join(root, 'public', 'city3d-social-emotes.js');
+  const social = fs.readFileSync(socialPath, 'utf8');
+  for (const feature of [
+    'bridge.X.socialPost',
+    'bridge.X.socialPublish',
+    "t:'social_post'",
+    "t:'social_like'",
+    "t:'social_reply'",
+    "m.t==='social_update'",
+    'data-x="socialLike"',
+    'data-x="socialReply"'
+  ]) {
+    assert.ok(social.includes(feature), 'Social app is missing: ' + feature);
+  }
+});
+
+test('server Social feed supports retrieving posts, publishing, likes, and replies', () => {
+  const server = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+  for (const event of ["m.t === 'social_get'", "m.t === 'social_post'", "m.t === 'social_like'", "m.t === 'social_reply'", "t: 'social_update'", "t: 'social_new'"]) {
+    assert.ok(server.includes(event), 'server is missing Social event: ' + event);
+  }
+});
