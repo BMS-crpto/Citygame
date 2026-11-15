@@ -502,7 +502,7 @@ function onConnection(ws) {
         const b = BLD[+bm[1]];
         if (!b || dist(b.door, p) > 8) return send(ws, { t: 'toast', text: 'Walk up to the door first' });
         const ownedBusiness = businesses['b' + b.id];
-        const businessVenue = { restaurant:'restaurant', fashion:'salon', tech:'office', supermarket:'supermarket', salon:'salon', lounge:'club', carwash:'supermarket', pharmacy:'pharmacy' };
+        const businessVenue = { restaurant:'restaurant', fashion:'fashion', tech:'office', supermarket:'supermarket', salon:'salon', lounge:'lounge', carwash:'carwash', pharmacy:'pharmacy' };
         const venueType = ownedBusiness ? (businessVenue[ownedBusiness.kind] || b.type) : b.type;
         const vt = BUILD.TYPES[venueType];
         p.inside = 'v_' + venueType; p.bld = b.id; p.car = -1; p.x = vt.room.x; p.z = vt.room.z + vt.hd - 4;
