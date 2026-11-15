@@ -544,7 +544,7 @@ function onConnection(ws) {
         ownedVenue.balance = Math.min(1e9, (Math.floor(+ownedVenue.balance) || 0) + cut);
         saveBusinesses();
         const owner = Object.values(R.players).find(q => pKey(q) === ownedVenue.ownerKey);
-        if (owner) send(owner.ws, { t:'toast', text:'🏪 '+ownedVenue.name+' earned ₦'+fmtN(cut)+' from a customer' });
+        if (owner) send(owner.ws, { t:'toast', text:'🏪 '+ownedVenue.name+' earned '+fmtN(cut)+' from a customer' });
       }
       const fx = vt.fx || {};
       if (fx.food) p.food = Math.max(0, Math.min(100, p.food + fx.food));
