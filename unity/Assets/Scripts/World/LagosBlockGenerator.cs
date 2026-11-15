@@ -41,7 +41,10 @@ namespace Citygame.World
         private static void CreateBuilding(Transform root, string name, Vector3 position, Vector3 size, Material material, BusinessCategory category)
         {
             GameObject building = CreateCube(name, root, position + Vector3.up * size.y * 0.5f, size, material);
-            BusinessSpot spot = building.AddComponent<BusinessSpot>();
+            GameObject spotObject = new GameObject(name + " business interaction point");
+            spotObject.transform.SetParent(root, false);
+            spotObject.transform.position = position + new Vector3(0f, 0.0f, -size.z * 0.65f);
+            BusinessSpot spot = spotObject.AddComponent<BusinessSpot>();
             spot.Configure(name, category);
             CreateCube(name + " sign", root, position + new Vector3(0, size.y + 0.45f, -size.z * 0.51f), new Vector3(size.x * 0.8f, 0.6f, 0.2f), MaterialFor(new Color(0.12f, 0.16f, 0.2f)));
         }
