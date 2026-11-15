@@ -94,3 +94,31 @@ test('landscape phone overlay scrolls the full app content on mobile', () => {
   assert.match(css, /#phone \.pbox\s*\{[\s\S]*height:auto!important/);
   assert.match(css, /#phone #appview\s*\{[\s\S]*overflow:visible!important/);
 });
+
+
+test('phone apps open as full-screen app views with in-app navigation', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  assert.match(html, /phone\.classList\.add\('app-open'\)/);
+  assert.match(html, /class="phone-appbar"/);
+  assert.match(html, /id="appBack"/);
+  assert.match(html, /#phone\.app-open #pgrid[\s\S]*display:none!important/);
+  assert.match(html, /#phone\.app-open #appview[\s\S]*flex:1/);
+});
+
+test('company registration works remotely and supports persistent staff management', () => {
+  const server = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+  const client = fs.readFileSync(htmlPath, 'utf8');
+  const start = server.indexOf("if (m.op === 'create')", server.indexOf("if (m.t === 'business')"));
+  const end = server.indexOf("if (!owned) return toast", start);
+  const create = server.slice(start, end);
+  assert.match(create, /const candidates = BLD\.filter\(q => q\.area === area/);
+  assert.match(create, /const area = String\(m\.area/);
+  assert.doesNotMatch(create, /dist\(q\.door,p\)/);
+  assert.match(server, /m\.op === 'hire'/);
+  assert.match(server, /m\.op === 'fire'/);
+  assert.match(server, /staff\.push\(/);
+  assert.match(server, /saveBusinesses\(\);savePlayer\(room,p\);sendBusinesses\(p\)/);
+  assert.match(client, /id="bizArea"/);
+  assert.match(client, /id="bizHire"/);
+  assert.match(client, /data-biz-fire/);
+});
