@@ -32,6 +32,7 @@ namespace Citygame.Game
 
         private SaveData save = new SaveData();
         private ThirdPersonMotor motor;
+        private DayNightCycle dayNight;
         private BusinessSpot nearby;
         private RideableCar nearbyCar;
         private float incomeClock;
@@ -44,6 +45,7 @@ namespace Citygame.Game
         private void Awake()
         {
             motor = FindObjectOfType<ThirdPersonMotor>();
+            dayNight = FindObjectOfType<DayNightCycle>();
             Load();
         }
 
@@ -87,6 +89,7 @@ namespace Citygame.Game
             GUI.skin.label.fontSize = Mathf.Clamp(Screen.width / 52, 14, 22);
             GUI.Box(new Rect(12, 12, 260, 74), "LAGOS LIFE | UNITY PROTOTYPE");
             GUI.Label(new Rect(24, 42, 230, 28), "Wallet: ₦" + save.cash.ToString("N0"));
+            if (dayNight != null) GUI.Label(new Rect(24, 64, 230, 20), "Lagos time: " + dayNight.ClockText);
 
             if (!string.IsNullOrEmpty(notice))
                 GUI.Box(new Rect(12, 92, Mathf.Min(Screen.width - 24, 420), 48), notice);
