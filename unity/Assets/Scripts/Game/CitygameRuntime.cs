@@ -60,7 +60,7 @@ namespace Citygame.Game
         private string activePhoneApp = "Home";
         private string socialDraft = "";
         private string socialReplyDraft = "";
-        private int replyTarget = -1;
+        private int replyTarget = -1;\n        private bool interiorActive;\n        private Vector3 interiorReturnPosition;\n        private BusinessInterior activeInterior;
 
         private string SavePath => Path.Combine(Application.persistentDataPath, "citygame-unity-save.json");
 
@@ -154,7 +154,7 @@ namespace Citygame.Game
 
             if (nearbyCar != null)
             {
-                string action = nearbyCar.IsOccupied ? "EXIT CAR" : "ENTER CAR";
+                if (interiorActive && GUI.Button(new Rect(Screen.width - 172f, Screen.height - 92f, 160f, 48f), "EXIT BUILDING")) ExitInterior();\n\n                string action = nearbyCar.IsOccupied ? "EXIT CAR" : "ENTER CAR";
                 if (GUI.Button(new Rect(Screen.width - button * 2.2f, Screen.height - button * 2.45f, button * 2f, button), action))
                 {
                     if (nearbyCar.IsOccupied) nearbyCar.ExitVehicle();
@@ -240,7 +240,7 @@ namespace Citygame.Game
                     {
                         GUI.Label(new Rect(x, y, w, 42f), nearby.BusinessName + "\n" + nearby.Category);
                         y += 44f;
-                        if (GUI.Button(new Rect(x, y, w, 46f), "Register business · ₦150,000")) Register(nearby);
+                        if (GUI.Button(new Rect(x, y, w, 44f), "Enter building")) EnterInterior(nearby);\n                        y += 50f;\n                        if (GUI.Button(new Rect(x, y, w, 46f), "Register business · ₦150,000")) Register(nearby);
                         y += 54f;
                     }
                     else { GUI.Label(new Rect(x, y, w, 48f), "Walk near a storefront to register a business."); y += 52f; }
@@ -428,7 +428,7 @@ namespace Citygame.Game
             GUI.color = Color.white;
         }
 
-        private void Register(BusinessSpot spot)
+        private void EnterInterior(BusinessSpot spot)\n        {\n            if (spot == null || motor == null || interiorActive) return;\n            interiorReturnPosition = motor.transform.position;\n            Vector3 roomOrigin = new Vector3(0f, 0f, 500f);\n            activeInterior = BusinessInterior.Create(spot, roomOrigin);\n            CharacterController controller = motor.GetComponent<CharacterController>();\n            if (controller != null) controller.enabled = false;\n            motor.transform.position = roomOrigin + new Vector3(0f, 0.1f, -3.7f);\n            motor.transform.rotation = Quaternion.identity;\n            if (controller != null) controller.enabled = true;\n            interiorActive = true;\n            nearby = null;\n            selectedDestination = null;\n            notice = "Entered " + spot.BusinessName + ". Use EXIT BUILDING to return to the street.";\n        }\n\n        private void ExitInterior()\n        {\n            if (!interiorActive || motor == null) return;\n            CharacterController controller = motor.GetComponent<CharacterController>();\n            if (controller != null) controller.enabled = false;\n            motor.transform.position = interiorReturnPosition;\n            if (controller != null) controller.enabled = true;\n            if (activeInterior != null) Destroy(activeInterior.gameObject);\n            activeInterior = null;\n            interiorActive = false;\n            notice = "Returned to the Lagos street.";\n        }\n\n        private void Register(BusinessSpot spot)
         {
             if (save.businesses.Exists(b => b.spotName == spot.BusinessName))
             { notice = "You already own this business."; return; }
