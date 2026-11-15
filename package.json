@@ -4,7 +4,8 @@
   "description": "Multiplayer 3D Lagos life sim. Dependency-free Node server + Three.js browser client.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "check": "sh scripts/check.sh"
   },
   "engines": {
     "node": ">=18"
