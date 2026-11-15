@@ -1,23 +1,33 @@
-# Citygame Unity Foundation
+# Citygame Unity Playable Prototype
 
-This is the Unity migration workspace for Citygame. The existing browser game in `public/` and `server.js` remains intact while the Unity foundation is built in parallel.
+This is the parallel Unity 6 migration workspace for Citygame. The existing browser game in `public/` and `server.js` remains preserved.
 
-## Engine
-- Unity 6 (6000.0 LTS line)
-- Initial target: Android/mobile; desktop editor for development
-- Runtime code is organized by gameplay domain under `Assets/Scripts`
+## Included prototype systems
+- Third-person capsule controller: keyboard walk, sprint, jump plus on-screen touch directional controls and jump button.
+- Follow camera.
+- Procedurally generated Lagos-inspired greybox street with named landmark/business spots.
+- Business registration when close to a spot (₦150,000 fee).
+- Hire staff (₦10,000 each, max 10 per owned business).
+- Prototype business revenue credited on a 20-second interval.
+- Local JSON save/load for wallet, business roster, staff and accumulated revenue.
+- Runtime business management overlay.
+
+## Engine and target
+- Unity 6 editor baseline: 6000.0.32f1
+- Initial target: Android/mobile; editor desktop for development
 
 ## Setup
-1. Install Unity Hub and a Unity 6 editor with Android Build Support (SDK/NDK + OpenJDK).
+1. Install Unity Hub and Unity 6 editor with Android Build Support (SDK/NDK + OpenJDK).
 2. Open the repository's `unity/` directory as a Unity project.
-3. Wait for package import.
-4. In Unity, use **Citygame > Create Foundation Scene** to create a playable greybox scene.
-5. Press Play to test the third-person movement foundation.
+3. Wait for imports and scripts to compile.
+4. Use **Citygame > Create Foundation Scene** from the editor menu.
+5. Press Play. Walk to the named greybox businesses and open the Business menu to register/hire.
 
-## Migration approach
-The browser game is not automatically converted. This workspace is a parallel native-engine foundation. Systems will be ported in stages: character/camera, Lagos world and addressable assets, interactions/buildings, business/economy, phone UI, then networking and persistence. Do not claim the Unity build is production-ready until built and device-tested.
+## Controls
+- Keyboard: WASD or arrow keys; Shift to sprint; Space to jump.
+- Touch: on-screen directional pad and Jump button.
+- Tab toggles the management overlay; the overlay also has a touch button.
+- Wallet and business data save to `Application.persistentDataPath/citygame-unity-save.json`.
 
-## Current scaffold limitations
-- Greybox scene uses a primitive floor and capsule player.
-- Movement uses Unity's legacy Input Manager axes (Horizontal/Vertical); configure active input handling accordingly if your editor is set to Input System only.
-- Multiplayer, account synchronization, business persistence, Lagos assets and production UI are not yet ported.
+## Important scope
+This is a playable greybox prototype foundation, not a complete production open-world game. The Unity workspace does not yet contain ported online multiplayer/accounts, cloud persistence, realistic Lagos building/character/vehicle assets, vehicle driving, full phone/social apps, production UI, or a generated Android APK. The current GitHub workflow tests the browser project and does not compile Unity C#; a Unity editor/device build is still required for verification. The browser game is unchanged and remains the current deployed experience unless a separate Unity build is created and deployed.
