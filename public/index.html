@@ -3593,7 +3593,7 @@ guard('mmroute',()=>{
 });
 
 // Public bridge for separately loaded phone-app modules.
-window.LAGOS_PHONE = { APPR, X, PX, S, phoneOpen, openApp: n => openApp(n), appview };
+window.LAGOS_PHONE = { APPR, X, PX, S, phoneOpen, openApp: n => openApp(n), appview, getCash:()=>myMoney, capturePhoto:()=>{const src=renderer.domElement,w=src.width,h=src.height,scale=Math.min(1,720/Math.max(w,h)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(w*scale));cv.height=Math.max(1,Math.round(h*scale));const ctx=cv.getContext('2d');ctx.drawImage(src,0,0,cv.width,cv.height);return cv.toDataURL('image/jpeg',0.76)} };
 console.log('Lagos Life v0.7 add-on loaded');
 })();
 
@@ -4289,6 +4289,7 @@ catch(e){console.warn('palms fallback',e);try{palmBatchBoxes();flushBatch()}catc
 </script>
 <script src="/city3d-social-emotes.js?v=2026111502"></script>
 <script src="/city-missions-career.js?v=202611142243"></script>
+<script src="/city-app-suite.js?v=2026111501"></script>
 <script src="/lagos-3d-polish.js?v=2026111503"></script>
 <script src="/citygame-world-finish.js?v=1"></script>
 <script src="/citygame-city-guide.js?v=2026111505"></script>
