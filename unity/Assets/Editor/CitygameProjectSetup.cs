@@ -14,11 +14,9 @@ namespace Citygame.Editor
         public static void CreateFoundationScene()
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-
             GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
             floor.name = "Lagos Greybox Ground";
             floor.transform.localScale = new Vector3(12f, 1f, 12f);
-
             GameObject cityRoot = new GameObject("Lagos Street Block");
             LagosBlockGenerator.Build(cityRoot.transform);
 
@@ -46,17 +44,19 @@ namespace Citygame.Editor
             light.type = LightType.Directional;
             light.intensity = 1.15f;
             lightObject.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+            DayNightCycle cycle = lightObject.AddComponent<DayNightCycle>();
+            SerializedObject cycleData = new SerializedObject(cycle);
+            cycleData.FindProperty("sun").objectReferenceValue = light;
+            cycleData.ApplyModifiedPropertiesWithoutUndo();
 
             GameObject gameSystems = new GameObject("Citygame Runtime Systems");
             gameSystems.AddComponent<CitygameRuntime>();
-
             if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
                 AssetDatabase.CreateFolder("Assets", "Scenes");
-
             EditorSceneManager.SaveScene(scene, "Assets/Scenes/CitygameFoundation.unity");
             AssetDatabase.SaveAssets();
             Selection.activeGameObject = player;
-            Debug.Log("Citygame playable greybox scene generated. Press Play to test movement, touch controls, business registration, hiring and local save.");
+            Debug.Log("Citygame scene generated with touch controls, business systems, local save and dynamic day/night lighting.");
         }
     }
 }
