@@ -9,8 +9,6 @@ namespace Citygame.World
         [SerializeField] private float minX = -38f;
         [SerializeField] private float maxX = 38f;
         [SerializeField] private float sidewalkZ = 9.5f;
-        private int direction = 1;
-
         public void Configure(float left, float right, float sidewalk)
         {
             minX = left;
