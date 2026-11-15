@@ -98,6 +98,40 @@
     #appview{max-height:34vh}
   }
   @media(max-height:650px){.pbox{height:96vh;padding:9px}.pgrid{gap:5px;padding:6px 2px}.app{min-height:55px}.app b{font-size:20px}#phoneSearch{padding:7px}}
+  /* Reliable Android landscape phone scrolling: scroll the overlay, not a clipped flex child. */
+  @media (orientation:landscape) and (max-height:600px){
+    #phone{
+      display:none;
+      flex-direction:column;
+      align-items:stretch;
+      justify-content:flex-start;
+      overflow-x:hidden!important;
+      overflow-y:auto!important;
+      -webkit-overflow-scrolling:touch;
+      touch-action:pan-y;
+      overscroll-behavior-y:contain;
+      padding:8px 10px max(18px,env(safe-area-inset-bottom));
+      gap:0;
+    }
+    #phone .pbox{
+      flex:0 0 auto;
+      width:min(96vw,900px);
+      height:auto!important;
+      min-height:0!important;
+      max-height:none!important;
+      margin:0 auto!important;
+      overflow:visible!important;
+      touch-action:pan-y;
+    }
+    #phone .pgrid{grid-template-columns:repeat(6,minmax(0,1fr));}
+    #phone #appview{max-height:none!important;min-height:0;overflow:visible!important;touch-action:pan-y;}
+  }
+  @media (orientation:landscape) and (max-height:420px){
+    #phone .pbox{width:min(98vw,1000px);padding:6px 10px}
+    #phone .pgrid{grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;padding:5px 1px}
+    #phone .app{min-height:45px;font-size:9px}
+    #phone .app b{font-size:17px}
+  }
   #bigmap{position:fixed;inset:0;background:#0b1424;display:none;z-index:9;flex-direction:row}
   #bigmap canvas{flex:none;touch-action:none}
   #mapside{flex:1;overflow:auto;padding:8px 10px;font-size:13px}
