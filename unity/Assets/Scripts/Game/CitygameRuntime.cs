@@ -235,7 +235,11 @@ namespace Citygame.Game
                 GUI.Label(new Rect(appArea.x + 98f, appArea.y + 2f, appArea.width - 100f, 32f), activePhoneApp.ToUpperInvariant());
                 GUI.color = Color.white;
                 Rect body = new Rect(appArea.x + 4f, appArea.y + 42f, appArea.width - 8f, appArea.height - 46f);
-                float contentHeight = activePhoneApp == "Social" ? Mathf.Max(800f, 360f + save.posts.Count * 150f) : 800f;
+                float contentHeight = activePhoneApp == "Social"
+                    ? Mathf.Max(800f, 360f + save.posts.Count * 220f)
+                    : activePhoneApp == "Business"
+                        ? Mathf.Max(1000f, 520f + FindObjectsOfType<BusinessSpot>().Length * 64f + save.businesses.Count * 60f)
+                        : 800f;
                 phoneScroll = GUI.BeginScrollView(body, phoneScroll, new Rect(0, 0, body.width - 18f, contentHeight));
                 float x = 0f, y = 0f, w = body.width - 28f;
 
@@ -252,7 +256,19 @@ namespace Citygame.Game
                         if (GUI.Button(new Rect(x, y, w, 46f), "Register business · ₦150,000")) Register(nearby);
                         y += 54f;
                     }
-                    else { GUI.Label(new Rect(x, y, w, 48f), "Walk near a storefront to register a business."); y += 52f; }
+                    else { GUI.Label(new Rect(x, y, w, 48f), "Register directly from your phone using the city directory below."); y += 52f; }
+
+                    GUI.Label(new Rect(x, y, w, 30f), "CITY BUSINESS DIRECTORY · PHONE REGISTRATION");
+                    y += 34f;
+                    BusinessSpot[] directory = FindObjectsOfType<BusinessSpot>();
+                    for (int d = 0; d < directory.Length; d++)
+                    {
+                        BusinessSpot location = directory[d];
+                        GUI.Label(new Rect(x + 4f, y, w * 0.58f, 38f), location.BusinessName + "\\n" + location.Category);
+                        if (GUI.Button(new Rect(x + w * 0.62f, y + 2f, w * 0.38f, 36f), "Register"))
+                            Register(location);
+                        y += 42f;
+                    }
                     GUI.Label(new Rect(x, y, w, 30f), "MY COMPANIES (" + save.businesses.Count + ")");
                     y += 32f;
                     if (save.businesses.Count > 0)
