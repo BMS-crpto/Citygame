@@ -100,9 +100,17 @@ namespace Citygame.Game
                 if (GUI.RepeatButton(new Rect(baseX + button, baseY + button, button, button), "↓")) input.y -= 1;
                 if (GUI.RepeatButton(new Rect(baseX, baseY + button, button, button), "←")) input.x -= 1;
                 if (GUI.RepeatButton(new Rect(baseX + button * 2, baseY + button, button, button), "→")) input.x += 1;
-                motor.SetMobileInput(input);
-                if (GUI.Button(new Rect(Screen.width - button * 1.25f, Screen.height - button * 1.35f, button, button), "JUMP"))
-                    motor.MobileJump();
+
+                if (motor.enabled)
+                {
+                    motor.SetMobileInput(input);
+                    if (GUI.Button(new Rect(Screen.width - button * 1.25f, Screen.height - button * 1.35f, button, button), "JUMP"))
+                        motor.MobileJump();
+                }
+                else if (nearbyCar != null && nearbyCar.IsOccupied)
+                {
+                    nearbyCar.SetMobileDriveInput(input);
+                }
             }
 
             if (nearbyCar != null)
