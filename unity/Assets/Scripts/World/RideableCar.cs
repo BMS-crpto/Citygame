@@ -13,6 +13,7 @@ namespace Citygame.World
         private ThirdPersonMotor occupant;
         private FollowCamera followCamera;
         private bool occupied;
+        private Vector2 mobileDriveInput;
 
         public bool IsOccupied => occupied;
         public float DistanceTo(Vector3 point) => Vector3.Distance(transform.position, point);
@@ -41,13 +42,18 @@ namespace Citygame.World
         private void Update()
         {
             if (!occupied || occupant == null) return;
-            float throttle = Input.GetAxisRaw("Vertical");
-            float steering = Input.GetAxisRaw("Horizontal");
+            Vector2 keyboard = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+            Vector2 input = mobileDriveInput.sqrMagnitude > 0.001f ? mobileDriveInput : keyboard;
+            input = Vector2.ClampMagnitude(input, 1f);
+            float throttle = input.y;
+            float steering = input.x;
             transform.Rotate(0f, steering * turnSpeed * Mathf.Clamp01(Mathf.Abs(throttle) + 0.15f) * Time.deltaTime, 0f);
             transform.position += transform.forward * throttle * driveSpeed * Time.deltaTime;
 
             if (Input.GetKeyDown(KeyCode.E)) ExitVehicle();
         }
+
+        public void SetMobileDriveInput(Vector2 value) { mobileDriveInput = Vector2.ClampMagnitude(value, 1f); }
 
         public bool Enter(ThirdPersonMotor player)
         {
@@ -71,6 +77,7 @@ namespace Citygame.World
             if (followCamera != null) followCamera.SetTarget(occupant.transform);
             occupant = null;
             occupied = false;
+            mobileDriveInput = Vector2.zero;
         }
     }
 }
