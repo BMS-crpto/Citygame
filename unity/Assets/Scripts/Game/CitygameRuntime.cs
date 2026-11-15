@@ -35,6 +35,7 @@ namespace Citygame.Game
         private float incomeClock;
         private string notice = "Welcome to Lagos Life. Explore and build your business.";
         private bool menuOpen;
+        private int selectedBusinessIndex;
 
         private string SavePath => Path.Combine(Application.persistentDataPath, "citygame-unity-save.json");
 
@@ -100,34 +101,56 @@ namespace Citygame.Game
 
             if (menuOpen)
             {
-                float x = Screen.width - 244, y = 70;
-                GUI.Box(new Rect(x, y, 232, 300), "BUSINESS MANAGEMENT");
+                float x = Screen.width - 270, y = 70;
+                float panelHeight = Mathf.Min(Screen.height - 90, 520f);
+                GUI.Box(new Rect(x, y, 258, panelHeight), "PHONE · MY COMPANIES");
                 y += 34;
                 if (nearby != null)
                 {
-                    GUI.Label(new Rect(x + 12, y, 208, 28), "Nearby: " + nearby.BusinessName);
+                    GUI.Label(new Rect(x + 12, y, 234, 28), "Nearby: " + nearby.BusinessName);
                     y += 32;
-                    if (GUI.Button(new Rect(x + 12, y, 208, 42), "Register · ₦150,000"))
+                    if (GUI.Button(new Rect(x + 12, y, 234, 40), "Register · ₦150,000"))
                         Register(nearby);
                     y += 48;
                 }
-                else GUI.Label(new Rect(x + 12, y, 208, 48), "Walk close to a marked business spot to register.");
-                y += 58;
-                if (save.businesses.Count > 0)
+                else
                 {
-                    OwnedBusiness first = save.businesses[0];
-                    GUI.Label(new Rect(x + 12, y, 208, 28), first.spotName + " | Staff " + first.staff + "/" + StaffLimit);
-                    y += 32;
-                    if (GUI.Button(new Rect(x + 12, y, 208, 42), "Hire staff · ₦10,000"))
-                        Hire(first);
+                    GUI.Label(new Rect(x + 12, y, 234, 42), "Walk to a business frontage to register it.");
                     y += 48;
-                    if (GUI.Button(new Rect(x + 12, y, 208, 42), "Collect / Save earnings"))
-                    {
-                        Save();
-                        notice = "Business earnings are credited automatically. Saved.";
-                    }
                 }
-                if (GUI.Button(new Rect(x + 12, y + 48, 208, 38), "Save game"))
+
+                GUI.Label(new Rect(x + 12, y, 234, 28), "Owned companies: " + save.businesses.Count);
+                y += 30;
+                if (save.businesses.Count == 0)
+                {
+                    GUI.Label(new Rect(x + 12, y, 234, 48), "Register a business to manage staff and income.");
+                    y += 52;
+                }
+                else
+                {
+                    selectedBusinessIndex = Mathf.Clamp(selectedBusinessIndex, 0, save.businesses.Count - 1);
+                    float listBottom = y + Mathf.Min(save.businesses.Count, 4) * 46f;
+                    for (int i = 0; i < save.businesses.Count && i < 4; i++)
+                    {
+                        OwnedBusiness company = save.businesses[i];
+                        string row = (i == selectedBusinessIndex ? "▶ " : "") + company.spotName +
+                            " · Staff " + company.staff + "/" + StaffLimit;
+                        if (GUI.Button(new Rect(x + 12, y, 234, 42), row))
+                            selectedBusinessIndex = i;
+                        y += 46;
+                    }
+                    y += 4;
+                    OwnedBusiness selected = save.businesses[selectedBusinessIndex];
+                    GUI.Label(new Rect(x + 12, y, 234, 30), "Category: " + selected.category);
+                    y += 30;
+                    GUI.Label(new Rect(x + 12, y, 234, 30), "Total earned: ₦" + selected.totalEarned.ToString("N0"));
+                    y += 32;
+                    if (GUI.Button(new Rect(x + 12, y, 234, 40), "Hire staff · ₦10,000"))
+                        Hire(selected);
+                    y += 46;
+                }
+
+                if (GUI.Button(new Rect(x + 12, y, 234, 38), "Save game"))
                 {
                     Save();
                     notice = "Game saved on this device.";
