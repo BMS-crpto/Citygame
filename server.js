@@ -366,7 +366,14 @@ function onConnection(ws) {
       }
       np.life = newLife(); if (sv && sv.life) restoreLife(np.life, sv.life); restoreInv(np, sv && sv.inv);
       np.ext = loadExt(sv && sv.ext); ensureAcct(np); if (np.ext.role && ROLES.includes(np.ext.role)) np.role = np.ext.role;
-      send(ws, { t: 'welcome', id, room, world: WORLD, path: np.path, first, pathInfo: PATHS[np.path], start: START[np.path], starter: np.starter || null, home: homeInfo(np) });
+      // Spawn the player inside their active home instead of at the random street position.
+      const home = homeInfo(np);
+      if (home) {
+        const homePlace = placeInfo('house' + home.unit);
+        if (homePlace) { np.inside = 'house' + home.unit; np.car = -1; np.x = homePlace.room.x; np.z = homePlace.room.z + homePlace.room.hd - 4; np.ry = Math.PI; }
+      }
+      send(ws, { t: 'welcome', id, room, world: WORLD, path: np.path, first, pathInfo: PATHS[np.path], start: START[np.path], starter: np.starter || null, home });
+      if (np.inside && home) send(ws, { t: 'int', place: np.inside, x: np.x, z: np.z });
       if (sv && !first) send(ws, { t: 'toast', text: '💾 Welcome back! Progress restored' });
       send(ws, { t: 'catalog', items: Object.entries(ITEMS).map(([id, i]) => ({ id, name: i.name, icon: i.icon, cat: i.cat, price: i.price, desc: i.desc })) });
       sendLife(np, rooms[room]); sendExtras(np);
