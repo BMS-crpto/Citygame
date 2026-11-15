@@ -135,7 +135,7 @@
   /* Native-feeling full-screen phone apps */
   #phone.app-open .pbox>div:first-child{display:none!important}
   #phone.app-open #pgrid,#phone.app-open #phoneSearch{display:none!important}
-  #phone.app-open #appview{display:block;min-height:0;margin:0;overflow:visible;text-align:left}
+  #phone.app-open #appview{display:block;flex:1;min-height:0;margin:0;overflow:visible;text-align:left}
   #phone.app-open .pbox{display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .phone-appbar{position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:9px;margin:0 -2px 12px;padding:7px 4px 11px;background:#0c111d;border-bottom:1px solid #ffffff20}
   .phone-appbar>div{flex:1;min-width:0;text-align:left}
@@ -2383,7 +2383,7 @@ let gps=null,jobInfo=null,jobTarget=null,selPlace=null,mapTimer=null,bmHits=[],c
 function syncCityBusinesses(list){
   cityBusinesses=Array.isArray(list)?list:[];
   if(world)for(const b of cityBusinesses){const p=world.places.find(x=>x.id===b.id);if(p){p.name=b.name;p.icon=b.icon;p.business=true;p.owner=b.owner;p.area=b.area}}
-  if(phone.style.display==='flex'&&$('appview')&&$('appview').dataset.app==='Business')renderBusinesses();
+  if(phone.style.display==='flex'&&$('appview')&&$('appview').dataset.app==='Business')openApp('Business');
 }
 const dist2=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
 function placesList(){
@@ -2409,7 +2409,7 @@ function businessSend(op,data={}){
 function renderBusinesses(){
   const mine=cityBusinesses.find(b=>b.isMine);
   appview.dataset.app='Business';
-  const areas=['Ikeja','Surulere','Lekki','Victoria Island','Ikoyi','Agege','Yaba','Mushin','Ajah','Eko Atlantic'];
+  const areas=['Ikeja GRA','Allen Avenue','Surulere','Ojuelegba','Lekki Phase 1','Lekki Phase 2','Victoria Island','Ikoyi','Agege','Mushin','Yaba','Oshodi','Ajah','Eko Atlantic','Epe','Ojo','Festac Town','Ikorodu','Ojota','Apapa','Badagry Road','Maryland','Lagos Mainland'];
   const areaOptions=areas.map(a=>'<option value="'+a+'">'+a+'</option>').join('');
   let h='<div class="card"><div style="font-size:12px;color:#a78bfa;font-weight:800;letter-spacing:1.5px">LAGOS LIFE • COMPANY HQ</div><h2 style="margin:7px 0">🏢 Company Manager</h2><p>Register and manage your company from your phone. Pick a Lagos district for your company location—no need to travel to the building.</p><b>One-time registration: ₦150,000</b></div>';
   if(mine){
