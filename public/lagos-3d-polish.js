@@ -6,14 +6,14 @@
    // Explicit color pipeline makes material colors and textures more consistent across Android browsers.
    if('outputColorSpace' in renderer&&THREE.SRGBColorSpace)renderer.outputColorSpace=THREE.SRGBColorSpace;else if(THREE.sRGBEncoding)renderer.outputEncoding=THREE.sRGBEncoding;
    renderer.toneMapping=THREE.ACESFilmicToneMapping;
-   renderer.toneMappingExposure=1.08;
+   renderer.toneMappingExposure=1.0;
    renderer.shadowMap.enabled=!(window.CITYGAME_MOBILE||(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)));
    renderer.shadowMap.type=THREE.PCFSoftShadowMap;
    // Two low-intensity practical fill lights add depth to the existing city materials without
    // changing gameplay positions, collisions, or server-authoritative player state.
-   const fillA=new THREE.PointLight(0x8bdde8,0.32,125,2);
+   const fillA=new THREE.PointLight(0x8bdde8,0.08,125,2);
    fillA.position.set(18,18,24);fillA.castShadow=false;window.scene.add(fillA);
-   const fillB=new THREE.PointLight(0xffc887,0.24,110,2);
+   const fillB=new THREE.PointLight(0xffc887,0.06,110,2);
    fillB.position.set(-30,12,-18);fillB.castShadow=false;window.scene.add(fillB);
    // Refine reflective materials already used by cars, character accessories and premium props.
    window.scene.traverse(o=>{
@@ -31,6 +31,6 @@
      });
    });
    // Keep the scene treatment subtle on smaller devices: retain the current renderer DPR cap.
-   renderer.domElement.style.filter='contrast(1.045) saturate(1.10) brightness(1.015)';
+   renderer.domElement.style.filter='contrast(1.08) saturate(1.12) brightness(0.98)';
  }catch(err){console.warn('Lagos 3D polish safely skipped:',err)}
 })();
