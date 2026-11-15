@@ -41,6 +41,8 @@ namespace Citygame.World
             BuildCar(root, "Lagos Taxi", new Vector3(-25f, 0.65f, -3.2f), paint);
             BuildCar(root, "City Sedan", new Vector3(2f, 0.65f, -3.2f), green);
             BuildCar(root, "Street Shuttle", new Vector3(28f, 0.65f, -3.2f), concrete);
+
+            BuildPedestrians(root);
         }
 
         private static void BuildCar(Transform root, string name, Vector3 position, Material bodyMaterial)
@@ -56,6 +58,22 @@ namespace Citygame.World
                 frontWheel.transform.SetParent(car.transform, true);
                 GameObject rearWheel = CreateCube(name + " rear wheel", root, position + new Vector3(-1.05f, -0.35f, side * 0.92f), new Vector3(0.65f, 0.65f, 0.25f), wheelMaterial);
                 rearWheel.transform.SetParent(car.transform, true);
+            }
+        }
+
+        private static void BuildPedestrians(Transform root)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                GameObject pedestrian = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                pedestrian.name = "Lagos Sidewalk Pedestrian " + (i + 1);
+                pedestrian.transform.SetParent(root, false);
+                pedestrian.transform.position = new Vector3(-34f + i * 9f, 0.9f, i % 2 == 0 ? 7.5f : -7.5f);
+                pedestrian.transform.localScale = new Vector3(0.65f, 0.9f, 0.65f);
+                pedestrian.GetComponent<Renderer>().sharedMaterial = MaterialFor(new Color(
+                    Random.Range(0.25f, 0.85f), Random.Range(0.2f, 0.75f), Random.Range(0.2f, 0.8f)));
+                SidewalkPedestrian walker = pedestrian.AddComponent<SidewalkPedestrian>();
+                walker.Configure(-38f, 38f, i % 2 == 0 ? 7.5f : -7.5f);
             }
         }
 
