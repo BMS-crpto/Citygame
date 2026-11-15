@@ -1,0 +1,46 @@
+name: Unity Android build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-build:
+    name: Compile Unity project and build Android player
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify Unity license secret is configured
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          if [ -z "$UNITY_LICENSE" ]; then
+            echo "::error::Add the UNITY_LICENSE repository secret before running this workflow. See the Unity build setup notes in this workflow."
+            exit 1
+          fi
+
+      - name: Build Unity Android player
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: unity
+          buildTarget: Android
+          buildName: Citygame
+          buildPath: build/Android
+          unityVersion: 6000.0.32f1
+          allowDirtyBuild: true
+
+      - name: Upload Android build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Citygame-Android
+          path: build/Android
+          if-no-files-found: error
+          retention-days: 7
