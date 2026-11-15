@@ -427,7 +427,7 @@ function onConnection(ws) {
       p.ride = null; if (d) { p.x = d.x + 3; p.z = d.z + 1; }
       send(ws, { t: 'tp', x: p.x, z: p.z });
     } else if (m.t === 'social_get') {
-      send(ws, { t: 'social_feed', posts: (R.feed || []).slice(-30).reverse() });
+      send(ws, { t: 'social_feed', posts: (R.feed || []).slice(-30).reverse().map(q => ({...q, likes:Array.isArray(q.likes)?q.likes:[], comments:Array.isArray(q.comments)?q.comments:[], likedByMe:Array.isArray(q.likes)&&q.likes.includes(p.id)})) });
     } else if (m.t === 'social_post') {
       const text = String(m.text || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 180);
       if (!text) return;
@@ -435,7 +435,24 @@ function onConnection(ws) {
       R.feed = R.feed || []; const post = { id: Date.now() + '-' + p.id, name: p.name, text, ts: now, area: p.inside || 'Lagos City' };
       R.feed.push(post); if (R.feed.length > 50) R.feed.shift();
       p.ext.socialPosts = (p.ext.socialPosts || 0) + 1;
+      post.likes = []; post.comments = [];
       broadcast(room, { t: 'social_new', post }); checkMissions(p, R); savePlayer(room, p);
+    } else if (m.t === 'social_like') {
+      const post = (R.feed || []).find(q => q.id === String(m.id || ''));
+      if (!post) return send(ws, { t: 'toast', text: 'That post is no longer available' });
+      post.likes = Array.isArray(post.likes) ? post.likes : [];
+      const at = post.likes.indexOf(p.id);
+      if (at >= 0) post.likes.splice(at, 1); else post.likes.push(p.id);
+      broadcast(room, { t: 'social_update', post });
+    } else if (m.t === 'social_reply') {
+      const post = (R.feed || []).find(q => q.id === String(m.id || ''));
+      const reply = String(m.text || '').replace(/[\\u0000-\\u001f<>]/g, '').trim().slice(0, 140);
+      if (!post || !reply) return;
+      if (!cooldown(p, 'social_reply', 1800)) return send(ws, { t: 'toast', text: 'Please wait before replying again' });
+      post.comments = Array.isArray(post.comments) ? post.comments : [];
+      post.comments.push({ id: Date.now() + '-' + p.id, name: p.name, text: reply, ts: now });
+      if (post.comments.length > 30) post.comments.shift();
+      broadcast(room, { t: 'social_update', post });
     } else if (m.t === 'emote') {
       const em = ['wave','dance','cheer','laugh','heart','flex','sit']; if (!em.includes(m.id)) return;
       if (p.jailUntil > now || p.inside || p.travelUntil > now) return send(ws, { t: 'toast', text: 'You cannot emote right now' });
