@@ -194,7 +194,7 @@ const tenants = saves._tenants = (saves._tenants && typeof saves._tenants === 'o
 // Player-owned businesses are shared across the Lagos server and stored with saved game data.
 const businesses = saves._businesses = (saves._businesses && typeof saves._businesses === 'object') ? saves._businesses : {};
 function saveBusinesses() { saveDirty = true; dirtySaves.add('_businesses'); }
-function businessList(viewerKey) { return Object.values(businesses).filter(b => b && BLD[+String(b.id).replace(/^b/, '')]).map(b => ({ id:b.id, name:b.name, kind:b.kind, icon:b.icon, area:b.area, locationName:b.locationName||b.name, x:b.x, z:b.z, owner:b.ownerName, isMine:b.ownerKey===viewerKey, balance:b.ownerKey===viewerKey?Math.max(0,Math.floor(+b.balance||0)):0, staff:b.ownerKey===viewerKey&&Array.isArray(b.staff)?b.staff:[] })); }
+function businessList(viewerKey) { return Object.values(businesses).filter(b => b && BLD[+String(b.id).replace(/^b/, '')]).map(b => ({ id:b.id, name:b.name, kind:b.kind, icon:b.icon, area:b.area, locationName:b.locationName||b.name, x:b.x, z:b.z, owner:b.ownerName, isMine:b.ownerKey===viewerKey, balance:b.ownerKey===viewerKey?Math.max(0,Math.floor(+b.balance||0)):0, staff:b.ownerKey===viewerKey&&Array.isArray(b.staff)?b.staff:[], created:b.created||0 })); }
 function sendBusinesses(p) { send(p.ws, { t:'x_businesses', businesses:businessList(pKey(p)) }); }
 function broadcastBusinesses(room) { for(const p of Object.values(rooms[room].players)) sendBusinesses(p); }
 function setTenant(id, t) { tenants[id] = t; saveDirty = true; dbPut('tenants', id, JSON.stringify(t)); }
@@ -933,7 +933,7 @@ function shopOp(room, p, m) {
   if (!it || typeof m.id !== 'string' || !Object.prototype.hasOwnProperty.call(ITEMS, m.id)) return;
   const n = it.cat === 'tool' ? 1 : Math.max(1, Math.min(10, Math.floor(+m.qty) || 1));
   if (m.op === 'buy') {
-    if (!atShop(p)) return me('Walk to a shop or the Grand Market first');
+    if (m.source !== 'phone' && !atShop(p)) return me('Walk to a shop or use the Lagos Market app');
     if (it.cat === 'tool' && p.inv[m.id]) return me('You already own that');
     if (bagCount(p) + n > BAG_CAP) return me(`Bag full (${BAG_CAP} items)`);
     const cost = it.price * n;
@@ -941,7 +941,7 @@ function shopOp(room, p, m) {
     p.inv[m.id] = (p.inv[m.id] || 0) + n; L.bought++;
     me(`${it.icon} Bought ${it.name}${n > 1 ? ' x' + n : ''}`);
   } else if (m.op === 'sell') {
-    if (!atShop(p)) return me('Walk to a shop or the Grand Market to sell');
+    if (m.source !== 'phone' && !atShop(p)) return me('Walk to a shop or use the Lagos Market app to sell');
     if ((p.inv[m.id] || 0) < n) return me('You do not have that');
     takeItem(p, m.id, n); addMoney(p, Math.floor(it.price / 2) * n, 'Sold ' + it.name + (n > 1 ? ' x' + n : '')); me(`💰 Sold ${it.name}`);
   } else if (m.op === 'use') {
