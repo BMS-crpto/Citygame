@@ -194,8 +194,9 @@ const tenants = saves._tenants = (saves._tenants && typeof saves._tenants === 'o
 // Player-owned businesses are shared across the Lagos server and stored with saved game data.
 const businesses = saves._businesses = (saves._businesses && typeof saves._businesses === 'object') ? saves._businesses : {};
 function saveBusinesses() { saveDirty = true; dirtySaves.add('_businesses'); }
-function businessList() { return Object.values(businesses).filter(b => b && BLD[+String(b.id).replace(/^b/, '')]).map(b => ({ id:b.id, name:b.name, kind:b.kind, icon:b.icon, area:b.area, x:b.x, z:b.z, owner:b.ownerName, balance:Math.max(0,Math.floor(+b.balance||0)) })); }
-function sendBusinesses(p) { send(p.ws, { t:'x_businesses', businesses:businessList() }); }
+function businessList(viewerKey) { return Object.values(businesses).filter(b => b && BLD[+String(b.id).replace(/^b/, '')]).map(b => ({ id:b.id, name:b.name, kind:b.kind, icon:b.icon, area:b.area, x:b.x, z:b.z, owner:b.ownerName, isMine:b.ownerKey===viewerKey, balance:b.ownerKey===viewerKey?Math.max(0,Math.floor(+b.balance||0)):0 })); }
+function sendBusinesses(p) { send(p.ws, { t:'x_businesses', businesses:businessList(pKey(p)) }); }
+function broadcastBusinesses(room) { for(const p of Object.values(rooms[room].players)) sendBusinesses(p); }
 function setTenant(id, t) { tenants[id] = t; saveDirty = true; dbPut('tenants', id, JSON.stringify(t)); }
 async function loadStore() {
   if (!UP_ON) { console.log('storage: FILES ONLY. On Render free this is wiped on restart. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for permanent accounts.'); return; }
@@ -500,9 +501,12 @@ function onConnection(ws) {
       if (bm) {                                   // any ordinary building: restaurant, club, office, home...
         const b = BLD[+bm[1]];
         if (!b || dist(b.door, p) > 8) return send(ws, { t: 'toast', text: 'Walk up to the door first' });
-        const vt = BUILD.TYPES[b.type];
-        p.inside = 'v_' + b.type; p.bld = b.id; p.car = -1; p.x = vt.room.x; p.z = vt.room.z + vt.hd - 4;
-        send(ws, { t: 'int', place: p.inside, x: p.x, z: p.z, name: b.name });
+        const ownedBusiness = businesses['b' + b.id];
+        const businessVenue = { restaurant:'restaurant', fashion:'salon', tech:'office', supermarket:'supermarket', salon:'salon', lounge:'club', carwash:'supermarket', pharmacy:'pharmacy' };
+        const venueType = ownedBusiness ? (businessVenue[ownedBusiness.kind] || b.type) : b.type;
+        const vt = BUILD.TYPES[venueType];
+        p.inside = 'v_' + venueType; p.bld = b.id; p.car = -1; p.x = vt.room.x; p.z = vt.room.z + vt.hd - 4;
+        send(ws, { t: 'int', place: p.inside, x: p.x, z: p.z, name: ownedBusiness ? ownedBusiness.name : b.name });
         return;
       }
       const info = placeInfo(m.place);
@@ -1131,7 +1135,7 @@ function extraMsg(room, p, m, now) {
       if (!charge(p, 150000, 'Started business: '+name)) return true;
       const id='b'+b.q.id, [icon,label]=kinds[kind];
       businesses[id]={id,ownerKey:key,ownerName:p.name,name,kind,icon,area:b.q.area||'Lagos',x:Math.round(b.q.out.x),z:Math.round(b.q.out.z),balance:0,created:now};
-      saveBusinesses(); broadcast(room,{t:'x_businesses',businesses:businessList()});
+      saveBusinesses(); broadcastBusinesses(room);
       broadcast(room,{t:'toast',text:'🏪 '+p.name+' opened '+name+' in '+(b.q.area||'Lagos')+'!'});
       savePlayer(room,p); return true;
     }
