@@ -487,7 +487,8 @@ function onConnection(ws) {
       if (m.place === 'home') { const h = myHouse(p); if (!h) return send(ws, { t: 'toast', text: 'You do not own a house yet' }); dest = { x: h.out.x, z: h.out.z, name: 'Home' }; }
       else dest = PLACES.find(q => q.id === m.place);
       const ride = RIDES[m.ride];
-      if (!dest || !ride) return;
+      if (!dest) return send(ws, { t: 'toast', text: 'That destination is unavailable. Refresh the map and choose another place.' });
+      if (!ride) return send(ws, { t: 'toast', text: 'That transport option is unavailable. Choose another ride.' });
       const AIRP = PLACES.find(q => q.id === 'airport');
       if (m.ride === 'jet' && !(dist(p, AIRP) < 60 || dest.id === 'airport')) return send(ws, { t: 'toast', text: '✈️ Jets only fly to or from Lagos Airport' });
       const d = dist(p, dest);
@@ -569,7 +570,7 @@ function onConnection(ws) {
       send(ws, { t: 'toast', text: vpay ? vt.msg.replace(/₦[\d,]+/, '₦' + vpay.toLocaleString('en-NG')) : vt.msg });
       sendLife(p, rooms[room]);
     } else if (m.t === 'bank') {
-      if (p.inside !== 'bank' || dist(p, ATM) > 7) return send(ws, { t: 'toast', text: 'Use an ATM inside the bank' });
+      if (p.inside !== 'bank' || dist(p, ATM) > 12) return send(ws, { t: 'toast', text: 'Use an ATM inside the bank' });
       const a = m.amt === 'all' ? (m.op === 'dep' ? p.money : p.bank) : Math.floor(+m.amt);
       if (!(a > 0) || a > 1e9) return send(ws, { t: 'toast', text: 'Pick an amount' });
       if (m.op === 'dep') {
@@ -578,7 +579,8 @@ function onConnection(ws) {
       } else if (m.op === 'wd') {
         if (a > p.bank) return send(ws, { t: 'toast', text: 'Not enough in your account' });
         p.bank -= a; p.money += a; send(ws, { t: 'toast', text: `🏦 Took out ₦${a}` });
-      }
+      } else return send(ws, { t: 'toast', text: 'Choose deposit or withdrawal' });
+      savePlayer(room, p);
     } else if (m.t === 'daily') {
       const E = p.ext, d = lagosDay();
       if (m.op === 'claim') {
