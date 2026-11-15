@@ -191,6 +191,11 @@ function flushSaves() {
 }
 // who rents which house: houseId -> { key, name, until(ms) }. Kept inside saves._tenants (file) and the 'tenants' hash (Upstash)
 const tenants = saves._tenants = (saves._tenants && typeof saves._tenants === 'object') ? saves._tenants : {};
+// Player-owned businesses are shared across the Lagos server and stored with saved game data.
+const businesses = saves._businesses = (saves._businesses && typeof saves._businesses === 'object') ? saves._businesses : {};
+function saveBusinesses() { saveDirty = true; dirtySaves.add('_businesses'); }
+function businessList() { return Object.values(businesses).filter(b => b && BLD[+String(b.id).replace(/^b/, '')]).map(b => ({ id:b.id, name:b.name, kind:b.kind, icon:b.icon, area:b.area, x:b.x, z:b.z, owner:b.ownerName, balance:Math.max(0,Math.floor(+b.balance||0)) })); }
+function sendBusinesses(p) { send(p.ws, { t:'x_businesses', businesses:businessList() }); }
 function setTenant(id, t) { tenants[id] = t; saveDirty = true; dbPut('tenants', id, JSON.stringify(t)); }
 async function loadStore() {
   if (!UP_ON) { console.log('storage: FILES ONLY. On Render free this is wiped on restart. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for permanent accounts.'); return; }
@@ -1080,7 +1085,7 @@ function sendCert(p) { const E = p.ext; send(p.ws, { t: 'x_cert', id: idNo(p), n
 function sendCars(p) { const E = p.ext; send(p.ws, { t: 'x_cars', cars: E.cars, license: !!E.license, list: Object.entries(VEHICLES).map(([c, v]) => ({ col: +c, name: v.name, icon: v.icon, price: v.price })) }); }
 function sendMarket(p) { const E = p.ext, prices = {}; for (const id in MARKET) prices[id] = { name: MARKET[id].name, icon: MARKET[id].icon, price: MARKET[id].price, hist: mkHist[id] }; send(p.ws, { t: 'x_mk', prices, hold: E.stocks, cash: p.money }); }
 function sendDecor(p) { const E = p.ext; send(p.ws, { t: 'x_decor', shop: Object.entries(DECOR).map(([id, d]) => ({ id, name: d.name, icon: d.icon, price: d.price })), inv: E.decorInv, placed: E.decor }); }
-function sendExtras(p) { sendCert(p); sendCars(p); sendDecor(p); send(p.ws, { t: 'x_role', role: p.role }); }
+function sendExtras(p) { sendCert(p); sendCars(p); sendDecor(p); sendBusinesses(p); send(p.ws, { t: 'x_role', role: p.role }); }
 function applyFx(p, f) {
   const L = p.life; if (!f || !L) return;
   if (f.food) p.food = Math.min(100, p.food + f.food);
@@ -1095,12 +1100,46 @@ const HUSTLES = {
   tutor: { name: 'Give lessons', icon: '📚', min: 800, max: 1200, cd: 40000 },
   content: { name: 'Post content online', icon: '🎬', min: 300, max: 3000, cd: 30000 }
 };
-const EXTRA = new Set(['getx', 'buycar', 'cert', 'setrole', 'inv', 'dm', 'pay', 'order', 'hire', 'decor', 'rtc', 'phone', 'mic', 'hustle']);
+const EXTRA = new Set(['getx', 'buycar', 'cert', 'setrole', 'inv', 'dm', 'pay', 'order', 'hire', 'decor', 'rtc', 'phone', 'mic', 'hustle', 'business']);
 function extraMsg(room, p, m, now) {
   if (!EXTRA.has(m.t)) return false;
   const E = p.ext = p.ext || loadExt(null), R = rooms[room];
   const toast = t => send(p.ws, { t: 'toast', text: t });
   const jailed = p.jailUntil > now;
+  if (m.t === 'business') {
+    if (jailed) return toast('You cannot run a business while in jail'), true;
+    const key = pKey(p), owned = Object.values(businesses).find(b => b && b.ownerKey === key);
+    if (m.op === 'create') {
+      if (owned) return toast('You already own a business. Manage it here.'), true;
+      if (p.inside) return toast('Go outside and stand near a building entrance'), true;
+      const b = BLD.reduce((best, q) => { const d=dist(q.door,p); return d<best.d?{q,d}:best; }, {q:null,d:14});
+      if (!b.q) return toast('Stand within 14 metres of a business building to buy it'), true;
+      const kinds = { restaurant:['🍲','Restaurant'], fashion:['👗','Fashion store'], tech:['📱','Tech shop'], supermarket:['🛒','Supermarket'], salon:['💇🏾','Salon'], lounge:['🎶','Lounge'], carwash:['🚗','Car wash'], pharmacy:['💊','Pharmacy'] };
+      const kind = kinds[String(m.kind||'restaurant')] ? String(m.kind) : 'restaurant';
+      const name = String(m.name||'').replace(/[<>\u0000-\u001f]/g,'').trim().slice(0,28);
+      if (name.length < 3) return toast('Business name must be at least 3 characters'), true;
+      if (Object.values(businesses).some(x => x && x.name.toLowerCase() === name.toLowerCase())) return toast('That business name is already taken'), true;
+      if (!charge(p, 150000, 'Started business: '+name)) return true;
+      const id='b'+b.q.id, [icon,label]=kinds[kind];
+      businesses[id]={id,ownerKey:key,ownerName:p.name,name,kind,icon,area:b.q.area||'Lagos',x:Math.round(b.q.out.x),z:Math.round(b.q.out.z),balance:0,created:now};
+      saveBusinesses(); broadcast(room,{t:'x_businesses',businesses:businessList()});
+      broadcast(room,{t:'toast',text:'🏪 '+p.name+' opened '+name+' in '+(b.q.area||'Lagos')+'!'});
+      savePlayer(room,p); return true;
+    }
+    if (!owned) return toast('You do not own a business yet'), true;
+    if (m.op === 'collect') {
+      const amount=Math.max(0,Math.floor(+owned.balance||0));
+      if (!amount) return toast('Your business has no earnings to collect yet'), true;
+      owned.balance=0;addMoney(p,amount,'Business earnings: '+owned.name);saveBusinesses();savePlayer(room,p);sendBusinesses(p);toast('💰 Collected ₦'+fmtN(amount)+' from '+owned.name);return true;
+    }
+    if (m.op === 'rename') {
+      const name=String(m.name||'').replace(/[<>\u0000-\u001f]/g,'').trim().slice(0,28);
+      if(name.length<3)return toast('Use at least 3 characters'),true;
+      if(Object.values(businesses).some(x=>x&&x.id!==owned.id&&x.name.toLowerCase()===name.toLowerCase()))return toast('That business name is taken'),true;
+      owned.name=name;saveBusinesses();broadcast(room,{t:'x_businesses',businesses:businessList()});savePlayer(room,p);toast('Business name updated');return true;
+    }
+    sendBusinesses(p);return true;
+  }
   if (m.t === 'getx') {
     if (m.k === 'cert') sendCert(p); else if (m.k === 'cars') sendCars(p); else if (m.k === 'mk') sendMarket(p); else if (m.k === 'decor') sendDecor(p);
   } else if (m.t === 'hustle') {
