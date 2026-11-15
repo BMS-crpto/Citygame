@@ -1,0 +1,57 @@
+/* CITYGAME PREMIUM LAGOS VISUAL PASS — version 1 */
+:root{
+ --cg-ink:#101b22;--cg-panel:#172730;--cg-panel2:#203640;--cg-line:#38515a;
+ --cg-gold:#f2c65d;--cg-gold2:#ffe5a0;--cg-cream:#f5eee1;--cg-mint:#82d8b0;
+ --cg-shadow:0 18px 50px rgba(0,0,0,.34);
+}
+html,body{background:#b9c6c0;color:#f8f4eb}
+button,.btn,[role=button]{font-family:Poppins,system-ui,sans-serif;font-weight:700;letter-spacing:.01em;border-radius:13px;box-shadow:0 3px 0 rgba(0,0,0,.16);transition:transform .14s ease,filter .14s ease,box-shadow .14s ease}
+button:active,.btn:active,[role=button]:active{transform:translateY(1px) scale(.985);box-shadow:0 1px 0 rgba(0,0,0,.2)}
+input,select,textarea{font-family:Poppins,system-ui,sans-serif}
+#login{background:radial-gradient(ellipse at 50% 5%,#4d7c83 0%,#233e4c 45%,#101d2a 100%)!important}
+#login .skyline{opacity:.7;filter:saturate(.85)}
+#login .stage{width:min(100%,440px);padding:clamp(12px,3vw,22px);gap:14px}
+#login .brand{margin-bottom:2px}
+#login .brand h1{font-size:clamp(30px,8vw,42px);letter-spacing:.075em;text-shadow:0 5px 20px #0006}
+#login .brand h1 span{color:var(--cg-gold)!important}
+#login .brand .tag{color:#e4edf0!important;letter-spacing:.02em}
+#login .card{background:linear-gradient(155deg,rgba(28,48,59,.97),rgba(12,25,34,.98))!important;border:1px solid #66808a!important;border-radius:24px!important;padding:clamp(16px,4vw,24px)!important;box-shadow:0 24px 70px #0006!important}
+#login .tabs{background:#0b1820!important;border:1px solid #344b55;border-radius:14px;padding:4px}
+#login .tabs button{background:transparent!important;color:#c5d4d9!important;box-shadow:none}
+#login .tabs button.on{background:linear-gradient(135deg,#f2c65d,#ffe5a0)!important;color:#1c2529!important;border-radius:10px}
+#login label{color:#d8e3e6!important;font-size:12px!important;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+#login input{background:#0b1820!important;border:1px solid #405963!important;color:#fff!important;border-radius:12px!important;outline:none}
+#login input:focus{border-color:var(--cg-gold)!important;box-shadow:0 0 0 3px #f2c65d22}
+#login .card button:not(.tabs button){background:linear-gradient(135deg,#e9b84a,#ffdf86)!important;color:#1b2529!important}
+#login .role{background:linear-gradient(145deg,#29424c,#172b35)!important;border:1px solid #3a5661!important;border-radius:14px!important}
+#login .role.sel{border-color:var(--cg-gold)!important;box-shadow:0 0 0 2px #f2c65d25}
+#hud div,#topbar,.hud,.notification{border-radius:13px!important;border-color:#435963!important}
+#phone{padding:12px!important}
+#phone .pbox{background:linear-gradient(165deg,#172832,#0b171f)!important;border:1px solid #536b74!important;border-radius:28px!important;box-shadow:0 26px 75px #0009, inset 0 1px #ffffff16!important}
+#phone .pbox:before{content:"";display:block;width:70px;height:5px;border-radius:99px;background:#526770;margin:7px auto 10px;opacity:.75}
+#pgrid .app,.appicon,.phone-app{border-radius:17px!important;border:1px solid #ffffff14!important;box-shadow:0 7px 16px #0003!important}
+#pgrid .app:active,.appicon:active{transform:scale(.94)}
+#appview{color:#eaf1f2!important}
+#appview h1,#appview h2,#appview h3{color:#fff!important;letter-spacing:-.02em}
+#appview input,#appview select,#appview textarea{background:#0d1d25!important;border:1px solid #3b535e!important;color:#f5f2e9!important;border-radius:11px!important}
+#appview button{border-radius:12px!important}
+#appview .app,#appview .tile,#appview .item{border-radius:14px!important}
+#mapside{border-radius:20px!important;box-shadow:var(--cg-shadow)!important}
+.modal,.dialog{backdrop-filter:blur(14px)!important}
+#stick{background:radial-gradient(circle,#ffffff20,#0b182044)!important;border:2px solid #ffffff45!important;box-shadow:0 8px 24px #0003!important}
+#knob{background:linear-gradient(145deg,#fff,#d8e5e8)!important;box-shadow:0 4px 12px #0004!important}
+#act{background:linear-gradient(145deg,#f6d16c,#e6ad39)!important;color:#18232a!important;border:2px solid #fff8!important;box-shadow:0 8px 24px #0005!important}
+#toast{background:linear-gradient(145deg,#172b35f5,#0b1720f5)!important;border:1px solid #536a74!important;box-shadow:var(--cg-shadow)!important;border-radius:14px!important}
+canvas{outline:none}
+@media(max-width:600px){
+ #login{justify-content:flex-start!important;padding-top:max(12px,env(safe-area-inset-top))!important}
+ #login .stage{margin:auto 0!important}
+ #login .card{width:100%!important}
+ #hud{font-size:12px!important}
+ #hud div{padding:6px 8px!important}
+ #phone{padding:max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom))!important}
+ #phone .pbox{width:min(100%,390px)!important;max-height:calc(100dvh - 16px)!important;border-radius:24px!important}
+ #stick{width:112px!important;height:112px!important;left:16px!important;bottom:max(18px,env(safe-area-inset-bottom))!important}
+ #act{min-width:64px!important;min-height:64px!important;right:20px!important;bottom:max(26px,env(safe-area-inset-bottom))!important}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation-duration:.01ms!important}}
