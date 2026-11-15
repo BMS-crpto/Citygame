@@ -1882,15 +1882,31 @@ stick.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.iden
 const endStick=()=>{stickId=null;joy.x=joy.y=0;knob.style.transform='translate(0,0)'};
 stick.addEventListener('touchend',endStick);stick.addEventListener('touchcancel',endStick);
 // drag anywhere to rotate the camera (left/right = turn, up/down = height)
-let camTouch=null,lastX=0,lastY=0;
-renderer.domElement.addEventListener('touchstart',e=>{camTouch=e.changedTouches[0].identifier;lastX=e.changedTouches[0].clientX;lastY=e.changedTouches[0].clientY});
+let camTouch=null,lastX=0,lastY=0,pinchDist=0,camZoom=1;
+const touchGap=e=>Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+renderer.domElement.addEventListener('touchstart',e=>{
+  if(e.touches.length>=2){camTouch=null;pinchDist=touchGap(e);return}
+  const t=e.changedTouches[0];camTouch=t.identifier;lastX=t.clientX;lastY=t.clientY;
+});
 renderer.domElement.addEventListener('touchmove',e=>{
+  if(e.touches.length>=2){
+    const d=touchGap(e);
+    if(pinchDist>0&&d>0)camZoom=Math.max(0.72,Math.min(1.8,camZoom*pinchDist/d));
+    pinchDist=d;return;
+  }
   for(const t of e.changedTouches)if(t.identifier===camTouch){
     if(myCol<0)camYaw-=(t.clientX-lastX)*0.01;
     camH=Math.max(3,Math.min(16,camH+(t.clientY-lastY)*0.03));
     lastX=t.clientX;lastY=t.clientY;
   }
 });
+const resetCameraTouches=e=>{
+  pinchDist=0;
+  if(e.touches.length===1){const t=e.touches[0];camTouch=t.identifier;lastX=t.clientX;lastY=t.clientY}
+  else camTouch=null;
+};
+renderer.domElement.addEventListener('touchend',resetCameraTouches);
+renderer.domElement.addEventListener('touchcancel',resetCameraTouches);
 const keys={};addEventListener('keydown',e=>keys[e.key.toLowerCase()]=1);addEventListener('keyup',e=>keys[e.key.toLowerCase()]=0);
 
 function toast(t){
@@ -2713,7 +2729,7 @@ function loop(now){
     me.rotation.y=myCol>=0?pos.ry:me.rotation.y+wrap(pos.ry-me.rotation.y)*0.2;
     animate(me,moving&&myCol<0,dt);animatePoseProps();
     for(const o of npcObjs){const vis=(o.n.place||null)===(inside||null)&&(Number(o.n.floor)||0)===(pos.floor||0)&&Math.hypot(o.n.x-pos.x,o.n.z-pos.z)<(inside?60:70);o.g.visible=vis;if(vis)animate(o.g,false,dt)}
-    const inCar=myCol>=0||ridingId>0||!!rideSc,levelY=(inside&&pos.floor?7.56:0),cd=inside?(ROOMS[inside]&&ROOMS[inside].model?5.4:3.4):inCar?9:3.5,ch=inside?(ROOMS[inside]&&ROOMS[inside].model?Math.max(6.2,camH*0.9):Math.min(2.8,camH*0.3)):inCar?Math.max(3.4,camH*0.55):Math.max(1.7,camH*0.27);
+    const inCar=myCol>=0||ridingId>0||!!rideSc,levelY=(inside&&pos.floor?7.56:0),cd=(inside?(ROOMS[inside]&&ROOMS[inside].model?5.4:3.4):inCar?9:3.5)*camZoom,ch=inside?(ROOMS[inside]&&ROOMS[inside].model?Math.max(6.2,camH*0.9):Math.min(2.8,camH*0.3)):inCar?Math.max(3.4,camH*0.55):Math.max(1.7,camH*0.27);
     if(rideSc&&rideSc.cabin){   // inside view: eyes in the vehicle, looking where it is heading
       const yw=rideSc.cy,fx=Math.sin(yw),fz=Math.cos(yw),lx=-Math.cos(yw),lz=Math.sin(yw),big=rideSc.col===5,bike=rideSc.col===8;
       camera.position.set(pos.x+lx*(bike?0:0.38)+fx*(bike?-0.1:0.1),bike?1.6:big?1.65:1.3,pos.z+lz*(bike?0:0.38)+fz*(bike?-0.1:0.1));
