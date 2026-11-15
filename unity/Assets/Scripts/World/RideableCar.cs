@@ -11,6 +11,7 @@ namespace Citygame.World
         [SerializeField] private Transform seatPoint;
         [SerializeField] private Transform exitPoint;
         private ThirdPersonMotor occupant;
+        private Rigidbody body;
         private FollowCamera followCamera;
         private bool occupied;
         private Vector2 mobileDriveInput;
@@ -20,8 +21,14 @@ namespace Citygame.World
 
         private void Awake()
         {
-            Collider body = GetComponent<Collider>();
-            body.isTrigger = false;
+            Collider carCollider = GetComponent<Collider>();
+            carCollider.isTrigger = false;
+            body = GetComponent<Rigidbody>();
+            if (body == null) body = gameObject.AddComponent<Rigidbody>();
+            body.isKinematic = true;
+            body.useGravity = false;
+            body.interpolation = RigidbodyInterpolation.Interpolate;
+            body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
             followCamera = FindObjectOfType<FollowCamera>();
             if (seatPoint == null)
             {
@@ -47,8 +54,19 @@ namespace Citygame.World
             input = Vector2.ClampMagnitude(input, 1f);
             float throttle = input.y;
             float steering = input.x;
-            transform.Rotate(0f, steering * turnSpeed * Mathf.Clamp01(Mathf.Abs(throttle) + 0.15f) * Time.deltaTime, 0f);
-            transform.position += transform.forward * throttle * driveSpeed * Time.deltaTime;
+            float yaw = steering * turnSpeed * Mathf.Clamp01(Mathf.Abs(throttle) + 0.15f) * Time.deltaTime;
+            Quaternion nextRotation = body != null ? body.rotation * Quaternion.Euler(0f, yaw, 0f) : transform.rotation * Quaternion.Euler(0f, yaw, 0f);
+            Vector3 nextPosition = transform.position + transform.forward * throttle * driveSpeed * Time.deltaTime;
+            if (body != null)
+            {
+                body.MoveRotation(nextRotation);
+                body.MovePosition(nextPosition);
+            }
+            else
+            {
+                transform.rotation = nextRotation;
+                transform.position = nextPosition;
+            }
 
             if (Input.GetKeyDown(KeyCode.E)) ExitVehicle();
         }
