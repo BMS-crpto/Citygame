@@ -4,6 +4,7 @@ using System.IO;
 using UnityEngine;
 using Citygame.Business;
 using Citygame.Player;
+using Citygame.World;
 
 namespace Citygame.Game
 {
@@ -32,6 +33,7 @@ namespace Citygame.Game
         private SaveData save = new SaveData();
         private ThirdPersonMotor motor;
         private BusinessSpot nearby;
+        private RideableCar nearbyCar;
         private float incomeClock;
         private string notice = "Welcome to Lagos Life. Explore and build your business.";
         private bool menuOpen;
@@ -67,6 +69,14 @@ namespace Citygame.Game
                 }
                 Save();
             }
+            nearbyCar = null;
+            float carDistance = 4.5f;
+            foreach (RideableCar car in FindObjectsOfType<RideableCar>())
+            {
+                float distance = car.DistanceTo(transform.position);
+                if (distance < carDistance) { carDistance = distance; nearbyCar = car; }
+            }
+
             if (Input.GetKeyDown(KeyCode.Tab)) menuOpen = !menuOpen;
         }
 
@@ -93,6 +103,16 @@ namespace Citygame.Game
                 motor.SetMobileInput(input);
                 if (GUI.Button(new Rect(Screen.width - button * 1.25f, Screen.height - button * 1.35f, button, button), "JUMP"))
                     motor.MobileJump();
+            }
+
+            if (nearbyCar != null)
+            {
+                string carAction = nearbyCar.IsOccupied ? "EXIT CAR · E" : "ENTER CAR";
+                if (GUI.Button(new Rect(Screen.width - button * 2.2f, Screen.height - button * 2.45f, button * 2f, button), carAction))
+                {
+                    if (nearbyCar.IsOccupied) nearbyCar.ExitVehicle();
+                    else if (motor != null && nearbyCar.Enter(motor)) notice = "Vehicle entered. Use WASD / arrows to drive; E to exit.";
+                }
             }
 
             Rect menuRect = new Rect(Screen.width - 230, 12, 218, 50);
