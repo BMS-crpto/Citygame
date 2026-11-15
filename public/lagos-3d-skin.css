@@ -158,3 +158,23 @@ button:active,.btn:active,[role=button]:active{filter:brightness(1.12);transform
 #pgrid,#phoneSearch,#appview{flex-shrink:0!important}
 #appview{overflow:visible!important;min-height:100px!important;touch-action:pan-y!important}
 #appview *{touch-action:pan-y!important}
+
+/* Landscape app viewport fix: fit the handset to the phone width and keep long
+   app screens scrollable inside the app pane instead of overflowing the screen. */
+@media (orientation:landscape) and (max-height:600px){
+  #phone{align-items:center!important;justify-content:center!important;overflow:hidden!important}
+  #phone .pbox{width:min(96vw,900px)!important;height:94dvh!important;max-height:94dvh!important;min-height:0!important;overflow:hidden!important;display:flex!important;flex-direction:column!important}
+  #phone.app-open .pbox{height:94dvh!important;max-height:94dvh!important;overflow:hidden!important}
+  #phone.app-open #appview{display:block!important;flex:1 1 auto!important;min-height:0!important;height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior-y:contain!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important}
+  #phone.app-open #appview *{touch-action:pan-y!important}
+  #phone:not(.app-open) #pgrid{grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:5px!important;padding:6px 3px!important}
+  #phone:not(.app-open) #pgrid .app{min-height:44px!important;padding:5px 2px!important}
+  #phone:not(.app-open) #pgrid .app b{font-size:18px!important;margin-bottom:2px!important}
+}
+@media (orientation:landscape) and (max-height:420px){
+  #phone .pbox{width:98vw!important;height:96dvh!important;max-height:96dvh!important;padding:7px 9px!important;border-radius:22px!important}
+  #phone.app-open .pbox{height:96dvh!important;max-height:96dvh!important}
+  #phone.app-open .phone-appbar{padding:3px 2px 6px!important;margin-bottom:7px!important}
+  #phone.app-open .phone-appbar b{font-size:13px!important}
+  #phone.app-open .phone-appbar .pb{padding:5px 8px!important}
+}
