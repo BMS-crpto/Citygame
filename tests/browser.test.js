@@ -174,3 +174,13 @@ test('all phone app shortcuts remain available and add-on apps use the full-scre
   assert.match(html, /X\.phoneAppBack=/);
   assert.match(html, /class="phone-appbar"/);
 });
+
+ 
+test('landscape full-screen phone apps fit the viewport and scroll within app content', () => {
+  const skin = fs.readFileSync(path.join(root, 'public', 'lagos-3d-skin.css'), 'utf8');
+  const landscape = skin.slice(skin.indexOf('Landscape app viewport fix'));
+  assert.match(landscape, /@media \(orientation:landscape\) and \(max-height:600px\)/);
+  assert.match(landscape, /#phone\.app-open #appview\{[\s\S]*overflow-y:auto!important/);
+  assert.match(landscape, /height:94dvh!important/);
+  assert.match(landscape, /grid-template-columns:repeat\(8,minmax\(0,1fr\)\)!important/);
+});
