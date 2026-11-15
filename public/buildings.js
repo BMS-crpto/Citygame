@@ -25,6 +25,24 @@
     if (bx <= -3) return bz <= -1 ? 'ikeja' : 'surulere';
     return 'market';
   }
+  function areaName(bx, bz) {
+    if (!inCore(bx, bz)) {
+      if (bx >= 6) return bz < 0 ? 'Epe' : 'Lekki Phase 2';
+      if (bx <= -7) return bz < 0 ? 'Ojo' : 'Festac Town';
+      if (bz <= -7) return bx < 0 ? 'Ikorodu' : 'Ojota';
+      if (bz >= 6) return bx < 0 ? 'Apapa' : 'Badagry Road';
+      if (bx >= 4) return bz < 0 ? 'Ikoyi' : 'Ajah';
+      if (bx <= -5) return bz < 0 ? 'Agege' : 'Mushin';
+      if (bz <= -5) return bx < 0 ? 'Yaba' : 'Oshodi';
+      return bx < 0 ? 'Maryland' : 'Eko Atlantic';
+    }
+    const d = districtOf(bx, bz);
+    if (d === 'vi') return 'Victoria Island';
+    if (d === 'lekki') return 'Lekki Phase 1';
+    if (d === 'ikeja') return bz <= -2 ? 'Ikeja GRA' : 'Allen Avenue';
+    if (d === 'surulere') return bz >= 1 ? 'Ojuelegba' : 'Surulere';
+    return bx < 0 ? 'Yaba' : 'Lagos Mainland';
+  }
 
   // ---- what each kind of building is like inside ----
   // room: where the interior is built (far from the city). hw/hd/h = half width, half depth, height.
@@ -110,7 +128,9 @@
   function build() {
     const out = [];
     const add = (bx, bz, slot, type, name, x, z, dz, outDz) => {
-      const o = { id: out.length, bx, bz, slot, type, name, door: { x, z: z + dz }, out: { x, z: z + dz + (outDz === undefined ? 2.4 : outDz) } };
+      const blockCode = String(bx + GN + 1).padStart(2, '0') + '-' + String(bz + GN + 1).padStart(2, '0');
+      const uniqueName = areaName(bx, bz) + ' · ' + name + ' ' + blockCode;
+      const o = { id: out.length, bx, bz, slot, type, name: uniqueName, area: areaName(bx, bz), door: { x, z: z + dz }, out: { x, z: z + dz + (outDz === undefined ? 2.4 : outDz) } };
       out.push(o); MAP[bx + ',' + bz + ',' + slot] = o; return o;
     };
     for (let bx = -GN; bx < GN; bx++) for (let bz = -GN; bz < GN; bz++) {
