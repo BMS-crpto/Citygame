@@ -1298,7 +1298,9 @@ function applyQuality(){
   try{localStorage.setItem('clo_quality',quality)}catch(e){}
   const pr={low:1,med:1.5,high:2}[quality];
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,pr,CITYGAME_MOBILE?1.25:1.75));renderer.setSize(innerWidth,innerHeight);
-  sun.castShadow=quality!=='low';
+  // Do not spend mobile GPU time on a shadow map the renderer cannot display.
+  renderer.shadowMap.enabled=!CITYGAME_MOBILE&&quality!=='low';
+  sun.castShadow=renderer.shadowMap.enabled;
   const s=quality==='high'?2048:1024;
   if(sun.shadow.mapSize.x!==s){sun.shadow.mapSize.set(s,s);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null}}
 }
