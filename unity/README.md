@@ -12,7 +12,7 @@ This is the parallel Unity 6 migration workspace for Citygame. The existing brow
 - Local JSON save/load for wallet, business roster, staff and accumulated revenue.
 - Phone-style company management overlay with selectable owned companies, paginated roster (all registered businesses can be browsed), category/staff details, hire controls and save button.
 - Street-front interaction markers for business registration.
-- Three greybox parked cars with enter/exit interaction, basic steering/throttle controls, camera target switching and touchscreen driving.
+- Three greybox parked cars with enter/exit interaction, basic steering/throttle controls, collision-aware Rigidbody movement, camera target switching and touchscreen driving.
 - Eight simple moving sidewalk pedestrians to make the block feel populated.
 - Dynamic 24-hour Lagos day/night cycle with changing sun direction, daylight intensity, ambient lighting, atmospheric fog and a live clock on the HUD (15-minute full game day).
 
