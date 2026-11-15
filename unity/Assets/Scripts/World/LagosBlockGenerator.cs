@@ -36,6 +36,23 @@ namespace Citygame.World
                 CreateCube("Street tree trunk", root, new Vector3(x, 1.1f, 7), new Vector3(0.5f, 2.2f, 0.5f), concrete);
                 CreateCube("Street tree crown", root, new Vector3(x, 3.1f, 7), new Vector3(2.1f, 2.1f, 2.1f), green);
             }
+
+            // Parked vehicles add a usable transport layer to the generated block.
+            BuildCar(root, "Lagos Taxi", new Vector3(-25f, 0.65f, -3.2f), paint);
+            BuildCar(root, "City Sedan", new Vector3(2f, 0.65f, -3.2f), green);
+            BuildCar(root, "Street Shuttle", new Vector3(28f, 0.65f, -3.2f), concrete);
+        }
+
+        private static void BuildCar(Transform root, string name, Vector3 position, Material bodyMaterial)
+        {
+            GameObject car = CreateCube(name, root, position, new Vector3(3.4f, 1.1f, 1.8f), bodyMaterial);
+            car.AddComponent<Citygame.World.RideableCar>();
+            CreateCube(name + " cabin", root, position + new Vector3(0f, 0.65f, 0f), new Vector3(1.8f, 0.8f, 1.45f), MaterialFor(new Color(0.22f, 0.28f, 0.32f)));
+            for (int side = -1; side <= 1; side += 2)
+            {
+                CreateCube(name + " front wheel", root, position + new Vector3(1.05f, -0.35f, side * 0.92f), new Vector3(0.65f, 0.65f, 0.25f), road);
+                CreateCube(name + " rear wheel", root, position + new Vector3(-1.05f, -0.35f, side * 0.92f), new Vector3(0.65f, 0.65f, 0.25f), road);
+            }
         }
 
         private static void CreateBuilding(Transform root, string name, Vector3 position, Vector3 size, Material material, BusinessCategory category)
