@@ -6,12 +6,19 @@
   const EMOTES=[['wave','👋','Wave'],['dance','🕺','Dance'],['cheer','🎉','Cheer'],['laugh','😂','Laugh'],['heart','❤️','Heart'],['flex','💪','Flex'],['sit','🧘','Chill']];
   let feed=[];
   const renderFeed=()=>{
-    const rows=feed.map(p=>'<div class="card" style="border-left:3px solid #f6c84c"><b>👤 '+esc3(p.name)+'</b><small style="display:block;color:#9ca3af;margin:3px 0">'+esc3(p.area||'Lagos City')+' • '+new Date(p.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+'</small><div style="white-space:pre-wrap;overflow-wrap:anywhere">'+esc3(p.text)+'</div></div>').join('');
-    bridge.appview.innerHTML='<div class="card" style="background:linear-gradient(135deg,#0e7490,#312e81)"><b>📸 LAGOS LIFE • CITY FEED</b><p>Share your moment with players in this city.</p><button class="xbtn gold" data-x="socialPost">＋ Create post</button> <button class="xbtn gray" data-x="socialRefresh">↻ Refresh</button></div>'+ (rows||'<div class="card">No posts yet. Be the first to post!</div>');
+    const rows=feed.map(p=>{
+      const likes=Array.isArray(p.likes)?p.likes:[];
+      const comments=Array.isArray(p.comments)?p.comments:[];
+      const replyRows=comments.slice(-5).map(q=>'<div style="padding:7px 10px;margin:5px 0;background:#111827;border-radius:10px"><b>'+esc3(q.name||'Player')+'</b><div style="overflow-wrap:anywhere">'+esc3(q.text)+'</div></div>').join('');
+      return '<article class="card" style="border-left:3px solid #f6c84c;margin:10px 0"><div style="display:flex;justify-content:space-between;gap:8px"><b>👤 '+esc3(p.name||'Player')+'</b><small>'+esc3(p.area||'Lagos City')+'</small></div><small style="color:#9ca3af">'+(p.ts?new Date(p.ts).toLocaleString(): 'Just now')+'</small><p style="white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5">'+esc3(p.text)+'</p><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><button class="xbtn '+(p.likedByMe?'gold':'gray')+'" data-x="socialLike" data-id="'+esc3(p.id)+'">❤️ '+(p.likedByMe?'Liked':'Like')+' · '+likes.length+'</button><b style="font-size:12px">💬 '+comments.length+' replies</b></div><div style="margin-top:8px">'+(replyRows||'<small style="color:#9ca3af">No replies yet.</small>')+'</div><div style="display:flex;gap:6px;margin-top:8px"><input data-social-reply="'+esc3(p.id)+'" maxlength="140" placeholder="Write a reply…" style="min-width:0;flex:1;width:0;padding:10px;border-radius:9px;background:#111827;color:white;border:1px solid #46516a"><button class="xbtn gray" data-x="socialReply" data-id="'+esc3(p.id)+'">Reply</button></div></article>';
+    }).join('');
+    bridge.appview.innerHTML='<div class="card" style="background:linear-gradient(135deg,#0e7490,#312e81)"><b>📸 LAGOS LIFE • SOCIAL</b><p>Post updates, like moments and reply to other players.</p><button class="xbtn gold" data-x="socialPost">＋ Create post</button> <button class="xbtn gray" data-x="socialRefresh">↻ Refresh</button></div>'+ (rows||'<div class="card">No posts yet. Be the first to post!</div>');
   };
   bridge.APPR.Social=function(){renderFeed();bridge.S({t:'social_get'})};
   bridge.X.socialPost=()=>{const text=prompt('Write a city feed post (max 180 characters):');if(text&&text.trim())bridge.S({t:'social_post',text:text.trim().slice(0,180)})};
   bridge.X.socialRefresh=()=>bridge.S({t:'social_get'});
+  bridge.X.socialLike=b=>bridge.S({t:'social_like',id:b.dataset.id});
+  bridge.X.socialReply=b=>{const id=b.dataset.id,input=bridge.appview.querySelector('[data-social-reply="'+id+'"]'),text=input&&input.value.trim();if(!text)return;if(text.length>140)return;if(bridge.S({t:'social_reply',id,text})!==false)input.value=''};
   bridge.APPR.Emotes=function(){
     bridge.appview.innerHTML='<div class="card" style="background:linear-gradient(135deg,#7c3aed,#db2777)"><b>🎭 3D CHARACTER EMOTES</b><p>Trigger a floating 3D effect above your avatar. Nearby players see it live.</p></div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">'+EMOTES.map(e=>'<button class="app" data-x="emote" data-id="'+e[0]+'" style="min-height:76px"><b style="font-size:32px">'+e[1]+'</b>'+e[2]+'</button>').join('')+'</div>';
   };
@@ -31,7 +38,8 @@
     sock.addEventListener('message',ev=>{
       let m;try{m=JSON.parse(ev.data)}catch(e){return}
       if(m.t==='social_feed'){feed=Array.isArray(m.posts)?m.posts.slice(0,30):[];if(bridge.PX.app==='Social'&&bridge.phoneOpen())renderFeed()}
-      if(m.t==='social_new'&&m.post){feed.unshift(m.post);feed=feed.slice(0,30);if(bridge.PX.app==='Social'&&bridge.phoneOpen())renderFeed()}
+      if(m.t==='social_new'&&m.post){feed=[m.post,...feed.filter(p=>p.id!==m.post.id)].slice(0,30);if(bridge.PX.app==='Social'&&bridge.phoneOpen())renderFeed()}
+      if(m.t==='social_update'&&m.post){feed=feed.map(p=>p.id===m.post.id?{...p,...m.post,likedByMe:m.post.likedByMe===undefined?p.likedByMe:m.post.likedByMe}:p);if(bridge.PX.app==='Social'&&bridge.phoneOpen())renderFeed()}
       if(m.t==='emote_fx')show3DEmote(m);
     });
     return sock;
