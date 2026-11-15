@@ -34,6 +34,7 @@ namespace Citygame.Game
 
         [Serializable] private class SaveData
         {
+            public int dataVersion = 2;
             public long cash = 1500000;
             public float energy = 100f;
             public float hunger = 100f;
@@ -465,6 +466,17 @@ namespace Citygame.Game
                     if (loaded != null) save = loaded;
                     if (save.businesses == null) save.businesses = new List<OwnedBusiness>();
                     if (save.posts == null) save.posts = new List<SocialPost>();
+                    for (int i = 0; i < save.posts.Count; i++)
+                        if (save.posts[i].replies == null) save.posts[i].replies = new List<string>();
+                    if (save.dataVersion < 2)
+                    {
+                        save.energy = 100f;
+                        save.hunger = 100f;
+                        save.hygiene = 100f;
+                        save.fun = 100f;
+                        save.dataVersion = 2;
+                        Save();
+                    }
                 }
             }
             catch (Exception e) { Debug.LogWarning("Citygame load failed: " + e.Message); }
