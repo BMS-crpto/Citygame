@@ -3258,13 +3258,14 @@ guard('openApp',()=>{
   openApp=function(n){
     PX.app=n;
     if(n!=='Chat')PX.cur=null;
-    if(APPR[n]){APPR[n]();if(n==='Invest')S({t:'getx',k:'mk'});if(n==='ID'){S({t:'getx',k:'cert'})}if(n==='Cars')S({t:'getx',k:'cars'});if(n==='Decor')S({t:'getx',k:'decor'});return}
+    if(APPR[n]){const ph=$('phone'),view=$('appview');if(ph)ph.classList.add('app-open');if(view)view.dataset.app=n;APPR[n]();if(view&&!view.querySelector('.phone-appbar')){view.insertAdjacentHTML('afterbegin','<div class="phone-appbar"><button class="pb q" data-x="phoneAppBack">‹ Apps</button><div><b>'+esc(n)+'</b><small>LAGOS LIFE • APP</small></div><button class="pb q" data-x="phoneAppBack">⌂</button></div>')}if(n==='Invest')S({t:'getx',k:'mk'});if(n==='ID'){S({t:'getx',k:'cert'})}if(n==='Cars')S({t:'getx',k:'cars'});if(n==='Decor')S({t:'getx',k:'decor'});return}
     _oa(n);
   };
   const _rj=renderJobs;
   renderJobs=function(){_rj();if(PX.app==='Jobs'&&phoneOpen())appendRoleUI()};
   setInterval(()=>{if(PX.app==='Invest'&&phoneOpen())S({t:'getx',k:'mk'})},3000);
 });
+X.phoneAppBack=()=>{PX.app=null;PX.cur=null;const ph=$('phone'),view=$('appview');if(ph)ph.classList.remove('app-open');if(view){view.dataset.app='';view.innerHTML='<div class="card" style="text-align:center;color:#aab2c4">Select an app to open</div>'}};
 const others_online=()=>Object.entries(PX.players).filter(([id])=>+id!==myId);
 
 /* Jobs: choose a good job or a bad one, join a friend's crew */
