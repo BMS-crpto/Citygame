@@ -7,7 +7,7 @@
    if('outputColorSpace' in renderer&&THREE.SRGBColorSpace)renderer.outputColorSpace=THREE.SRGBColorSpace;else if(THREE.sRGBEncoding)renderer.outputEncoding=THREE.sRGBEncoding;
    renderer.toneMapping=THREE.ACESFilmicToneMapping;
    renderer.toneMappingExposure=1.08;
-   renderer.shadowMap.enabled=true;
+   renderer.shadowMap.enabled=!(window.CITYGAME_MOBILE||(/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)));
    renderer.shadowMap.type=THREE.PCFSoftShadowMap;
    // Two low-intensity practical fill lights add depth to the existing city materials without
    // changing gameplay positions, collisions, or server-authoritative player state.
