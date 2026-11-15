@@ -2195,7 +2195,7 @@ document.getElementById('play').onclick=()=>{
     else if(m.t==='toast')toast(m.text);
     else if(m.t==='npcsay')showNpc(m);
     else if(m.t==='speaker')showSpeaker(m);
-    else if(m.t==='chat')chatLine(m.name,m.text);
+    else if(m.t==='chat'){chatLine(m.name,m.text);phoneChatAdd(m.name,m.text)}
     else if(m.t==='social_feed'){socialPosts=Array.isArray(m.posts)?m.posts:[];if(appview.dataset.app==='Social')renderSocialFeed()}
     else if(m.t==='social_new'){if(m.post){socialPosts=[m.post,...socialPosts.filter(p=>p.id!==m.post.id)].slice(0,30);if(appview.dataset.app==='Social')renderSocialFeed()}}
     else if(m.t==='social_update'){if(m.post){socialPosts=socialPosts.map(p=>p.id===m.post.id?m.post:p);if(appview.dataset.app==='Social')renderSocialFeed()}}
@@ -2445,12 +2445,11 @@ function closeAppView(){
 function openApp(n){
   if(n==='Map'){closePhone();openMap();return}
   if(n==='Life'){closePhone();const b=$('lifeBtn');if(b)b.click();return}
-  if(n==='Chat'){closePhone();const t=prompt('Say something:');if(t&&ws)ws.send(JSON.stringify({t:'chat',text:t}));return}
   phone.classList.add('app-open');
   if(n==='Business')renderBusinesses();
   else if(n==='GPS')renderGps();
   else if(n==='Properties')renderProperties();
-  else if(n==='News')appview.innerHTML='<div class="card"><b>📰 LAGOS CITY NEWS</b><p>Latest city updates, events and opportunities.</p><small>News feed preview • More stories coming soon</small></div>';
+  else if(n==='Chat'){appview.innerHTML='<div class="card"><b>💬 LAGOS LIVE CHAT</b><p>Talk to players in your current multiplayer room.</p><div id="phoneChatFeed" style="height:48vh;overflow:auto;background:#0b111d;border-radius:12px;padding:10px"></div><div style="display:flex;gap:7px;margin-top:9px"><input id="phoneChatInput" maxlength="80" placeholder="Message your city..." style="flex:1;min-width:0;width:0;text-align:left;background:#111a2a;color:white;border:1px solid #46516a"><button class="pb q" id="phoneChatSend">Send</button></div></div>';renderPhoneChat();setTimeout(()=>{const send=$('phoneChatSend'),input=$('phoneChatInput');if(send&&input){const go=()=>{const text=input.value.trim();if(!text)return;if(!ws||ws.readyState!==1){toast('Connect to multiplayer chat first');return}ws.send(JSON.stringify({t:'chat',text}));input.value=''};send.onclick=go;input.onkeydown=e=>{if(e.key==='Enter')go()}}},0)}\n  else if(n==='News')appview.innerHTML='<div class="card"><b>📰 LAGOS CITY NEWS</b><p>Latest city updates, events and opportunities.</p><small>News feed preview • More stories coming soon</small></div>';
   else if(n==='Yellow Pages')appview.innerHTML='<div class="card"><b>📒 YELLOW PAGES</b><p>Find city services and destinations.</p><button class="pb q" onclick="setGps(\'bank\')">🏦 Lagoon Bank</button><button class="pb q" onclick="renderGps()">📍 Explore map</button></div>';
   else if(n==='Account')appview.innerHTML='<div class="card"><b>💳 ACCOUNT OVERVIEW</b><h2 style="color:#a78bfa">₦'+(myMoney||0)+'</h2><small>Cash balance</small><hr style="border-color:#292f40"><b>Bank balance: ₦'+myBank+'</b></div>';
   else if(n==='Feed'||n==='Social')renderSocial();
@@ -2471,6 +2470,17 @@ function openApp(n){
 }
 
 function setQuality(q){quality=q;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===q));applyQuality();openApp('Settings')}
+let phoneChatMessages=[];
+function phoneChatAdd(name,text){
+  phoneChatMessages.push({name:String(name||'Player'),text:String(text||'').slice(0,80),time:Date.now()});
+  if(phoneChatMessages.length>80)phoneChatMessages.shift();
+  if(appview.dataset.app==='Chat')renderPhoneChat();
+}
+function renderPhoneChat(){
+  const feed=$('phoneChatFeed');if(!feed)return;
+  feed.innerHTML=phoneChatMessages.map(m=>'<div style="padding:7px 8px;margin:5px 0;background:#172235;border-radius:10px"><b>'+escapeBusinessText(m.name)+'</b><div style="overflow-wrap:anywhere">'+escapeBusinessText(m.text)+'</div></div>').join('')||'<small style="color:#9aa8bf">No messages yet. Say hello to Lagos!</small>';
+  feed.scrollTop=feed.scrollHeight;
+}
 let socialPosts=[];
 function renderSocialFeed(){
  const feed=appview.querySelector('#socialFeed');if(!feed)return;
