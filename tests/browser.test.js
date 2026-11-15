@@ -57,3 +57,26 @@ test('server Social feed supports retrieving posts, publishing, likes, and repli
     assert.ok(server.includes(event), 'server is missing Social event: ' + event);
   }
 });
+
+
+test('bank withdrawals persist balances and map travel reports invalid selections', () => {
+  const server = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+  const bank = server.slice(server.indexOf("} else if (m.t === 'bank')"), server.indexOf("} else if (m.t === 'daily')"));
+  assert.match(bank, /p\.bank -= a; p\.money \+= a/);
+  assert.match(bank, /savePlayer\(room, p\)/);
+  assert.match(bank, /dist\(p, ATM\) > 12/);
+  const travel = server.slice(server.indexOf("if (m.t === 'travel')"), server.indexOf("} else if (m.t === 'job')"));
+  assert.match(travel, /That destination is unavailable/);
+  assert.match(travel, /That transport option is unavailable/);
+});
+
+test('city lighting keeps the original scene from becoming washed out', () => {
+  const polish = fs.readFileSync(path.join(root, 'public', 'lagos-3d-polish.js'), 'utf8');
+  const finish = fs.readFileSync(path.join(root, 'public', 'citygame-world-finish.js'), 'utf8');
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  assert.match(polish, /toneMappingExposure=1\.0/);
+  assert.match(polish, /PointLight\(0x8bdde8,0\.08/);
+  assert.match(finish, /HemisphereLight\(0xd9efff,0x675442,0\.10/);
+  assert.match(finish, /DirectionalLight\(0xffe2b8,0\.06/);
+  assert.match(html, /'Private Jet':0,'Uber':0/);
+});
