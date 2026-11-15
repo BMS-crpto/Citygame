@@ -1143,21 +1143,20 @@ function extraMsg(room, p, m, now) {
     const key = pKey(p), owned = Object.values(businesses).find(b => b && b.ownerKey === key);
     if (m.op === 'create') {
       if (owned) return toast('You already own a business. Manage it here.'), true;
-      if (p.inside) return toast('Go outside and stand near a building entrance'), true;
-      const b = BLD.reduce((best, q) => { const d=dist(q.door,p); return d<best.d?{q,d}:best; }, {q:null,d:14});
-      if (!b.q) return toast('Stand within 14 metres of a business building to buy it'), true;
       const kinds = { restaurant:['🍲','Restaurant'], fashion:['👗','Fashion store'], tech:['📱','Tech shop'], supermarket:['🛒','Supermarket'], salon:['💇🏾','Salon'], lounge:['🎶','Lounge'], carwash:['🚗','Car wash'], pharmacy:['💊','Pharmacy'] };
       const kind = kinds[String(m.kind||'restaurant')] ? String(m.kind) : 'restaurant';
       const name = String(m.name||'').replace(/[<>\u0000-\u001f]/g,'').trim().slice(0,28);
-      const id='b'+b.q.id;
-      if (businesses[id]) return toast('This building already has a player-owned business. Choose another building.'), true;
+      const area = String(m.area||'').trim().slice(0,48);
+      const candidates = BLD.filter(q => q.area === area && q.type !== 'home' && q.type !== 'terminal');
+      const b = candidates.find(q => !businesses['b'+q.id]);
+      if (!b) return toast('That area has no available company location. Choose another area.'), true;
       if (name.length < 3) return toast('Business name must be at least 3 characters'), true;
       if (Object.values(businesses).some(x => x && x.name.toLowerCase() === name.toLowerCase())) return toast('That business name is already taken'), true;
       if (!charge(p, 150000, 'Started business: '+name)) return true;
       const [icon,label]=kinds[kind];
-      businesses[id]={id,ownerKey:key,ownerName:p.name,name,kind,icon,area:b.q.area||'Lagos',x:Math.round(b.q.out.x),z:Math.round(b.q.out.z),balance:0,created:now};
+      businesses['b'+b.id]={id:'b'+b.id,ownerKey:key,ownerName:p.name,name,kind,icon,area:b.area,locationName:b.name,x:Math.round(b.out.x),z:Math.round(b.out.z),balance:0,staff:[],created:now};
       saveBusinesses(); broadcastBusinesses(room);
-      broadcast(room,{t:'toast',text:'🏪 '+p.name+' opened '+name+' in '+(b.q.area||'Lagos')+'!'});
+      broadcast(room,{t:'toast',text:'🏢 '+p.name+' registered '+name+' in '+b.area+'!'});
       savePlayer(room,p); return true;
     }
     if (!owned) return toast('You do not own a business yet'), true;
@@ -1171,6 +1170,24 @@ function extraMsg(room, p, m, now) {
       if(name.length<3)return toast('Use at least 3 characters'),true;
       if(Object.values(businesses).some(x=>x&&x.id!==owned.id&&x.name.toLowerCase()===name.toLowerCase()))return toast('That business name is taken'),true;
       owned.name=name;saveBusinesses();broadcastBusinesses(room);savePlayer(room,p);toast('Business name updated');return true;
+    }
+    if (m.op === 'hire') {
+      const staff = Array.isArray(owned.staff) ? owned.staff : (owned.staff=[]);
+      const roles = { cashier:'Cashier', manager:'Manager', security:'Security', cleaner:'Cleaner', stylist:'Stylist', chef:'Chef' };
+      const role = String(m.role||'cashier');
+      if (!roles[role]) return toast('Choose a valid staff role'), true;
+      if (staff.length >= 10) return toast('Your company has reached its 10 staff limit'), true;
+      const fee = 10000;
+      if (!charge(p, fee, 'Hired '+roles[role]+' for '+owned.name)) return true;
+      staff.push({id:Date.now()+'-'+staff.length,role,name:roles[role]+' '+(staff.length+1),hired:now});
+      saveBusinesses();savePlayer(room,p);sendBusinesses(p);toast('👥 '+roles[role]+' hired for ₦10,000');return true;
+    }
+    if (m.op === 'fire') {
+      const staff = Array.isArray(owned.staff) ? owned.staff : [];
+      const index = Math.floor(+m.index);
+      if (!Number.isInteger(index) || index < 0 || index >= staff.length) return toast('Staff member not found'), true;
+      const removed = staff.splice(index,1)[0];
+      saveBusinesses();sendBusinesses(p);toast((removed.name||'Staff member')+' removed from your company');return true;
     }
     sendBusinesses(p);return true;
   }
