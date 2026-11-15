@@ -28,6 +28,7 @@ namespace Citygame.Game
         {
             public string author = "You";
             public string message;
+            public int likes;
             public List<string> replies = new List<string>();
         }
 
@@ -314,7 +315,13 @@ namespace Citygame.Game
                         GUI.Box(new Rect(x, y, w, 118f + post.replies.Count * 26f), GUIContent.none);
                         GUI.Label(new Rect(x + 8f, y + 6f, w - 16f, 22f), post.author + " · Lagos Life");
                         GUI.Label(new Rect(x + 8f, y + 30f, w - 16f, 42f), post.message);
-                        if (GUI.Button(new Rect(x + 8f, y + 76f, w - 16f, 32f), "Reply (" + post.replies.Count + ")"))
+                        if (GUI.Button(new Rect(x + 8f, y + 76f, (w - 20f) * 0.48f, 32f), "♥ Like (" + post.likes + ")"))
+                        {
+                            post.likes++;
+                            Save();
+                            notice = "You liked the post in your local feed.";
+                        }
+                        if (GUI.Button(new Rect(x + 12f + (w - 20f) * 0.52f, y + 76f, (w - 20f) * 0.48f, 32f), "Reply (" + post.replies.Count + ")"))
                             replyTarget = p;
                         float replyY = y + 118f;
                         for (int r = 0; r < post.replies.Count; r++)
@@ -349,6 +356,14 @@ namespace Citygame.Game
                 {
                     GUI.Label(new Rect(x, y, w, 30f), "PHONE SETTINGS"); y += 34f;
                     GUI.Label(new Rect(x, y, w, 52f), "Display: responsive\nOrientation: portrait / landscape"); y += 58f;
+                    GUI.Label(new Rect(x, y, w, 28f), "Graphics quality: " + QualitySettings.names[QualitySettings.GetQualityLevel()]); y += 32f;
+                    if (GUI.Button(new Rect(x, y, w, 42f), "Change graphics quality"))
+                    {
+                        int nextQuality = (QualitySettings.GetQualityLevel() + 1) % QualitySettings.names.Length;
+                        QualitySettings.SetQualityLevel(nextQuality, true);
+                        notice = "Graphics quality set to " + QualitySettings.names[nextQuality] + ".";
+                    }
+                    y += 50f;
                     if (GUI.Button(new Rect(x, y, w, 42f), "Save game")) { Save(); notice = "Saved."; }
                 }
                 else if (activePhoneApp == "Jobs")
