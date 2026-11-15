@@ -35,6 +35,11 @@ namespace Citygame.Game
         [Serializable] private class SaveData
         {
             public long cash = 1500000;
+            public float energy = 100f;
+            public float hunger = 100f;
+            public float hygiene = 100f;
+            public float fun = 100f;
+            public long jobEarnings;
             public List<OwnedBusiness> businesses = new List<OwnedBusiness>();
             public List<SocialPost> posts = new List<SocialPost>();
         }
@@ -46,6 +51,7 @@ namespace Citygame.Game
         private RideableCar nearbyCar;
         private BusinessSpot selectedDestination;
         private float incomeClock;
+        private float needsClock;
         private string notice = "Welcome to Lagos Life. Explore and build your business.";
         private bool menuOpen;
         private int selectedBusinessIndex;
@@ -74,6 +80,17 @@ namespace Citygame.Game
             {
                 float distance = Vector3.Distance(playerPosition, spot.transform.position);
                 if (distance < best) { best = distance; nearby = spot; }
+            }
+
+            needsClock += Time.deltaTime;
+            if (needsClock >= 60f)
+            {
+                needsClock = 0f;
+                save.hunger = Mathf.Clamp(save.hunger - 2f, 0f, 100f);
+                save.energy = Mathf.Clamp(save.energy - 1.5f, 0f, 100f);
+                save.hygiene = Mathf.Clamp(save.hygiene - 1f, 0f, 100f);
+                save.fun = Mathf.Clamp(save.fun - 0.75f, 0f, 100f);
+                Save();
             }
 
             incomeClock += Time.deltaTime;
@@ -106,6 +123,7 @@ namespace Citygame.Game
             bool portrait = Screen.height > Screen.width;
             GUI.Box(new Rect(12, 12, 250, 70), "LAGOS LIFE");
             GUI.Label(new Rect(24, 42, 220, 26), "₦" + save.cash.ToString("N0"));
+            GUI.Label(new Rect(12, 84, Mathf.Min(Screen.width - 24, 380), 24), "Energy " + save.energy.ToString("0") + " | Hunger " + save.hunger.ToString("0") + " | Hygiene " + save.hygiene.ToString("0"));
             if (dayNight != null) GUI.Label(new Rect(24, 62, 220, 20), dayNight.ClockText);
 
             if (!string.IsNullOrEmpty(notice))
@@ -369,6 +387,14 @@ namespace Citygame.Game
                 else if (activePhoneApp == "Jobs")
                 {
                     GUI.Label(new Rect(x, y, w, 34f), "LAGOS JOB BOARD"); y += 40f;
+                    GUI.Label(new Rect(x, y, w, 38f), "Career earnings: ₦" + save.jobEarnings.ToString("N0")); y += 42f;
+                    GUI.Box(new Rect(x, y, w, 76f), "District delivery shift\nComplete a simple local prototype shift to earn ₦5,000."); y += 86f;
+                    if (GUI.Button(new Rect(x, y, w, 42f), "Work shift · Earn ₦5,000"))
+                    {
+                        if (save.energy < 15f) notice = "You need more energy before taking a shift.";
+                        else { save.cash += 5000; save.jobEarnings += 5000; save.energy = Mathf.Clamp(save.energy - 15f, 0f, 100f); Save(); notice = "Shift completed. ₦5,000 added to your wallet."; }
+                    }
+                    y += 50f;
                     GUI.Box(new Rect(x, y, w, 84f), "Business staff\nCompanies hire staff from the Business app.\nStaff hiring costs ₦10,000 each."); y += 94f;
                     GUI.Box(new Rect(x, y, w, 84f), "Street opportunities\nExplore the district and discover storefronts.\nRegister a company to earn passive income."); y += 94f;
                     if (GUI.Button(new Rect(x, y, w, 42f), "Open Business app")) activePhoneApp = "Business";
@@ -382,7 +408,11 @@ namespace Citygame.Game
                 else if (activePhoneApp == "Profile")
                 {
                     GUI.Label(new Rect(x, y, w, 34f), "PLAYER PROFILE"); y += 40f;
-                    GUI.Box(new Rect(x, y, w, 112f), "Lagos Resident\nWallet: ₦" + save.cash.ToString("N0") + "\nOwned companies: " + save.businesses.Count + "\nCity feed posts: " + save.posts.Count); y += 122f;
+                    GUI.Box(new Rect(x, y, w, 152f), "Lagos Resident\nWallet: ₦" + save.cash.ToString("N0") + "\nOwned companies: " + save.businesses.Count + "\nCity feed posts: " + save.posts.Count + "\nEnergy: " + save.energy.ToString("0") + "  Hunger: " + save.hunger.ToString("0") + "\nHygiene: " + save.hygiene.ToString("0") + "  Fun: " + save.fun.ToString("0")); y += 162f;
+                    if (GUI.Button(new Rect(x, y, w, 42f), "Rest at home · Restore energy")) { save.energy = Mathf.Clamp(save.energy + 35f, 0f, 100f); save.fun = Mathf.Clamp(save.fun + 10f, 0f, 100f); Save(); notice = "You rested. Energy restored."; }
+                    y += 50f;
+                    if (GUI.Button(new Rect(x, y, w, 42f), "Eat a meal · ₦1,500")) { if (save.cash < 1500) notice = "Not enough money for a meal."; else { save.cash -= 1500; save.hunger = Mathf.Clamp(save.hunger + 35f, 0f, 100f); Save(); notice = "Meal purchased. Hunger reduced."; } }
+                    y += 50f;
                     if (GUI.Button(new Rect(x, y, w, 42f), "Save profile")) { Save(); notice = "Profile progress saved on this device."; }
                 }
                 else
