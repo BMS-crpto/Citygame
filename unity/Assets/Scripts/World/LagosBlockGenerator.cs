@@ -80,6 +80,25 @@ namespace Citygame.World
         private static void CreateBuilding(Transform root, string name, Vector3 position, Vector3 size, Material material, BusinessCategory category)
         {
             GameObject building = CreateCube(name, root, position + Vector3.up * size.y * 0.5f, size, material);
+            Material glass = MaterialFor(new Color(0.16f, 0.28f, 0.38f));
+            Material trim = MaterialFor(new Color(0.78f, 0.72f, 0.62f));
+            // Repeated windows and floor bands give the block a recognisable Lagos mid-rise street frontage.
+            int floors = Mathf.Max(1, Mathf.FloorToInt(size.y / 2.1f));
+            int windowsPerFloor = Mathf.Max(2, Mathf.FloorToInt(size.x / 2.1f));
+            float windowWidth = Mathf.Min(1.05f, size.x / (windowsPerFloor + 1f));
+            for (int floor = 0; floor < floors; floor++)
+            {
+                float windowY = position.y + 1.05f + floor * (size.y / floors);
+                for (int window = 0; window < windowsPerFloor; window++)
+                {
+                    float windowX = position.x - size.x * 0.5f + (window + 1) * (size.x / (windowsPerFloor + 1f));
+                    CreateCube(name + " facade window", root, new Vector3(windowX, windowY, position.z - size.z * 0.5f - 0.055f), new Vector3(windowWidth, 0.72f, 0.08f), glass);
+                }
+                if (floor > 0)
+                    CreateCube(name + " facade floor trim", root, new Vector3(position.x, position.y + floor * (size.y / floors), position.z - size.z * 0.5f - 0.07f), new Vector3(size.x * 0.96f, 0.09f, 0.1f), trim);
+            }
+            // Shopfront glazing at street level.
+            CreateCube(name + " storefront", root, position + new Vector3(0f, 0.9f, -size.z * 0.5f - 0.08f), new Vector3(size.x * 0.62f, 1.45f, 0.1f), glass);
             GameObject spotObject = new GameObject(name + " business interaction point");
             spotObject.transform.SetParent(root, false);
             spotObject.transform.position = position + new Vector3(0f, 0.0f, -size.z * 0.65f);
