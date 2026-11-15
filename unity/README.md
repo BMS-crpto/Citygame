@@ -27,7 +27,7 @@ This is the parallel Unity 6 migration workspace for Citygame. The existing brow
 
 ## Controls
 - Keyboard: WASD or arrow keys; Shift to sprint; Space to jump.
-- Touch: on-screen directional pad, Jump, and nearby vehicle Enter/Exit button.
+- Touch: on-screen directional pad, Jump, and nearby vehicle Enter/Exit button and touch steering/throttle while seated.
 - Vehicles: enter with the on-screen button, drive with WASD/arrows, press E to exit.
 - Tab toggles the management overlay; the overlay also has a touch button.
 - Wallet and business data save to `Application.persistentDataPath/citygame-unity-save.json`.
