@@ -119,3 +119,46 @@ canvas{outline:none}
  #phone .pbox{width:min(94vw,390px)!important}
 }
 @media(prefers-reduced-motion:reduce){#menu .role{transition:none!important}}
+
+/* CITYBOUND-INSPIRED TOTAL UI REIMAGINATION — planning-sim visual language, original Citygame styling */
+:root{--cbg:#101820;--cpanel:#192631;--cpanel2:#223440;--cstroke:#3b4e5c;--ctext:#e8f0f4;--cmuted:#9eafb9;--caccent:#71c5d2;--caccent2:#e3bd74}
+html,body{font-family:Inter,system-ui,-apple-system,sans-serif!important;background:#101820!important;color:var(--ctext)!important}
+/* Fullscreen entrance: restrained urban planning console rather than game-menu gradient */
+#menu{background:radial-gradient(ellipse at 50% 12%,#304b5b 0%,#192a36 42%,#0b141b 100%)!important;align-items:center!important;gap:14px!important}
+#menu h1{font-size:clamp(28px,6vw,44px)!important;letter-spacing:1.5px!important;color:#f0f5f7!important;text-shadow:0 4px 20px #0008!important}
+#menu input,input{background:#172630!important;border:1px solid #48606d!important;color:#edf5f7!important;border-radius:10px!important;box-shadow:inset 0 1px 4px #0004!important}
+#menu input::placeholder,input::placeholder{color:#9fb0ba!important}
+.roles{max-width:560px!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:9px!important}
+.role{background:linear-gradient(160deg,#203541,#172630)!important;border:1px solid #3c5360!important;border-radius:12px!important;color:#dce8ee!important;padding:12px 8px!important;box-shadow:0 5px 14px #0002!important}
+.role b{filter:saturate(.82)!important}
+.role.sel{background:linear-gradient(160deg,#2d505d,#203a46)!important;border:1px solid #75c6d3!important;box-shadow:0 0 0 2px #75c6d328,0 7px 20px #0005!important}
+button,.btn{background:linear-gradient(180deg,#80d1dc,#54aab9)!important;color:#0b1a21!important;border:1px solid #a4e1e7!important;border-radius:10px!important;box-shadow:0 4px 12px #0003!important;font-weight:800!important}
+button:hover,.btn:hover{filter:brightness(1.06)!important}
+/* Gameplay HUD uses compact planner-style panels */
+#hud{gap:8px!important;align-items:flex-start!important;font-size:12px!important}
+#hud div,#tasks div,#needs,#toast,.toast{background:linear-gradient(160deg,#1c2c37f2,#101c25f2)!important;border:1px solid #3b505d!important;border-radius:9px!important;box-shadow:0 6px 18px #0004!important;color:#e8f0f4!important;backdrop-filter:blur(10px)!important}
+#hud div{padding:7px 10px!important}
+#money{color:#8fdbb9!important;font-size:15px!important}
+#tasks div{padding:5px 9px!important;margin-bottom:5px!important}
+#needs{padding:9px!important}
+#needs .bar i{background:linear-gradient(90deg,#6dc4d2,#8fdbb9)!important}
+/* Phone becomes an in-game operations terminal */
+#phone{background:#050b10dc!important;backdrop-filter:blur(5px)!important}
+#phone .pbox{background:linear-gradient(160deg,#1b2b36,#0f1a23)!important;border:1px solid #58717e!important;border-radius:22px!important;box-shadow:0 0 0 4px #0b131a,0 24px 60px #000a!important;color:#e8f0f4!important}
+#pgrid .app,.app{background:linear-gradient(155deg,#253b48,#192b36)!important;border:1px solid #3c5664!important;border-radius:12px!important;color:#e9f2f5!important;box-shadow:0 3px 9px #0002!important}
+#pgrid .app b,.app b{filter:saturate(.85)!important}
+#phoneSearch{background:#101c25!important;border:1px solid #3c5664!important;color:#e8f0f4!important;border-radius:10px!important}
+#appview{color:#e8f0f4!important}
+#appview button{border-radius:9px!important}
+/* Map and destination explorer: clear selection and neutral cartography */
+#bigmap{background:#0d171f!important}
+#mapside{background:linear-gradient(180deg,#172630,#101a22)!important;border-left:1px solid #3b505d!important;color:#e8f0f4!important}
+#mapside .mh{color:#f0f5f7!important;border-bottom:1px solid #3b505d!important;padding:6px 0 9px!important}
+#mapside .pl,#mapside .det,.pl,.det{background:#1b2b36!important;border:1px solid #344b58!important;border-radius:9px!important;color:#dce8ee!important}
+#mapside .pl.sel,.pl.sel{background:#25424d!important;border-color:#71c5d2!important}
+/* interaction controls, menus and dialogs retain visible touch targets */
+.modal,.dialog,#ride,.box{background:linear-gradient(155deg,#1b2b36,#101a22)!important;border:1px solid #435a67!important;border-radius:16px!important;box-shadow:0 20px 60px #0009!important;color:#e8f0f4!important}
+#stick{border:1px solid #88cbd6!important;background:#152a35aa!important;box-shadow:0 0 0 4px #0b151b66!important}
+#act{background:linear-gradient(180deg,#80d1dc,#54aab9)!important;color:#0b1a21!important;border:1px solid #a4e1e7!important}
+#toast{border-color:#71c5d2!important}
+@media(max-width:600px){#hud{gap:4px!important}#hud div{padding:5px 7px!important;font-size:10px!important}.roles{max-width:100%!important}.role{padding:9px 5px!important}#phone .pbox{width:min(94vw,400px)!important}}
