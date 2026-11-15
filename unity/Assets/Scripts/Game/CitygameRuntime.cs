@@ -156,10 +156,11 @@ namespace Citygame.Game
                 else if (nearbyCar != null && nearbyCar.IsOccupied) nearbyCar.SetMobileDriveInput(input);
             }
 
+            if (interiorActive && GUI.Button(new Rect(Screen.width - 172f, Screen.height - 92f, 160f, 48f), "EXIT BUILDING"))
+                ExitInterior();
+
             if (nearbyCar != null)
             {
-                if (interiorActive && GUI.Button(new Rect(Screen.width - 172f, Screen.height - 92f, 160f, 48f), "EXIT BUILDING")) ExitInterior();
-
                 string action = nearbyCar.IsOccupied ? "EXIT CAR" : "ENTER CAR";
                 if (GUI.Button(new Rect(Screen.width - button * 2.2f, Screen.height - button * 2.45f, button * 2f, button), action))
                 {
