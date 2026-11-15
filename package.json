@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "check": "sh scripts/check.sh",
-    "test": "node --test"
+    "test": "node --test",
+    "audit:assets": "node scripts/audit-assets.js"
   },
   "engines": {
     "node": ">=18"
