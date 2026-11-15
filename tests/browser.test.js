@@ -78,5 +78,5 @@ test('city lighting keeps the original scene from becoming washed out', () => {
   assert.match(polish, /PointLight\(0x8bdde8,0\.08/);
   assert.match(finish, /HemisphereLight\(0xd9efff,0x675442,0\.10/);
   assert.match(finish, /DirectionalLight\(0xffe2b8,0\.06/);
-  assert.match(html, /'Private Jet':0,'Uber':0/);
+  assert.match(html, /'Uber':0,'Private Jet':0/);
 });
