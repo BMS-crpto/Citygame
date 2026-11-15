@@ -40,6 +40,7 @@ namespace Citygame.Game
         private bool menuOpen;
         private int selectedBusinessIndex;
         private int companyPageOffset;
+        private Vector2 phoneScroll;
 
         private string SavePath => Path.Combine(Application.persistentDataPath, "citygame-unity-save.json");
 
@@ -128,77 +129,116 @@ namespace Citygame.Game
                 }
             }
 
-            Rect menuRect = new Rect(Screen.width - 230, 12, 218, 50);
-            if (GUI.Button(menuRect, menuOpen ? "CLOSE BUSINESS MENU" : "BUSINESS / PHONE"))
+            bool portrait = Screen.height > Screen.width;
+            float phoneWidth = portrait ? Screen.width - 24f : Mathf.Min(360f, Screen.width * 0.42f);
+            float phoneX = portrait ? 12f : Screen.width - phoneWidth - 16f;
+            Rect menuRect = new Rect(portrait ? Screen.width - 168f : Screen.width - 230f, 12,
+                portrait ? 156f : 218f, 50f);
+            GUI.color = new Color(0.25f, 0.85f, 0.72f);
+            if (GUI.Button(menuRect, menuOpen ? "✕ CLOSE PHONE" : "▣ PHONE / BUSINESS"))
                 menuOpen = !menuOpen;
+            GUI.color = Color.white;
 
             if (menuOpen)
             {
-                float x = Screen.width - 270, y = 70;
-                float panelHeight = Mathf.Min(Screen.height - 90, 520f);
-                GUI.Box(new Rect(x, y, 258, panelHeight), "PHONE · MY COMPANIES");
-                y += 34;
+                float panelTop = portrait ? 72f : 70f;
+                float panelHeight = Mathf.Max(150f, Screen.height - panelTop - 16f);
+                Rect panel = new Rect(phoneX, panelTop, phoneWidth, panelHeight);
+                GUI.color = new Color(0.08f, 0.11f, 0.16f, 0.97f);
+                GUI.Box(panel, GUIContent.none);
+                GUI.color = Color.white;
+
+                float pad = 12f;
+                float contentWidth = phoneWidth - pad * 2f;
+                GUI.color = new Color(0.25f, 0.85f, 0.72f);
+                GUI.Label(new Rect(phoneX + pad, panelTop + 8f, contentWidth, 28f), "LAGOS LIFE  /  MY COMPANIES");
+                GUI.color = Color.white;
+                GUI.Label(new Rect(phoneX + pad, panelTop + 34f, contentWidth, 24f),
+                    "Wallet  ₦" + save.cash.ToString("N0") + "    •    Owned " + save.businesses.Count);
+
+                Rect scrollRect = new Rect(phoneX + pad, panelTop + 62f, contentWidth, panelHeight - 74f);
+                float contentHeight = 600f + save.businesses.Count * 46f;
+                phoneScroll = GUI.BeginScrollView(scrollRect, phoneScroll,
+                    new Rect(0, 0, contentWidth - 18f, contentHeight));
+
+                float x = 0f, y = 0f, rowWidth = contentWidth - 22f;
+                GUI.color = new Color(0.95f, 0.78f, 0.34f);
+                GUI.Label(new Rect(x, y, rowWidth, 26f), "NEARBY OPPORTUNITY");
+                GUI.color = Color.white;
+                y += 28f;
                 if (nearby != null)
                 {
-                    GUI.Label(new Rect(x + 12, y, 234, 28), "Nearby: " + nearby.BusinessName);
-                    y += 32;
-                    if (GUI.Button(new Rect(x + 12, y, 234, 40), "Register · ₦150,000"))
+                    GUI.Label(new Rect(x, y, rowWidth, 34f), nearby.BusinessName + "  •  " + nearby.Category);
+                    y += 36f;
+                    GUI.color = new Color(0.25f, 0.85f, 0.72f);
+                    if (GUI.Button(new Rect(x, y, rowWidth, 44f), "REGISTER BUSINESS  ·  ₦150,000"))
                         Register(nearby);
-                    y += 48;
+                    GUI.color = Color.white;
+                    y += 52f;
                 }
                 else
                 {
-                    GUI.Label(new Rect(x + 12, y, 234, 42), "Walk to a business frontage to register it.");
-                    y += 48;
+                    GUI.Label(new Rect(x, y, rowWidth, 48f), "No business nearby. Walk up to a shop frontage to register it.");
+                    y += 52f;
                 }
 
-                GUI.Label(new Rect(x + 12, y, 150, 28), "Owned: " + save.businesses.Count);
-                if (save.businesses.Count > 4)
-                {
-                    int maxOffset = ((save.businesses.Count - 1) / 4) * 4;
-                    companyPageOffset = Mathf.Clamp(companyPageOffset, 0, maxOffset);
-                    if (GUI.Button(new Rect(x + 160, y - 2, 38, 30), "‹"))
-                        companyPageOffset = Mathf.Max(0, companyPageOffset - 4);
-                    if (GUI.Button(new Rect(x + 202, y - 2, 38, 30), "›"))
-                        companyPageOffset = Mathf.Min(maxOffset, companyPageOffset + 4);
-                }
-                y += 30;
+                GUI.color = new Color(0.95f, 0.78f, 0.34f);
+                GUI.Label(new Rect(x, y, rowWidth, 26f), "YOUR COMPANY PORTFOLIO");
+                GUI.color = Color.white;
+                y += 30f;
                 if (save.businesses.Count == 0)
                 {
-                    GUI.Label(new Rect(x + 12, y, 234, 48), "Register a business to manage staff and income.");
-                    y += 52;
+                    GUI.Label(new Rect(x, y, rowWidth, 48f), "You have no companies yet. Register a nearby business to get started.");
+                    y += 52f;
                 }
                 else
                 {
                     selectedBusinessIndex = Mathf.Clamp(selectedBusinessIndex, 0, save.businesses.Count - 1);
+                    int maxOffset = ((save.businesses.Count - 1) / 4) * 4;
+                    companyPageOffset = Mathf.Clamp(companyPageOffset, 0, maxOffset);
                     int pageEnd = Mathf.Min(companyPageOffset + 4, save.businesses.Count);
                     if (selectedBusinessIndex < companyPageOffset || selectedBusinessIndex >= pageEnd)
                         selectedBusinessIndex = companyPageOffset;
+
+                    if (save.businesses.Count > 4)
+                    {
+                        if (GUI.Button(new Rect(x, y, rowWidth * 0.48f, 34f), "‹  PREVIOUS"))
+                            companyPageOffset = Mathf.Max(0, companyPageOffset - 4);
+                        if (GUI.Button(new Rect(x + rowWidth * 0.52f, y, rowWidth * 0.48f, 34f), "NEXT  ›"))
+                            companyPageOffset = Mathf.Min(maxOffset, companyPageOffset + 4);
+                        y += 40f;
+                    }
+
                     for (int i = companyPageOffset; i < pageEnd; i++)
                     {
                         OwnedBusiness company = save.businesses[i];
-                        string row = (i == selectedBusinessIndex ? "▶ " : "") + company.spotName +
-                            " · Staff " + company.staff + "/" + StaffLimit;
-                        if (GUI.Button(new Rect(x + 12, y, 234, 42), row))
+                        string row = (i == selectedBusinessIndex ? "▶  " : "") + company.spotName +
+                            "\n" + company.category + "  •  Staff " + company.staff + "/" + StaffLimit;
+                        if (GUI.Button(new Rect(x, y, rowWidth, 48f), row))
                             selectedBusinessIndex = i;
-                        y += 46;
+                        y += 52f;
                     }
-                    y += 4;
+
                     OwnedBusiness selected = save.businesses[selectedBusinessIndex];
-                    GUI.Label(new Rect(x + 12, y, 234, 30), "Category: " + selected.category);
-                    y += 30;
-                    GUI.Label(new Rect(x + 12, y, 234, 30), "Total earned: ₦" + selected.totalEarned.ToString("N0"));
-                    y += 32;
-                    if (GUI.Button(new Rect(x + 12, y, 234, 40), "Hire staff · ₦10,000"))
+                    GUI.color = new Color(0.25f, 0.85f, 0.72f);
+                    GUI.Label(new Rect(x, y, rowWidth, 28f), "COMPANY DETAILS");
+                    GUI.color = Color.white;
+                    y += 30f;
+                    GUI.Label(new Rect(x, y, rowWidth, 28f), "Lifetime earnings  ₦" + selected.totalEarned.ToString("N0"));
+                    y += 32f;
+                    GUI.Label(new Rect(x, y, rowWidth, 28f), "Staff employed  " + selected.staff + "/" + StaffLimit);
+                    y += 34f;
+                    if (GUI.Button(new Rect(x, y, rowWidth, 44f), "HIRE STAFF  ·  ₦10,000"))
                         Hire(selected);
-                    y += 46;
+                    y += 52f;
                 }
 
-                if (GUI.Button(new Rect(x + 12, y, 234, 38), "Save game"))
+                if (GUI.Button(new Rect(x, y, rowWidth, 42f), "SAVE GAME"))
                 {
                     Save();
                     notice = "Game saved on this device.";
                 }
+                GUI.EndScrollView();
             }
         }
 
