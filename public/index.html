@@ -2664,6 +2664,7 @@ function trafficUpdate(dt){
 
 function loop(now){
   requestAnimationFrame(loop);
+  fpsGovernor(now);
   const dt=Math.min(0.05,(now-last)/1000);last=now;tAcc+=dt;
   if(!me&&_ovUp())return;   // login/menu is covering the screen: skip rendering the hidden 3D city (was causing lag)
   let ix=joy.x,iy=joy.y;
