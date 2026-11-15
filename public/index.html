@@ -77,6 +77,26 @@
   #appview{margin:8px 0 4px;min-height:100px}
   #appview .card{background:linear-gradient(145deg,#191f2c,#11151e);border:1px solid #2b3445;border-radius:15px;padding:12px;box-shadow:0 5px 16px #0002}
   #phx{background:#292f3d;border-color:#505a6d;border-radius:13px;padding:8px 12px}
+  /* Landscape phones: keep the whole phone interface reachable by scrolling. */
+  @media (orientation:landscape) and (max-height:600px){
+    #phone{align-items:flex-start;justify-content:center;overflow-y:auto;padding:5px 8px;overscroll-behavior:contain}
+    #phone .pbox{width:min(96vw,900px);height:auto;min-height:0;max-height:none;flex:0 0 auto;margin:auto;padding:9px 12px;border-radius:22px;overflow:visible}
+    #phone .pbox:before{padding:0 8px 6px}
+    #phone .pbox:after{margin:7px auto 1px}
+    #phone .pgrid{grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:7px 2px}
+    #phone .app{min-height:54px;padding:5px 2px;font-size:10px}
+    #phone .app b{font-size:20px;margin-bottom:1px}
+    #phoneSearch{margin:5px 0;padding:8px 11px}
+    #appview{max-height:42vh;overflow-y:auto;overscroll-behavior:contain}
+    #appview .card{padding:9px;margin-bottom:5px}
+  }
+  @media (orientation:landscape) and (max-height:420px){
+    #phone .pbox{width:min(98vw,1000px);padding:6px 10px}
+    #phone .pgrid{grid-template-columns:repeat(8,minmax(0,1fr));gap:4px;padding:5px 1px}
+    #phone .app{min-height:45px;font-size:9px}
+    #phone .app b{font-size:17px}
+    #appview{max-height:34vh}
+  }
   @media(max-height:650px){.pbox{height:96vh;padding:9px}.pgrid{gap:5px;padding:6px 2px}.app{min-height:55px}.app b{font-size:20px}#phoneSearch{padding:7px}}
   #bigmap{position:fixed;inset:0;background:#0b1424;display:none;z-index:9;flex-direction:row}
   #bigmap canvas{flex:none;touch-action:none}
@@ -2325,11 +2345,11 @@ const fareOf=(r,d)=>Math.max(r.min,Math.round(d*r.rate));
 // ---- phone ----
 const APPS=[['📰','News'],['📒','Yellow Pages'],['💳','Account'],['🗞️','Feed'],['🗺️','Map'],['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['🏆','Progress'],['🗓️','Daily'],['🎉','Social'],['💬','Chat'],['⚙️','Settings'],['🖼️','Gallery'],['🧮','Calculator'],['🛍️','Market'],['🏪','Business'],['👤','Avatar'],['📋','Life'],['🏘️','Properties']];
 $('pgrid').innerHTML=APPS.map(a=>`<button class="app" data-app="${a[1]}"><b>${a[0]}</b>${a[1]}</button>`).join('');
-function openPhone(){if(!me)return;phone.style.display='flex';const p=$('phonePlayer');if(p)p.textContent=(myName||lotName||'PLAYER').toUpperCase()+' • ₦'+Math.round(myMoney||0).toLocaleString('en-NG');$('phoneSearch').value='';document.querySelectorAll('#pgrid .app').forEach(b=>b.style.display='');appview.innerHTML='<div class="card"><b>Welcome back 👋</b><p>Choose an app to manage your Lagos life.</p><small>GPS • Work • Banking • Properties</small></div>'}
+function openPhone(){if(!me)return;phone.style.display='flex';const p=$('phonePlayer');if(p)p.textContent=(myName||lotName||'PLAYER').toUpperCase()+' • ₦'+Math.round(myMoney||0).toLocaleString('en-NG');$('phoneSearch').value='';document.querySelectorAll('#pgrid .app').forEach(b=>b.style.display='');appview.innerHTML='<div class="card"><b>Welcome back 👋</b><p>Choose an app to manage your Lagos life.</p><button class="pb q" style="width:100%;background:linear-gradient(90deg,#7c3aed,#2563eb);color:#fff" onclick="openApp(\'Business\')">🏢 CREATE A COMPANY / BUSINESS</button><small>Open the Business Centre to register your own shop or company. Registration costs ₦150,000 and requires you to stand near a building entrance.</small><p style="margin:8px 0 0"><small>GPS • Work • Banking • Properties</small></p></div>'}
 function closePhone(){phone.style.display='none'}
 $('phonebtn').onclick=openPhone;$('phx').onclick=closePhone;
 $('pgrid').onclick=e=>{const b=e.target.closest('[data-app]');if(b)openApp(b.dataset.app)};
-$('phoneSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('#pgrid .app').forEach(b=>b.style.display=b.dataset.app.toLowerCase().includes(q)?'':'none')});
+$('phoneSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('#pgrid .app').forEach(b=>{const n=b.dataset.app.toLowerCase();const aliases=n==='business'?'business company companies create company startup enterprise':n; b.style.display=(!q||aliases.includes(q))?'':'none'})});
 function gpsToHouse(h){if(!h)return;gps={x:h.x,z:h.z,name:h.name||('Property '+h.id)};closePhone();toast('📍 GPS set to '+gps.name)}
 function businessSend(op,data={}){
   if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'business',op,...data}));
