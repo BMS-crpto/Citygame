@@ -42,7 +42,7 @@
     if(typeof THREE==='undefined'||typeof window.scene==='undefined')return;
     const canvas=document.createElement('canvas');canvas.width=256;canvas.height=128;
     const ctx=canvas.getContext('2d');ctx.clearRect(0,0,256,128);
-    ctx.fillStyle='rgba(8,14,28,.82)';ctx.beginPath();ctx.roundRect(18,12,220,100,28);ctx.fill();
+    ctx.fillStyle='rgba(8,14,28,.82)';ctx.beginPath();if(ctx.roundRect){ctx.roundRect(18,12,220,100,28)}else{ctx.moveTo(46,12);ctx.lineTo(210,12);ctx.quadraticCurveTo(238,12,238,40);ctx.lineTo(238,84);ctx.quadraticCurveTo(238,112,210,112);ctx.lineTo(46,112);ctx.quadraticCurveTo(18,112,18,84);ctx.lineTo(18,40);ctx.quadraticCurveTo(18,12,46,12)}ctx.closePath();ctx.fill();
     ctx.strokeStyle='#f6c84c';ctx.lineWidth=4;ctx.stroke();
     const em=EMOTES.find(e=>e[0]===m.emote);ctx.font='70px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(em?em[1]:'✨',128,62);
     const tex=new THREE.CanvasTexture(canvas);tex.needsUpdate=true;
