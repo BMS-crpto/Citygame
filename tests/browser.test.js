@@ -163,3 +163,14 @@ test('phone News combines live community posts and player company updates', () =
   assert.match(module, /m\.t==='x_businesses'/);
   assert.match(module, /Community headlines/);
 });
+
+
+test('all phone app shortcuts remain available and add-on apps use the full-screen shell', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  for (const app of ["'Business'","'Properties'","'GPS'","'Progress'","'Daily'","'Calculator'","'Account'","'Avatar'","'Yellow Pages'","'Life'"]) {
+    assert.ok(html.includes(app), 'missing phone shortcut: ' + app);
+  }
+  assert.match(html, /if\(APPR\[n\]\)\{const ph=\$\('phone'\),view=\$\('appview'\);if\(ph\)ph\.classList\.add\('app-open'\)/);
+  assert.match(html, /X\.phoneAppBack=/);
+  assert.match(html, /class="phone-appbar"/);
+});
