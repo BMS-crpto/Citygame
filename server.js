@@ -446,7 +446,7 @@ function onConnection(ws) {
       broadcast(room, { t: 'social_update', post });
     } else if (m.t === 'social_reply') {
       const post = (R.feed || []).find(q => q.id === String(m.id || ''));
-      const reply = String(m.text || '').replace(/[\\u0000-\\u001f<>]/g, '').trim().slice(0, 140);
+      const reply = String(m.text || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, 140);
       if (!post || !reply) return;
       if (!cooldown(p, 'social_reply', 1800)) return send(ws, { t: 'toast', text: 'Please wait before replying again' });
       post.comments = Array.isArray(post.comments) ? post.comments : [];
