@@ -54,7 +54,7 @@ namespace Citygame.World
             {
                 GameObject frontWheel = CreateCube(name + " front wheel", root, position + new Vector3(1.05f, -0.35f, side * 0.92f), new Vector3(0.65f, 0.65f, 0.25f), wheelMaterial);
                 frontWheel.transform.SetParent(car.transform, true);
-                GameObject rearWheel = CreateCube(name + " rear wheel", root, position + new Vector3(-1.05f, -0.35f, side * 0.92f), new Vector3(0.65f, 0.65f, 0.25f), road);
+                GameObject rearWheel = CreateCube(name + " rear wheel", root, position + new Vector3(-1.05f, -0.35f, side * 0.92f), new Vector3(0.65f, 0.65f, 0.25f), wheelMaterial);
                 rearWheel.transform.SetParent(car.transform, true);
             }
         }
