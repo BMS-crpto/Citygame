@@ -42,7 +42,7 @@ namespace Citygame.Editor
             light.intensity = 1.15f;
             lightObject.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
 
-            EditorSceneManager.SaveScene(scene, "Assets/Scenes/CitygameFoundation.unity");
+            if (!AssetDatabase.IsValidFolder("Assets/Scenes"))\n                AssetDatabase.CreateFolder("Assets", "Scenes");\n\n            EditorSceneManager.SaveScene(scene, "Assets/Scenes/CitygameFoundation.unity");
             AssetDatabase.SaveAssets();
             Selection.activeGameObject = player;
             Debug.Log("Citygame foundation scene created. Press Play to test the greybox movement.");
