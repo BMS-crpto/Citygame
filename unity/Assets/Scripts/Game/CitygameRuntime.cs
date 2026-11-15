@@ -127,11 +127,11 @@ namespace Citygame.Game
             if (dayNight != null) GUI.Label(new Rect(24, 62, 220, 20), dayNight.ClockText);
 
             if (!string.IsNullOrEmpty(notice))
-                GUI.Box(new Rect(12, 88, Mathf.Min(Screen.width - 24, 380), 44), notice);
+                GUI.Box(new Rect(12, 112, Mathf.Min(Screen.width - 24, 380), 44), notice);
             if (selectedDestination != null)
             {
                 float destinationDistance = Vector3.Distance(motor != null ? motor.transform.position : transform.position, selectedDestination.transform.position);
-                GUI.Box(new Rect(12, 136, Mathf.Min(Screen.width - 24, 300), 42), "NAV: " + selectedDestination.BusinessName + " · " + destinationDistance.ToString("0") + "m");
+                GUI.Box(new Rect(12, 160, Mathf.Min(Screen.width - 24, 300), 42), "NAV: " + selectedDestination.BusinessName + " · " + destinationDistance.ToString("0") + "m");
             }
 
             float button = Mathf.Clamp(Screen.width * 0.105f, 54f, 88f);
