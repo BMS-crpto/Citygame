@@ -2568,7 +2568,7 @@ let rideSc=null,rideHud=null;
 const RIDE_SAY={Keke:['🛺 Driver: Hold am o, bad road ahead!','🛺 Driver: Madam/Oga, I go use the short cut!','🛺 Keke dey fly 🔥'],Danfo:['🚌 Conductor: Enter with your change!','🚌 Conductor: Who dey drop? Last stop!','🚌 Passenger: Driver, calm down o!'],Okada:['🏍️ Rider: Hold me well, I dey enter gap!','🏍️ Rider: No LASTMA for here, we go fast!'],'Private Driver':['🚘 Driver: Good day sir/ma, any music?','🚘 Driver: Traffic dey, but I know another road.']};
 const RIDE_V={Keke:11,Danfo:13,Okada:17,'Private Driver':15};   // cruising speed in metres per second (about 40-60 km/h)
 function startRideScene(m){
-  const col={Keke:6,Danfo:5,Okada:8,'Private Driver':0}[m.ride];
+  const col={Keke:6,Danfo:5,Okada:8,'Private Driver':0,'Uber':0,'Private Jet':0}[m.ride];
   if(col===undefined||m.dx===undefined||!me)return false;
   const g=makeCar(col);scene.add(g);
   const B=64,sn=v=>Math.round(v/B)*B,sx=pos.x,sz=pos.z,dx=m.dx,dz=m.dz,xa=sn(sx),zb=sn(dz),xd=sn(dx);
