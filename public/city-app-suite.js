@@ -37,7 +37,7 @@
   const bag=Object.entries(inv).map(([id,n])=>{const i=items.find(x=>x.id===id)||{name:id,icon:'📦',price:0};return '<div class="card" style="display:flex;gap:8px;align-items:center;margin:7px 0"><span style="font-size:22px">'+esc(i.icon)+'</span><div style="flex:1"><b>'+esc(i.name)+'</b><br><small>In bag: '+n+' · Sell value ₦'+Math.floor(i.price/2).toLocaleString('en-NG')+'</small></div><button class="xbtn gray" data-x="marketUse" data-id="'+esc(id)+'">Use</button><button class="xbtn red" data-x="marketSell" data-id="'+esc(id)+'">Sell 1</button></div>'}).join('');
   bridge.appview.innerHTML='<section class="card" style="background:linear-gradient(135deg,#14532d,#0e7490)"><small style="letter-spacing:1.5px">LAGOS LIFE • ONLINE SHOPPING</small><h2>🛍️ Lagos Market</h2><p>Buy supplies directly from your phone, wherever you are in Lagos.</p><div style="display:flex;justify-content:space-between;gap:8px"><b>Cash: ₦'+cash.toLocaleString('en-NG')+'</b><b>Bag: '+count+'/'+(life&&life.cap||40)+'</b></div></section><h3>🛒 Shop items</h3>'+(stock||'<div class="card">Loading item catalogue…</div>')+'<h3>🎒 Your bag</h3>'+(bag||'<div class="card">Your bag is empty.</div>')+'<small style="color:#9aa8bd">Purchases and sales are checked by the game server. Buying uses the listed shop price; selling returns half the listed price.</small>';
  };
- bridge.APPR.Market=()=>{renderMarket();if(!catalog.length)bridge.S({t:'join_catalog'})};
+ bridge.APPR.Market=()=>{renderMarket()};
  bridge.X.marketBuy=b=>{
   const id=b.dataset.id,sel=bridge.appview.querySelector('[data-market-qty="'+id+'"]'),qty=Math.max(1,Math.min(10,Number(sel&&sel.value)||1));
   bridge.S({t:'shop',op:'buy',id,qty,source:'phone'});
