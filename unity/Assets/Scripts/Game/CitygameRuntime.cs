@@ -53,6 +53,10 @@ namespace Citygame.Game
         private BusinessSpot selectedDestination;
         private float incomeClock;
         private float needsClock;
+        private float cityObjectRefreshClock;
+        private const float CityObjectRefreshInterval = 1f;
+        private BusinessSpot[] cityBusinesses = Array.Empty<BusinessSpot>();
+        private RideableCar[] cityCars = Array.Empty<RideableCar>();
         private string notice = "Welcome to Lagos Life. Explore and build your business.";
         private bool menuOpen;
         private int selectedBusinessIndex;
@@ -72,16 +76,25 @@ namespace Citygame.Game
         {
             motor = FindObjectOfType<ThirdPersonMotor>();
             dayNight = FindObjectOfType<DayNightCycle>();
+            RefreshCityObjects();
             Load();
         }
 
         private void Update()
         {
+            cityObjectRefreshClock += Time.deltaTime;
+            if (cityObjectRefreshClock >= CityObjectRefreshInterval)
+            {
+                cityObjectRefreshClock = 0f;
+                RefreshCityObjects();
+            }
+
             Vector3 playerPosition = motor != null ? motor.transform.position : transform.position;
             nearby = null;
             float best = 4.5f;
-            foreach (BusinessSpot spot in FindObjectsOfType<BusinessSpot>())
+            foreach (BusinessSpot spot in cityBusinesses)
             {
+                if (spot == null) continue;
                 float distance = Vector3.Distance(playerPosition, spot.transform.position);
                 if (distance < best) { best = distance; nearby = spot; }
             }
@@ -111,8 +124,9 @@ namespace Citygame.Game
             }
             nearbyCar = null;
             float carDistance = 4.5f;
-            foreach (RideableCar car in FindObjectsOfType<RideableCar>())
+            foreach (RideableCar car in cityCars)
             {
+                if (car == null) continue;
                 float distance = car.DistanceTo(playerPosition);
                 if (distance < carDistance) { carDistance = distance; nearbyCar = car; }
             }
@@ -238,7 +252,7 @@ namespace Citygame.Game
                 float contentHeight = activePhoneApp == "Social"
                     ? Mathf.Max(800f, 360f + save.posts.Count * 220f)
                     : activePhoneApp == "Business"
-                        ? Mathf.Max(1000f, 520f + FindObjectsOfType<BusinessSpot>().Length * 64f + save.businesses.Count * 60f)
+                        ? Mathf.Max(1000f, 520f + cityBusinesses.Length * 64f + save.businesses.Count * 60f)
                         : 800f;
                 phoneScroll = GUI.BeginScrollView(body, phoneScroll, new Rect(0, 0, body.width - 18f, contentHeight));
                 float x = 0f, y = 0f, w = body.width - 28f;
@@ -260,10 +274,11 @@ namespace Citygame.Game
 
                     GUI.Label(new Rect(x, y, w, 30f), "CITY BUSINESS DIRECTORY · PHONE REGISTRATION");
                     y += 34f;
-                    BusinessSpot[] directory = FindObjectsOfType<BusinessSpot>();
+                    BusinessSpot[] directory = cityBusinesses;
                     for (int d = 0; d < directory.Length; d++)
                     {
                         BusinessSpot location = directory[d];
+                        if (location == null) continue;
                         GUI.Label(new Rect(x + 4f, y, w * 0.58f, 38f), location.BusinessName + "\n" + location.Category);
                         if (GUI.Button(new Rect(x + w * 0.62f, y + 2f, w * 0.38f, 36f), "Register"))
                             Register(location);
@@ -316,8 +331,9 @@ namespace Citygame.Game
                     GUI.Box(new Rect(mapRect.x, mapRect.y + 131f, mapRect.width, 2f), GUIContent.none);
                     GUI.Box(new Rect(mapRect.x + mapRect.width * 0.525f, mapRect.y, 2f, mapRect.height), GUIContent.none);
                     GUI.color = new Color(0.1f, 0.22f, 0.35f);
-                    foreach (BusinessSpot spot in FindObjectsOfType<BusinessSpot>())
+                    foreach (BusinessSpot spot in cityBusinesses)
                     {
+                        if (spot == null) continue;
                         Vector3 pos = spot.transform.position;
                         float markerX = mapRect.x + Mathf.Clamp01((pos.x + 40f) / 80f) * (mapRect.width - 82f);
                         float markerY = mapRect.y + Mathf.Clamp01((20f - pos.z) / 40f) * (mapRect.height - 30f);
@@ -453,6 +469,12 @@ namespace Citygame.Game
             GUI.color = Color.white;
         }
 
+        private void RefreshCityObjects()
+        {
+            cityBusinesses = FindObjectsOfType<BusinessSpot>();
+            cityCars = FindObjectsOfType<RideableCar>();
+        }
+
         private void EnterInterior(BusinessSpot spot)
         {
             if (spot == null || motor == null || interiorActive) return;
@@ -485,6 +507,7 @@ namespace Citygame.Game
 
         private void Register(BusinessSpot spot)
         {
+            if (spot == null) { notice = "This business location is no longer available."; return; }
             if (save.businesses.Exists(b => b.spotName == spot.BusinessName))
             { notice = "You already own this business."; return; }
             if (save.cash < RegistrationFee) { notice = "Not enough cash for registration."; return; }
