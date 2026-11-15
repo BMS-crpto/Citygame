@@ -1297,7 +1297,7 @@ let quality='med';
 function applyQuality(){
   try{localStorage.setItem('clo_quality',quality)}catch(e){}
   const pr={low:1,med:1.5,high:2}[quality];
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,pr));renderer.setSize(innerWidth,innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,pr,CITYGAME_MOBILE?1.25:1.75));renderer.setSize(innerWidth,innerHeight);
   sun.castShadow=quality!=='low';
   const s=quality==='high'?2048:1024;
   if(sun.shadow.mapSize.x!==s){sun.shadow.mapSize.set(s,s);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null}}
