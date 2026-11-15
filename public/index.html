@@ -2311,7 +2311,7 @@ function businessSend(op,data={}){
 }
 function renderBusinesses(){
   if(!world){appview.innerHTML='<div class="card">🏪 Enter Lagos to open the business centre.</div>';return}
-  const mine=cityBusinesses.find(b=>b.owner===(myName||lotName));
+  const mine=cityBusinesses.find(b=>b.isMine);
   appview.dataset.app='Business';
   let h='<div class="card"><b>🏪 LAGOS BUSINESS CENTRE</b><p>Start your own player-owned business inside an existing Lagos building. Other players can visit, and customer activity earns business income.</p><b>Registration fee: ₦150,000</b><br><small>Stand outside a building entrance before registering. One business per player.</small></div>';
   if(mine){
@@ -2412,7 +2412,7 @@ function renderGps(){
   appview.innerHTML='<div class="card">📍 <b>LAGOS GPS · '+L.length+' DESTINATIONS</b><br>'+(gps?'Going to <b>'+gps.name+'</b>':'Search every building, business and landmark across Lagos. Select one to set your route.')+'</div>'
     +'<input id="gpsFind" type="search" placeholder="Search buildings, areas or businesses..." style="width:100%;padding:12px;border-radius:10px;margin:6px 0">'
     +(gps?'<button class="pb q" onclick="gps=null;renderGps()">Clear GPS</button>':'')
-    +L.map(p=>'<button class="pb q" data-gps-name="'+p.name.toLowerCase()+'" style="display:flex;justify-content:space-between;width:100%" onclick="setGps(\''+p.id+'\')"><span>'+p.icon+' '+p.name+'</span><span>'+(p.d>=1000?(p.d/1000).toFixed(1)+' km':p.d+' m')+'</span></button>').join('');
+    +L.map(p=>'<button class="pb q" data-gps-name="'+(p.name+' '+(p.area||'')+' '+(p.owner||'')).toLowerCase()+'" style="display:flex;justify-content:space-between;width:100%" onclick="setGps(\''+p.id+'\')"><span>'+p.icon+' '+p.name+'</span><span>'+(p.d>=1000?(p.d/1000).toFixed(1)+' km':p.d+' m')+'</span></button>').join('');
   const gpsFind=$('gpsFind');
   if(gpsFind)gpsFind.addEventListener('input',()=>{const q=gpsFind.value.trim().toLowerCase();appview.querySelectorAll('[data-gps-name]').forEach(el=>el.style.display=el.dataset.gpsName.includes(q)?'flex':'none')});
 }
@@ -2446,8 +2446,8 @@ function drawBigMap(){
     const a=P(p.x,p.z),building=String(p.id).startsWith('b');
     bmHits.push({x:a[0],y:a[1],id:p.id,building});
     if(building){
-      g.fillStyle=selPlace===p.id?'#ffd54a':'#f6d365';
-      g.beginPath();g.arc(a[0],a[1],selPlace===p.id?5:2.8,0,7);g.fill();
+      g.fillStyle=selPlace===p.id?'#ffd54a':p.business?'#55e6a5':'#f6d365';
+      g.beginPath();g.arc(a[0],a[1],selPlace===p.id?5:p.business?4:2.8,0,7);g.fill();
       if(selPlace===p.id){g.font='bold 11px sans-serif';g.lineWidth=3;g.strokeStyle='#000';g.strokeText(p.name,a[0],a[1]-11);g.fillStyle='#fff';g.fillText(p.name,a[0],a[1]-11)}
     }else{
       if(selPlace===p.id){g.fillStyle='#ffd54a55';g.beginPath();g.arc(a[0],a[1],20,0,7);g.fill()}
