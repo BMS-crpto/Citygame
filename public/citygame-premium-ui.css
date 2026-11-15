@@ -93,3 +93,29 @@ canvas{outline:none}
  #appview .card{padding:11px!important}
  #mapside{max-width:48vw!important}
 }
+
+/* CITYGAME WORLD + INTERFACE FINISH — v3 */
+:root{--cg-sand:#d4b36a;--cg-emerald:#287b5c;--cg-ink:#07131c;--cg-panel:#122530}
+/* Cohesive world-facing overlays: clear hierarchy, legible text and softer contrast */
+#hud div,#district,#needs,#tasks div,#chatlog div,#toast{backdrop-filter:blur(8px)!important;background:linear-gradient(155deg,#10232deF,#06121aeF)!important;border:1px solid #d4b36a2a!important;box-shadow:0 4px 14px #0006!important;color:#f0f5f7!important}
+#hud div{border-radius:12px!important;text-shadow:0 1px 2px #0008}
+#money{color:#9af0bf!important;text-shadow:0 0 9px #3cb87933!important}
+#menu .role,#login .card{backdrop-filter:blur(12px)!important}
+#menu .role{transition:transform .16s ease,background .16s ease,border-color .16s ease!important}
+#menu .role.sel{border-color:#d4b36a!important;box-shadow:0 0 0 2px #d4b36a24,0 8px 22px #0005!important}
+#play,#login .go,#guestbtn{letter-spacing:.25px!important}
+#stick,#act,#use,.sbtn{touch-action:none!important;user-select:none!important;-webkit-user-select:none!important}
+#stick{border-radius:50%!important}
+#act{font-weight:900!important;letter-spacing:.4px!important}
+#bigmap{overscroll-behavior:contain!important}
+#mapside{scrollbar-width:thin;scrollbar-color:#496572 transparent}
+#mapside .pl{min-height:42px!important;align-items:center!important}
+#mapside .pl.sel{border-color:var(--cg-sand)!important}
+#atm .box{width:min(92vw,390px)!important;min-width:0!important}
+@media(max-width:600px){
+ #hud{left:6px!important;right:6px!important;gap:4px!important}
+ #hud div{padding:5px 7px!important;font-size:10px!important}
+ #tasks{max-width:58%!important}
+ #phone .pbox{width:min(94vw,390px)!important}
+}
+@media(prefers-reduced-motion:reduce){#menu .role{transition:none!important}}
