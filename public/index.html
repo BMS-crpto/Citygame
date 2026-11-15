@@ -2397,7 +2397,7 @@ const fareOf=(r,d)=>Math.max(r.min,Math.round(d*r.rate));
 // ---- phone ----
 const APPS=[['📰','News'],['📒','Yellow Pages'],['💳','Account'],['🗞️','Feed'],['🗺️','Map'],['📍','GPS'],['💼','Jobs'],['🏦','Bank'],['🏆','Progress'],['🗓️','Daily'],['🎉','Social'],['💬','Chat'],['⚙️','Settings'],['🖼️','Gallery'],['🧮','Calculator'],['🛍️','Market'],['🏪','Business'],['👤','Avatar'],['📋','Life'],['🏘️','Properties']];
 $('pgrid').innerHTML=APPS.map(a=>`<button class="app" data-app="${a[1]}"><b>${a[0]}</b>${a[1]}</button>`).join('');
-function openPhone(){if(!me)return;phone.classList.remove('app-open');phone.style.display='flex';const p=$('phonePlayer');if(p)p.textContent=(myName||lotName||'PLAYER').toUpperCase()+' • ₦'+Math.round(myMoney||0).toLocaleString('en-NG');$('phoneSearch').value='';document.querySelectorAll('#pgrid .app').forEach(b=>b.style.display='');appview.innerHTML='<div class="card"><b>Welcome back 👋</b><p>Choose an app to manage your Lagos life.</p><button class="pb q" style="width:100%;background:linear-gradient(90deg,#7c3aed,#2563eb);color:#fff" onclick="openApp(\'Business\')">🏢 CREATE A COMPANY / BUSINESS</button><small>Open the Business Centre to register your own shop or company. Registration costs ₦150,000 and requires you to stand near a building entrance.</small><p style="margin:8px 0 0"><small>GPS • Work • Banking • Properties</small></p></div>'}
+function openPhone(){if(!me)return;phone.classList.remove('app-open');phone.style.display='flex';const p=$('phonePlayer');if(p)p.textContent=(myName||lotName||'PLAYER').toUpperCase()+' • ₦'+Math.round(myMoney||0).toLocaleString('en-NG');$('phoneSearch').value='';document.querySelectorAll('#pgrid .app').forEach(b=>b.style.display='');appview.innerHTML='<div class="card"><b>Welcome back 👋</b><p>Choose an app to manage your Lagos life.</p><button class="pb q" style="width:100%;background:linear-gradient(90deg,#7c3aed,#2563eb);color:#fff" onclick="openApp(\'Business\')">🏢 CREATE A COMPANY / BUSINESS</button><small>Open the Business Centre to register your own shop or company. Register from anywhere in Lagos, choose your company district, and manage staff from your phone.</small><p style="margin:8px 0 0"><small>GPS • Work • Banking • Properties</small></p></div>'}
 function closePhone(){phone.style.display='none'}
 $('phonebtn').onclick=openPhone;$('phx').onclick=closePhone;
 $('pgrid').onclick=e=>{const b=e.target.closest('[data-app]');if(b)openApp(b.dataset.app)};
@@ -3243,7 +3243,7 @@ guard('cars',()=>{
 
 /* ---------- 7. phone apps ---------- */
 const X={};
-const APPS2=[['🗺️','Map'],['💼','Jobs'],['💬','Chat'],['💸','Pay'],['🚗','Cars'],['📈','Invest'],['🍔','Food'],['🧑🏾‍🍳','Hire'],['🛋️','Decor'],['🪪','ID'],['💪🏾','Hustle'],['🏦','Bank'],['⚙️','Settings']];
+const APPS2=[['🗺️','Map'],['💼','Jobs'],['💬','Chat'],['💸','Pay'],['🚗','Cars'],['📈','Invest'],['🍔','Food'],['🧑🏾‍🍳','Hire'],['🛋️','Decor'],['🪪','ID'],['💪🏾','Hustle'],['🏦','Bank'],['⚙️','Settings'],['🏢','Business'],['🏘️','Properties'],['📍','GPS'],['🏆','Progress'],['🗓️','Daily'],['🧮','Calculator'],['💳','Account'],['👤','Avatar'],['📒','Yellow Pages'],['📋','Life']];
 guard('grid',()=>{
   $('pgrid').innerHTML=APPS2.map(a=>`<button class="app" data-app="${a[1]}"><b>${a[0]}</b>${a[1]}</button>`).join('');
   appview.addEventListener('click',e=>{const b=e.target.closest('[data-x]');if(b&&X[b.dataset.x])guard('x:'+b.dataset.x,()=>X[b.dataset.x](b))});
