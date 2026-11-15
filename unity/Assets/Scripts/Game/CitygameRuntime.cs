@@ -43,6 +43,7 @@ namespace Citygame.Game
         private DayNightCycle dayNight;
         private BusinessSpot nearby;
         private RideableCar nearbyCar;
+        private BusinessSpot selectedDestination;
         private float incomeClock;
         private string notice = "Welcome to Lagos Life. Explore and build your business.";
         private bool menuOpen;
@@ -108,6 +109,11 @@ namespace Citygame.Game
 
             if (!string.IsNullOrEmpty(notice))
                 GUI.Box(new Rect(12, 88, Mathf.Min(Screen.width - 24, 380), 44), notice);
+            if (selectedDestination != null)
+            {
+                float destinationDistance = Vector3.Distance(motor != null ? motor.transform.position : transform.position, selectedDestination.transform.position);
+                GUI.Box(new Rect(12, 136, Mathf.Min(Screen.width - 24, 300), 42), "NAV: " + selectedDestination.BusinessName + " · " + destinationDistance.ToString("0") + "m");
+            }
 
             float button = Mathf.Clamp(Screen.width * 0.105f, 54f, 88f);
             float baseX = 18f, baseY = Screen.height - button * 2.35f;
@@ -272,7 +278,10 @@ namespace Citygame.Game
                         float markerX = mapRect.x + Mathf.Clamp01((pos.x + 40f) / 80f) * (mapRect.width - 82f);
                         float markerY = mapRect.y + Mathf.Clamp01((20f - pos.z) / 40f) * (mapRect.height - 30f);
                         if (GUI.Button(new Rect(markerX, markerY, 82f, 28f), spot.BusinessName))
-                            notice = "Map location: " + spot.BusinessName + " (" + spot.Category + ")";
+                        {
+                            selectedDestination = spot;
+                            notice = "Destination set: " + spot.BusinessName + ". Follow the NAV distance display.";
+                        }
                     }
                     GUI.color = Color.white;
                     y += 270f;
@@ -342,9 +351,28 @@ namespace Citygame.Game
                     GUI.Label(new Rect(x, y, w, 52f), "Display: responsive\nOrientation: portrait / landscape"); y += 58f;
                     if (GUI.Button(new Rect(x, y, w, 42f), "Save game")) { Save(); notice = "Saved."; }
                 }
+                else if (activePhoneApp == "Jobs")
+                {
+                    GUI.Label(new Rect(x, y, w, 34f), "LAGOS JOB BOARD"); y += 40f;
+                    GUI.Box(new Rect(x, y, w, 84f), "Business staff\nCompanies hire staff from the Business app.\nStaff hiring costs ₦10,000 each."); y += 94f;
+                    GUI.Box(new Rect(x, y, w, 84f), "Street opportunities\nExplore the district and discover storefronts.\nRegister a company to earn passive income."); y += 94f;
+                    if (GUI.Button(new Rect(x, y, w, 42f), "Open Business app")) activePhoneApp = "Business";
+                }
+                else if (activePhoneApp == "Cars")
+                {
+                    GUI.Label(new Rect(x, y, w, 34f), "VEHICLE GARAGE"); y += 40f;
+                    GUI.Box(new Rect(x, y, w, 84f), nearbyCar != null ? (nearbyCar.IsOccupied ? "You are driving a nearby vehicle.\nUse EXIT CAR to leave." : "A vehicle is nearby.\nUse ENTER CAR to drive.") : "No vehicle nearby.\nExplore Lagos to find a ride."); y += 94f;
+                    GUI.Label(new Rect(x, y, w, 48f), "Driving controls: use the on-screen directional pad.\nVehicles are part of the local prototype.");
+                }
+                else if (activePhoneApp == "Profile")
+                {
+                    GUI.Label(new Rect(x, y, w, 34f), "PLAYER PROFILE"); y += 40f;
+                    GUI.Box(new Rect(x, y, w, 112f), "Lagos Resident\nWallet: ₦" + save.cash.ToString("N0") + "\nOwned companies: " + save.businesses.Count + "\nCity feed posts: " + save.posts.Count); y += 122f;
+                    if (GUI.Button(new Rect(x, y, w, 42f), "Save profile")) { Save(); notice = "Profile progress saved on this device."; }
+                }
                 else
                 {
-                    GUI.Label(new Rect(x, y, w, 70f), activePhoneApp + " app\nThis app screen is a starter view in the Unity prototype.");
+                    GUI.Label(new Rect(x, y, w, 70f), activePhoneApp + " app\nThis screen is being expanded in the Unity prototype.");
                 }
                 GUI.EndScrollView();
             }
