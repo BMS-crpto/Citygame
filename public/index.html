@@ -2379,9 +2379,12 @@ function setJob(j){
 function renderGps(){
   phone.style.display='flex';
   const L=placesList();L.forEach(p=>p.d=Math.round(Math.hypot(p.x-pos.x,p.z-pos.z)));L.sort((a,b)=>a.d-b.d);
-  appview.innerHTML='<div class="card">📍 <b>GPS navigation</b><br>'+(gps?'Going to <b>'+gps.name+'</b>':'Pick where you want to go. A pink line shows the way on the road and an arrow points to it.')+'</div>'
+  appview.innerHTML='<div class="card">📍 <b>LAGOS GPS · '+L.length+' DESTINATIONS</b><br>'+(gps?'Going to <b>'+gps.name+'</b>':'Search every building, business and landmark across Lagos. Select one to set your route.')+'</div>'
+    +'<input id="gpsFind" type="search" placeholder="Search buildings, areas or businesses..." style="width:100%;padding:12px;border-radius:10px;margin:6px 0">'
     +(gps?'<button class="pb q" onclick="gps=null;renderGps()">Clear GPS</button>':'')
-    +L.map(p=>'<button class="pb q" style="display:flex;justify-content:space-between;width:100%" onclick="setGps(\''+p.id+'\')"><span>'+p.icon+' '+p.name+'</span><span>'+(p.d>=1000?(p.d/1000).toFixed(1)+' km':p.d+' m')+'</span></button>').join('');
+    +L.map(p=>'<button class="pb q" data-gps-name="'+p.name.toLowerCase()+'" style="display:flex;justify-content:space-between;width:100%" onclick="setGps(\''+p.id+'\')"><span>'+p.icon+' '+p.name+'</span><span>'+(p.d>=1000?(p.d/1000).toFixed(1)+' km':p.d+' m')+'</span></button>').join('');
+  const gpsFind=$('gpsFind');
+  if(gpsFind)gpsFind.addEventListener('input',()=>{const q=gpsFind.value.trim().toLowerCase();appview.querySelectorAll('[data-gps-name]').forEach(el=>el.style.display=el.dataset.gpsName.includes(q)?'flex':'none')});
 }
 function setGps(id){
   const p=placesList().find(q=>q.id===id);if(!p)return;
