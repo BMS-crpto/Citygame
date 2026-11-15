@@ -264,7 +264,7 @@ namespace Citygame.Game
                     for (int d = 0; d < directory.Length; d++)
                     {
                         BusinessSpot location = directory[d];
-                        GUI.Label(new Rect(x + 4f, y, w * 0.58f, 38f), location.BusinessName + "\\n" + location.Category);
+                        GUI.Label(new Rect(x + 4f, y, w * 0.58f, 38f), location.BusinessName + "\n" + location.Category);
                         if (GUI.Button(new Rect(x + w * 0.62f, y + 2f, w * 0.38f, 36f), "Register"))
                             Register(location);
                         y += 42f;
