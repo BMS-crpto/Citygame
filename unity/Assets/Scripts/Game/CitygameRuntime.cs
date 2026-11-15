@@ -39,6 +39,7 @@ namespace Citygame.Game
         private string notice = "Welcome to Lagos Life. Explore and build your business.";
         private bool menuOpen;
         private int selectedBusinessIndex;
+        private int companyPageOffset;
 
         private string SavePath => Path.Combine(Application.persistentDataPath, "citygame-unity-save.json");
 
@@ -151,7 +152,16 @@ namespace Citygame.Game
                     y += 48;
                 }
 
-                GUI.Label(new Rect(x + 12, y, 234, 28), "Owned companies: " + save.businesses.Count);
+                GUI.Label(new Rect(x + 12, y, 150, 28), "Owned: " + save.businesses.Count);
+                if (save.businesses.Count > 4)
+                {
+                    int maxOffset = ((save.businesses.Count - 1) / 4) * 4;
+                    companyPageOffset = Mathf.Clamp(companyPageOffset, 0, maxOffset);
+                    if (GUI.Button(new Rect(x + 160, y - 2, 38, 30), "‹"))
+                        companyPageOffset = Mathf.Max(0, companyPageOffset - 4);
+                    if (GUI.Button(new Rect(x + 202, y - 2, 38, 30), "›"))
+                        companyPageOffset = Mathf.Min(maxOffset, companyPageOffset + 4);
+                }
                 y += 30;
                 if (save.businesses.Count == 0)
                 {
@@ -161,7 +171,8 @@ namespace Citygame.Game
                 else
                 {
                     selectedBusinessIndex = Mathf.Clamp(selectedBusinessIndex, 0, save.businesses.Count - 1);
-                    for (int i = 0; i < save.businesses.Count && i < 4; i++)
+                    int pageEnd = Mathf.Min(companyPageOffset + 4, save.businesses.Count);
+                    for (int i = companyPageOffset; i < pageEnd; i++)
                     {
                         OwnedBusiness company = save.businesses[i];
                         string row = (i == selectedBusinessIndex ? "▶ " : "") + company.spotName +
