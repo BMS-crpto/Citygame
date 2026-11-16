@@ -25,7 +25,7 @@ namespace Citygame.Editor
                 for (int x = -1; x <= 1; x++)
                 {
                     GameObject districtRoot = new GameObject(districtNames[districtIndex] + " District");
-                    LagosBlockGenerator.Build(districtRoot.transform, new Vector3(x * 90f, 0f, z * 54f), districtNames[districtIndex]);
+                    LagosBlockGenerator.Build(districtRoot.transform, new Vector3(x * 68f, 0f, z * 54f), districtNames[districtIndex]);
                     districtIndex++;
                 }
             }
