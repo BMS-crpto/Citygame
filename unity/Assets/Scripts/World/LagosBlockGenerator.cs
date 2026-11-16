@@ -78,9 +78,24 @@ namespace Citygame.World
             BuildCar(root, "City Sedan", new Vector3(2f, 0.65f, -3.2f), green);
             BuildCar(root, "Street Shuttle", new Vector3(28f, 0.65f, -3.2f), concrete);
 
+            BuildAmbientTraffic(root, paint, green);
             BuildStreetLights(root);
             BuildPedestrianCrossings(root);
             BuildPedestrians(root);
+        }
+
+        private static void BuildAmbientTraffic(Transform root, Material firstPaint, Material secondPaint)
+        {
+            // Two lightweight cars circulate on the market street, away from
+            // parked cars and storefront entrances.
+            GameObject eastbound = CreateCube("Market Street traffic eastbound", root,
+                new Vector3(-40f, 0.62f, 18.5f), new Vector3(3.5f, 0.72f, 1.65f), firstPaint);
+            TrafficVehicle eastDriver = eastbound.AddComponent<TrafficVehicle>();
+            eastDriver.Configure(root.position.x - 42f, root.position.x + 42f, root.position.z + 18.5f, 1, 5.5f);
+            GameObject westbound = CreateCube("Market Street traffic westbound", root,
+                new Vector3(40f, 0.62f, 21.5f), new Vector3(3.5f, 0.72f, 1.65f), secondPaint);
+            TrafficVehicle westDriver = westbound.AddComponent<TrafficVehicle>();
+            westDriver.Configure(root.position.x - 42f, root.position.x + 42f, root.position.z + 21.5f, -1, 4.8f);
         }
 
         private static void BuildCar(Transform root, string name, Vector3 position, Material bodyMaterial)
