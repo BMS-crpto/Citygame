@@ -141,6 +141,12 @@ namespace Citygame.World
                 {
                     if (wheelVisuals[i] == null) continue;
                     wheelVisuals[i].Rotate(Vector3.up, roll, Space.Self);
+                    if (suspensionPivots != null && (i == 1 || i == 3) && suspensionPivots[i] != null)
+                    {
+                        Vector3 pivotAngles = suspensionPivots[i].localEulerAngles;
+                        pivotAngles.y = steering * 25f;
+                        suspensionPivots[i].localEulerAngles = pivotAngles;
+                    }
                 }
             }
             if (speedDisplay != null)
