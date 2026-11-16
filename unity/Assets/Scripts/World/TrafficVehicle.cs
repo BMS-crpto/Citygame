@@ -38,15 +38,23 @@ namespace Citygame.World
             if (redSignal && (Mathf.Abs(p.x - (minX + 8f)) < 3.8f || Mathf.Abs(p.x - (maxX - 8f)) < 3.8f))
                 targetSpeed = 0f;
 
-            // Follow traffic ahead instead of driving through another vehicle.
+            // Start the sensor beyond this vehicle's front bumper. A ray starting
+            // inside the car's own collider is ignored by Unity physics, which
+            // previously made the following check unreliable.
             Vector3 forward = direction > 0 ? Vector3.right : Vector3.left;
-            if (Physics.Raycast(transform.position + Vector3.up * 0.2f, forward, out RaycastHit hit, 6f,
+            Vector3 sensorOrigin = transform.position + forward * 1.9f + Vector3.up * 0.04f;
+            const float sensorDistance = 8f;
+            if (Physics.Raycast(sensorOrigin, forward, out RaycastHit hit, sensorDistance,
                 Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             {
                 TrafficVehicle other = hit.collider.GetComponentInParent<TrafficVehicle>();
                 if (other != null && other != this && other.direction == direction &&
-                    Mathf.Abs(other.laneZ - laneZ) <= 1.2f && hit.distance < 5f)
-                    targetSpeed = Mathf.Min(targetSpeed, Mathf.Max(0f, (hit.distance - 2f) * speed / 3f));
+                    Mathf.Abs(other.laneZ - laneZ) <= 1.2f)
+                {
+                    const float safeGap = 2.2f;
+                    float followSpeed = Mathf.Clamp((hit.distance - safeGap) / 3.5f, 0f, 1f) * speed;
+                    targetSpeed = Mathf.Min(targetSpeed, followSpeed);
+                }
             }
 
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, (targetSpeed < currentSpeed ? 8f : 2.5f) * Time.deltaTime);
