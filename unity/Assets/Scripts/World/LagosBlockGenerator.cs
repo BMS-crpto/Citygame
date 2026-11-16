@@ -159,6 +159,17 @@ namespace Citygame.World
             steeringWheel.transform.localScale = new Vector3(0.43f, 0.035f, 0.43f);
             steeringWheel.GetComponent<Renderer>().sharedMaterial = interior;
             DisableVisualCollider(steeringWheel);
+            GameObject speedTextObject = new GameObject(name + " digital speedometer text");
+            speedTextObject.transform.SetParent(car.transform, false);
+            speedTextObject.transform.localPosition = new Vector3(0.88f, 0.69f, -0.39f);
+            speedTextObject.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
+            TextMesh speedText = speedTextObject.AddComponent<TextMesh>();
+            speedText.text = "000 km/h";
+            speedText.fontSize = 48;
+            speedText.characterSize = 0.018f;
+            speedText.anchor = TextAnchor.MiddleCenter;
+            speedText.color = new Color(0.2f, 0.9f, 1f);
+            rideable.ConfigureDrivingVisuals(steeringWheel.transform, wheelVisuals, speedText);
             CreateCarPart(name + " left side mirror", car.transform, new Vector3(0.55f, 0.77f, -0.94f), new Vector3(0.25f, 0.16f, 0.18f), metal);
             CreateCarPart(name + " right side mirror", car.transform, new Vector3(0.55f, 0.77f, 0.94f), new Vector3(0.25f, 0.16f, 0.18f), metal);
             CreateCarPart(name + " footwell", car.transform, new Vector3(0.35f, 0.08f, -0.38f), new Vector3(0.45f, 0.08f, 0.42f), interior);
@@ -187,6 +198,8 @@ namespace Citygame.World
             }
             rideable.ConfigureHeadlights(headlamps);
 
+            Transform[] wheelVisuals = new Transform[4];
+            int wheelIndex = 0;
             for (int side = -1; side <= 1; side += 2)
             {
                 for (int axle = -1; axle <= 1; axle += 2)
@@ -199,6 +212,7 @@ namespace Citygame.World
                     wheel.transform.localScale = new Vector3(0.68f, 0.16f, 0.68f);
                     wheel.GetComponent<Renderer>().sharedMaterial = rubber;
                     DisableVisualCollider(wheel);
+                    wheelVisuals[wheelIndex++] = wheel.transform;
 
                     GameObject hub = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                     hub.name = name + " alloy wheel hub";
