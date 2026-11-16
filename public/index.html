@@ -135,8 +135,8 @@
   /* Native-feeling full-screen phone apps */
   #phone.app-open .pbox>div:first-child{display:none!important}
   #phone.app-open #pgrid,#phone.app-open #phoneSearch{display:none!important}
-  #phone.app-open #appview{display:block;flex:1;min-height:0;margin:0;overflow:visible;text-align:left}
-  #phone.app-open .pbox{display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  #phone.app-open #appview{display:block;flex:1 1 auto;min-height:0;margin:0;max-height:100%;overflow-y:auto!important;overflow-x:hidden;text-align:left;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+  #phone.app-open .pbox{display:flex;flex-direction:column;max-height:calc(100dvh - 16px)!important;overflow:hidden!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .phone-appbar{position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:9px;margin:0 -2px 12px;padding:7px 4px 11px;background:#0c111d;border-bottom:1px solid #ffffff20}
   .phone-appbar>div{flex:1;min-width:0;text-align:left}
   .phone-appbar b{display:block;font-size:16px}
@@ -144,8 +144,8 @@
   .phone-appbar .pb{margin:0;padding:8px 11px}
   #phone.app-open .pbox:after{margin:14px auto 3px}
   @media (orientation:landscape) and (max-height:600px){
-    #phone.app-open .pbox{width:min(96vw,900px);height:auto!important;max-height:none!important;overflow:visible}
-    #phone.app-open #appview{max-height:none!important;overflow:visible!important}
+    #phone.app-open .pbox{width:min(96vw,900px);height:auto!important;max-height:calc(100dvh - 16px)!important;overflow:hidden!important}
+    #phone.app-open #appview{max-height:100%!important;overflow-y:auto!important;overflow-x:hidden!important}
   }
   #bigmap{position:fixed;inset:0;background:#0b1424;display:none;z-index:9;flex-direction:row}
   #bigmap canvas{flex:none;touch-action:none}
