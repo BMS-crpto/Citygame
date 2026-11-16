@@ -26,18 +26,25 @@ namespace Citygame.World
         private Transform[] wheelVisuals;
         private TextMesh speedDisplay;
         private float currentSpeed;
+        private float fuelPercent = 100f;
+        private string currentGear = "N";
+        private Transform[] suspensionPivots;
+        private readonly float[] suspensionRest = { -0.18f, -0.18f, -0.18f, -0.18f };
         private float steeringVisual;
 
         public bool IsOccupied => occupied;
         public bool IsCockpitView => cockpitView;
         public bool HeadlightsOn => headlightsOn;
         public float SpeedKph => Mathf.Abs(currentSpeed) * 3.6f;
+        public float FuelPercent => fuelPercent;
+        public string CurrentGear => currentGear;
 
-        public void ConfigureDrivingVisuals(Transform wheel, Transform[] tyres, TextMesh display)
+        public void ConfigureDrivingVisuals(Transform wheel, Transform[] tyres, TextMesh display, Transform[] springs)
         {
             steeringWheel = wheel;
             wheelVisuals = tyres;
             speedDisplay = display;
+            suspensionPivots = springs;
         }
 
         public void ConfigureCockpit(Transform anchor) { cockpitAnchor = anchor; }
@@ -101,8 +108,13 @@ namespace Citygame.World
             float throttle = input.y;
             float steering = input.x;
             float targetSpeed = throttle * driveSpeed;
-            float rate = Mathf.Abs(throttle) < 0.05f ? braking * 0.32f : (Mathf.Sign(targetSpeed) != Mathf.Sign(currentSpeed) ? braking : acceleration);
+            bool brakingInput = Mathf.Abs(throttle) < 0.05f || (Mathf.Abs(currentSpeed) > 0.1f && Mathf.Sign(targetSpeed) != Mathf.Sign(currentSpeed));
+            float rate = brakingInput ? braking : acceleration;
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, rate * Time.deltaTime);
+            if (Mathf.Abs(currentSpeed) > 0.1f)
+                fuelPercent = Mathf.Max(0f, fuelPercent - Mathf.Abs(currentSpeed) * Time.deltaTime * 0.0018f);
+            if (fuelPercent <= 0f) currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, braking * Time.deltaTime);
+            currentGear = throttle < -0.08f ? "R" : (throttle > 0.08f || Mathf.Abs(currentSpeed) > 0.1f ? "D" : "N");
             if (Mathf.Abs(currentSpeed) < 0.025f) currentSpeed = 0f;
 
             float steeringFactor = Mathf.Clamp01(Mathf.Abs(currentSpeed) / 2.5f);
@@ -131,11 +143,40 @@ namespace Citygame.World
                     wheelVisuals[i].Rotate(Vector3.up, roll, Space.Self);
                 }
             }
-            if (speedDisplay != null) speedDisplay.text = Mathf.RoundToInt(SpeedKph).ToString("000") + " km/h";
+            if (speedDisplay != null)
+                speedDisplay.text = Mathf.RoundToInt(SpeedKph).ToString("000") + " km/h\n" + currentGear + "  |  FUEL " + Mathf.RoundToInt(fuelPercent) + "%";
+            UpdateSuspension();
 
             if (Input.GetKeyDown(KeyCode.E)) ExitVehicle();
             if (Input.GetKeyDown(KeyCode.C)) ToggleCameraView();
             if (Input.GetKeyDown(KeyCode.L)) ToggleHeadlights();
+        }
+
+        private void UpdateSuspension()
+        {
+            if (suspensionPivots == null) return;
+            for (int i = 0; i < suspensionPivots.Length; i++)
+            {
+                Transform spring = suspensionPivots[i];
+                if (spring == null) continue;
+                Vector3 origin = spring.position + transform.up * 0.42f;
+                RaycastHit[] hits = Physics.RaycastAll(origin, -transform.up, 0.95f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+                float target = suspensionRest[i];
+                float nearest = float.MaxValue;
+                for (int h = 0; h < hits.Length; h++)
+                {
+                    Transform hitTransform = hits[h].transform;
+                    if (hitTransform == transform || hitTransform.IsChildOf(transform)) continue;
+                    if (hits[h].distance < nearest)
+                    {
+                        nearest = hits[h].distance;
+                        target = suspensionRest[i] + Mathf.Clamp(0.89f - nearest, -0.16f, 0.16f);
+                    }
+                }
+                Vector3 local = spring.localPosition;
+                local.y = Mathf.Lerp(local.y, target, 1f - Mathf.Exp(-14f * Time.deltaTime));
+                spring.localPosition = local;
+            }
         }
 
         public void SetMobileDriveInput(Vector2 value) { mobileDriveInput = Vector2.ClampMagnitude(value, 1f); }
@@ -182,7 +223,7 @@ namespace Citygame.World
             occupied = false;
             mobileDriveInput = Vector2.zero;
             currentSpeed = 0f;
-            if (speedDisplay != null) speedDisplay.text = "000 km/h";
+            if (speedDisplay != null) speedDisplay.text = "000 km/h\nN  |  FUEL " + Mathf.RoundToInt(fuelPercent) + "%";
         }
     }
 }
