@@ -92,7 +92,13 @@
       '<div class="cgAccRow"><small>Last game save</small><b>'+date(a.lastSavedAt)+'</b></div>'+
       '<div class="cgAccRow"><small>Home address</small><b>'+esc(p.home ? [p.home.name,p.home.area].filter(Boolean).join(' · ') : 'No active home')+'</b></div>'+
       '<div class="cgAccRow"><small>Home lease ends</small><b>'+date(p.home && p.home.until)+'</b></div>'+
+      '<div class="cgAccRow"><small>Weekly rent</small><b>'+money(p.homeRent)+'</b></div>'+
+      '<div class="cgAccRow"><small>Furniture placed</small><b>'+Number(p.furniturePlacedCount||0)+' / 60</b></div>'+
       '</div></section>'+
+      '<section class="cgAccSection"><h3>My home · furniture and storage</h3>'+
+      ((p.homeFurniture||[]).length ? p.homeFurniture.map(item=>'<div class="cgAccBiz"><b>'+esc(item.icon)+' '+esc(item.name)+'</b><small>Room position · X '+Number(item.x).toFixed(1)+' / Z '+Number(item.z).toFixed(1)+' · Rotation '+Number(item.rotation).toFixed(2)+'</small></div>').join('') : '<div class="cgAccNote">No furniture placed in the active home yet. Use the in-game furniture shop and Decor mode to furnish your rooms.</div>')+
+      ((p.furnitureInventory||[]).length ? '<h3 style="margin-top:14px">Furniture in storage</h3>'+p.furnitureInventory.map(item=>'<div class="cgAccBiz"><b>'+esc(item.icon)+' '+esc(item.name)+'</b><small>Stored quantity: '+Number(item.quantity)+'</small></div>').join('') : '<div class="cgAccNote">No unplaced furniture in storage.</div>')+
+      '</section>'+
       '<section class="cgAccSection"><h3>My businesses</h3>'+businessMarkup(p.businesses)+'</section>'+
       '<section class="cgAccSection"><h3>Profile settings</h3>'+
       '<div class="cgAccField"><label for="cgAccDisplay">Display name</label><input id="cgAccDisplay" maxlength="24" value="'+esc(a.displayName)+'"></div>'+
