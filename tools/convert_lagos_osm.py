@@ -61,6 +61,12 @@ def main():
                                      "width":ROAD_WIDTH.get(str(highway),4),
                                      "height":0,"points":[local_point(p) for p in line]})
             continue
+        if tags.get("waterway") or tags.get("natural") == "coastline":
+            for line in lines:
+                if len(line) >= 2:
+                    features.append({"kind":"waterline","name":name,"roadClass":"",
+                                     "width":8,"height":0,"points":[local_point(p) for p in line]})
+            continue
         building = tags.get("building")
         if building and typ == "Polygon" and coords:
             ring = coords[0]
