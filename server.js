@@ -1465,7 +1465,15 @@ function extraMsg(room, p, m, now) {
       if (p.car >= 0) return toast('Park your current vehicle before retrieving another'), true;
       if (!E.storedCars.includes(col) || !E.cars.includes(col) || !VEHICLES[col]) return toast('That vehicle is not in your garage'), true;
       E.storedCars = E.storedCars.filter(x => x !== col);
-      const x = home.kind === 'villa' ? home.x + 7.55 : home.out.x + 5.5, z = home.kind === 'villa' ? home.z + 4.2 : home.out.z + 2.5, ry = Math.PI;
+      let x, z;
+      if (home.kind === 'villa') { x = home.x + 7.55; z = home.z + 4.2; }
+      else {
+        // Match the marked resident parking bays built beside flats and penthouses.
+        x = home.x + 10.5;
+        const slots = home.kind === 'lobby' ? [-5.2, 0, 5.2] : [-2.8, 2.8];
+        z = (home.kind === 'lobby' ? home.z + 2.4 : home.z) + slots[Math.min(E.storedCars.length, slots.length - 1)];
+      }
+      const ry = Math.PI;
       sendCars(p); send(p.ws, { t: 'garage_spawn', col, x, z, ry });
       toast('🔑 ' + VEHICLES[col].name + ' retrieved to your driveway');
       savePlayer(room, p); return true;
