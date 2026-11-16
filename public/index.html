@@ -922,7 +922,11 @@ function addSign(text,x,y,z,ry,w,bg,fg){
   x=T.X(x);y=T.Y(y);z=T.Z(z);w=T.SX(w);
   const k=text+bg;let mt=signCache[k];
   if(!mt){
-    const t=canvasTex(512,128,(g,W,H)=>{g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.28)';g.fillRect(0,H-9,W,9);g.fillStyle=fg||'#fff';g.font='bold 54px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(text,W/2,H/2-3)});
+    const t=canvasTex(512,128,(g,W,H)=>{g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.28)';g.fillRect(0,H-9,W,9);g.fillStyle=fg||'#fff';g.font='bold 54px sans-serif';g.textAlign='center';g.textBaseline='middle';
+  // District labels make the map readable as a Lagos city map, not only a dot field.
+  g.save();g.font='700 12px system-ui';g.lineWidth=3;g.strokeStyle='rgba(5,15,25,.82)';g.fillStyle='rgba(255,255,255,.88)';
+  for(let bx=-GN+1;bx<GN;bx+=3)for(let bz=-GN+1;bz<GN;bz+=3){const name=districtNameForMap(bx,bz),a=P(bx*BLOCK,bz*BLOCK);if(a[0]>-90&&a[0]<S+90&&a[1]>-30&&a[1]<S+30){g.strokeText(name,a[0],a[1]);g.fillText(name,a[0],a[1])}}
+  g.restore();g.fillText(text,W/2,H/2-3)});
     t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;mt=signCache[k]=new THREE.MeshBasicMaterial({map:t});
   }
   const s=new THREE.Mesh(new THREE.PlaneGeometry(w,w/4),mt);s.position.set(x,y,z);s.rotation.y=ry||0;scene.add(s);return s;
@@ -2680,6 +2684,7 @@ function mmDraw(){
 const $=id=>document.getElementById(id);
 const phone=$('phone'),appview=$('appview'),bigmap=$('bigmap'),bmc=$('bmc'),bmg=bmc.getContext('2d'),mapside=$('mapside');
 let gps=null,jobInfo=null,jobTarget=null,selPlace=null,mapTimer=null,bmHits=[],cityBusinesses=[];
+let mapZoom=1,mapPanX=0,mapPanY=0,mapDrag=null,mapDragged=false;
 function syncCityBusinesses(list){
   cityBusinesses=Array.isArray(list)?list:[];
   if(world)for(const b of cityBusinesses){const p=world.places.find(x=>x.id===b.id);if(p){p.name=b.name;p.icon=b.icon;p.business=true;p.owner=b.owner;p.area=b.area}}
@@ -2879,8 +2884,9 @@ function openMap(){
 
 function closeMap(){bigmap.style.display='none';clearInterval(mapTimer)}
 function sizeMap(){const S=Math.floor(Math.min(innerHeight-4,innerWidth*0.58));bmc.width=bmc.height=S;bmc.style.width=bmc.style.height=S+'px'}
+function districtNameForMap(bx,bz){const k=districtOf(bx,bz);return k==='airport'?'AIRPORT':(DIST[k]||outerInfo(bx,bz)[1]).toUpperCase()}
 function drawBigMap(){
-  const S=bmc.width,sc=S/(GN*BLOCK*2+60),g=bmg,P=(x,z)=>[S/2-x*sc,S/2-z*sc];
+  const S=bmc.width,sc=S/(GN*BLOCK*2+60)*mapZoom,g=bmg,P=(x,z)=>[S/2-x*sc+mapPanX,S/2-z*sc+mapPanY];
   g.fillStyle='#0f2a45';g.fillRect(0,0,S,S);
   for(let bx=-GN;bx<GN;bx++)for(let bz=-GN;bz<GN;bz++){
     const a=P(bx*BLOCK+6,bz*BLOCK+6),b=P(bx*BLOCK+BLOCK-6,bz*BLOCK+BLOCK-6);
@@ -2906,20 +2912,24 @@ function drawBigMap(){
       g.font='bold 11px sans-serif';g.lineWidth=3;g.strokeStyle='#000';g.strokeText(p.name,a[0],a[1]+17);g.fillStyle='#fff';g.fillText(p.name,a[0],a[1]+17);
     }
   });
-  if(gps){const a=P(gps.x,gps.z);g.font='22px sans-serif';g.fillText('📍',a[0],a[1]-8)}
+  if(gps){const a=P(gps.x,gps.z),m=P(pos.x,pos.z);g.save();g.setLineDash([7,5]);g.strokeStyle='#58c7ff';g.lineWidth=3;g.beginPath();g.moveTo(m[0],m[1]);g.lineTo(a[0],a[1]);g.stroke();g.setLineDash([]);g.restore();g.font='22px sans-serif';g.fillText('📍',a[0],a[1]-8)}
   if(jobTarget){const a=P(jobTarget.x,jobTarget.z);g.font='22px sans-serif';g.fillText('📦',a[0],a[1]-8)}
   const m=P(pos.x,pos.z);g.save();g.translate(m[0],m[1]);g.rotate(-pos.ry);g.fillStyle='#fff';g.strokeStyle='#000';g.lineWidth=2;
   g.beginPath();g.moveTo(0,-11);g.lineTo(8,9);g.lineTo(0,5);g.lineTo(-8,9);g.closePath();g.fill();g.stroke();g.restore();
 }
+bmc.addEventListener('wheel',e=>{e.preventDefault();const r=bmc.getBoundingClientRect(),x=(e.clientX-r.left)*bmc.width/r.width,y=(e.clientY-r.top)*bmc.height/r.height,old=mapZoom;mapZoom=Math.max(0.75,Math.min(3.2,mapZoom*(e.deltaY<0?1.12:0.89)));const f=mapZoom/old;mapPanX=x-(x-mapPanX)*f;mapPanY=y-(y-mapPanY)*f;drawBigMap()},{passive:false});
+bmc.addEventListener('pointerdown',e=>{mapDrag={x:e.clientX,y:e.clientY,px:mapPanX,py:mapPanY,id:e.pointerId};mapDragged=false;bmc.setPointerCapture(e.pointerId)});
+bmc.addEventListener('pointermove',e=>{if(!mapDrag||mapDrag.id!==e.pointerId)return;const dx=e.clientX-mapDrag.x,dy=e.clientY-mapDrag.y;if(Math.abs(dx)+Math.abs(dy)>5)mapDragged=true;if(mapDragged){const r=bmc.getBoundingClientRect();mapPanX=mapDrag.px+dx*bmc.width/r.width;mapPanY=mapDrag.py+dy*bmc.height/r.height;drawBigMap()}});
+const stopMapDrag=e=>{if(mapDrag&&mapDrag.id===e.pointerId)mapDrag=null};bmc.addEventListener('pointerup',stopMapDrag);bmc.addEventListener('pointercancel',stopMapDrag);
 bmc.addEventListener('click',e=>{
-  const r=bmc.getBoundingClientRect(),x=(e.clientX-r.left)*bmc.width/r.width,y=(e.clientY-r.top)*bmc.height/r.height;
+  if(mapDragged){mapDragged=false;return}const r=bmc.getBoundingClientRect(),x=(e.clientX-r.left)*bmc.width/r.width,y=(e.clientY-r.top)*bmc.height/r.height;
   let best=null,bd=16;for(const h of bmHits){const d=Math.hypot(h.x-x,h.y-y),limit=h.building?10:16;if(d<Math.min(bd,limit)){bd=d;best=h}}
   if(best){selPlace=best.id;renderSide();drawBigMap()}
 });
 function renderSide(){
   const L=placesList(),me_=pos;
   L.forEach(p=>p.d=Math.round(Math.hypot(p.x-me_.x,p.z-me_.z)));L.sort((a,b)=>a.d-b.d);
-  let h=`<div class="mh">🗺️ Lagos Map <button class="pb q" data-act="close" style="margin:0">✖</button></div>`;
+  let h=`<div class="mh">🗺️ LAGOS CITY MAP <button class="pb q" data-act="close" style="margin:0">✖</button></div><div style="display:flex;gap:5px;flex-wrap:wrap;padding:5px 0"><button class="pb q" data-act="zoomIn">＋ Zoom</button><button class="pb q" data-act="zoomOut">－ Zoom</button><button class="pb q" data-act="mapReset">◎ Re-centre</button></div><div style="font-size:10px;opacity:.8;margin-bottom:6px">Drag map to pan · pinch/scroll to zoom · blue line shows straight-line GPS bearing</div>`;
   h+=L.map(p=>`<div class="pl ${selPlace===p.id?'sel':''}" data-act="sel" data-id="${p.id}"><span>${p.icon} ${p.name}</span><span>${p.d}m</span></div>`).join('');
   const sp=L.find(p=>p.id===selPlace);
   if(sp){
@@ -2933,6 +2943,9 @@ function renderSide(){
 mapside.onclick=e=>{
   const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
   if(a==='close')closeMap();
+  else if(a==='zoomIn'){mapZoom=Math.min(3.2,mapZoom*1.25);drawBigMap()}
+  else if(a==='zoomOut'){mapZoom=Math.max(0.75,mapZoom/1.25);drawBigMap()}
+  else if(a==='mapReset'){mapZoom=1;mapPanX=0;mapPanY=0;drawBigMap()}
   else if(a==='sel'){selPlace=b.dataset.id;renderSide();drawBigMap()}
   else if(a==='gps')setGps(selPlace);
   else if(a==='cleargps'){gps=null;renderSide();drawBigMap()}
