@@ -81,6 +81,7 @@ namespace Citygame.World
             BuildCar(root, "Lagos City Bus", new Vector3(42f, 0.65f, -3.2f), green, VehicleStyle.Bus);
 
             BuildGarage(root, concrete, paint);
+            BuildPetrolStation(root, concrete, paint);
             BuildAmbientTraffic(root, paint, green);
             BuildStreetLights(root);
             BuildPedestrianCrossings(root);
@@ -101,6 +102,64 @@ namespace Citygame.World
             servicePoint.transform.position = centre + root.position + new Vector3(0f, 0f, -5.5f);
             VehicleGarage garage = servicePoint.AddComponent<VehicleGarage>();
             garage.Configure("Lagos Motor Works", new Vector3(18f, 2.8f, 12f));
+        }
+
+        private static void BuildPetrolStation(Transform root, Material concrete, Material brand)
+        {
+            // Roadside forecourt placed at the west end of the main road, clear
+            // of the vehicle workshop and the storefront entrances.
+            Vector3 centre = new Vector3(-43f, 0f, 0f);
+            Material canopy = MaterialFor(new Color(0.92f, 0.91f, 0.84f));
+            Material red = MaterialFor(new Color(0.78f, 0.055f, 0.035f));
+            Material white = MaterialFor(new Color(0.94f, 0.94f, 0.9f));
+            Material black = MaterialFor(new Color(0.07f, 0.075f, 0.08f));
+
+            GameObject forecourt = CreateCube("Lagos petrol station forecourt", root,
+                centre + new Vector3(0f, 0.035f, 0f), new Vector3(13f, 0.12f, 18f), concrete);
+            DisableVisualCollider(forecourt);
+            GameObject roof = CreateCube("Petrol station canopy", root,
+                centre + new Vector3(0f, 4.1f, 0f), new Vector3(13f, 0.55f, 15f), canopy);
+            GameObject fascia = CreateCube("Petrol station red fascia", root,
+                centre + new Vector3(0f, 3.82f, -7.2f), new Vector3(13f, 0.5f, 0.35f), red);
+            DisableVisualCollider(roof);
+            DisableVisualCollider(fascia);
+
+            for (int side = -1; side <= 1; side += 2)
+            {
+                GameObject column = CreateCube("Petrol station canopy column", root,
+                    centre + new Vector3(side * 5.6f, 2.05f, 0f), new Vector3(0.35f, 4.1f, 0.35f), white);
+                DisableVisualCollider(column);
+            }
+
+            for (int pump = 0; pump < 2; pump++)
+            {
+                Vector3 pumpPosition = centre + new Vector3(pump == 0 ? -2.7f : 2.7f, 0f, -1.2f);
+                GameObject baseBlock = CreateCube("Fuel pump island", root,
+                    pumpPosition + new Vector3(0f, 0.18f, 0f), new Vector3(2.1f, 0.36f, 2.1f), black);
+                GameObject cabinet = CreateCube("Petrol pump dispenser", root,
+                    pumpPosition + new Vector3(0f, 1.25f, 0f), new Vector3(1.05f, 2.1f, 0.8f), white);
+                GameObject display = CreateCube("Fuel pump digital display", root,
+                    pumpPosition + new Vector3(0f, 1.65f, -0.42f), new Vector3(0.68f, 0.34f, 0.035f), black);
+                GameObject nozzle = CreateCube("Fuel pump nozzle", root,
+                    pumpPosition + new Vector3(0.58f, 1.15f, 0.05f), new Vector3(0.16f, 0.48f, 0.16f), black);
+                DisableVisualCollider(baseBlock);
+                DisableVisualCollider(cabinet);
+                DisableVisualCollider(display);
+                DisableVisualCollider(nozzle);
+            }
+
+            GameObject sign = CreateCube("Petrol station roadside sign", root,
+                centre + new Vector3(-5.8f, 2.1f, -8.2f), new Vector3(2.2f, 3.8f, 0.35f), red);
+            GameObject signFace = CreateCube("Petrol station sign face", root,
+                centre + new Vector3(-5.8f, 2.35f, -8.4f), new Vector3(1.85f, 1.25f, 0.08f), white);
+            DisableVisualCollider(sign);
+            DisableVisualCollider(signFace);
+
+            GameObject servicePoint = new GameObject("Lagos petrol station fuel point");
+            servicePoint.transform.SetParent(root, false);
+            servicePoint.transform.position = centre + root.position + new Vector3(0f, 0f, 5.4f);
+            PetrolStation station = servicePoint.AddComponent<PetrolStation>();
+            station.Configure("Lagos Fuel Station", 9f);
         }
 
         private static void BuildAmbientTraffic(Transform root, Material firstPaint, Material secondPaint)
