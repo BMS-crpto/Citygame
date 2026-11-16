@@ -64,7 +64,7 @@
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || 'Account request failed.');
-    return data.account;
+    return data.account || data;
   }
   function businessMarkup(items) {
     if (!items || !items.length) return '<div class="cgAccNote">No player-owned businesses saved on this account yet.</div>';
@@ -90,7 +90,13 @@
       '<div class="cgAccField"><label for="cgAccDisplay">Display name</label><input id="cgAccDisplay" maxlength="24" value="'+esc(a.displayName)+'"></div>'+
       '<div class="cgAccField"><label for="cgAccBio">About me · 120 characters max</label><textarea id="cgAccBio" maxlength="120" placeholder="Write a short player bio…">'+esc(a.bio||'')+'</textarea></div>'+
       '<div class="cgAccActions"><button id="cgAccSave">Save profile</button><button class="alt" id="cgAccRefresh">Refresh saved data</button><button class="alt" id="cgAccSignout">Sign out</button></div><div class="cgAccError" id="cgAccError"></div>'+
-      '<div class="cgAccNote">Account storage: '+esc(storage==='persistent'?'Persistent cloud storage':'Local fallback storage')+'. Profile updates are saved to the game server. Character progress is saved by the multiplayer game session.</div></section>';
+      '<div class="cgAccNote">Account storage: '+esc(storage==='persistent'?'Persistent cloud storage':'Local fallback storage')+'. Profile updates are saved to the game server. Character progress is saved by the multiplayer game session.</div></section>'+
+      '<section class="cgAccSection"><h3>Account security</h3>'+
+      '<div class="cgAccField"><label for="cgAccCurrent">Current password</label><input id="cgAccCurrent" type="password" autocomplete="current-password" maxlength="128"></div>'+
+      '<div class="cgAccField"><label for="cgAccNew">New password</label><input id="cgAccNew" type="password" autocomplete="new-password" minlength="10" maxlength="128" placeholder="At least 10 characters"></div>'+
+      '<div class="cgAccField"><label for="cgAccConfirm">Confirm new password</label><input id="cgAccConfirm" type="password" autocomplete="new-password" minlength="10" maxlength="128"></div>'+
+      '<div class="cgAccActions"><button id="cgAccPassword">Update password</button></div><div class="cgAccError" id="cgAccPasswordError"></div>'+
+      '<div class="cgAccNote">Your current password is verified on the server. Passwords are stored as salted scrypt hashes, never as readable text.</div></section>';
     document.getElementById('cgAccSave').onclick = async () => {
       const button = document.getElementById('cgAccSave'), error = document.getElementById('cgAccError');
       button.disabled = true; button.textContent = 'Saving…'; error.textContent = '';
@@ -101,6 +107,22 @@
         document.getElementById('cgAccError').textContent = 'Profile saved successfully.';
       } catch (e) { error.textContent = e.message; }
       finally { button.disabled = false; button.textContent = 'Save profile'; }
+    };
+    document.getElementById('cgAccPassword').onclick = async () => {
+      const button = document.getElementById('cgAccPassword');
+      const error = document.getElementById('cgAccPasswordError');
+      const currentPassword = document.getElementById('cgAccCurrent').value;
+      const newPassword = document.getElementById('cgAccNew').value;
+      const confirmPassword = document.getElementById('cgAccConfirm').value;
+      error.textContent = '';
+      if (newPassword !== confirmPassword) { error.textContent = 'The new passwords do not match.'; return; }
+      button.disabled = true; button.textContent = 'Updating…';
+      try {
+        const result = await request('POST', {action:'change-password',currentPassword,newPassword});
+        error.style.color = '#7ee5bf'; error.textContent = result.message || 'Password updated.';
+        ['cgAccCurrent','cgAccNew','cgAccConfirm'].forEach(id => { document.getElementById(id).value = ''; });
+      } catch (e) { error.style.color = '#ffb4a9'; error.textContent = e.message; }
+      finally { button.disabled = false; button.textContent = 'Update password'; }
     };
     document.getElementById('cgAccRefresh').onclick = load;
     document.getElementById('cgAccSignout').onclick = () => {
