@@ -2953,10 +2953,10 @@ function loop(now){
         }else if(r.stage==='checkout'&&Math.hypot(n.x-n.checkoutX,n.z-n.checkoutZ)<0.65){
           r.tx=n.checkoutX;r.tz=n.checkoutZ;
           if(!r.checkoutUntil)r.checkoutUntil=nowNpc+1800;
-          if(nowNpc>=r.checkoutUntil){if(receipt)receipt.visible=true;r.stage='exit';r.tx=n.exitX;r.tz=n.exitZ;r.checkoutUntil=0;r.stageAt=nowNpc+10000}
+          if(nowNpc>=r.checkoutUntil){if(receipt)receipt.visible=true;if(!r.saleSent&&ws&&ws.readyState===1){ws.send(JSON.stringify({t:'customer_sale'}));r.saleSent=true}r.stage='exit';r.tx=n.exitX;r.tz=n.exitZ;r.checkoutUntil=0;r.stageAt=nowNpc+10000}
         }else if(r.stage==='exit'&&Math.hypot(n.x-n.exitX,n.z-n.exitZ)<0.85){
           if(receipt)receipt.visible=false;o.g.userData.pose=null;
-          n.x=n.spawnX;n.z=n.spawnZ;o.g.position.set(n.x,0,n.z);r.stage='browse';r.tx=n.x;r.tz=n.z;r.stageAt=nowNpc+5000+Math.random()*7000;r.sitUntil=0;
+          n.x=n.spawnX;n.z=n.spawnZ;o.g.position.set(n.x,0,n.z);r.stage='browse';r.tx=n.x;r.tz=n.z;r.stageAt=nowNpc+5000+Math.random()*7000;r.sitUntil=0;r.saleSent=false;
         }
         if(r.stage==='browse'&&nowNpc>=r.next){r.phase+=1.7;r.tx=n.spawnX+Math.sin(r.phase)*2.5;r.tz=n.spawnZ+Math.cos(r.phase*.83)*2.5;r.next=nowNpc+2200+Math.random()*1800}
       }else if(nowNpc>r.next){r.phase+=1.7;const radius=n.customerRoutineRadius||(n.place?1.1:2.2);r.tx=r.x+Math.sin(r.phase)*radius;r.tz=r.z+Math.cos(r.phase*.83)*radius;r.next=nowNpc+(active?4200:9000)}
