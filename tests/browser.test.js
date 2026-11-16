@@ -262,3 +262,18 @@ test('Unity tropical rain particle budget is reduced on mobile', () => {
   assert.match(weather, /main\.maxParticles = Application\.isMobilePlatform \? 600 : 1800/);
   assert.match(weather, /emission\.rateOverTime = Application\.isMobilePlatform \? rainRate \* mobileRainMultiplier : rainRate/);
 });
+
+
+test('Unity business interiors vary by business category and spawn ambient indoor NPCs', () => {
+  const interior = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'BusinessInterior.cs'), 'utf8');
+  const npc = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'InteriorNpc.cs'), 'utf8');
+  for (const category of ['Barbershop','FashionStore','Restaurant','Supermarket','Lounge','CarWash','Pharmacy','Technology']) {
+    assert.match(interior, new RegExp('case BusinessCategory\\.' + category + ':'));
+  }
+  assert.match(interior, /SpawnInteriorNpcs\(root\.transform, npcCount\)/);
+  assert.match(interior, /npc\.name = i == 0 \? "Interior staff NPC" : "Interior customer NPC " \+ i/);
+  assert.match(interior, /npc\.AddComponent<InteriorNpc>\(\)/);
+  assert.match(npc, /Vector3\.MoveTowards/);
+  assert.match(npc, /Mathf\.Clamp\(position\.x, roomXBounds\.x, roomXBounds\.y\)/);
+  assert.match(npc, /Mathf\.Clamp\(position\.z, roomZBounds\.x, roomZBounds\.y\)/);
+});
