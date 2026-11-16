@@ -54,6 +54,7 @@ namespace Citygame.Game
         private BusinessSpot nearby;
         private RideableCar nearbyCar;
         private VehicleGarage nearbyGarage;
+        private PetrolStation nearbyPetrolStation;
         private BusinessSpot selectedDestination;
         private float incomeClock;
         private float needsClock;
@@ -64,7 +65,9 @@ namespace Citygame.Game
         private BusinessSpot[] cityBusinesses = Array.Empty<BusinessSpot>();
         private RideableCar[] cityCars = Array.Empty<RideableCar>();
         private VehicleGarage[] cityGarages = Array.Empty<VehicleGarage>();
+        private PetrolStation[] cityPetrolStations = Array.Empty<PetrolStation>();
         private bool garageOpen;
+        private bool petrolStationOpen;
         private bool garageShopOpen;
         private int garagePaintIndex;
         private string notice = "Welcome to Lagos Life. Explore and build your business.";
@@ -148,6 +151,15 @@ namespace Citygame.Game
                 if (garage == null) continue;
                 float distance = Vector3.Distance(playerPosition, garage.transform.position);
                 if (distance < garageDistance) { garageDistance = distance; nearbyGarage = garage; }
+            }
+
+            nearbyPetrolStation = null;
+            float stationDistance = 9f;
+            foreach (PetrolStation station in cityPetrolStations)
+            {
+                if (station == null) continue;
+                float distance = Vector3.Distance(playerPosition, station.transform.position);
+                if (distance < stationDistance) { stationDistance = distance; nearbyPetrolStation = station; }
             }
 
             autosaveClock += Time.deltaTime;
@@ -234,6 +246,44 @@ namespace Citygame.Game
                 if (nearbyCar.IsOccupied && GUI.Button(new Rect(Screen.width - button * 2.2f, Screen.height - button * 4.65f, button * 2f, button),
                     "HEADLIGHTS " + (nearbyCar.HeadlightsOn ? "ON" : "OFF")))
                     nearbyCar.ToggleHeadlights();
+            }
+
+            if (nearbyPetrolStation != null && GUI.Button(
+                new Rect(Screen.width - 190f, Screen.height - button * 6.95f, 178f, 48f),
+                petrolStationOpen ? "CLOSE FUEL STATION" : "REFUEL VEHICLE"))
+                petrolStationOpen = !petrolStationOpen;
+            if (nearbyPetrolStation == null) petrolStationOpen = false;
+            if (petrolStationOpen && nearbyPetrolStation != null)
+            {
+                float panelWidth = Mathf.Min(300f, Screen.width - 24f);
+                Rect panel = new Rect(Screen.width - panelWidth - 12f, Screen.height - 230f, panelWidth, 205f);
+                GUI.Box(panel, nearbyPetrolStation.StationName + "\\nFUEL FORECOURT");
+                RideableCar fuelCar = GetNearestStationVehicle();
+                if (fuelCar == null)
+                {
+                    GUI.Label(new Rect(panel.x + 12f, panel.y + 52f, panel.width - 24f, 56f),
+                        "Bring your vehicle close to a pump to refuel.");
+                }
+                else
+                {
+                    float missingFuel = 100f - fuelCar.FuelPercent;
+                    long fuelCost = Mathf.CeilToInt(missingFuel * 250f);
+                    GUI.Label(new Rect(panel.x + 12f, panel.y + 48f, panel.width - 24f, 34f),
+                        "Tank " + Mathf.RoundToInt(fuelCar.FuelPercent) + "% · Full tank ₦" + fuelCost.ToString("N0"));
+                    if (GUI.Button(new Rect(panel.x + 12f, panel.y + 88f, panel.width - 24f, 44f),
+                        missingFuel < 1f ? "TANK FULL" : "FILL TANK · ₦" + fuelCost.ToString("N0")))
+                    {
+                        if (missingFuel < 1f) notice = "Your fuel tank is already full.";
+                        else if (save.cash < fuelCost) notice = "Not enough cash to fill the tank.";
+                        else
+                        {
+                            save.cash -= fuelCost;
+                            fuelCar.Refuel();
+                            Save();
+                            notice = "Fuel tank filled at " + nearbyPetrolStation.StationName + ".";
+                        }
+                    }
+                }
             }
 
             if (nearbyGarage != null && GUI.Button(new Rect(Screen.width - 190f, Screen.height - button * 5.8f, 178f, 48f),
@@ -647,6 +697,21 @@ namespace Citygame.Game
             RefreshCityObjects();
         }
 
+        private RideableCar GetNearestStationVehicle()
+        {
+            Vector3 playerPosition = motor != null ? motor.transform.position : transform.position;
+            RideableCar closest = null;
+            float best = 12f;
+            for (int i = 0; i < cityCars.Length; i++)
+            {
+                RideableCar car = cityCars[i];
+                if (car == null) continue;
+                float distance = car.DistanceTo(playerPosition);
+                if (distance < best) { best = distance; closest = car; }
+            }
+            return closest;
+        }
+
         private RideableCar GetNearestGarageVehicle()
         {
             Vector3 playerPosition = motor != null ? motor.transform.position : transform.position;
@@ -667,6 +732,7 @@ namespace Citygame.Game
             cityBusinesses = FindObjectsOfType<BusinessSpot>();
             cityCars = FindObjectsOfType<RideableCar>();
             cityGarages = FindObjectsOfType<VehicleGarage>();
+            cityPetrolStations = FindObjectsOfType<PetrolStation>();
         }
 
         public void EnterInterior(BusinessSpot spot)
