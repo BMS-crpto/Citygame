@@ -3523,19 +3523,25 @@ APPR.Hustle=function(){appview.innerHTML=`<div class="card">💪🏾 Side hustle
 X.hustle=b=>S({t:'hustle',id:b.dataset.id});
 
 /* Decor */
+let decorRotationOffset=0;
 APPR.Decor=function(){
   const D=PX.decor,R=inside&&ROOMS[inside],ownHome=inside&&/^house/.test(inside)&&myHome&&inside==='house'+myHome.unit;
   const unit=ownHome?String(myHome.unit):null,placed=unit&&D.placed&&D.placed[unit]?D.placed[unit]:[];
   const nm=id=>{const s=(D.shop||[]).find(x=>x.id===id);return s?s.icon+' '+s.name:id};
-  let h=`<div class="card">🛋️ Decorate your home in 3D. ${ownHome?'Stand where you want it, face the direction, then press <b>Place</b>.':'<b>Go inside your own home</b> to place things.'}</div>`;
+  const roomName=R?(R.name||R.label||(/house/.test(inside)?'Home interior':'Interior')):'Outside your home';
+  let h=`<div class="card"><b>🛋️ HOME DESIGN STUDIO</b><p>${ownHome?'You are editing your own property. Choose an item, set its facing direction, then place it from your current position.':'Enter your own home to place or remove furniture. You can still browse and buy items here.'}</p><small>Current location: ${esc(roomName)} · ${ownHome?'Placement enabled':'Placement locked'}</small></div>`;
+  h+='<div class="card"><b>↻ Furniture direction</b><p style="font-size:12px;opacity:.8">Rotation offset: '+Math.round(decorRotationOffset*180/Math.PI)+'°</p><div class="xrow"><button class="xbtn" data-x="drotleft">↶ Rotate 15°</button><button class="xbtn" data-x="drotright">↷ Rotate 15°</button><button class="xbtn gray" data-x="drotreset">Reset</button></div></div>';
   const inv=Object.entries(D.inv||{});
-  h+='<h4>🎒 Your items</h4>'+(inv.length?inv.map(([id,q])=>`<div class="xrow"><div><b>${nm(id)}</b><small>x${q}</small></div>${ownHome?`<button class="xbtn" data-x="dplace" data-id="${id}">Place</button>`:''}</div>`).join(''):'<div style="font-size:12px;opacity:.7">Nothing yet. Buy something below.</div>');
-  if(ownHome)h+='<h4>🏠 In your home</h4>'+(placed.length?placed.map((it,i)=>`<div class="xrow"><b>${nm(it.id)}</b><button class="xbtn red" data-x="dremove" data-n="${i}">Remove</button></div>`).join(''):'<div style="font-size:12px;opacity:.7">Empty</div>');
-  h+='<h4>🛍️ Shop</h4>'+(D.shop||[]).map(s=>`<div class="xrow"><div><b>${s.icon} ${esc(s.name)}</b><small>${fmtN(s.price)}</small></div><button class="xbtn gold" data-x="dbuy" data-id="${s.id}">Buy</button></div>`).join('');
+  h+='<h4>🎒 Furniture storage</h4>'+(inv.length?inv.map(([id,q])=>`<div class="xrow"><div><b>${nm(id)}</b><small>Available: x${q}</small></div>${ownHome?`<button class="xbtn" data-x="dplace" data-id="${id}">Place here</button>`:''}</div>`).join(''):'<div style="font-size:12px;opacity:.7">Your storage is empty. Browse the furniture shop below.</div>');
+  if(ownHome)h+='<h4>🏠 Furniture in this property · '+placed.length+'/60</h4>'+(placed.length?placed.map((it,i)=>`<div class="xrow"><div><b>${nm(it.id)}</b><small>Position ${Number(it.x||0).toFixed(1)}, ${Number(it.z||0).toFixed(1)} · Facing ${Math.round((Number(it.ry)||0)*180/Math.PI)}°</small></div><button class="xbtn red" data-x="dremove" data-n="${i}">Remove</button></div>`).join(''):'<div style="font-size:12px;opacity:.7">This property has no placed furniture yet.</div>');
+  h+='<h4>🛍️ Furniture shop</h4>'+(D.shop||[]).map(s=>`<div class="xrow"><div><b>${s.icon} ${esc(s.name)}</b><small>${fmtN(s.price)}</small></div><button class="xbtn gold" data-x="dbuy" data-id="${s.id}">Buy</button></div>`).join('');
   appview.innerHTML=h;
 };
 X.dbuy=b=>S({t:'decor',op:'buy',id:b.dataset.id});
-X.dplace=b=>{const R=ROOMS[inside];if(!R)return;const x=pos.x+Math.sin(pos.ry)*1.8-R.x0,z=pos.z+Math.cos(pos.ry)*1.8-R.z0;S({t:'decor',op:'place',id:b.dataset.id,x,z,ry:pos.ry})};
+X.drotleft=()=>{decorRotationOffset-=Math.PI/12;renderApp()};
+X.drotright=()=>{decorRotationOffset+=Math.PI/12;renderApp()};
+X.drotreset=()=>{decorRotationOffset=0;renderApp()};
+X.dplace=b=>{const R=ROOMS[inside];if(!R||!inside||!/^house/.test(inside)||!myHome||inside!=='house'+myHome.unit){toast('Enter your own home before placing furniture');return}const x=pos.x+Math.sin(pos.ry)*1.8-R.x0,z=pos.z+Math.cos(pos.ry)*1.8-R.z0;if(Math.abs(x)>8||Math.abs(z)>8){toast('Move further inside the room before placing furniture');return}S({t:'decor',op:'place',id:b.dataset.id,x,z,ry:pos.ry+decorRotationOffset})};
 X.dremove=b=>S({t:'decor',op:'remove',n:+b.dataset.n});
 const decorGroup=new THREE.Group();scene.add(decorGroup);let decorKey='';
 function decorMesh(id){
