@@ -77,6 +77,28 @@ namespace Citygame.World
                     npcCount = 3; break;
             }
 
+            // A simple mezzanine and climbable stairs give multi-storey shops
+            // an upstairs area without adding heavy navigation systems.
+            Material stair = Make(new Color(0.48f, 0.43f, 0.36f));
+            for (int step = 0; step < 10; step++)
+            {
+                Cube(root.transform, "Interior staircase step " + (step + 1),
+                    new Vector3(-4.65f, 0.11f + step * 0.22f, -3.55f + step * 0.72f),
+                    new Vector3(1.25f, 0.22f, 0.76f), stair);
+            }
+            Cube(root.transform, "Upstairs mezzanine floor", new Vector3(2.4f, 2.35f, 2.8f),
+                new Vector3(6.8f, 0.2f, 4.2f), floor);
+            Cube(root.transform, "Upstairs mezzanine front rail", new Vector3(2.4f, 2.9f, 0.68f),
+                new Vector3(6.8f, 0.1f, 0.1f), accent);
+            for (int railPost = 0; railPost < 6; railPost++)
+                Cube(root.transform, "Upstairs mezzanine rail post " + railPost,
+                    new Vector3(-0.7f + railPost * 1.24f, 2.62f, 0.68f),
+                    new Vector3(0.08f, 0.55f, 0.08f), accent);
+
+            // The exit trigger returns the player to the pavement outside this shop.
+            BusinessDoorPortal.CreateExit(root.transform, new Vector3(0f, 1f, -4.45f),
+                origin + new Vector3(0f, 0f, -7.5f));
+
             SpawnInteriorNpcs(root.transform, npcCount);
             return interior;
         }
