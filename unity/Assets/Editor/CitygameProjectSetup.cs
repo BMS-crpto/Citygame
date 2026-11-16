@@ -17,17 +17,25 @@ namespace Citygame.Editor
             GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
             floor.name = "Lagos Greybox Ground";
             floor.transform.localScale = new Vector3(40f, 1f, 40f);
-            // Build a connected 3x3 Lagos region on a shared road grid.
-            string[] districtNames = { "Ikeja", "Yaba", "Surulere", "Agege", "Central Lagos", "Lekki", "Ojota", "Victoria Island", "Apapa" };
-            int districtIndex = 0;
-            for (int z = -1; z <= 1; z++)
+            // Prefer imported, coordinate-accurate OpenStreetMap geometry. The
+            // procedural block remains only as a clearly logged fallback until
+            // the project owner supplies a licensed/exported Lagos GeoJSON extract.
+            bool realLagosLoaded = LagosRealMapImporter.TryBuild(scene.GetRootGameObjects().Length > 0
+                ? scene.GetRootGameObjects()[0].transform : new GameObject("Lagos Map Root").transform);
+            if (!realLagosLoaded)
             {
-                for (int x = -1; x <= 1; x++)
+                string[] districtNames = { "Ikeja", "Yaba", "Surulere", "Agege", "Central Lagos", "Lekki", "Ojota", "Victoria Island", "Apapa" };
+                int districtIndex = 0;
+                for (int z = -1; z <= 1; z++)
                 {
-                    GameObject districtRoot = new GameObject(districtNames[districtIndex] + " District");
-                    LagosBlockGenerator.Build(districtRoot.transform, new Vector3(x * 68f, 0f, z * 54f), districtNames[districtIndex]);
-                    districtIndex++;
+                    for (int x = -1; x <= 1; x++)
+                    {
+                        GameObject districtRoot = new GameObject(districtNames[districtIndex] + " District (fallback greybox)");
+                        LagosBlockGenerator.Build(districtRoot.transform, new Vector3(x * 68f, 0f, z * 54f), districtNames[districtIndex]);
+                        districtIndex++;
+                    }
                 }
+                Debug.LogWarning("Real Lagos map data is not installed. Add Assets/Resources/LagosMapData.json generated from an OSM GeoJSON extract, then recreate the scene.");
             }
 
             GameObject player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
