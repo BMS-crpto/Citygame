@@ -64,20 +64,10 @@
  };
  bridge.X.companyFire=b=>bridge.S({t:'business',op:'fire',index:Number(b.dataset.index)});
  bridge.X.companyRefresh=()=>bridge.S({t:'business'});
- const OldWS=window.WebSocket;
- window.WebSocket=function(url,protocols){
-  const sock=protocols?new OldWS(url,protocols):new OldWS(url);
-  sock.addEventListener('message',ev=>{
-   let m;try{m=JSON.parse(ev.data)}catch(_){return}
-   if(m.t==='x_businesses'){
-    businesses=Array.isArray(m.businesses)?m.businesses:[];
-    if(bridge.PX.app==='Company'&&bridge.phoneOpen())render();
-   }
-  });
-  return sock;
+ window.CGCompanyReceive=list=>{
+  businesses=Array.isArray(list)?list:[];
+  if(bridge.PX.app==='Company'&&bridge.phoneOpen())render();
  };
- window.WebSocket.prototype=OldWS.prototype;
- ['CONNECTING','OPEN','CLOSING','CLOSED'].forEach(k=>window.WebSocket[k]=OldWS[k]);
  const grid=document.getElementById('pgrid');
  if(grid&&!grid.querySelector('[data-app="Company"]')){
   const btn=document.createElement('button');btn.className='app';btn.dataset.app='Company';btn.innerHTML='<b>🏢</b>Company';btn.addEventListener('click',()=>bridge.openApp('Company'));grid.append(btn);
