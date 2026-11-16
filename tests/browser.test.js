@@ -291,3 +291,14 @@ test('Unity Lagos map buildings have framed entrances aligned to business intera
   assert.match(map, /position\.x, position\.y, frontZ - 1\.1f/);
   assert.match(map, /spot\.Configure\(name, category\)/);
 });
+
+
+test('Unity Lagos map connects the main, market and southern streets with north-south connectors', () => {
+  const map = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'LagosBlockGenerator.cs'), 'utf8');
+  assert.match(map, /Balogun Connector Street/);
+  assert.match(map, /Adeniran Connector Street/);
+  assert.match(map, /South District Street/);
+  assert.match(map, /Balogun Connector edge west/);
+  assert.match(map, /Adeniran Connector edge east/);
+  assert.ok(map.indexOf('Material laneWhite =') < map.indexOf('Balogun Connector edge west'));
+});
