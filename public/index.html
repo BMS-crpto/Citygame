@@ -2831,7 +2831,7 @@ function spawnCar(nearPlayer=false){
     if(Math.hypot(x-pos.x,z-pos.z)<30||TR.cars.some(c=>Math.hypot(c.x-x,c.z-z)<14))continue;
     const k=TKINDS[ri(TKINDS.length)],g=makeCar(k[0],k[1]);g.position.set(x,0,z);g.rotation.y=Math.atan2(d[0],d[1]);scene.add(g);
     const slow=k[0]===6?0.65:k[0]===5?0.85:1;
-    TR.cars.push({g,x,z,ry:g.rotation.y,v:0,vmax:rnd(8,13)*slow,ni:i+d[0],nj:j+d[1],d,stuck:0,free:0});return;
+    TR.cars.push({g,x,z,ry:g.rotation.y,v:0,vmax:rnd(8,13)*slow,ni:i+d[0],nj:j+d[1],d,stuck:0,free:0,kind:k[0],stopAt:k[0]===5&&Math.random()<0.42?rnd(0.55,0.82)*BLOCK:-1,stopLeft:0});return;
   }
 }
 function pedPt(p){return[p.pi*BLOCK+p.sx*SW,p.pj*BLOCK+p.sz*SW]}
@@ -2872,7 +2872,10 @@ function trafficUpdate(dt){
     const sy=Math.sin(c.ry),cy=Math.cos(c.ry);
     const S=lanePt(c.ni-c.d[0],c.nj-c.d[1],c.d),E=lanePt(c.ni,c.nj,c.d),len=Math.hypot(E[0]-S[0],E[1]-S[1]);
     let t=(c.x-S[0])*c.d[0]+(c.z-S[1])*c.d[1];
-    if(t>len-4.5){const nd=carNext(c);c.ni+=nd[0];c.nj+=nd[1];c.d=nd;continue}
+    // Danfo minibuses occasionally pull into a short passenger stop along their route.
+    if(c.kind===5&&c.stopAt>0&&t>=c.stopAt){c.stopAt=-1;c.stopLeft=rnd(2.2,3.6);c.v=0}
+    if(c.stopLeft>0){c.stopLeft=Math.max(0,c.stopLeft-dt);c.v=0;c.g.position.set(c.x,0,c.z);c.g.rotation.y=c.ry;c.g.visible=Math.hypot(c.x-pos.x,c.z-pos.z)<190;continue}
+    if(t>len-4.5){const nd=carNext(c);c.ni+=nd[0];c.nj+=nd[1];c.d=nd;c.stopAt=c.kind===5&&Math.random()<0.42?rnd(0.55,0.82)*BLOCK:-1;continue}
     const S2=lanePt(c.ni-c.d[0],c.nj-c.d[1],c.d);t=Math.max(0,t);const la=Math.min(len,t+6+c.v*0.35);
     const tx=S2[0]+c.d[0]*la+(c.d[0]===0?0:0),tz=S2[1]+c.d[1]*la;
     const err=wrap(Math.atan2(tx-c.x,tz-c.z)-c.ry),turn=Math.min(2.4,Math.abs(err)*3.5);
