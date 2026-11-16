@@ -5,7 +5,7 @@ Usage:
   python tools/convert_lagos_osm.py lagos.geojson unity/Assets/Resources/LagosMapData.json
 
 The input should cover the chosen Lagos play area and contain OSM tags in feature properties.
-Coordinates are projected locally in metres around central Lagos (6.5244, 3.3792).
+Coordinates are projected locally in metres around central Lagos (6.5244, 3.3792).\nUnity JsonUtility requires Vector2 points as {x,y} objects, not coordinate arrays.
 """
 import json, math, sys
 from pathlib import Path
