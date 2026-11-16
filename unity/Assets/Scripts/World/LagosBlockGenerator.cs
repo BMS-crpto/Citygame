@@ -223,7 +223,7 @@ namespace Citygame.World
                 pedestrian.GetComponent<Renderer>().sharedMaterial = MaterialFor(new Color(
                     Random.Range(0.25f, 0.85f), Random.Range(0.2f, 0.75f), Random.Range(0.2f, 0.8f)));
                 SidewalkPedestrian walker = pedestrian.AddComponent<SidewalkPedestrian>();
-                walker.Configure(-38f, 38f, i % 2 == 0 ? 7.5f : -7.5f);
+                walker.Configure(root.position.x - 38f, root.position.x + 38f, root.position.z + (i % 2 == 0 ? 7.5f : -7.5f));
             }
         }
 
