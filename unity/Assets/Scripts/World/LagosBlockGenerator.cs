@@ -66,6 +66,7 @@ namespace Citygame.World
             BuildCar(root, "Street Shuttle", new Vector3(28f, 0.65f, -3.2f), concrete);
 
             BuildStreetLights(root);
+            BuildPedestrianCrossings(root);
             BuildPedestrians(root);
         }
 
@@ -144,6 +145,35 @@ namespace Citygame.World
         {
             Collider visualCollider = visual.GetComponent<Collider>();
             if (visualCollider != null) visualCollider.enabled = false;
+        }
+
+        private static void BuildPedestrianCrossings(Transform root)
+        {
+            Material paint = MaterialFor(new Color(0.91f, 0.90f, 0.84f));
+            // Zebra crossings at the three junctions on each connector.
+            float[] connectorX = { -34f, 34f };
+            float[] junctionZ = { -18f, 0f, 18f };
+            foreach (float x in connectorX)
+            {
+                foreach (float z in junctionZ)
+                {
+                    for (int stripe = 0; stripe < 7; stripe++)
+                    {
+                        float stripeZ = z - 3.0f + stripe * 1.0f;
+                        CreateCube("Zebra crossing stripe", root,
+                            new Vector3(x, 0.025f, stripeZ),
+                            new Vector3(7.2f, 0.035f, 0.42f), paint);
+                    }
+                }
+            }
+            // A short crossing on the main avenue near the market entrance.
+            for (int stripe = 0; stripe < 7; stripe++)
+            {
+                float stripeX = -4.2f + stripe * 1.0f;
+                CreateCube("Market entrance zebra crossing stripe", root,
+                    new Vector3(stripeX, 0.026f, 5.0f),
+                    new Vector3(0.42f, 0.035f, 2.2f), paint);
+            }
         }
 
         private static void BuildStreetLights(Transform root)
