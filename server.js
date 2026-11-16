@@ -190,7 +190,7 @@ function accountApi(req, res) {
     try { input = JSON.parse(body || '{}'); } catch (e) { return sendJson(400, { error: 'Invalid profile data.' }); }
     if (req.method === 'POST' && input.action === 'save-avatar') {
       const raw = input.look;
-      if (!Array.isArray(raw) || raw.length !== 6 || raw.some((v, i) => !Number.isInteger(v) || v < 0 || v > [4,1,7,4,1,5][i])) return sendJson(400, { error: 'Invalid character appearance data.' });
+      if (!Array.isArray(raw) || raw.length !== 6 || raw.some((v, i) => !Number.isInteger(v) || v < 0 || v > [4,4,7,4,1,5][i])) return sendJson(400, { error: 'Invalid character appearance data.' });
       const appearance = input.appearance && typeof input.appearance === 'object' ? input.appearance : {};
       const safeAppearance = {};
       for (const field of ['skin','hair','style','shirt','pants','shoes']) {
