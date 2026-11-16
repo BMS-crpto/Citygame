@@ -1193,8 +1193,13 @@ function buildVenueInside(k){
     club:[['Ada · Guest',-8,4,[3,1,5,1,0,2]],['Yomi · Guest',8,4,[1,0,3,2,1,1]]]
   };
   for(const [name,dx,dz,look] of customerPlans[k]||[]){
-    const n={id:'customer_'+k+'_'+name.replace(/[^a-z0-9]/gi,''),name,title:'Customer',x:X+dx,z:Z+dz,ry:0,look,place:'v_'+k,floor:0,isCustomer:true,customerRoutineRadius:3.1};
-    const g=makeCharacter('npc',n.name,look);g.position.set(n.x,0,n.z);scene.add(g);npcObjs.push({n,g});
+    const checkoutX=X+Math.max(-hw+2,Math.min(hw-2,k==='restaurant'?-3:k==='supermarket'?6:0));
+    const checkoutZ=Z+(k==='restaurant'?-7.8:k==='supermarket'?-9.2:-hd+3.2);
+    const seat=(k==='restaurant'||k==='club')?{x:X+(dx<0?-7.5:7.5),z:Z+(k==='restaurant'?1.5:2.5)}:null;
+    const n={id:'customer_'+k+'_'+name.replace(/[^a-z0-9]/gi,''),name,title:'Customer',x:X+dx,z:Z+dz,ry:0,look,place:'v_'+k,floor:0,isCustomer:true,customerRoutineRadius:3.1,spawnX:X+dx,spawnZ:Z+dz,checkoutX,checkoutZ,seatX:seat&&seat.x,seatZ:seat&&seat.z,exitX:R.exit.x,exitZ:R.exit.z};
+    const g=makeCharacter('npc',n.name,look);g.position.set(n.x,0,n.z);
+    const receipt=makeLabel('✓ PURCHASED','#ffd54a',2.5,2.4);receipt.visible=false;g.add(receipt);g.userData.receipt=receipt;
+    scene.add(g);npcObjs.push({n,g});
   }
   addSign(t.label.toUpperCase(),X,t.h-1.4,Z-hd+0.12,0,Math.min(8,hw*0.7),t.bg);
   switch(k){
@@ -2934,12 +2939,30 @@ function loop(now){
     me.rotation.y=myCol>=0?pos.ry:me.rotation.y+wrap(pos.ry-me.rotation.y)*0.2;
     animate(me,moving&&myCol<0,dt);animatePoseProps();
     for(const o of npcObjs){
-      const n=o.n;if(!o.routine)o.routine={x:n.x,z:n.z,phase:Math.random()*Math.PI*2,next:0,tx:n.x,tz:n.z};
+      const n=o.n;if(!o.routine)o.routine={x:n.x,z:n.z,phase:Math.random()*Math.PI*2,next:0,tx:n.x,tz:n.z,stage:'browse',stageAt:performance.now()+6500+Math.random()*5000};
       const r=o.routine,nowNpc=performance.now(),hour=new Date().getHours(),active=hour>=7&&hour<22;
-      if(nowNpc>r.next){r.phase+=1.7;const radius=n.customerRoutineRadius|| (n.place?1.1:2.2);r.tx=r.x+Math.sin(r.phase)*radius;r.tz=r.z+Math.cos(r.phase*.83)*radius;r.next=nowNpc+(active?4200:9000)}
-      const dx=r.tx-n.x,dz=r.tz-n.z,d=Math.hypot(dx,dz),step=Math.min(d,dt*(active?.72:.22));
+      if(n.isCustomer){
+        const receipt=o.g.userData.receipt;
+        if(r.stage==='browse'&&nowNpc>=r.stageAt){
+          if(n.seatX!==undefined&&Math.random()<0.62){r.stage='seat';r.tx=n.seatX;r.tz=n.seatZ}
+          else{r.stage='checkout';r.tx=n.checkoutX;r.tz=n.checkoutZ}
+          r.stageAt=nowNpc+6500;
+        }else if(r.stage==='seat'){
+          if(Math.hypot(n.x-n.seatX,n.z-n.seatZ)<0.55){r.tx=n.x;r.tz=n.z;o.g.userData.pose='sit';if(!r.sitUntil)r.sitUntil=nowNpc+3500+Math.random()*3000;
+            if(nowNpc>=r.sitUntil){o.g.userData.pose=null;r.stage='checkout';r.tx=n.checkoutX;r.tz=n.checkoutZ;r.stageAt=nowNpc+7000}}
+        }else if(r.stage==='checkout'&&Math.hypot(n.x-n.checkoutX,n.z-n.checkoutZ)<0.65){
+          r.tx=n.checkoutX;r.tz=n.checkoutZ;
+          if(!r.checkoutUntil)r.checkoutUntil=nowNpc+1800;
+          if(nowNpc>=r.checkoutUntil){if(receipt)receipt.visible=true;r.stage='exit';r.tx=n.exitX;r.tz=n.exitZ;r.checkoutUntil=0;r.stageAt=nowNpc+10000}
+        }else if(r.stage==='exit'&&Math.hypot(n.x-n.exitX,n.z-n.exitZ)<0.85){
+          if(receipt)receipt.visible=false;o.g.userData.pose=null;
+          n.x=n.spawnX;n.z=n.spawnZ;o.g.position.set(n.x,0,n.z);r.stage='browse';r.tx=n.x;r.tz=n.z;r.stageAt=nowNpc+5000+Math.random()*7000;r.sitUntil=0;
+        }
+        if(r.stage==='browse'&&nowNpc>=r.next){r.phase+=1.7;r.tx=n.spawnX+Math.sin(r.phase)*2.5;r.tz=n.spawnZ+Math.cos(r.phase*.83)*2.5;r.next=nowNpc+2200+Math.random()*1800}
+      }else if(nowNpc>r.next){r.phase+=1.7;const radius=n.customerRoutineRadius||(n.place?1.1:2.2);r.tx=r.x+Math.sin(r.phase)*radius;r.tz=r.z+Math.cos(r.phase*.83)*radius;r.next=nowNpc+(active?4200:9000)}
+      const dx=r.tx-n.x,dz=r.tz-n.z,d=Math.hypot(dx,dz),pace=n.isCustomer&&r.stage==='exit'?1.05:n.isCustomer?0.82:active?.72:.22,step=Math.min(d,dt*pace);
       if(d>.08){n.x+=dx/d*step;n.z+=dz/d*step;o.g.position.x=n.x;o.g.position.z=n.z;o.g.rotation.y=Math.atan2(dx,dz)}
-      const vis=(n.place||null)===(inside||null)&&(Number(n.floor)||0)===(pos.floor||0)&&Math.hypot(n.x-pos.x,n.z-pos.z)<(inside?60:70);o.g.visible=vis;if(vis)animate(o.g,d>.08&&active,dt)
+      const vis=(n.place||null)===(inside||null)&&(Number(n.floor)||0)===(pos.floor||0)&&Math.hypot(n.x-pos.x,n.z-pos.z)<(inside?60:70);o.g.visible=vis;if(vis)animate(o.g,d>.08&&active,dt);
     }
     const inCar=myCol>=0||ridingId>0||!!rideSc,levelY=(inside&&pos.floor?7.56:0),cd=(inside?(ROOMS[inside]&&ROOMS[inside].model?5.4:3.4):inCar?9:3.5)*camZoom,ch=inside?(ROOMS[inside]&&ROOMS[inside].model?Math.max(6.2,camH*0.9):Math.min(2.8,camH*0.3)):inCar?Math.max(3.4,camH*0.55):Math.max(1.7,camH*0.27);
     if(rideSc&&rideSc.cabin){   // inside view: eyes in the vehicle, looking where it is heading
