@@ -28,6 +28,7 @@ namespace Citygame.World
         private float currentSpeed;
         private float fuelPercent = 100f;
         private float conditionPercent = 100f;
+        private Color originalPaint = Color.white;
         private string currentGear = "N";
         private Transform[] suspensionPivots;
         private readonly float[] suspensionRest = { -0.18f, -0.18f, -0.18f, -0.18f };
@@ -45,7 +46,7 @@ namespace Citygame.World
         {
             conditionPercent = 100f;
             Renderer bodyRenderer = GetComponent<Renderer>();
-            if (bodyRenderer != null) bodyRenderer.material.color = Color.white;
+            if (bodyRenderer != null) bodyRenderer.material.color = originalPaint;
         }
 
         public void Refuel() { fuelPercent = 100f; }
@@ -53,6 +54,7 @@ namespace Citygame.World
         public void SetPaint(Color color)
         {
             Renderer bodyRenderer = GetComponent<Renderer>();
+            originalPaint = color;
             if (bodyRenderer != null) bodyRenderer.material.color = color;
         }
 
@@ -64,7 +66,7 @@ namespace Citygame.World
             conditionPercent = Mathf.Max(0f, conditionPercent - (impact - 4f) * 2.2f);
             Renderer bodyRenderer = GetComponent<Renderer>();
             if (bodyRenderer != null)
-                bodyRenderer.material.color = Color.Lerp(new Color(0.55f, 0.12f, 0.08f), Color.white, conditionPercent / 100f);
+                bodyRenderer.material.color = Color.Lerp(new Color(0.55f, 0.12f, 0.08f), originalPaint, conditionPercent / 100f);
         }
 
         public void ConfigureDrivingVisuals(Transform wheel, Transform[] tyres, TextMesh display, Transform[] springs)
@@ -104,6 +106,8 @@ namespace Citygame.World
         {
             Collider carCollider = GetComponent<Collider>();
             carCollider.isTrigger = false;
+            Renderer bodyRenderer = GetComponent<Renderer>();
+            if (bodyRenderer != null) originalPaint = bodyRenderer.material.color;
             body = GetComponent<Rigidbody>();
             if (body == null) body = gameObject.AddComponent<Rigidbody>();
             body.isKinematic = true;
