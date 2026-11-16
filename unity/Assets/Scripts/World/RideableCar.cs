@@ -27,6 +27,7 @@ namespace Citygame.World
         private TextMesh speedDisplay;
         private float currentSpeed;
         private float fuelPercent = 100f;
+        private float conditionPercent = 100f;
         private string currentGear = "N";
         private Transform[] suspensionPivots;
         private readonly float[] suspensionRest = { -0.18f, -0.18f, -0.18f, -0.18f };
@@ -37,7 +38,34 @@ namespace Citygame.World
         public bool HeadlightsOn => headlightsOn;
         public float SpeedKph => Mathf.Abs(currentSpeed) * 3.6f;
         public float FuelPercent => fuelPercent;
+        public float ConditionPercent => conditionPercent;
         public string CurrentGear => currentGear;
+
+        public void Repair()
+        {
+            conditionPercent = 100f;
+            Renderer bodyRenderer = GetComponent<Renderer>();
+            if (bodyRenderer != null) bodyRenderer.material.color = Color.white;
+        }
+
+        public void Refuel() { fuelPercent = 100f; }
+
+        public void SetPaint(Color color)
+        {
+            Renderer bodyRenderer = GetComponent<Renderer>();
+            if (bodyRenderer != null) bodyRenderer.material.color = color;
+        }
+
+        private void OnCollisionEnter(Collision collision)
+        {
+            if (collision == null || collision.collider == null) return;
+            float impact = Mathf.Max(collision.relativeVelocity.magnitude, Mathf.Abs(currentSpeed));
+            if (impact < 5f) return;
+            conditionPercent = Mathf.Max(0f, conditionPercent - (impact - 4f) * 2.2f);
+            Renderer bodyRenderer = GetComponent<Renderer>();
+            if (bodyRenderer != null)
+                bodyRenderer.material.color = Color.Lerp(new Color(0.55f, 0.12f, 0.08f), Color.white, conditionPercent / 100f);
+        }
 
         public void ConfigureDrivingVisuals(Transform wheel, Transform[] tyres, TextMesh display, Transform[] springs)
         {
@@ -107,7 +135,8 @@ namespace Citygame.World
             input = Vector2.ClampMagnitude(input, 1f);
             float throttle = input.y;
             float steering = input.x;
-            float targetSpeed = throttle * driveSpeed;
+            float vehiclePower = Mathf.Lerp(0.45f, 1f, conditionPercent / 100f);
+            float targetSpeed = throttle * driveSpeed * vehiclePower;
             bool brakingInput = Mathf.Abs(throttle) < 0.05f || (Mathf.Abs(currentSpeed) > 0.1f && Mathf.Sign(targetSpeed) != Mathf.Sign(currentSpeed));
             float rate = brakingInput ? braking : acceleration;
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, rate * Time.deltaTime);
