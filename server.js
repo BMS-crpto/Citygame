@@ -122,16 +122,30 @@ function accountSnapshot(username) {
   const key = 'CITY1:a:' + username;
   const sv = saves[key] && typeof saves[key] === 'object' ? saves[key] : {};
   const ext = sv.ext && typeof sv.ext === 'object' ? sv.ext : {};
-  const career = sv.life && sv.life.career ? sv.life.career : null;
-  const home = Object.values(tenants).find(t => t && t.key === key && t.until > Date.now());
+  const life = sv.life && typeof sv.life === 'object' ? sv.life : {};
+  const career = life.career && typeof life.career === 'object' ? life.career : null;
+  const careerDef = career && typeof CAREERS !== 'undefined' ? CAREERS[career.id] : null;
+  const careerLevel = career && careerDef ? levelOf(career) : 0;
+  const homeEntry = Object.entries(tenants).find(([, t]) => t && t.key === key && t.until > Date.now());
+  const homeId = homeEntry ? homeEntry[0] : '';
+  const homeUnit = homeId && typeof UNITS !== 'undefined' ? UNITS[+homeId] : null;
+  const homeHouse = homeUnit && typeof HOUSES !== 'undefined' ? HOUSES[homeUnit.house] : null;
   const ownedBusinesses = Object.values(businesses).filter(b => b && b.ownerKey === key).map(b => ({
     id: b.id, name: b.name, kind: b.kind, area: b.area,
-    balance: Math.max(0, Math.floor(+b.balance || 0)),
+    locationName: String(b.locationName || ''), balance: Math.max(0, Math.floor(+b.balance || 0)),
     staffCount: Array.isArray(b.staff) ? b.staff.length : 0,
     customers: Math.max(0, Math.floor(+b.customers || 0))
   }));
   const inventory = sv.inv && typeof sv.inv === 'object' ? sv.inv : {};
   const inventoryCount = Object.values(inventory).reduce((n, q) => n + Math.max(0, Math.floor(+q || 0)), 0);
+  const needs = {
+    food: Math.max(0, Math.min(100, +sv.food || 0)),
+    energy: Math.max(0, Math.min(100, +life.energy || 0)),
+    hygiene: Math.max(0, Math.min(100, +life.hygiene || 0)),
+    fun: Math.max(0, Math.min(100, +life.fun || 0)),
+    social: Math.max(0, Math.min(100, +life.social || 0)),
+    bladder: Math.max(0, Math.min(100, +life.bladder || 0))
+  };
   return {
     username,
     displayName: String((a.profile && a.profile.displayName) || a.name || username).slice(0, 30),
@@ -142,15 +156,18 @@ function accountSnapshot(username) {
     player: {
       money: Math.max(0, Math.floor(+sv.money || 0)),
       bank: Math.max(0, Math.floor(+sv.bank || 0)),
-      food: Math.max(0, Math.min(100, +sv.food || 0)),
+      food: needs.food, needs,
       path: String(sv.path || ''),
       look: Array.isArray(sv.look) ? sv.look.slice(0, 6) : [],
-      career: career ? { id: String(career.id || ''), xp: Math.max(0, Math.floor(+career.xp || 0)) } : null,
+      career: career ? { id: String(career.id || ''), title: String(careerDef && careerDef.title || career.id || ''), level: careerLevel + 1, xp: Math.max(0, Math.floor(+career.xp || 0)), skill: Math.max(0, Math.floor(+(life.skills && life.skills[career.id]) || 0)) } : null,
+      skills: life.skills && typeof life.skills === 'object' ? Object.entries(life.skills).slice(0, 20).map(([id, level]) => ({ id: String(id), level: Math.max(0, Math.min(10, Math.floor(+level || 0))) })) : [],
       inventoryItems: inventoryCount,
       vehicles: Array.isArray(ext.cars) ? ext.cars.length : 0,
+      vehicleIds: Array.isArray(ext.cars) ? ext.cars.slice(0, 30) : [],
       hasDriversLicense: !!ext.license,
-      homeActive: !!home,
-      homeUntil: home ? +home.until : 0,
+      homeActive: !!homeEntry,
+      home: homeEntry ? { id: homeId, name: String(homeUnit && homeHouse ? unitName(homeHouse, homeUnit) : homeHouse && homeHouse.name || 'Rented home'), area: String(homeHouse && homeHouse.area || ''), until: +homeEntry[1].until } : null,
+      homeUntil: homeEntry ? +homeEntry[1].until : 0,
       businesses: ownedBusinesses,
       dailyStreak: Math.max(0, Math.floor(+ext.streak || 0))
     }
@@ -487,7 +504,7 @@ function onConnection(ws) {
         ws, id, name: String(m.name || 'Player').slice(0, 14), role, money: 500, bank: 0, inside: null, food: 100, job: null, travelUntil: 0, dest: null, look: (Array.isArray(m.look) ? m.look : []).slice(0, 6).concat([0,0,0,0,0,0]).slice(0, 6).map((v, i) => Math.max(0, Math.min(MAXLOOK[i], Math.floor(+v) || 0))), car: -1, jailUntil: 0, cd: {},
         x: (Math.random() - 0.5) * 8, z: (Math.random() - 0.5) * 8, ry: 0, moving: false, floor: 0
       };
-      const np = rooms[room].players[id]; if (gu) { np.email = gu.email; np.acct = gu.acct; if (gu.acct) np.name = gu.acct; else if (!m.name) np.name = String(gu.name).slice(0, 14); }
+      const np = rooms[room].players[id]; if (gu) { np.email = gu.email; np.acct = gu.acct; if (gu.acct) { const profileName = accounts[gu.acct] && accounts[gu.acct].profile && accounts[gu.acct].profile.displayName; np.name = String(profileName || gu.acct).slice(0, 14); } else if (!m.name) np.name = String(gu.name).slice(0, 14); }
       const sv = saves[saveKey(room, np)];
       if (sv) {
         np.money = Math.max(0, Math.floor(+sv.money) || 0); np.bank = Math.max(0, Math.floor(+sv.bank) || 0); np.food = Math.max(0, Math.min(100, +sv.food || 100));
