@@ -7,6 +7,7 @@ namespace Citygame.Player
         [SerializeField] private Transform target;
         [SerializeField] private Vector3 offset = new Vector3(0f, 4.2f, -6.5f);
         [SerializeField, Min(0.1f)] private float followSharpness = 8f;
+        [SerializeField, Min(0f)] private float targetFocusHeight = 1.4f;
         [SerializeField, Range(15f, 80f)] private float pitch = 24f;
         [SerializeField, Min(0.1f)] private float touchOrbitSensitivity = 0.18f;
         [SerializeField, Min(0.001f)] private float pinchZoomSensitivity = 0.012f;
@@ -26,7 +27,7 @@ namespace Citygame.Player
             ReadOrbitInput();
 
             Quaternion rotation = Quaternion.Euler(orbitPitch, target.eulerAngles.y + orbitYaw, 0f);
-            Vector3 focus = target.position + Vector3.up * 1.4f;
+            Vector3 focus = target.position + Vector3.up * targetFocusHeight;
             Vector3 desiredPosition = focus + rotation * offset;
             Vector3 direction = desiredPosition - focus;
             float desiredDistance = direction.magnitude;
