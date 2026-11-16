@@ -121,6 +121,24 @@ const server = http.createServer((req, res) => {
   const route = url.replace(/[/]+$/, '') || '/';
   if (req.method === 'POST' && (route === '/api/register' || route === '/api/login')) return authApi(req, res);
   if (req.method === 'GET' && route === '/api/health') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ ok: true, storage: UP_ON ? (dbWritesOk ? 'upstash (accounts are permanent)' : 'upstash unreachable - using temporary files') : 'temporary file (accounts are WIPED when Render restarts or redeploys)', accounts: Object.keys(accounts).length - 1, lastError: dbLastError })); }
+  if (req.method === 'GET' && route === '/api/world-status') {
+    const activeRooms = Object.values(rooms || {});
+    const onlinePlayers = activeRooms.reduce((n, room) => n + Object.keys(room.players || {}).length, 0);
+    const businessCount = Object.keys(businesses || {}).length;
+    const payload = {
+      ok: true,
+      world: 'CITY1',
+      onlinePlayers,
+      activeRooms: activeRooms.filter(room => Object.keys(room.players || {}).length).length,
+      buildings: BLD.length,
+      destinations: PLACES.length,
+      playerBusinesses: businessCount,
+      storage: UP_ON && dbWritesOk ? 'persistent' : 'local-fallback',
+      uptimeSeconds: Math.floor(process.uptime())
+    };
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+    return res.end(JSON.stringify(payload));
+  }
   if (req.method === 'GET' && route === '/config.json') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ googleClientId: GOOGLE_CLIENT_ID, turn: process.env.TURN_URL ? { urls: process.env.TURN_URL.split(','), username: process.env.TURN_USER || '', credential: process.env.TURN_PASS || '' } : null })); }
   if (url === '/') url = '/index.html';
   const file = path.normalize(path.join(PUB, url));
