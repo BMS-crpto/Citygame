@@ -216,3 +216,13 @@ test('Unity follow camera supports bounded two-finger pinch zoom', () => {
   assert.match(camera, /Vector2\.Distance\(first\.position, second\.position\)/);
   assert.match(camera, /Mathf\.Clamp\(offset\.z - pinchDelta \* pinchZoomSensitivity,[\s\S]*-maximumZoomDistance, -minimumZoomDistance\)/);
 });
+
+
+test('Unity follow camera exposes adjustable player focus height and mobile pinch zoom bounds', () => {
+  const camera = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'Player', 'FollowCamera.cs'), 'utf8');
+  assert.match(camera, /\[SerializeField, Min\(0f\)\] private float targetFocusHeight = 1\.4f;/);
+  assert.match(camera, /Vector3 focus = target\.position \+ Vector3\.up \* targetFocusHeight;/);
+  assert.match(camera, /pinchZoomSensitivity/);
+  assert.match(camera, /Mathf\.Clamp\(offset\.z \+ pinchDelta \* pinchZoomSensitivity,[\s\S]*-maximumZoomDistance, -minimumZoomDistance\)/);
+  assert.match(camera, /orbitPitch = Mathf\.Clamp\([\s\S]*minimumPitch, maximumPitch\)/);
+});
