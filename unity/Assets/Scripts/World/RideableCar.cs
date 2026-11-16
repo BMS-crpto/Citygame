@@ -128,7 +128,7 @@ namespace Citygame.World
                 for (int i = 0; i < wheelVisuals.Length; i++)
                 {
                     if (wheelVisuals[i] == null) continue;
-                    wheelVisuals[i].Rotate(Vector3.right, roll, Space.Self);
+                    wheelVisuals[i].Rotate(Vector3.up, roll, Space.Self);
                 }
             }
             if (speedDisplay != null) speedDisplay.text = Mathf.RoundToInt(SpeedKph).ToString("000") + " km/h";
