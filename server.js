@@ -110,6 +110,79 @@ function authApi(req, res) {
   });
 }
 
+// ---- authenticated player account/profile API ----
+function accountFromRequest(req) {
+  const header = String(req.headers.authorization || '');
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  return match ? readToken(match[1]) : null;
+}
+function accountSnapshot(username) {
+  const a = accounts[username];
+  if (!a) return null;
+  const key = 'CITY1:a:' + username;
+  const sv = saves[key] && typeof saves[key] === 'object' ? saves[key] : {};
+  const ext = sv.ext && typeof sv.ext === 'object' ? sv.ext : {};
+  const career = sv.life && sv.life.career ? sv.life.career : null;
+  const home = Object.values(tenants).find(t => t && t.key === key && t.until > Date.now());
+  const ownedBusinesses = Object.values(businesses).filter(b => b && b.ownerKey === key).map(b => ({
+    id: b.id, name: b.name, kind: b.kind, area: b.area,
+    balance: Math.max(0, Math.floor(+b.balance || 0)),
+    staffCount: Array.isArray(b.staff) ? b.staff.length : 0,
+    customers: Math.max(0, Math.floor(+b.customers || 0))
+  }));
+  const inventory = sv.inv && typeof sv.inv === 'object' ? sv.inv : {};
+  const inventoryCount = Object.values(inventory).reduce((n, q) => n + Math.max(0, Math.floor(+q || 0)), 0);
+  return {
+    username,
+    displayName: String((a.profile && a.profile.displayName) || a.name || username).slice(0, 30),
+    bio: String((a.profile && a.profile.bio) || '').slice(0, 120),
+    email: String(a.email || ''),
+    createdAt: +a.created || 0,
+    lastSavedAt: +sv.saved || 0,
+    player: {
+      money: Math.max(0, Math.floor(+sv.money || 0)),
+      bank: Math.max(0, Math.floor(+sv.bank || 0)),
+      food: Math.max(0, Math.min(100, +sv.food || 0)),
+      path: String(sv.path || ''),
+      look: Array.isArray(sv.look) ? sv.look.slice(0, 6) : [],
+      career: career ? { id: String(career.id || ''), xp: Math.max(0, Math.floor(+career.xp || 0)) } : null,
+      inventoryItems: inventoryCount,
+      vehicles: Array.isArray(ext.cars) ? ext.cars.length : 0,
+      hasDriversLicense: !!ext.license,
+      homeActive: !!home,
+      homeUntil: home ? +home.until : 0,
+      businesses: ownedBusinesses,
+      dailyStreak: Math.max(0, Math.floor(+ext.streak || 0))
+    }
+  };
+}
+function accountApi(req, res) {
+  const sendJson = (code, data) => {
+    res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+    res.end(JSON.stringify(data));
+  };
+  const auth = accountFromRequest(req);
+  if (!auth || !accounts[auth.acct]) return sendJson(401, { error: 'Please sign in again to access your player account.' });
+  const username = auth.acct;
+  if (req.method === 'GET') return sendJson(200, { ok: true, account: accountSnapshot(username), storage: UP_ON && dbWritesOk ? 'persistent' : 'local-fallback' });
+  if (req.method !== 'PATCH') return sendJson(405, { error: 'Method not allowed' });
+  let body = '';
+  req.on('data', chunk => { body += chunk; if (body.length > 3000) req.destroy(); });
+  req.on('end', () => {
+    let input;
+    try { input = JSON.parse(body || '{}'); } catch (e) { return sendJson(400, { error: 'Invalid profile data.' }); }
+    const displayName = String(input.displayName == null ? '' : input.displayName).trim();
+    const bio = String(input.bio == null ? '' : input.bio).trim();
+    if (displayName.length < 2 || displayName.length > 24 || !/^[\p{L}\p{N} _.'-]+$/u.test(displayName)) return sendJson(400, { error: 'Display name must be 2–24 letters, numbers or simple punctuation.' });
+    if (bio.length > 120) return sendJson(400, { error: 'Bio must be 120 characters or fewer.' });
+    const a = accounts[username];
+    a.profile = Object.assign({}, a.profile || {}, { displayName, bio, updatedAt: Date.now() });
+    saveAccounts();
+    persistAccount(username).then(() => sendJson(200, { ok: true, account: accountSnapshot(username) }))
+      .catch(e => { console.log('account profile save failed', username, e.message); sendJson(503, { error: 'Profile could not be saved. Please retry.' }); });
+  });
+}
+
 const PUB = path.join(__dirname, 'public');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.wasm': 'application/wasm', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.wav': 'audio/wav', '.ktx2': 'image/ktx2', '.bin': 'application/octet-stream' };
 const server = http.createServer((req, res) => {
@@ -120,6 +193,7 @@ const server = http.createServer((req, res) => {
   catch (e) { res.writeHead(400); return res.end(); }
   const route = url.replace(/[/]+$/, '') || '/';
   if (req.method === 'POST' && (route === '/api/register' || route === '/api/login')) return authApi(req, res);
+  if (route === '/api/account' || route === '/api/account/profile') return accountApi(req, res);
   if (req.method === 'GET' && route === '/api/health') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ ok: true, storage: UP_ON ? (dbWritesOk ? 'upstash (accounts are permanent)' : 'upstash unreachable - using temporary files') : 'temporary file (accounts are WIPED when Render restarts or redeploys)', accounts: Object.keys(accounts).length - 1, lastError: dbLastError })); }
   if (req.method === 'GET' && route === '/api/world-status') {
     const activeRooms = Object.values(rooms || {});
