@@ -2774,6 +2774,8 @@ function openApp(n){
   appview.insertAdjacentHTML('afterbegin','<div class="phone-appbar"><button class="pb q" id="appBack">‹ Apps</button><div><b>'+icons[n]+' '+escapeBusinessText(n)+'</b><small> LAGOS LIFE • APP</small></div><button class="pb q" id="appHome">⌂</button></div>');
   $('appBack').onclick=closeAppView;
   $('appHome').onclick=closeAppView;
+  // Let registered add-on apps replace the legacy preview with their full working screen.
+  if(typeof APPR!=='undefined'&&APPR[n]&&typeof APPR[n]==='function')APPR[n]();
 }
 
 function setQuality(q){quality=q;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===q));applyQuality();openApp('Settings')}
