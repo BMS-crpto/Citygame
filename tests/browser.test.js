@@ -245,3 +245,12 @@ test('Unity procedural city reuses a single tropical skybox material across rebu
   assert.match(generator, /RenderSettings\.skybox = tropicalSkyMaterial/);
   assert.match(generator, /Citygame tropical sky/);
 });
+
+ 
+test('Unity sidewalk pedestrians clamp movement to walkable endpoints', () => {
+  const pedestrian = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'SidewalkPedestrian.cs'), 'utf8');
+  assert.match(pedestrian, /Vector3 nextPosition = transform\.position \+ step/);
+  assert.match(pedestrian, /if \(nextPosition\.x >= maxX\)[\s\S]*nextPosition\.x = maxX[\s\S]*direction = -1/);
+  assert.match(pedestrian, /else if \(nextPosition\.x <= minX\)[\s\S]*nextPosition\.x = minX[\s\S]*direction = 1/);
+  assert.match(pedestrian, /transform\.position = nextPosition/);
+});
