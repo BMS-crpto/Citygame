@@ -2961,7 +2961,24 @@ function loop(now){
         if(r.stage==='browse'&&nowNpc>=r.next){r.phase+=1.7;r.tx=n.spawnX+Math.sin(r.phase)*2.5;r.tz=n.spawnZ+Math.cos(r.phase*.83)*2.5;r.next=nowNpc+2200+Math.random()*1800}
       }else if(nowNpc>r.next){r.phase+=1.7;const radius=n.customerRoutineRadius||(n.place?1.1:2.2);r.tx=r.x+Math.sin(r.phase)*radius;r.tz=r.z+Math.cos(r.phase*.83)*radius;r.next=nowNpc+(active?4200:9000)}
       const dx=r.tx-n.x,dz=r.tz-n.z,d=Math.hypot(dx,dz),pace=n.isCustomer&&r.stage==='exit'?1.05:n.isCustomer?0.82:active?.72:.22,step=Math.min(d,dt*pace);
-      if(d>.08){n.x+=dx/d*step;n.z+=dz/d*step;o.g.position.x=n.x;o.g.position.z=n.z;o.g.rotation.y=Math.atan2(dx,dz)}
+      if(d>.08){
+        const nx=n.x+dx/d*step,nz=n.z+dz/d*step;
+        let moved=false;
+        // Indoor customers respect the same furniture and wall collision grid as the player.
+        if(n.isCustomer&&inside&&(n.place||null)===(inside||null)){
+          const blockX=collide(nx,n.z),blockZ=collide(n.x,nz),blockBoth=collide(nx,nz);
+          if(!blockBoth){n.x=nx;n.z=nz;moved=true}
+          else if(!blockX){n.x=nx;moved=true}
+          else if(!blockZ){n.z=nz;moved=true}
+          else{
+            // If the direct route is blocked, try either perpendicular side before stopping.
+            const side=step*0.9,px=-dz/d*side,pz=dx/d*side;
+            if(!collide(n.x+px,n.z+pz)){n.x+=px;n.z+=pz;moved=true}
+            else if(!collide(n.x-px,n.z-pz)){n.x-=px;n.z-=pz;moved=true}
+          }
+        }else{n.x=nx;n.z=nz;moved=true}
+        if(moved){o.g.position.x=n.x;o.g.position.z=n.z;o.g.rotation.y=Math.atan2(dx,dz)}
+      }
       const vis=(n.place||null)===(inside||null)&&(Number(n.floor)||0)===(pos.floor||0)&&Math.hypot(n.x-pos.x,n.z-pos.z)<(inside?60:70);o.g.visible=vis;if(vis)animate(o.g,d>.08&&active,dt);
     }
     const inCar=myCol>=0||ridingId>0||!!rideSc,levelY=(inside&&pos.floor?7.56:0),cd=(inside?(ROOMS[inside]&&ROOMS[inside].model?5.4:3.4):inCar?9:3.5)*camZoom,ch=inside?(ROOMS[inside]&&ROOMS[inside].model?Math.max(6.2,camH*0.9):Math.min(2.8,camH*0.3)):inCar?Math.max(3.4,camH*0.55):Math.max(1.7,camH*0.27);
