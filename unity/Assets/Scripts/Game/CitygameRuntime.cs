@@ -220,9 +220,9 @@ namespace Citygame.Game
                 GUI.Label(new Rect(appArea.x + 12f, appArea.y + 8f, appArea.width - 24f, 52f),
                     "Lagos Life\n₦" + save.cash.ToString("N0") + "  •  " + save.businesses.Count + " companies");
                 GUI.color = Color.white;
-                string[] names = { "Business", "Map", "Social", "Wallet", "Jobs", "Settings", "Cars", "Profile" };
-                string[] glyphs = { "🏢", "🗺", "💬", "₦", "💼", "⚙", "🚗", "👤" };
-                int cols = portrait ? 4 : 3;
+                string[] names = { "Business", "Map", "Social", "Wallet", "Jobs", "Activities", "Settings", "Cars", "Profile" };
+                string[] glyphs = { "🏢", "🗺", "💬", "₦", "💼", "🎯", "⚙", "🚗", "👤" };
+                int cols = portrait ? 3 : 3;
                 float gap = 8f, cellW = (appArea.width - gap * (cols - 1)) / cols;
                 float cellH = Mathf.Min(92f, appArea.height * 0.19f);
                 float gridY = appArea.y + 72f;
@@ -257,7 +257,7 @@ namespace Citygame.Game
                     ? Mathf.Max(800f, 360f + save.posts.Count * 220f)
                     : activePhoneApp == "Business"
                         ? Mathf.Max(1000f, 520f + cityBusinesses.Length * 64f + save.businesses.Count * 60f)
-                        : 800f;
+                        : activePhoneApp == "Activities" ? 1050f : 800f;
                 phoneScroll = GUI.BeginScrollView(body, phoneScroll, new Rect(0, 0, body.width - 18f, contentHeight));
                 float x = 0f, y = 0f, w = body.width - 28f;
 
@@ -414,6 +414,47 @@ namespace Citygame.Game
                         }
                     }
                     if (save.posts.Count == 0) GUI.Label(new Rect(x, y, w, 48f), "No posts yet. Publish the first city update.");
+                }
+                else if (activePhoneApp == "Activities")
+                {
+                    GUI.Label(new Rect(x, y, w, 34f), "LAGOS CITY ACTIVITIES"); y += 40f;
+                    GUI.Label(new Rect(x, y, w, 44f), "Take a break from business. Explore the city, meet residents and enjoy local activities."); y += 52f;
+                    GUI.Box(new Rect(x, y, w, 78f), "COMMUNITY FOOTBALL\nJoin a casual neighbourhood match. Costs 10 energy and adds 20 fun."); y += 86f;
+                    if (GUI.Button(new Rect(x, y, w, 42f), "Play neighbourhood football"))
+                    {
+                        if (save.energy < 10f) notice = "You need more energy for this activity.";
+                        else { save.energy = Mathf.Clamp(save.energy - 10f, 0f, 100f); save.fun = Mathf.Clamp(save.fun + 20f, 0f, 100f); Save(); notice = "You joined a friendly football match. Fun increased."; }
+                    }
+                    y += 50f;
+                    GUI.Box(new Rect(x, y, w, 78f), "CINEMA NIGHT\nWatch a movie in town. Costs ₦2,500 and adds 25 fun."); y += 86f;
+                    if (GUI.Button(new Rect(x, y, w, 42f), "Go to the cinema · ₦2,500"))
+                    {
+                        if (save.cash < 2500) notice = "Not enough cash for the cinema.";
+                        else { save.cash -= 2500; save.fun = Mathf.Clamp(save.fun + 25f, 0f, 100f); Save(); notice = "Cinema visit complete. Enjoy your evening."; }
+                    }
+                    y += 50f;
+                    GUI.Box(new Rect(x, y, w, 78f), "LAGOS FOOD FESTIVAL\nTry local food and restore hunger. Costs ₦1,800."); y += 86f;
+                    if (GUI.Button(new Rect(x, y, w, 42f), "Visit food festival · ₦1,800"))
+                    {
+                        if (save.cash < 1800) notice = "Not enough cash for the food festival.";
+                        else { save.cash -= 1800; save.hunger = Mathf.Clamp(save.hunger + 30f, 0f, 100f); save.fun = Mathf.Clamp(save.fun + 12f, 0f, 100f); Save(); notice = "You enjoyed the food festival."; }
+                    }
+                    y += 50f;
+                    GUI.Box(new Rect(x, y, w, 78f), "CITY SIGHTSEEING\nExplore a destination using the Map app. Adds fun."); y += 86f;
+                    if (GUI.Button(new Rect(x, y, w, 42f), "Choose a sightseeing destination"))
+                    {
+                        activePhoneApp = "Map";
+                        notice = "Choose a destination marker on the city map.";
+                    }
+                    y += 50f;
+                    GUI.Box(new Rect(x, y, w, 78f), "WEEKEND COMMUNITY MEETUP\nA social break for local residents. Costs ₦500 and adds 18 fun."); y += 86f;
+                    if (GUI.Button(new Rect(x, y, w, 42f), "Attend community meetup · ₦500"))
+                    {
+                        if (save.cash < 500) notice = "Not enough cash for the meetup.";
+                        else { save.cash -= 500; save.fun = Mathf.Clamp(save.fun + 18f, 0f, 100f); Save(); notice = "You attended the neighbourhood meetup."; }
+                    }
+                    y += 50f;
+                    GUI.Label(new Rect(x, y, w, 44f), "More world activities—sports grounds, events, restaurants and multiplayer meetups—will connect to physical locations as the city expands.");
                 }
                 else if (activePhoneApp == "Settings")
                 {
