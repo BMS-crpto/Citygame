@@ -70,18 +70,79 @@ namespace Citygame.World
 
         private static void BuildCar(Transform root, string name, Vector3 position, Material bodyMaterial)
         {
-            GameObject car = CreateCube(name, root, position, new Vector3(3.4f, 1.1f, 1.8f), bodyMaterial);
+            // The root collider remains the vehicle collision body. All added
+            // details are visual-only so they do not snag the player or road.
+            GameObject car = CreateCube(name, root, position, new Vector3(3.7f, 0.72f, 1.82f), bodyMaterial);
             car.AddComponent<Citygame.World.RideableCar>();
-            Material wheelMaterial = MaterialFor(new Color(0.08f, 0.08f, 0.08f));
-            GameObject cabin = CreateCube(name + " cabin", root, position + new Vector3(0f, 0.65f, 0f), new Vector3(1.8f, 0.8f, 1.45f), MaterialFor(new Color(0.22f, 0.28f, 0.32f)));
+
+            Material glass = MaterialFor(new Color(0.055f, 0.12f, 0.17f));
+            Material rubber = MaterialFor(new Color(0.035f, 0.04f, 0.045f));
+            Material alloy = MaterialFor(new Color(0.48f, 0.52f, 0.56f));
+            Material headlamp = MaterialFor(new Color(0.92f, 0.88f, 0.68f));
+            Material tailLamp = MaterialFor(new Color(0.72f, 0.035f, 0.025f));
+
+            GameObject cabin = CreateCube(name + " glazed cabin", root,
+                position + new Vector3(-0.12f, 0.62f, 0f),
+                new Vector3(1.95f, 0.78f, 1.48f), glass);
             cabin.transform.SetParent(car.transform, true);
+            DisableVisualCollider(cabin);
+
+            GameObject roof = CreateCube(name + " roof", root,
+                position + new Vector3(-0.12f, 1.03f, 0f),
+                new Vector3(1.62f, 0.12f, 1.42f), bodyMaterial);
+            roof.transform.SetParent(car.transform, true);
+            DisableVisualCollider(roof);
+
             for (int side = -1; side <= 1; side += 2)
             {
-                GameObject frontWheel = CreateCube(name + " front wheel", root, position + new Vector3(1.05f, -0.35f, side * 0.92f), new Vector3(0.65f, 0.65f, 0.25f), wheelMaterial);
-                frontWheel.transform.SetParent(car.transform, true);
-                GameObject rearWheel = CreateCube(name + " rear wheel", root, position + new Vector3(-1.05f, -0.35f, side * 0.92f), new Vector3(0.65f, 0.65f, 0.25f), wheelMaterial);
-                rearWheel.transform.SetParent(car.transform, true);
+                for (int axle = -1; axle <= 1; axle += 2)
+                {
+                    GameObject wheel = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                    wheel.name = name + (axle > 0 ? " front tyre" : " rear tyre");
+                    wheel.transform.SetParent(car.transform, false);
+                    wheel.transform.localPosition = new Vector3(axle * 1.12f, -0.18f, side * 0.91f);
+                    wheel.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                    wheel.transform.localScale = new Vector3(0.68f, 0.16f, 0.68f);
+                    wheel.GetComponent<Renderer>().sharedMaterial = rubber;
+                    DisableVisualCollider(wheel);
+
+                    GameObject hub = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                    hub.name = name + " alloy wheel hub";
+                    hub.transform.SetParent(car.transform, false);
+                    hub.transform.localPosition = new Vector3(axle * 1.12f, -0.18f, side * 1.075f);
+                    hub.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+                    hub.transform.localScale = new Vector3(0.34f, 0.17f, 0.34f);
+                    hub.GetComponent<Renderer>().sharedMaterial = alloy;
+                    DisableVisualCollider(hub);
+                }
             }
+
+            for (int side = -1; side <= 1; side += 2)
+            {
+                GameObject front = CreateCube(name + " front headlamp", root,
+                    position + new Vector3(1.87f, 0.08f, side * 0.59f),
+                    new Vector3(0.06f, 0.22f, 0.42f), headlamp);
+                front.transform.SetParent(car.transform, true);
+                DisableVisualCollider(front);
+
+                GameObject rear = CreateCube(name + " rear tail lamp", root,
+                    position + new Vector3(-1.87f, 0.08f, side * 0.59f),
+                    new Vector3(0.06f, 0.22f, 0.42f), tailLamp);
+                rear.transform.SetParent(car.transform, true);
+                DisableVisualCollider(rear);
+            }
+
+            GameObject bumper = CreateCube(name + " front bumper", root,
+                position + new Vector3(1.88f, -0.24f, 0f),
+                new Vector3(0.16f, 0.16f, 1.72f), alloy);
+            bumper.transform.SetParent(car.transform, true);
+            DisableVisualCollider(bumper);
+        }
+
+        private static void DisableVisualCollider(GameObject visual)
+        {
+            Collider visualCollider = visual.GetComponent<Collider>();
+            if (visualCollider != null) visualCollider.enabled = false;
         }
 
         private static void BuildPedestrians(Transform root)
