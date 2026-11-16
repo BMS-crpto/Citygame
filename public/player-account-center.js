@@ -43,6 +43,9 @@
     .cgAccError{font-size:11px;color:#ffb4a9;min-height:16px;margin-top:6px}
     .cgAccBiz{padding:10px;border-radius:11px;background:#182b41;margin:7px 0}
     .cgAccBiz b{font-size:12px}.cgAccBiz small{display:block;color:#9cb0c5;font-size:10px;margin-top:3px}
+    .cgNeedGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+    .cgNeed{min-width:0}.cgNeedHead{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:#b9cadd;margin-bottom:5px}
+    .cgNeedTrack{height:7px;border-radius:9px;background:#07111e;overflow:hidden}.cgNeedFill{height:100%;border-radius:9px;background:linear-gradient(90deg,#23b6a5,#8ce4b7)}
     @media(max-width:560px){.cgAccGrid{grid-template-columns:repeat(2,minmax(0,1fr))}.cgAccRows{grid-template-columns:1fr}.cgAccHero{align-items:flex-start}.cgAccAvatar{width:48px;height:48px;flex-basis:48px}}
   `;
   document.head.appendChild(css);
@@ -76,14 +79,19 @@
     const content = document.getElementById('cgAccContent');
     content.innerHTML =
       '<section class="cgAccHero"><div class="cgAccAvatar">🧑🏾‍💻</div><div><div class="cgAccName">'+esc(a.displayName)+'</div><div class="cgAccHandle">@'+esc(a.username)+' · '+esc(a.email || 'No email added')+'</div><div class="cgAccSub">Member since '+date(a.createdAt)+'</div></div></section>'+
-      '<div class="cgAccGrid"><div class="cgAccStat"><small>Cash wallet</small><b>'+money(p.money)+'</b></div><div class="cgAccStat"><small>Bank balance</small><b>'+money(p.bank)+'</b></div><div class="cgAccStat"><small>Career</small><b>'+esc(p.career ? p.career.id : 'Not started')+'</b></div><div class="cgAccStat"><small>Vehicles</small><b>'+Number(p.vehicles||0)+'</b></div><div class="cgAccStat"><small>Home</small><b>'+(p.homeActive?'Active':'Not active')+'</b></div><div class="cgAccStat"><small>Business</small><b>'+((p.businesses||[]).length)+'</b></div></div>'+
+      '<div class="cgAccGrid"><div class="cgAccStat"><small>Cash wallet</small><b>'+money(p.money)+'</b></div><div class="cgAccStat"><small>Bank balance</small><b>'+money(p.bank)+'</b></div><div class="cgAccStat"><small>Career</small><b>'+esc(p.career ? (p.career.title || p.career.id) : 'Not started')+'</b></div><div class="cgAccStat"><small>Vehicles</small><b>'+Number(p.vehicles||0)+'</b></div><div class="cgAccStat"><small>Home</small><b>'+(p.homeActive?'Active':'Not active')+'</b></div><div class="cgAccStat"><small>Business</small><b>'+((p.businesses||[]).length)+'</b></div></div>'+
+      '<section class="cgAccSection"><h3>Life needs</h3><div class="cgNeedGrid">'+
+      [['Hunger','food'],['Energy','energy'],['Hygiene','hygiene'],['Fun','fun'],['Social','social'],['Bladder','bladder']].map(([label,key])=>{const value=Math.max(0,Math.min(100,Number((p.needs||{})[key])||0));return '<div class="cgNeed"><div class="cgNeedHead"><span>'+label+'</span><b>'+value+'%</b></div><div class="cgNeedTrack"><div class="cgNeedFill" style="width:'+value+'%"></div></div></div>';}).join('')+
+      '</div></section>'+
       '<section class="cgAccSection"><h3>Saved player progress</h3><div class="cgAccRows">'+
       '<div class="cgAccRow"><small>Life path</small><b>'+esc(p.path || 'Not set')+'</b></div>'+
-      '<div class="cgAccRow"><small>Food / needs data</small><b>'+Math.round(Number(p.food)||0)+' / 100</b></div>'+
+      '<div class="cgAccRow"><small>Career level / XP</small><b>'+(p.career?'Level '+Number(p.career.level||1)+' · '+Number(p.career.xp||0)+' XP':'No career yet')+'</b></div>'+
       '<div class="cgAccRow"><small>Inventory items</small><b>'+Number(p.inventoryItems||0)+'</b></div>'+
       '<div class="cgAccRow"><small>Driver licence</small><b>'+(p.hasDriversLicense?'Issued':'Not issued')+'</b></div>'+
       '<div class="cgAccRow"><small>Daily reward streak</small><b>'+Number(p.dailyStreak||0)+' days</b></div>'+
       '<div class="cgAccRow"><small>Last game save</small><b>'+date(a.lastSavedAt)+'</b></div>'+
+      '<div class="cgAccRow"><small>Home address</small><b>'+esc(p.home ? [p.home.name,p.home.area].filter(Boolean).join(' · ') : 'No active home')+'</b></div>'+
+      '<div class="cgAccRow"><small>Home lease ends</small><b>'+date(p.home && p.home.until)+'</b></div>'+
       '</div></section>'+
       '<section class="cgAccSection"><h3>My businesses</h3>'+businessMarkup(p.businesses)+'</section>'+
       '<section class="cgAccSection"><h3>Profile settings</h3>'+
