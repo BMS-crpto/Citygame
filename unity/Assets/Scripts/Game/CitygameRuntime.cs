@@ -41,6 +41,9 @@ namespace Citygame.Game
             public float hygiene = 100f;
             public float fun = 100f;
             public long jobEarnings;
+            public bool hasSavedPlayerPosition;
+            public Vector3 playerPosition;
+            public Vector3 playerEulerAngles;
             public List<OwnedBusiness> businesses = new List<OwnedBusiness>();
             public List<SocialPost> posts = new List<SocialPost>();
         }
@@ -54,7 +57,9 @@ namespace Citygame.Game
         private float incomeClock;
         private float needsClock;
         private float cityObjectRefreshClock;
+        private float autosaveClock;
         private const float CityObjectRefreshInterval = 1f;
+        private const float AutosaveInterval = 15f;
         private BusinessSpot[] cityBusinesses = Array.Empty<BusinessSpot>();
         private RideableCar[] cityCars = Array.Empty<RideableCar>();
         private string notice = "Welcome to Lagos Life. Explore and build your business.";
@@ -131,7 +136,24 @@ namespace Citygame.Game
                 if (distance < carDistance) { carDistance = distance; nearbyCar = car; }
             }
 
+            autosaveClock += Time.deltaTime;
+            if (autosaveClock >= AutosaveInterval)
+            {
+                autosaveClock = 0f;
+                Save();
+            }
+
             if (Input.GetKeyDown(KeyCode.Tab)) menuOpen = !menuOpen;
+        }
+
+        private void OnApplicationPause(bool paused)
+        {
+            if (paused) Save();
+        }
+
+        private void OnApplicationQuit()
+        {
+            Save();
         }
 
         private void OnGUI()
@@ -574,7 +596,17 @@ namespace Citygame.Game
 
         private void Save()
         {
-            try { File.WriteAllText(SavePath, JsonUtility.ToJson(save, true)); }
+            try
+            {
+                // Never persist the temporary interior staging coordinates.
+                if (motor != null && !interiorActive)
+                {
+                    save.playerPosition = motor.transform.position;
+                    save.playerEulerAngles = motor.transform.eulerAngles;
+                    save.hasSavedPlayerPosition = true;
+                }
+                File.WriteAllText(SavePath, JsonUtility.ToJson(save, true));
+            }
             catch (Exception e) { Debug.LogWarning("Citygame save failed: " + e.Message); }
         }
 
@@ -599,9 +631,20 @@ namespace Citygame.Game
                         save.dataVersion = 2;
                         Save();
                     }
+                    RestorePlayerPosition();
                 }
             }
             catch (Exception e) { Debug.LogWarning("Citygame load failed: " + e.Message); }
+        }
+
+        private void RestorePlayerPosition()
+        {
+            if (!save.hasSavedPlayerPosition || motor == null) return;
+            CharacterController controller = motor.GetComponent<CharacterController>();
+            if (controller != null) controller.enabled = false;
+            motor.transform.SetPositionAndRotation(save.playerPosition, Quaternion.Euler(save.playerEulerAngles));
+            if (controller != null) controller.enabled = true;
+        }
         }
     }
 }
