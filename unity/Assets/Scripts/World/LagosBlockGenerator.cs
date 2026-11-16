@@ -78,7 +78,7 @@ namespace Citygame.World
             BuildCar(root, "City Sedan", new Vector3(-10f, 0.65f, -3.2f), green, VehicleStyle.Sedan);
             BuildCar(root, "Lagos SUV", new Vector3(8f, 0.65f, -3.2f), concrete, VehicleStyle.Suv);
             BuildCar(root, "Lagos Sports Coupe", new Vector3(26f, 0.65f, -3.2f), paint, VehicleStyle.Sports);
-            BuildCar(root, "Lagos Minibus", new Vector3(42f, 0.65f, -3.2f), green, VehicleStyle.Minibus);
+            BuildCar(root, "Lagos City Bus", new Vector3(42f, 0.65f, -3.2f), green, VehicleStyle.Bus);
 
             BuildAmbientTraffic(root, paint, green);
             BuildStreetLights(root);
@@ -107,7 +107,7 @@ namespace Citygame.World
             BuildCar(root, name, position, bodyMaterial, VehicleStyle.Sedan);
         }
 
-        private enum VehicleStyle { Sedan, Taxi, Suv, Minibus, Sports }
+        private enum VehicleStyle { Sedan, Taxi, Suv, Bus, Sports }
 
         private static void BuildCar(Transform root, string name, Vector3 position, Material bodyMaterial, VehicleStyle style)
         {
@@ -115,7 +115,7 @@ namespace Citygame.World
             switch (style)
             {
                 case VehicleStyle.Suv: car.transform.localScale = new Vector3(1.14f, 1.12f, 1.08f); break;
-                case VehicleStyle.Minibus: car.transform.localScale = new Vector3(1.28f, 1.2f, 1.18f); break;
+                case VehicleStyle.Bus: car.transform.localScale = new Vector3(1.55f, 1.42f, 1.25f); break;
                 case VehicleStyle.Sports: car.transform.localScale = new Vector3(1.04f, 0.86f, 0.98f); break;
                 case VehicleStyle.Taxi: car.transform.localScale = new Vector3(1.02f, 1f, 1.02f); break;
             }
@@ -149,6 +149,8 @@ namespace Citygame.World
                 CreateCarPart(name + " door handle", car.transform, new Vector3(-0.52f, 0.43f, side * 0.85f), new Vector3(0.2f, 0.045f, 0.035f), alloy);
             }
             CreateCarPart(name + " roof", car.transform, new Vector3(-0.12f, 1.09f, 0f), new Vector3(1.72f, 0.12f, 1.48f), bodyMaterial);
+            if (style == VehicleStyle.Taxi)
+                CreateCarPart(name + " taxi roof sign", car.transform, new Vector3(0.05f, 1.2f, 0f), new Vector3(0.48f, 0.12f, 0.34f), headlamp);
             // Dashboard, instrument binnacle, digital display and centre console.
             CreateCarPart(name + " dashboard", car.transform, new Vector3(0.62f, 0.48f, 0f), new Vector3(0.38f, 0.28f, 1.42f), interior);
             CreateCarPart(name + " instrument cluster", car.transform, new Vector3(0.79f, 0.67f, -0.39f), new Vector3(0.12f, 0.19f, 0.42f), metal);
