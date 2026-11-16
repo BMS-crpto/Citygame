@@ -2123,8 +2123,23 @@ function lobbyEntrance(h){
   addSign(h.area.toUpperCase(),x,5.5,z+1.55,0,6.4,'#0d2b45','#ffd54a');
   bx_(x-3.9,0.5,z+1.4,0.9,1,0.9,0x2f7a35);bx_(x+3.9,0.5,z+1.4,0.9,1,0.9,0x2f7a35);
 }
+function apartmentParking(h){
+  // Dedicated residents' parking court beside apartment and penthouse entrances.
+  const x=h.x+10.5,z=h.kind==='lobby'?h.z+2.4:h.z;
+  const bays=h.kind==='lobby'?3:2,depth=bays===3?18:12;
+  bx_(x,0.065,z,7.2,0.13,depth+1.2,0x555b61);
+  bx_(x-3.25,0.11,z,0.12,0.035,depth,0xe7e7e7);
+  bx_(x+3.25,0.11,z,0.12,0.035,depth,0xe7e7e7);
+  for(let i=0;i<=bays;i++)bx_(x,0.115,z-depth/2+i*(depth/bays),6.5,0.035,0.12,0xf3f0df);
+  for(const dx of [-3.05,3.05])for(const dz0 of [-depth/2+0.5,depth/2-0.5])bx_(x+dx,1.45,z+dz0,0.16,2.9,0.16,0x3c4650);
+  bx_(x,3.0,z,6.5,0.18,depth,0x303943);
+  bx_(x,3.12,z,6.1,0.035,depth-0.5,0x68727b);
+  addSign('RESIDENT PARKING',x,4.0,z+depth/2+0.8,0,4.8,'#142333','#f4d38d');
+}
 function buildRental(h){
-  if(h.kind==='flat')flatBuilding(h);else if(h.kind==='lobby')lobbyEntrance(h);else villa(h.x,h.z);
+  if(h.kind==='flat'){flatBuilding(h);apartmentParking(h);}
+  else if(h.kind==='lobby'){lobbyEntrance(h);apartmentParking(h);}
+  else villa(h.x,h.z);
 }
 function houseTaken(h){const ho=houseObjs[h.id];return h.units===1?!!ho.owner:(ho.occ||0)>=h.units}
 function houseDot(h){return myHome&&myHome.id===h.id?'#ffd54a':houseTaken(h)?'#8d99a6':'#39e07a'}
