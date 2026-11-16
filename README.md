@@ -11,7 +11,9 @@ Open `/rebuild.html` to inspect the new client foundation:
 - Third-person player movement with keyboard and touch controls.
 - Portrait and landscape mobile layouts.
 - In-game city map with searchable destinations, pan, zoom, map markers and GPS destination selection.
-- Separate full-screen phone/app views.
+- Separate full-screen phone/app views, including a live Company Manager connected to the existing multiplayer business API and a player-account sign-in/snapshot screen.
+- Authenticated read-only player account snapshot endpoint, with existing password and registration rules preserved.
+- Procedural pedestrian and traffic ambience in the rebuild preview.
 
 The preview is an early foundation, not yet a replacement for the full game. Existing account, multiplayer, career, business, social, vehicle and property systems are still being migrated. The root `/` route continues to serve the existing playable game during this migration.
 
