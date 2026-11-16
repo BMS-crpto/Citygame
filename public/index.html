@@ -1229,7 +1229,7 @@ function rebuildLot(force){
   let slot=0;
   for(const q of ppl)for(const col of q.cars){
     if(slot>=18)break;
-    const x=9+(slot%9)*5.6,z=114.5+((slot/9)|0)*4.2,g=makeCar(col);g.position.set(x,0,z);g.rotation.y=Math.PI/2;scene.add(g);
+    const x=9+(slot%9)*5.6,z=114.5+((slot/9)|0)*4.2,g=makeCar(col,q.mine?'owned':undefined);g.position.set(x,0,z);g.rotation.y=Math.PI/2;scene.add(g);
     const o={g,x,z,ry:Math.PI/2,col};lotCars.push(o);if(q.mine)parked.push(o);slot++;
   }
 }
