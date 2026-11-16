@@ -74,9 +74,11 @@ namespace Citygame.World
             }
 
             // Parked vehicles add a usable transport layer to the generated block.
-            BuildCar(root, "Lagos Taxi", new Vector3(-25f, 0.65f, -3.2f), paint);
-            BuildCar(root, "City Sedan", new Vector3(2f, 0.65f, -3.2f), green);
-            BuildCar(root, "Street Shuttle", new Vector3(28f, 0.65f, -3.2f), concrete);
+            BuildCar(root, "Lagos Taxi", new Vector3(-28f, 0.65f, -3.2f), paint, VehicleStyle.Taxi);
+            BuildCar(root, "City Sedan", new Vector3(-10f, 0.65f, -3.2f), green, VehicleStyle.Sedan);
+            BuildCar(root, "Lagos SUV", new Vector3(8f, 0.65f, -3.2f), concrete, VehicleStyle.Suv);
+            BuildCar(root, "Lagos Sports Coupe", new Vector3(26f, 0.65f, -3.2f), paint, VehicleStyle.Sports);
+            BuildCar(root, "Lagos Minibus", new Vector3(42f, 0.65f, -3.2f), green, VehicleStyle.Minibus);
 
             BuildAmbientTraffic(root, paint, green);
             BuildStreetLights(root);
@@ -102,8 +104,22 @@ namespace Citygame.World
         {
             // The root collider remains the vehicle collision body. All added
             // details are visual-only so they do not snag the player or road.
+            BuildCar(root, name, position, bodyMaterial, VehicleStyle.Sedan);
+        }
+
+        private enum VehicleStyle { Sedan, Taxi, Suv, Minibus, Sports }
+
+        private static void BuildCar(Transform root, string name, Vector3 position, Material bodyMaterial, VehicleStyle style)
+        {
             GameObject car = CreateCube(name, root, position, new Vector3(3.7f, 0.72f, 1.82f), bodyMaterial);
-            car.AddComponent<Citygame.World.RideableCar>();
+            switch (style)
+            {
+                case VehicleStyle.Suv: car.transform.localScale = new Vector3(1.14f, 1.12f, 1.08f); break;
+                case VehicleStyle.Minibus: car.transform.localScale = new Vector3(1.28f, 1.2f, 1.18f); break;
+                case VehicleStyle.Sports: car.transform.localScale = new Vector3(1.04f, 0.86f, 0.98f); break;
+                case VehicleStyle.Taxi: car.transform.localScale = new Vector3(1.02f, 1f, 1.02f); break;
+            }
+            RideableCar rideable = car.AddComponent<Citygame.World.RideableCar>();
 
             Material glass = GlassMaterial();
             Material rubber = MaterialFor(new Color(0.035f, 0.04f, 0.045f));
@@ -169,7 +185,7 @@ namespace Citygame.World
             speedText.characterSize = 0.018f;
             speedText.anchor = TextAnchor.MiddleCenter;
             speedText.color = new Color(0.2f, 0.9f, 1f);
-            rideable.ConfigureDrivingVisuals(steeringWheel.transform, wheelVisuals, speedText);
+
             CreateCarPart(name + " left side mirror", car.transform, new Vector3(0.55f, 0.77f, -0.94f), new Vector3(0.25f, 0.16f, 0.18f), metal);
             CreateCarPart(name + " right side mirror", car.transform, new Vector3(0.55f, 0.77f, 0.94f), new Vector3(0.25f, 0.16f, 0.18f), metal);
             CreateCarPart(name + " footwell", car.transform, new Vector3(0.35f, 0.08f, -0.38f), new Vector3(0.45f, 0.08f, 0.42f), interior);
@@ -199,15 +215,20 @@ namespace Citygame.World
             rideable.ConfigureHeadlights(headlamps);
 
             Transform[] wheelVisuals = new Transform[4];
+            Transform[] suspensionPivots = new Transform[4];
             int wheelIndex = 0;
             for (int side = -1; side <= 1; side += 2)
             {
                 for (int axle = -1; axle <= 1; axle += 2)
                 {
+                    GameObject suspension = new GameObject(name + " suspension pivot");
+                    suspension.transform.SetParent(car.transform, false);
+                    suspension.transform.localPosition = new Vector3(axle * 1.12f, -0.18f, side * 0.91f);
+                    suspensionPivots[wheelIndex] = suspension.transform;
                     GameObject wheel = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                     wheel.name = name + (axle > 0 ? " front tyre" : " rear tyre");
-                    wheel.transform.SetParent(car.transform, false);
-                    wheel.transform.localPosition = new Vector3(axle * 1.12f, -0.18f, side * 0.91f);
+                    wheel.transform.SetParent(suspension.transform, false);
+                    wheel.transform.localPosition = Vector3.zero;
                     wheel.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
                     wheel.transform.localScale = new Vector3(0.68f, 0.16f, 0.68f);
                     wheel.GetComponent<Renderer>().sharedMaterial = rubber;
@@ -216,14 +237,16 @@ namespace Citygame.World
 
                     GameObject hub = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                     hub.name = name + " alloy wheel hub";
-                    hub.transform.SetParent(car.transform, false);
-                    hub.transform.localPosition = new Vector3(axle * 1.12f, -0.18f, side * 1.075f);
+                    hub.transform.SetParent(suspension.transform, false);
+                    hub.transform.localPosition = new Vector3(0f, 0f, side * 0.165f);
                     hub.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
                     hub.transform.localScale = new Vector3(0.34f, 0.17f, 0.34f);
                     hub.GetComponent<Renderer>().sharedMaterial = alloy;
                     DisableVisualCollider(hub);
                 }
             }
+
+            rideable.ConfigureDrivingVisuals(steeringWheel.transform, wheelVisuals, speedText, suspensionPivots);
 
             for (int side = -1; side <= 1; side += 2)
             {
