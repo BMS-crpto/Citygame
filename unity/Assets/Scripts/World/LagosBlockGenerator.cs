@@ -288,9 +288,45 @@ namespace Citygame.World
             spotObject.transform.position = new Vector3(position.x, position.y, frontZ - 1.1f);
             BusinessSpot spot = spotObject.AddComponent<BusinessSpot>();
             spot.Configure(name, category);
-            CreateCube(name + " sign", root,
+            Material signMaterial = MaterialFor(new Color(0.12f, 0.16f, 0.2f));
+            CreateCube(name + " signboard", root,
                 position + new Vector3(0, size.y + 0.45f, frontZ - 0.01f),
-                new Vector3(size.x * 0.8f, 0.6f, 0.2f), MaterialFor(new Color(0.12f, 0.16f, 0.2f)));
+                new Vector3(size.x * 0.8f, 0.6f, 0.2f), signMaterial);
+            CreateCube(name + " signboard top trim", root,
+                position + new Vector3(0, size.y + 0.78f, frontZ - 0.02f),
+                new Vector3(size.x * 0.82f, 0.07f, 0.24f), trim);
+
+            // Ground-floor shop awning and slim supports make storefronts read
+            // as distinct Lagos businesses from the street camera.
+            Material awning = MaterialFor(new Color(0.72f, 0.24f, 0.10f));
+            CreateCube(name + " storefront awning", root,
+                new Vector3(position.x, position.y + groundFloorHeight + 0.12f, frontZ - 0.62f),
+                new Vector3(size.x * 0.92f, 0.16f, 1.25f), awning);
+            for (int side = -1; side <= 1; side += 2)
+            {
+                CreateCube(name + " awning support", root,
+                    new Vector3(position.x + side * (size.x * 0.43f), position.y + groundFloorHeight * 0.5f, frontZ - 1.12f),
+                    new Vector3(0.09f, groundFloorHeight, 0.09f), trim);
+            }
+
+            // Narrow upper-floor balcony ledges with rails add depth without
+            // requiring expensive transparent materials or extra lighting.
+            if (size.y >= 5f)
+            {
+                float balconyY = position.y + groundFloorHeight + 0.18f;
+                CreateCube(name + " balcony floor", root,
+                    new Vector3(position.x, balconyY, frontZ - 0.42f),
+                    new Vector3(size.x * 0.76f, 0.14f, 0.9f), trim);
+                CreateCube(name + " balcony front rail", root,
+                    new Vector3(position.x, balconyY + 0.52f, frontZ - 0.82f),
+                    new Vector3(size.x * 0.76f, 0.08f, 0.08f), frameMaterial);
+                for (int rail = -1; rail <= 1; rail++)
+                {
+                    CreateCube(name + " balcony rail post", root,
+                        new Vector3(position.x + rail * size.x * 0.25f, balconyY + 0.28f, frontZ - 0.82f),
+                        new Vector3(0.07f, 0.55f, 0.07f), frameMaterial);
+                }
+            }
         }
 
         // Keep one procedural sky material across scene rebuilds to avoid leaking
