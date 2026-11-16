@@ -148,12 +148,24 @@ namespace Citygame.World
             return obj;
         }
 
+        // Reuse materials by color instead of allocating a unique material for every
+        // window, curb, tree and prop. This keeps the procedural mobile scene lighter.
+        private static readonly System.Collections.Generic.Dictionary<Color, Material> MaterialCache =
+            new System.Collections.Generic.Dictionary<Color, Material>();
+
         private static Material MaterialFor(Color color)
         {
+            if (MaterialCache.TryGetValue(color, out Material cached) && cached != null)
+                return cached;
+
             Shader shader = Shader.Find("Universal Render Pipeline/Lit");
             if (shader == null) shader = Shader.Find("Standard");
+            if (shader == null) return null;
+
             Material material = new Material(shader);
             material.color = color;
+            material.name = "Citygame shared material " + color;
+            MaterialCache[color] = material;
             return material;
         }
     }
