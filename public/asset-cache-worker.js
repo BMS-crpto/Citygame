@@ -21,7 +21,7 @@ self.addEventListener('fetch',event=>{
  if(request.method!=='GET')return;
  const url=new URL(request.url);
  if(url.origin!==self.location.origin)return;
- if(/\\.glb$/i.test(url.pathname)){
+ if(/\.glb$/i.test(url.pathname)){
   event.respondWith((async()=>{
    const cache=await caches.open(ASSETS);
    const cached=await cache.match(request,{ignoreSearch:true});
@@ -43,7 +43,7 @@ self.addEventListener('fetch',event=>{
   })());
   return;
  }
- if(/\\.(?:js|css|json)$/i.test(url.pathname)){
+ if(/\.(?:js|css|json)$/i.test(url.pathname)){
   event.respondWith((async()=>{
    const cache=await caches.open(SHELL);
    try{
