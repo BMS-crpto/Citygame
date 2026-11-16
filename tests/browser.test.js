@@ -277,3 +277,17 @@ test('Unity business interiors vary by business category and spawn ambient indoo
   assert.match(npc, /Mathf\.Clamp\(position\.x, roomXBounds\.x, roomXBounds\.y\)/);
   assert.match(npc, /Mathf\.Clamp\(position\.z, roomZBounds\.x, roomZBounds\.y\)/);
 });
+
+
+test('Unity Lagos map buildings have framed entrances aligned to business interaction points', () => {
+  const map = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'LagosBlockGenerator.cs'), 'utf8');
+  assert.match(map, /ground floor left frontage/);
+  assert.match(map, /ground floor right frontage/);
+  assert.match(map, /entrance lintel/);
+  assert.match(map, /entrance door/);
+  assert.match(map, /door handle/);
+  assert.match(map, /storefront glass left/);
+  assert.match(map, /storefront glass right/);
+  assert.match(map, /position\.x, position\.y, frontZ - 1\.1f/);
+  assert.match(map, /spot\.Configure\(name, category\)/);
+});
