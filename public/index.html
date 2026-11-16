@@ -1861,16 +1861,24 @@ function attachCarModel(g,col,role){
   if(!key)return;
   whenModel(key,()=>{
     const car=cloneModel(key),cfg=MODEL_CFG[key];
-    if(cfg.body||role==='taxi'){
-      const paint=role==='taxi'?0xfdd835:carCols[col%carCols.length];
+    const customPaint=role==='owned'&&PX.carPaint&&PX.carPaint[col];
+    if(cfg.body||role==='taxi'||customPaint){
+      const paint=customPaint?new THREE.Color(customPaint):role==='taxi'?0xfdd835:carCols[col%carCols.length];
       car.traverse(o=>{
         if(!o.isMesh)return;
         const ms=Array.isArray(o.material)?o.material:[o.material];
-        const nm=ms.map(m=>{if((cfg.body&&cfg.body.test(m.name||''))||(customPaint&&/body|paint|exterior|car/i.test((m.name||'')+' '+(o.name||''))&&!/glass|window|wheel|tire|light|chrome/i.test((m.name||'')+' '+(o.name||''))){const c=m.clone();if(paint.isColor)c.color.copy(paint);else c.color.setHex(paint);return c}return m});
+        const nm=ms.map(m=>{
+          const materialName=(m.name||'')+' '+(o.name||'');
+          const isBody=(cfg.body&&cfg.body.test(m.name||''))||(customPaint&&/body|paint|exterior|car/i.test(materialName)&&!/glass|window|wheel|tire|light|chrome/i.test(materialName));
+          if(!isBody)return m;
+          const c=m.clone();
+          if(paint.isColor)c.color.copy(paint);else c.color.setHex(paint);
+          return c;
+        });
         o.material=Array.isArray(o.material)?nm:nm[0];
       });
     }
-    // the okada keeps its procedural rider (tagged in makeBikeProc); everything else of the old placeholder is hidden
+    // The Okada keeps its procedural rider; the downloaded model replaces its placeholder.
     g.children.slice().forEach(c=>{c.visible=key==='okada'&&!!c.userData.rider;if(c.visible)c.position.y-=0.3});
     g.userData.siren=null;
     g.add(car);g.userData.model=car;
