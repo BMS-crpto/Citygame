@@ -1456,6 +1456,8 @@ function extraMsg(room, p, m, now) {
       if (E.storedCars.includes(col)) return toast('That vehicle is already in your garage'), true;
       if (E.storedCars.length >= capacity) return toast('Your home garage is full'), true;
       E.storedCars.push(col); p.car = -1;
+       send(p.ws, { t: 'garage_door', x: home.x, z: home.z, open: 1 });
+       setTimeout(() => send(p.ws, { t: 'garage_door', x: home.x, z: home.z, open: 0 }), 3800);
       sendCars(p); send(p.ws, { t: 'garage_stored', col });
       toast('🏠 ' + VEHICLES[col].name + ' safely stored at ' + home.name);
       savePlayer(room, p); return true;
@@ -1474,6 +1476,8 @@ function extraMsg(room, p, m, now) {
         z = (home.kind === 'lobby' ? home.z + 2.4 : home.z) + slots[Math.min(E.storedCars.length, slots.length - 1)];
       }
       const ry = Math.PI;
+      send(p.ws, { t: 'garage_door', x: home.x, z: home.z, open: 1 });
+      setTimeout(() => send(p.ws, { t: 'garage_door', x: home.x, z: home.z, open: 0 }), 3800);
       sendCars(p); send(p.ws, { t: 'garage_spawn', col, x, z, ry });
       toast('🔑 ' + VEHICLES[col].name + ' retrieved to your driveway');
       savePlayer(room, p); return true;
