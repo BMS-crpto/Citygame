@@ -20,8 +20,8 @@ namespace Citygame.Editor
             // Prefer imported, coordinate-accurate OpenStreetMap geometry. The
             // procedural block remains only as a clearly logged fallback until
             // the project owner supplies a licensed/exported Lagos GeoJSON extract.
-            bool realLagosLoaded = LagosRealMapImporter.TryBuild(scene.GetRootGameObjects().Length > 0
-                ? scene.GetRootGameObjects()[0].transform : new GameObject("Lagos Map Root").transform);
+            GameObject mapRoot = new GameObject("Lagos Map Root");
+            bool realLagosLoaded = LagosRealMapImporter.TryBuild(mapRoot.transform);
             if (!realLagosLoaded)
             {
                 string[] districtNames = { "Ikeja", "Yaba", "Surulere", "Agege", "Central Lagos", "Lekki", "Ojota", "Victoria Island", "Apapa" };
