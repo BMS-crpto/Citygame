@@ -772,9 +772,9 @@ const MISSIONS = [
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 // sleeping / watching TV is acted out: the client shows the character lying in a bed or sitting on a sofa, and everyone nearby sees it
 function setPose(p, pose, ms) { p.pose = pose; p.poseUntil = Date.now() + ms; send(p.ws, { t: 'pose', pose, secs: ms / 1000 }); }
-const newLife = () => ({ earned: 0, energy: 100, hygiene: 100, fun: 100, career: null, shifts: 0, bought: 0, promoted: false, done: {} });
+const newLife = () => ({ earned: 0, energy: 100, hygiene: 100, fun: 100, social: 100, bladder: 100, career: null, shifts: 0, bought: 0, promoted: false, done: {} });
 function restoreLife(L, s) {
-  L.energy = clamp(+s.energy || 0, 0, 100); L.hygiene = clamp(+s.hygiene || 0, 0, 100); L.fun = clamp(+s.fun || 0, 0, 100);
+  L.energy = clamp(+s.energy || 0, 0, 100); L.hygiene = clamp(+s.hygiene || 0, 0, 100); L.fun = clamp(+s.fun || 0, 0, 100); L.social = s.social == null ? 100 : clamp(+s.social || 0, 0, 100); L.bladder = s.bladder == null ? 100 : clamp(+s.bladder || 0, 0, 100);
   if (s.career && CAREERS[s.career.id]) L.career = { id: s.career.id, xp: Math.max(0, Math.floor(+s.career.xp) || 0) };
   L.earned = Math.max(0, Math.floor(+s.earned) || 0); L.shifts = Math.max(0, Math.floor(+s.shifts) || 0); L.bought = Math.max(0, Math.floor(+s.bought) || 0); L.promoted = !!s.promoted; L.done = s.done && typeof s.done === 'object' ? s.done : {};
 }
@@ -858,7 +858,7 @@ function npcLine(p, n) {
 function sendLife(p, R) {
   const L = p.life, c = L.career && CAREERS[L.career.id], lv = c ? levelOf(L.career) : 0;
   send(p.ws, { t: 'lifeinfo',
-    needs: { food: Math.round(p.food), energy: Math.round(L.energy), hygiene: Math.round(L.hygiene), fun: Math.round(L.fun) },
+    needs: { food: Math.round(p.food), energy: Math.round(L.energy), hygiene: Math.round(L.hygiene), fun: Math.round(L.fun), social: Math.round(L.social), bladder: Math.round(L.bladder) },
     career: c ? { title: c.title, level: c.lv[lv][0], pay: c.lv[lv][1], xp: L.career.xp, next: c.lv[lv + 1] ? c.lv[lv + 1][2] : null } : null,
     careers: Object.entries(CAREERS).map(([id, x]) => ({ id, title: x.title, pay: x.lv[0][1] })),
     missions: MISSIONS.filter(x => !x.path || x.path === p.path).map(x => ({ name: x.name, reward: x.reward, done: !!L.done[x.id] })),
@@ -899,8 +899,17 @@ function lifeOp(room, p, m) {
     if (!cooldown(p, 'fun', 10000)) return me('Take a short break first');
     if (!charge(p, 50, 'Entertainment')) return;
     L.fun += 30; me('🎮 That was fun!'); if (ownHome) setPose(p, 'sit', 12000);
+  } else if (m.op === 'toilet') {
+    if (!ownHome) return me('Use the toilet inside your own home 🚽');
+    if (!cooldown(p, 'toilet', 8000)) return me('Give it a moment');
+    L.bladder = 100; me('🚽 All sorted. You feel comfortable again.');
+  } else if (m.op === 'social') {
+    const friendNearby = Object.values(R.players).some(q => q.id !== p.id && q.jailUntil <= now && !q.travelUntil && dist(p, q) < 12);
+    if (!friendNearby) return me('Find another player nearby and say hello first 👋');
+    if (!cooldown(p, 'social', 12000)) return me('You just had a chat. Take a little break.');
+    L.social += 35; L.fun += 5; me('👋 Nice conversation! Your social need improved.');
   }
-  L.energy = clamp(L.energy, 0, 100); L.hygiene = clamp(L.hygiene, 0, 100); L.fun = clamp(L.fun, 0, 100);
+  L.energy = clamp(L.energy, 0, 100); L.hygiene = clamp(L.hygiene, 0, 100); L.fun = clamp(L.fun, 0, 100); L.social = clamp(L.social, 0, 100); L.bladder = clamp(L.bladder, 0, 100);
   checkMissions(p, R); sendLife(p, R);
 }
 // ================= INVENTORY & SHOP =================
@@ -959,7 +968,7 @@ function shopOp(room, p, m) {
   checkMissions(p, R); sendLife(p, R);
 }
 // needs drain every 5s, ledger + missions + panel refresh every 1.5s
-setInterval(() => { for (const code in rooms) for (const o of Object.values(rooms[code].players)) { const L = o.life; if (!L) continue; L.energy = clamp(L.energy - 0.6, 0, 100); L.hygiene = clamp(L.hygiene - 0.4, 0, 100); L.fun = clamp(L.fun - 0.5, 0, 100); } }, 5000);
+setInterval(() => { for (const code in rooms) for (const o of Object.values(rooms[code].players)) { const L = o.life; if (!L) continue; L.energy = clamp(L.energy - 0.6, 0, 100); L.hygiene = clamp(L.hygiene - 0.4, 0, 100); L.fun = clamp(L.fun - 0.5, 0, 100); L.social = clamp(L.social - 0.12, 0, 100); L.bladder = clamp(L.bladder - 0.35, 0, 100); } }, 5000);
 setInterval(() => {
   for (const code in rooms) for (const p of Object.values(rooms[code].players)) {
     if (!p.life) continue;
