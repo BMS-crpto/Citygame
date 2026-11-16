@@ -51,6 +51,13 @@ test('phone Social app supports live likes, replies, and in-app post creation', 
   }
 });
 
+
+test('Social app renderer does not call an undefined appbar helper', () => {
+  const social = fs.readFileSync(path.join(root, 'public', 'city3d-social-emotes.js'), 'utf8');
+  assert.doesNotMatch(social, /appbar\\s*\\(/);
+  assert.match(social, /bridge\\.appview\\.innerHTML=/);
+});
+
 test('server Social feed supports retrieving posts, publishing, likes, and replies', () => {
   const server = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
   for (const event of ["m.t === 'social_get'", "m.t === 'social_post'", "m.t === 'social_like'", "m.t === 'social_reply'", "t: 'social_update'", "t: 'social_new'"]) {
