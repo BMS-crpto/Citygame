@@ -164,6 +164,10 @@ namespace Citygame.Game
                 if (motor.enabled)
                 {
                     motor.SetMobileInput(input);
+                    bool sprintHeld = GUI.RepeatButton(
+                        new Rect(Screen.width - button * 2.5f, Screen.height - button * 1.35f, button, button),
+                        "RUN");
+                    motor.SetMobileSprint(sprintHeld);
                     if (GUI.Button(new Rect(Screen.width - button * 1.25f, Screen.height - button * 1.35f, button, button), "JUMP"))
                         motor.MobileJump();
                 }
