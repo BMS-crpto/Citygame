@@ -20,13 +20,13 @@ namespace Citygame.World
             CreateCube("Balogun Connector Street", root, new Vector3(-34f, -0.07f, 0f), new Vector3(9f, 0.12f, 54f), road);
             CreateCube("Adeniran Connector Street", root, new Vector3(34f, -0.07f, 0f), new Vector3(9f, 0.12f, 54f), road);
             CreateCube("South District Street", root, new Vector3(0f, -0.07f, -18f), new Vector3(90f, 0.12f, 9f), road);
+            Material laneYellow = MaterialFor(new Color(0.96f, 0.72f, 0.12f));
+            Material laneWhite = MaterialFor(new Color(0.88f, 0.88f, 0.82f));
             // Pale edge markings make the new junctions legible from the driving camera.
             CreateCube("Balogun Connector edge west", root, new Vector3(-38.45f, 0.012f, 0f), new Vector3(0.12f, 0.025f, 54f), laneWhite);
             CreateCube("Balogun Connector edge east", root, new Vector3(-29.55f, 0.012f, 0f), new Vector3(0.12f, 0.025f, 54f), laneWhite);
             CreateCube("Adeniran Connector edge west", root, new Vector3(29.55f, 0.012f, 0f), new Vector3(0.12f, 0.025f, 54f), laneWhite);
             CreateCube("Adeniran Connector edge east", root, new Vector3(38.45f, 0.012f, 0f), new Vector3(0.12f, 0.025f, 54f), laneWhite);
-            Material laneYellow = MaterialFor(new Color(0.96f, 0.72f, 0.12f));
-            Material laneWhite = MaterialFor(new Color(0.88f, 0.88f, 0.82f));
             // Lagos-style double yellow center lines and pale road-edge markings.
             CreateCube("Double yellow center line A", root, new Vector3(0, 0.012f, -0.12f), new Vector3(90, 0.025f, 0.11f), laneYellow);
             CreateCube("Double yellow center line B", root, new Vector3(0, 0.012f, 0.12f), new Vector3(90, 0.025f, 0.11f), laneYellow);
