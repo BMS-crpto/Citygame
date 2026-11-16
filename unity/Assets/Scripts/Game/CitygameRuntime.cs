@@ -339,7 +339,7 @@ namespace Citygame.Game
                     {
                         if (spot == null) continue;
                         Vector3 pos = spot.transform.position;
-                        float markerX = mapRect.x + Mathf.Clamp01((pos.x + 135f) / 270f) * (mapRect.width - 82f);
+                        float markerX = mapRect.x + Mathf.Clamp01((pos.x + 113f) / 226f) * (mapRect.width - 82f);
                         float markerY = mapRect.y + Mathf.Clamp01((81f - pos.z) / 162f) * (mapRect.height - 30f);
                         if (GUI.Button(new Rect(markerX, markerY, 82f, 28f), spot.BusinessName))
                         {
