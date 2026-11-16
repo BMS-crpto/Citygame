@@ -159,7 +159,7 @@ namespace Citygame.Game
             {
                 if (station == null) continue;
                 float distance = Vector3.Distance(playerPosition, station.transform.position);
-                if (distance < stationDistance) { stationDistance = distance; nearbyPetrolStation = station; }
+                if (distance < station.InteractionRadius && distance < stationDistance) { stationDistance = distance; nearbyPetrolStation = station; }
             }
 
             autosaveClock += Time.deltaTime;
@@ -257,7 +257,7 @@ namespace Citygame.Game
             {
                 float panelWidth = Mathf.Min(300f, Screen.width - 24f);
                 Rect panel = new Rect(Screen.width - panelWidth - 12f, Screen.height - 230f, panelWidth, 205f);
-                GUI.Box(panel, nearbyPetrolStation.StationName + "\\nFUEL FORECOURT");
+                GUI.Box(panel, nearbyPetrolStation.StationName + "\nFUEL FORECOURT");
                 RideableCar fuelCar = GetNearestStationVehicle();
                 if (fuelCar == null)
                 {
