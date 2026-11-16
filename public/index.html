@@ -3659,27 +3659,60 @@ X.payTo=b=>{const a=Math.floor(+prompt('Send how much? (₦)','1000'));if(a>=1)S
 
 /* Cars */
 const CARCAT={saloon:[0,3,9,14],suv:[1,4],sports:[2,7,10,12,13],bike:[8,6],work:[5,11]};
-const CARCATL=[['all','All'],['saloon','🚗 Saloons'],['suv','🚙 SUVs'],['sports','🏎️ Sports'],['bike','🏍️ Bikes'],['work','🚌 Work']];
+const CARCATL=[['all','ALL RIDES'],['saloon','🚗 SEDANS'],['suv','🚙 SUVs'],['sports','🏎️ SUPERCARS'],['bike','🏍️ BIKES'],['work','🚌 COMMERCIAL']];
 PX.carQ='';PX.carCat='all';PX.carSort='';
+(function installEpicGarageStyles(){
+ if(document.getElementById('epic-garage-styles'))return;
+ const st=document.createElement('style');st.id='epic-garage-styles';
+ st.textContent=[
+ ".epic-garage{color:#edf3ff;padding:2px 1px 18px}",
+ ".eg-hero{position:relative;overflow:hidden;border:1px solid #e7b95c55;border-radius:19px;padding:16px;background:radial-gradient(ellipse at 90% 0%,#e5a83a38,transparent 48%),linear-gradient(135deg,#172b43,#101725 58%,#211b24);box-shadow:0 14px 34px #0005}",
+ ".eg-hero:after{content:'✦';position:absolute;right:17px;top:13px;color:#f7d58b;font-size:30px;text-shadow:0 0 22px #f7c65c88}",
+ ".eg-kicker{font-size:9px;letter-spacing:2.2px;font-weight:900;color:#f6d58c}.eg-hero h2{font-size:23px;letter-spacing:-.7px;margin:5px 0 4px;color:#fff}.eg-hero p{font-size:11px;color:#b9c6d8;margin:0;max-width:245px;line-height:1.5}",
+ ".eg-statrow{display:flex;gap:7px;margin-top:13px}.eg-stat{flex:1;min-width:0;border:1px solid #ffffff1c;border-radius:11px;padding:8px;background:#07111c88}.eg-stat b{display:block;color:#ffe1a1;font-size:15px}.eg-stat small{font-size:8px;color:#9cacc0;letter-spacing:.8px}",
+ ".eg-search{display:block;width:100%;box-sizing:border-box;margin:11px 0 8px;padding:12px 14px!important;border-radius:13px!important;background:#0d1725!important;border:1px solid #334155!important;color:#fff!important}",
+ ".eg-cats{display:flex;gap:6px;overflow-x:auto;padding:2px 1px 9px;scrollbar-width:none}.eg-cats::-webkit-scrollbar{display:none}.eg-cat{white-space:nowrap;border:1px solid #34445a;border-radius:99px;padding:8px 11px;background:#172438;color:#cbd5e1;font-size:9px;font-weight:900;letter-spacing:.5px}.eg-cat.active{background:linear-gradient(120deg,#f7d88c,#d99a35);color:#1a2230;border-color:#ffe5a8;box-shadow:0 5px 16px #d99a3533}",
+ ".eg-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 1px 9px}.eg-toolbar b{font-size:11px;color:#f4d38d;letter-spacing:1px}.eg-toolbar select{max-width:145px;background:#101c2b;color:#dce7f5;border:1px solid #334155;border-radius:9px;padding:7px;font-size:10px}",
+ ".eg-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.eg-car{min-width:0;overflow:hidden;position:relative;border:1px solid #ffffff1b;border-radius:15px;background:linear-gradient(155deg,#1d2b3d,#101722 74%);box-shadow:0 7px 18px #0003}.eg-car.owned{border-color:#3c997b88}",
+ ".eg-car-art{height:88px;display:flex;align-items:center;justify-content:center;position:relative;background:radial-gradient(ellipse at 50% 100%,#e8ad4a22,transparent 60%),linear-gradient(145deg,#26394d,#111b29)}.eg-car-art:after{content:'';position:absolute;left:15%;right:15%;bottom:15px;height:1px;background:linear-gradient(90deg,transparent,#f5d18a99,transparent);box-shadow:0 0 14px #f5d18a55}.eg-car-emoji{font-size:49px;filter:drop-shadow(0 9px 6px #0009);transform:translateY(-2px)}",
+ ".eg-car-tag{position:absolute;top:7px;left:7px;z-index:1;border-radius:99px;padding:4px 7px;background:#07111ddd;color:#f7d58c;font-size:8px;font-weight:900;letter-spacing:.7px}.eg-car-tag.owned{background:#0b3a31;color:#8ff0c6}.eg-car-body{padding:9px}.eg-car-name{font-size:12px;font-weight:900;color:#f8fafc;min-height:30px;line-height:1.25}.eg-car-price{font-size:14px;font-weight:900;color:#ffd98b;margin:5px 0 7px}",
+ ".eg-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-bottom:8px}.eg-spec{background:#ffffff08;border-radius:7px;padding:5px}.eg-spec small{display:block;font-size:7px;color:#8294aa;letter-spacing:.7px}.eg-spec b{font-size:9px;color:#dce7f5}.eg-actions{display:flex;gap:5px}.eg-btn{flex:1;min-width:0;border:1px solid #59677a;border-radius:8px;padding:8px 4px;background:#26364a;color:#f5f7fb;font-size:9px;font-weight:900}.eg-btn.primary{background:linear-gradient(120deg,#f7d88c,#d99a35);border-color:#ffe5a8;color:#18202b}.eg-btn:disabled{opacity:.45}",
+ ".eg-empty{grid-column:1/-1;text-align:center;border:1px dashed #46566a;border-radius:14px;padding:22px;color:#aab8ca;font-size:11px}.eg-license{margin:9px 0;border:1px solid #d6a94b55;border-radius:12px;padding:10px;background:#d6a94b12;font-size:10px;color:#e7d6ae}.eg-license button{margin-top:7px}.eg-foot{font-size:9px;color:#788ba3;text-align:center;padding:12px 3px}",
+ "@media(max-width:360px){.eg-grid{gap:6px}.eg-car-body{padding:7px}.eg-car-art{height:76px}.eg-car-emoji{font-size:42px}}"
+ ].join("");
+ document.head.appendChild(st);
+})();
 function carListHtml(){
-  let L=PX.carList.slice();
-  if(PX.carCat!=='all')L=L.filter(v=>CARCAT[PX.carCat].includes(v.col));
-  if(PX.carQ)L=L.filter(v=>v.name.toLowerCase().includes(PX.carQ.toLowerCase()));
-  if(PX.carSort==='lo')L.sort((a,b)=>a.price-b.price);else if(PX.carSort==='hi')L.sort((a,b)=>b.price-a.price);
-  const own=v=>PX.cars.includes(v.col);
-  return '<div style="color:#9ca3af;margin:6px 2px">'+L.length+' ads</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+L.map(v=>`<div style="background:#1f2937;border-radius:10px;padding:8px;text-align:center"><div style="font-size:34px">${v.icon}</div><span style="background:#16a34a;color:#fff;border-radius:4px;font-size:10px;padding:1px 5px">In stock</span><div style="font-weight:700;margin-top:4px">${esc(v.name)}</div><div style="color:#ffd54a">${fmtK(v.price)}</div>${own(v)?'<div style="margin-top:6px;color:#86efac">✔ Owned</div>':`<button class="xbtn" data-x="buycar" data-c="${v.col}" style="margin-top:6px">Buy</button>`}</div>`).join('')+'</div>';
+ let L=(PX.carList||[]).slice();
+ if(PX.carCat!=='all')L=L.filter(v=>(CARCAT[PX.carCat]||[]).includes(v.col));
+ if(PX.carQ)L=L.filter(v=>v.name.toLowerCase().includes(PX.carQ.toLowerCase()));
+ if(PX.carSort==='lo')L.sort((a,b)=>a.price-b.price);else if(PX.carSort==='hi')L.sort((a,b)=>b.price-a.price);
+ const own=v=>PX.cars.includes(v.col);
+ return '<div class="eg-grid">'+(L.length?L.map(v=>{
+  const sp=SPECS[v.col]||[v.name,'—','—','—'],isOwn=own(v);
+  const category=(Object.keys(CARCAT).find(k=>CARCAT[k].includes(v.col))||'ride').toUpperCase();
+  return '<article class="eg-car'+(isOwn?' owned':'')+'"><div class="eg-car-art"><span class="eg-car-tag'+(isOwn?' owned':'')+'">'+(isOwn?'✓ IN YOUR GARAGE':category)+'</span><span class="eg-car-emoji">'+esc(v.icon||'🚘')+'</span></div><div class="eg-car-body"><div class="eg-car-name">'+esc(v.name)+'</div><div class="eg-car-price">'+fmtK(v.price)+'</div><div class="eg-specs"><div class="eg-spec"><small>TOP SPEED</small><b>'+esc(sp[1])+'</b></div><div class="eg-spec"><small>0–100 KM/H</small><b>'+esc(sp[2])+'</b></div><div class="eg-spec"><small>POWER</small><b>'+esc(sp[3])+'</b></div><div class="eg-spec"><small>STATUS</small><b>'+(isOwn?'OWNED':'AVAILABLE')+'</b></div></div><div class="eg-actions"><button class="eg-btn" data-x="carinfo" data-c="'+v.col+'">DETAILS</button>'+(isOwn?'<button class="eg-btn primary" disabled>OWNED ✓</button>':'<button class="eg-btn primary" data-x="buycar" data-c="'+v.col+'">BUY RIDE</button>')+'</div></div></article>';
+ }).join(''):'<div class="eg-empty">No vehicles match this search. Try another category or name.</div>')+'</div>';
 }
 APPR.Cars=function(){
-  const lic=PX.license?'':`<div class="card">🪪 You need a <b>Driver's License</b> to buy or drive.<br><button class="xbtn gold" data-x="lic">Get license ${fmtN(PX.cert?PX.cert.price:20000)}</button></div>`;
-  appview.innerHTML=`<div style="background:#16a34a;border-radius:12px;padding:10px;margin-bottom:8px"><b style="color:#fff">Elite Auto Gallery</b><br><small style="color:#dcfce7">delivered to the gallery lot</small><input id="cq" value="${esc(PX.carQ)}" placeholder="🔍 I am looking for..." style="width:100%;box-sizing:border-box;margin-top:8px;padding:9px;border:0;border-radius:18px"></div>${lic}
-  <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px">${CARCATL.map(c=>`<button class="xbtn" data-x="carcat" data-c="${c[0]}" style="white-space:nowrap;${PX.carCat===c[0]?'background:#16a34a;color:#fff':''}">${c[1]}</button>`).join('')}</div>
-  <select id="cs" style="width:100%;padding:7px;border-radius:8px;margin-bottom:4px"><option value="">Any price</option><option value="lo"${PX.carSort==='lo'?' selected':''}>Price: low to high</option><option value="hi"${PX.carSort==='hi'?' selected':''}>Price: high to low</option></select><div id="clist">${carListHtml()}</div>`;
-  const q=document.getElementById('cq');q.oninput=()=>{PX.carQ=q.value;document.getElementById('clist').innerHTML=carListHtml()};
-  document.getElementById('cs').onchange=e=>{PX.carSort=e.target.value;document.getElementById('clist').innerHTML=carListHtml()};
+ const lic=PX.license?'':'<div class="eg-license">🪪 A valid driver\\'s licence is required before you can buy or drive a vehicle.<br><button class="eg-btn primary" data-x="lic">GET DRIVER\\'S LICENCE · '+fmtN(PX.cert?PX.cert.price:20000)+'</button></div>';
+ const owned=(PX.cars||[]).length,total=(PX.carList||[]).length;
+ appview.innerHTML='<section class="epic-garage"><header class="eg-hero"><div class="eg-kicker">LAGOS MOTORING • PRIVATE COLLECTION</div><h2>ELITE AUTO GALLERY</h2><p>Find your next ride. Explore the collection, compare performance and build your personal garage.</p><div class="eg-statrow"><div class="eg-stat"><b>'+owned+'</b><small>YOUR RIDES</small></div><div class="eg-stat"><b>'+total+'</b><small>SHOWROOM MODELS</small></div><div class="eg-stat"><b>'+(PX.license?'READY':'PENDING')+'</b><small>DRIVER STATUS</small></div></div></header><input class="eg-search" id="cq" value="'+esc(PX.carQ)+'" placeholder="⌕ Search the collection..." autocomplete="off">'+lic+'<div class="eg-cats">'+CARCATL.map(c=>'<button class="eg-cat'+(PX.carCat===c[0]?' active':'')+'" data-x="carcat" data-c="'+c[0]+'">'+c[1]+'</button>').join('')+'</div><div class="eg-toolbar"><b>THE COLLECTION · '+total+' MODELS</b><select id="cs"><option value=""'+(PX.carSort===''?' selected':'')+'>FEATURED ORDER</option><option value="lo"'+(PX.carSort==='lo'?' selected':'')+'>PRICE: LOW TO HIGH</option><option value="hi"'+(PX.carSort==='hi'?' selected':'')+'>PRICE: HIGH TO LOW</option></select></div><div id="clist">'+carListHtml()+'</div><div class="eg-foot">Vehicle ownership and purchases are confirmed by the Citygame server.</div></section>';
+ const q=document.getElementById('cq');q.oninput=()=>{PX.carQ=q.value;document.getElementById('clist').innerHTML=carListHtml()};
+ document.getElementById('cs').onchange=e=>{PX.carSort=e.target.value;document.getElementById('clist').innerHTML=carListHtml()};
 };
 X.carcat=b=>{PX.carCat=b.dataset.c;APPR.Cars()};
 X.lic=()=>S({t:'cert',op:'buy',id:'license'});
 X.buycar=b=>S({t:'buycar',col:+b.dataset.c});
+X.carinfo=b=>{
+ const col=+b.dataset.c,v=(PX.carList||[]).find(x=>x.col===col);if(!v)return;
+ const sp=SPECS[col]||[v.name,'—','—','—'],owned=PX.cars.includes(col);
+ let old=document.getElementById('epicCarDetails');if(old)old.remove();
+ const el=document.createElement('div');el.id='epicCarDetails';
+ el.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px;background:#020711d9;backdrop-filter:blur(8px)';
+ el.innerHTML='<section style="width:min(390px,100%);border:1px solid #d8ad5c88;border-radius:20px;padding:18px;background:linear-gradient(145deg,#1d2c40,#0b121e);color:#f8fafc;box-shadow:0 24px 80px #000b"><div style="font-size:9px;letter-spacing:2px;color:#f4d38d;font-weight:900">ELITE AUTO GALLERY • VEHICLE PROFILE</div><div style="font-size:54px;text-align:center;padding:15px 0;filter:drop-shadow(0 8px 9px #0008)">'+esc(v.icon||'🚘')+'</div><h2 style="margin:0;font-size:22px">'+esc(v.name)+'</h2><div style="font-size:20px;color:#ffd98b;font-weight:900;margin:6px 0 12px">'+fmtK(v.price)+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">'+[['TOP SPEED',sp[1]],['0–100 KM/H',sp[2]],['ENGINE POWER',sp[3]],['OWNERSHIP',owned?'IN YOUR GARAGE':'AVAILABLE']].map(x=>'<div style="padding:10px;border-radius:10px;background:#ffffff0b"><small style="display:block;color:#8fa2b9;font-size:8px;letter-spacing:1px">'+x[0]+'</small><b style="font-size:12px">'+esc(x[1])+'</b></div>').join('')+'</div><div style="display:flex;gap:8px;margin-top:14px"><button id="egClose" style="flex:1;padding:12px;border-radius:10px;border:1px solid #52637a;background:#25364c;color:#fff;font-weight:800">CLOSE</button>'+(owned?'<button disabled style="flex:1;padding:12px;border-radius:10px;border:0;background:#245a49;color:#b9f4d8;font-weight:800">OWNED ✓</button>':'<button id="egBuy" style="flex:1;padding:12px;border-radius:10px;border:0;background:linear-gradient(110deg,#f8df9d,#d99a35);color:#17202d;font-weight:900">BUY RIDE</button>')+'</div></section>';
+ document.body.appendChild(el);el.addEventListener('click',e=>{if(e.target===el||e.target.id==='egClose')el.remove();if(e.target.id==='egBuy'){S({t:'buycar',col});el.remove()}});
+};
 
 /* ID & certificates */
 APPR.ID=function(){
