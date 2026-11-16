@@ -3654,6 +3654,7 @@ guard('grid',()=>{
   appview.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='waIn')X.waSend()});
 });
 const APPR={};  // app renderers
+if(window.LAGOS_PHONE)Object.assign(window.LAGOS_PHONE,{APPR,X,PX,S,phoneOpen});
 guard('phonebtn',()=>{const pb=$('phonebtn'),_op=pb.onclick;pb.onclick=function(e){PX.app=null;PX.cur=null;return _op.call(this,e)}});
 function renderApp(){if(!phoneOpen()||!APPR[PX.app])return;const inp=document.getElementById('waIn'),v=inp?inp.value:'',foc=inp&&document.activeElement===inp;APPR[PX.app]();
   const n=document.getElementById('waIn');if(n){n.value=v;if(foc)n.focus();const ms=document.getElementById('waMsgs');if(ms)ms.scrollTop=ms.scrollHeight}}
@@ -4060,7 +4061,7 @@ guard('mmroute',()=>{
 });
 
 // Public bridge for separately loaded phone-app modules.
-window.LAGOS_PHONE = { APPR, X, PX, S, phoneOpen, openApp: n => openApp(n), appview, getCash:()=>myMoney, capturePhoto:()=>{renderer.render(scene,camera);const src=renderer.domElement,w=src.width,h=src.height,scale=Math.min(1,720/Math.max(w,h)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(w*scale));cv.height=Math.max(1,Math.round(h*scale));const ctx=cv.getContext('2d');ctx.drawImage(src,0,0,cv.width,cv.height);return cv.toDataURL('image/jpeg',0.76)} };
+window.LAGOS_PHONE = { openApp: n => openApp(n), appview, getCash:()=>myMoney, capturePhoto:()=>{renderer.render(scene,camera);const src=renderer.domElement,w=src.width,h=src.height,scale=Math.min(1,720/Math.max(w,h)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(w*scale));cv.height=Math.max(1,Math.round(h*scale));const ctx=cv.getContext('2d');ctx.drawImage(src,0,0,cv.width,cv.height);return cv.toDataURL('image/jpeg',0.76)} };
 console.log('Lagos Life v0.7 add-on loaded');
 })();
 
