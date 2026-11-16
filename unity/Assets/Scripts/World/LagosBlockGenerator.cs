@@ -65,6 +65,7 @@ namespace Citygame.World
             BuildCar(root, "City Sedan", new Vector3(2f, 0.65f, -3.2f), green);
             BuildCar(root, "Street Shuttle", new Vector3(28f, 0.65f, -3.2f), concrete);
 
+            BuildStreetLights(root);
             BuildPedestrians(root);
         }
 
@@ -143,6 +144,28 @@ namespace Citygame.World
         {
             Collider visualCollider = visual.GetComponent<Collider>();
             if (visualCollider != null) visualCollider.enabled = false;
+        }
+
+        private static void BuildStreetLights(Transform root)
+        {
+            Material poleMaterial = MaterialFor(new Color(0.16f, 0.18f, 0.20f));
+            Material lampMaterial = MaterialFor(new Color(0.92f, 0.82f, 0.58f));
+            // Static emissive-looking lamp heads provide street detail without
+            // adding dozens of expensive real-time lights on mobile.
+            for (int i = 0; i < 8; i++)
+            {
+                float x = -31.5f + i * 9f;
+                for (int side = -1; side <= 1; side += 2)
+                {
+                    float z = side * 8.1f;
+                    CreateCube("Lagos streetlight pole", root,
+                        new Vector3(x, 2.6f, z), new Vector3(0.16f, 5.2f, 0.16f), poleMaterial);
+                    CreateCube("Lagos streetlight arm", root,
+                        new Vector3(x + 0.55f, 5.05f, z), new Vector3(1.2f, 0.12f, 0.14f), poleMaterial);
+                    CreateCube("Lagos streetlight lamp", root,
+                        new Vector3(x + 1.08f, 4.96f, z), new Vector3(0.42f, 0.16f, 0.32f), lampMaterial);
+                }
+            }
         }
 
         private static void BuildPedestrians(Transform root)
