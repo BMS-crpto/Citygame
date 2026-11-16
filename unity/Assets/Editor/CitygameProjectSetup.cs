@@ -22,6 +22,12 @@ namespace Citygame.Editor
             // the project owner supplies a licensed/exported Lagos GeoJSON extract.
             GameObject mapRoot = new GameObject("Lagos Map Root");
             bool realLagosLoaded = LagosRealMapImporter.TryBuild(mapRoot.transform);
+            if (realLagosLoaded)
+            {
+                // The imported map spans kilometres; enlarge the base ground so
+                // untagged parcels remain walkable while roads/buildings keep OSM geometry.
+                floor.transform.localScale = new Vector3(1500f, 1f, 1500f);
+            }
             if (!realLagosLoaded)
             {
                 string[] districtNames = { "Ikeja", "Yaba", "Surulere", "Agege", "Central Lagos", "Lekki", "Ojota", "Victoria Island", "Apapa" };
