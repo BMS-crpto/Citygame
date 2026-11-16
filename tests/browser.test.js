@@ -338,8 +338,8 @@ test('downloadable asset packs only list models that exist in the repository', (
   const manifest = JSON.parse(fs.readFileSync(path.join(root, 'public', 'asset-packs.json'), 'utf8'));
   assert.ok(Array.isArray(manifest.packs) && manifest.packs.length >= 3);
   for (const pack of manifest.packs) {
-    assert.ok(Array.isArray(pack.files) && pack.files.length > 0, pack.id + ' must list files');
-    for (const file of pack.files) {
+    assert.ok(Array.isArray(pack.assets) && pack.assets.length > 0, pack.id + ' must list files');
+    for (const file of pack.assets) {
       const target = path.join(root, 'public', file.replace(/^\\//, ''));
       assert.ok(fs.existsSync(target), 'missing asset pack file: ' + file);
     }
