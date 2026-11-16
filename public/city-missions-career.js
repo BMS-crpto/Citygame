@@ -4,6 +4,7 @@
  const bridge=window.LAGOS_PHONE;
  if(!bridge){console.error('Missions app unavailable: phone bridge not initialized');return;}
  const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ const appbar=name=>'<div class="phone-appbar"><button class="pb q" data-x="phoneAppBack">‹ Apps</button><div><b>'+esc(name)+'</b><small>LAGOS LIFE • APP</small></div><button class="pb q" data-x="phoneAppBack">⌂</button></div>';
  let life=null;
  const render=()=>{
   const m=life||{},missions=Array.isArray(m.missions)?m.missions:[],careers=Array.isArray(m.careers)?m.careers:[];
