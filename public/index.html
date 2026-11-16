@@ -2977,7 +2977,19 @@ function loop(now){
             else if(!collide(n.x-px,n.z-pz)){n.x-=px;n.z-=pz;moved=true}
           }
         }else{n.x=nx;n.z=nz;moved=true}
-        if(moved){o.g.position.x=n.x;o.g.position.z=n.z;o.g.rotation.y=Math.atan2(dx,dz)}
+        if(moved){
+          o.g.position.x=n.x;o.g.position.z=n.z;o.g.rotation.y=Math.atan2(dx,dz);
+          if(n.isCustomer)r.blockedSince=0;
+        }else if(n.isCustomer&&inside&&(n.place||null)===(inside||null)){
+          // Recover customers that remain blocked by a fixture for too long.
+          if(!r.blockedSince)r.blockedSince=nowNpc;
+          if(nowNpc-r.blockedSince>8000){
+            n.x=n.spawnX;n.z=n.spawnZ;o.g.position.set(n.x,0,n.z);
+            o.g.userData.pose=null;if(receipt)receipt.visible=false;
+            r.stage='browse';r.tx=n.x;r.tz=n.z;r.stageAt=nowNpc+5000;
+            r.sitUntil=0;r.checkoutUntil=0;r.saleSent=false;r.blockedSince=0;
+          }
+        }
       }
       const vis=(n.place||null)===(inside||null)&&(Number(n.floor)||0)===(pos.floor||0)&&Math.hypot(n.x-pos.x,n.z-pos.z)<(inside?60:70);o.g.visible=vis;if(vis)animate(o.g,d>.08&&active,dt);
     }
