@@ -420,7 +420,7 @@ function onConnection(ws) {
       const venueMap={restaurant:'restaurant',fashion:'fashion',tech:'office',supermarket:'supermarket',salon:'salon',lounge:'lounge',carwash:'carwash',pharmacy:'pharmacy'};
       const business=bid>=0?businesses['b'+bid]:null;
       if(!business||venueMap[business.kind]!==venue)return;
-      if(!cooldown(business,'visible_customer_sale',22000))return;
+      if(now-(+business.lastVisibleSaleAt||0)<22000)return;
       const ticket=({restaurant:950,fashion:2400,tech:3100,supermarket:1250,salon:1800,lounge:2200,carwash:1500,pharmacy:1100})[business.kind]||1200;
       const quality=businessQuality(business);
       const sale=Math.round(ticket*(0.9+Math.random()*0.2)*(1+quality));
