@@ -1359,7 +1359,7 @@ const HUSTLES = {
   tutor: { name: 'Give lessons', icon: '📚', min: 800, max: 1200, cd: 40000 },
   content: { name: 'Post content online', icon: '🎬', min: 300, max: 3000, cd: 30000 }
 };
-const EXTRA = new Set(['getx', 'buycar', 'cert', 'setrole', 'inv', 'dm', 'pay', 'order', 'hire', 'decor', 'rtc', 'phone', 'mic', 'hustle', 'business']);
+const EXTRA = new Set(['getx', 'buycar', 'carpaint', 'cert', 'setrole', 'inv', 'dm', 'pay', 'order', 'hire', 'decor', 'rtc', 'phone', 'mic', 'hustle', 'business']);
 function extraMsg(room, p, m, now) {
   if (!EXTRA.has(m.t)) return false;
   const E = p.ext = p.ext || loadExt(null), R = rooms[room];
