@@ -105,7 +105,7 @@ namespace Citygame.World
             GameObject car = CreateCube(name, root, position, new Vector3(3.7f, 0.72f, 1.82f), bodyMaterial);
             car.AddComponent<Citygame.World.RideableCar>();
 
-            Material glass = MaterialFor(new Color(0.055f, 0.12f, 0.17f));
+            Material glass = GlassMaterial();
             Material rubber = MaterialFor(new Color(0.035f, 0.04f, 0.045f));
             Material alloy = MaterialFor(new Color(0.48f, 0.52f, 0.56f));
             Material headlamp = MaterialFor(new Color(0.92f, 0.88f, 0.68f));
@@ -115,6 +115,11 @@ namespace Citygame.World
             Material seatFabric = MaterialFor(new Color(0.16f, 0.18f, 0.19f));
             Material metal = MaterialFor(new Color(0.28f, 0.31f, 0.33f));
             Material display = MaterialFor(new Color(0.035f, 0.12f, 0.15f));
+            if (display != null && display.HasProperty("_EmissionColor"))
+            {
+                display.EnableKeyword("_EMISSION");
+                display.SetColor("_EmissionColor", new Color(0.04f, 0.42f, 0.52f));
+            }
 
             // Open framed cabin: glass panels leave the dashboard and seats visible.
             CreateCarPart(name + " windshield", car.transform, new Vector3(0.78f, 0.79f, 0f), new Vector3(0.07f, 0.62f, 1.34f), glass);
@@ -164,6 +169,23 @@ namespace Citygame.World
             cockpitAnchor.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
             RideableCar rideable = car.GetComponent<RideableCar>();
             rideable.ConfigureCockpit(cockpitAnchor.transform);
+            Light[] headlamps = new Light[2];
+            for (int lampIndex = 0; lampIndex < 2; lampIndex++)
+            {
+                GameObject lampObject = new GameObject(name + " functional headlight " + (lampIndex + 1));
+                lampObject.transform.SetParent(car.transform, false);
+                lampObject.transform.localPosition = new Vector3(1.82f, 0.12f, lampIndex == 0 ? -0.48f : 0.48f);
+                lampObject.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
+                Light lamp = lampObject.AddComponent<Light>();
+                lamp.type = LightType.Spot;
+                lamp.range = 24f;
+                lamp.spotAngle = 52f;
+                lamp.intensity = 2.1f;
+                lamp.shadows = LightShadows.None;
+                lamp.enabled = false;
+                headlamps[lampIndex] = lamp;
+            }
+            rideable.ConfigureHeadlights(headlamps);
 
             for (int side = -1; side <= 1; side += 2)
             {
@@ -221,6 +243,37 @@ namespace Citygame.World
             part.GetComponent<Renderer>().sharedMaterial = material;
             DisableVisualCollider(part);
             return part;
+        }
+
+        private static Material GlassMaterial()
+        {
+            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+            if (shader == null) shader = Shader.Find("Standard");
+            if (shader == null) return MaterialFor(new Color(0.055f, 0.12f, 0.17f));
+
+            Material material = new Material(shader);
+            material.name = "Citygame vehicle glass";
+            Color tint = new Color(0.16f, 0.28f, 0.34f, 0.28f);
+            material.color = tint;
+            if (material.HasProperty("_Surface"))
+            {
+                material.SetFloat("_Surface", 1f);
+                material.SetFloat("_Blend", 0f);
+                material.SetFloat("_ZWrite", 0f);
+                material.renderQueue = 3000;
+            }
+            else if (material.HasProperty("_Mode"))
+            {
+                material.SetFloat("_Mode", 3f);
+                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.One);
+                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                material.SetInt("_ZWrite", 0);
+                material.DisableKeyword("_ALPHATEST_ON");
+                material.EnableKeyword("_ALPHABLEND_ON");
+                material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                material.renderQueue = 3000;
+            }
+            return material;
         }
 
         private static void DisableVisualCollider(GameObject visual)
