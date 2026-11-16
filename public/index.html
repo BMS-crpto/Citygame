@@ -543,7 +543,7 @@ button.go,#play,#fgo{background:linear-gradient(105deg,#42d8c0,#f0c46b)!importan
     <div class="roles" id="roles"></div>
     <div class="sec">Character appearance</div><div id="lookbox"></div>
     <div class="sec">Graphics</div>
-    <div class="qrow" id="qrow"><button class="q" data-q="low">Low</button><button class="q sel" data-q="med">Medium</button><button class="q" data-q="high">High</button></div>
+    <div class="qrow" id="qrow"><button class="q" data-q="low">Low</button><button class="q" data-q="med">Medium</button><button class="q" data-q="high">High</button><button class="q" data-q="auto">Auto</button></div>
   </div>
   <button id="play">ENTER LAGOS ▶</button>
   <div class="world"><i></i> One shared world · everyone who joins plays together</div>
@@ -1667,9 +1667,13 @@ function updateDistrict(){
   document.getElementById('district').textContent='📍 '+curDist+'  •  🕒 '+clockText;
 }
 let quality='med';
+let qualityMode='auto';
+function syncQualityButtons(){
+  document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===qualityMode));
+}
 function applyQuality(){
-  try{localStorage.setItem('clo_quality',quality)}catch(e){}
-  const pr={low:1,med:1.5,high:2}[quality];
+  try{localStorage.setItem('clo_quality',qualityMode)}catch(e){}
+  const pr={low:1,med:1.5,high:2}[quality]||1.5;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,pr,CITYGAME_MOBILE?1.25:1.75));renderer.setSize(innerWidth,innerHeight);
   // Do not spend mobile GPU time on a shadow map the renderer cannot display.
   renderer.shadowMap.enabled=!CITYGAME_MOBILE&&quality!=='low';
@@ -1677,20 +1681,28 @@ function applyQuality(){
   const s=quality==='high'?2048:1024;
   if(sun.shadow.mapSize.x!==s){sun.shadow.mapSize.set(s,s);if(sun.shadow.map){sun.shadow.map.dispose();sun.shadow.map=null}}
 }
-document.querySelectorAll('#qrow .q').forEach(b=>b.onclick=()=>{quality=b.dataset.q;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x===b));applyQuality()});
-try{const sq=localStorage.getItem('clo_quality');quality=(sq==='low'||sq==='med'||sq==='high')?sq:'high'}catch(e){quality='high'}
-applyQuality();
-document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===quality));
+document.querySelectorAll('#qrow .q').forEach(b=>b.onclick=()=>{
+  qualityMode=b.dataset.q;
+  if(qualityMode!=='auto')quality=qualityMode;
+  syncQualityButtons();applyQuality();
+});
+try{
+  const saved=localStorage.getItem('clo_quality');
+  if(saved==='low'||saved==='med'||saved==='high'||saved==='auto')qualityMode=saved;
+  quality=qualityMode==='auto'?'high':qualityMode;
+}catch(e){qualityMode='auto';quality='high'}
+syncQualityButtons();applyQuality();
 let fpsAcc=0,fpsN=0,fpsT=0;
 function fpsGovernor(now){
   if(!fpsT){fpsT=now;return}
   fpsAcc+=now-fpsT;fpsT=now;fpsN++;
   if(fpsN>=90){
     const avg=fpsAcc/fpsN;fpsAcc=0;fpsN=0;
+    if(qualityMode!=='auto')return;
     let next=quality;
     if(avg<22&&quality!=='low')next=quality==='high'?'med':'low';
     else if(avg>30&&quality!=='high')next=quality==='low'?'med':'high';
-    if(next!==quality){quality=next;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===quality));applyQuality()}
+    if(next!==quality){quality=next;applyQuality()}
   }
 }
 
