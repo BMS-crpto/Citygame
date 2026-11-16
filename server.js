@@ -136,6 +136,16 @@ function accountSnapshot(username) {
     staffCount: Array.isArray(b.staff) ? b.staff.length : 0,
     customers: Math.max(0, Math.floor(+b.customers || 0))
   }));
+  const decorInventory = ext.decorInv && typeof ext.decorInv === 'object' ? ext.decorInv : {};
+  const homeDecor = homeId && ext.decor && Array.isArray(ext.decor[homeId]) ? ext.decor[homeId] : [];
+  const homeFurniture = homeDecor.filter(item => item && DECOR[item.id]).slice(0, 60).map(item => ({
+    id: String(item.id), name: DECOR[item.id].name, icon: DECOR[item.id].icon,
+    x: Math.max(-8, Math.min(8, +item.x || 0)), z: Math.max(-8, Math.min(8, +item.z || 0)),
+    rotation: Math.round((+item.ry || 0) * 100) / 100
+  }));
+  const furnitureInventory = Object.entries(decorInventory).filter(([id, count]) => DECOR[id] && +count > 0).map(([id, count]) => ({
+    id, name: DECOR[id].name, icon: DECOR[id].icon, quantity: Math.min(200, Math.floor(+count || 0))
+  }));
   const inventory = sv.inv && typeof sv.inv === 'object' ? sv.inv : {};
   const inventoryCount = Object.values(inventory).reduce((n, q) => n + Math.max(0, Math.floor(+q || 0)), 0);
   const needs = {
@@ -168,6 +178,10 @@ function accountSnapshot(username) {
       homeActive: !!homeEntry,
       home: homeEntry ? { id: homeId, name: String(homeUnit && homeHouse ? unitName(homeHouse, homeUnit) : homeHouse && homeHouse.name || 'Rented home'), area: String(homeHouse && homeHouse.area || ''), until: +homeEntry[1].until } : null,
       homeUntil: homeEntry ? +homeEntry[1].until : 0,
+      homeFurniture,
+      furnitureInventory,
+      furniturePlacedCount: homeFurniture.length,
+      homeRent: homeHouse ? Math.max(0, Math.floor(+homeHouse.rent || 0)) : 0,
       businesses: ownedBusinesses,
       dailyStreak: Math.max(0, Math.floor(+ext.streak || 0))
     }
