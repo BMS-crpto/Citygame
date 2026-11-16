@@ -19,6 +19,7 @@ namespace Citygame.World
         private bool occupied;
         private Vector2 mobileDriveInput;
         private Transform cockpitAnchor;
+        private Transform cameraTarget;
         private bool cockpitView;
         private Light[] headlights;
         private bool headlightsOn;
@@ -115,6 +116,10 @@ namespace Citygame.World
             body.interpolation = RigidbodyInterpolation.Interpolate;
             body.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
             followCamera = FindObjectOfType<FollowCamera>();
+            GameObject cameraTargetObject = new GameObject("Vehicle follow camera target");
+            cameraTargetObject.transform.SetParent(transform, false);
+            cameraTargetObject.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
+            cameraTarget = cameraTargetObject.transform;
             if (seatPoint == null)
             {
                 GameObject seat = new GameObject("Driver Seat");
@@ -151,9 +156,9 @@ namespace Citygame.World
             if (Mathf.Abs(currentSpeed) < 0.025f) currentSpeed = 0f;
 
             float steeringFactor = Mathf.Clamp01(Mathf.Abs(currentSpeed) / 2.5f);
-            float yaw = steering * turnSpeed * steeringFactor * Mathf.Sign(currentSpeed == 0f ? 1f : currentSpeed) * Time.deltaTime;
+            float yaw = -steering * turnSpeed * steeringFactor * Mathf.Sign(currentSpeed == 0f ? 1f : currentSpeed) * Time.deltaTime;
             Quaternion nextRotation = body != null ? body.rotation * Quaternion.Euler(0f, yaw, 0f) : transform.rotation * Quaternion.Euler(0f, yaw, 0f);
-            Vector3 nextPosition = transform.position + transform.forward * currentSpeed * Time.deltaTime;
+            Vector3 nextPosition = transform.position + transform.right * currentSpeed * Time.deltaTime;
             if (body != null)
             {
                 body.MoveRotation(nextRotation);
@@ -177,7 +182,7 @@ namespace Citygame.World
                     if (suspensionPivots != null && (i == 1 || i == 3) && suspensionPivots[i] != null)
                     {
                         Vector3 pivotAngles = suspensionPivots[i].localEulerAngles;
-                        pivotAngles.y = steering * 25f;
+                        pivotAngles.y = -steering * 25f;
                         suspensionPivots[i].localEulerAngles = pivotAngles;
                     }
                 }
@@ -225,7 +230,7 @@ namespace Citygame.World
             if (!occupied || followCamera == null || cockpitAnchor == null) return;
             cockpitView = !cockpitView;
             followCamera.SetCockpitView(cockpitAnchor, cockpitView);
-            if (!cockpitView) followCamera.SetTarget(transform);
+            if (!cockpitView) followCamera.SetTarget(cameraTarget != null ? cameraTarget : transform);
         }
 
         public bool Enter(ThirdPersonMotor player)
@@ -239,7 +244,7 @@ namespace Citygame.World
             occupant.transform.localRotation = Quaternion.identity;
             if (followCamera != null)
             {
-                followCamera.SetTarget(transform);
+                followCamera.SetTarget(cameraTarget != null ? cameraTarget : transform);
                 followCamera.SetCockpitView(cockpitAnchor, false);
             }
             cockpitView = false;
