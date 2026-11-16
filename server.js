@@ -772,10 +772,12 @@ const MISSIONS = [
 const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 // sleeping / watching TV is acted out: the client shows the character lying in a bed or sitting on a sofa, and everyone nearby sees it
 function setPose(p, pose, ms) { p.pose = pose; p.poseUntil = Date.now() + ms; send(p.ws, { t: 'pose', pose, secs: ms / 1000 }); }
-const newLife = () => ({ earned: 0, energy: 100, hygiene: 100, fun: 100, social: 100, bladder: 100, career: null, shifts: 0, bought: 0, promoted: false, done: {} });
+const newLife = () => ({ earned: 0, energy: 100, hygiene: 100, fun: 100, social: 100, bladder: 100, career: null, skills: {}, studySessions: 0, shifts: 0, bought: 0, promoted: false, done: {} });
 function restoreLife(L, s) {
   L.energy = clamp(+s.energy || 0, 0, 100); L.hygiene = clamp(+s.hygiene || 0, 0, 100); L.fun = clamp(+s.fun || 0, 0, 100); L.social = s.social == null ? 100 : clamp(+s.social || 0, 0, 100); L.bladder = s.bladder == null ? 100 : clamp(+s.bladder || 0, 0, 100);
   if (s.career && CAREERS[s.career.id]) L.career = { id: s.career.id, xp: Math.max(0, Math.floor(+s.career.xp) || 0) };
+  L.skills = {}; if (s.skills && typeof s.skills === 'object') for (const id of Object.keys(CAREERS)) L.skills[id] = clamp(Math.floor(+s.skills[id]) || 0, 0, 10);
+  L.studySessions = Math.max(0, Math.floor(+s.studySessions) || 0);
   L.earned = Math.max(0, Math.floor(+s.earned) || 0); L.shifts = Math.max(0, Math.floor(+s.shifts) || 0); L.bought = Math.max(0, Math.floor(+s.bought) || 0); L.promoted = !!s.promoted; L.done = s.done && typeof s.done === 'object' ? s.done : {};
 }
 const levelOf = c => (c.xp >= 15 ? 2 : c.xp >= 5 ? 1 : 0);
@@ -859,12 +861,13 @@ function sendLife(p, R) {
   const L = p.life, c = L.career && CAREERS[L.career.id], lv = c ? levelOf(L.career) : 0;
   send(p.ws, { t: 'lifeinfo',
     needs: { food: Math.round(p.food), energy: Math.round(L.energy), hygiene: Math.round(L.hygiene), fun: Math.round(L.fun), social: Math.round(L.social), bladder: Math.round(L.bladder) },
-    career: c ? { title: c.title, level: c.lv[lv][0], pay: c.lv[lv][1], xp: L.career.xp, next: c.lv[lv + 1] ? c.lv[lv + 1][2] : null } : null,
+    career: c ? { id: L.career.id, title: c.title, level: c.lv[lv][0], pay: c.lv[lv][1], xp: L.career.xp, next: c.lv[lv + 1] ? c.lv[lv + 1][2] : null, skill: L.skills[L.career.id] || 0 } : null,
     careers: Object.entries(CAREERS).map(([id, x]) => ({ id, title: x.title, pay: x.lv[0][1] })),
     missions: MISSIONS.filter(x => !x.path || x.path === p.path).map(x => ({ name: x.name, reward: x.reward, done: !!L.done[x.id] })),
     path: { id: p.path, name: (PATHS[p.path] || {}).name, emoji: (PATHS[p.path] || {}).emoji, goal: (PATHS[p.path] || {}).goal }, home: homeInfo(p),
     log: (p.ledger || []).slice(-8).reverse(), inv: p.inv, atShop: atShop(p), cap: BAG_CAP });
 }
+function cTitleFor(id) { return CAREERS[id] ? CAREERS[id].title : 'Career'; }
 function lifeOp(room, p, m) {
   const R = rooms[room], L = p.life, now = Date.now(), me = t => send(p.ws, { t: 'toast', text: t });
   if (p.jailUntil > now) return me('You are in jail!');
@@ -881,11 +884,22 @@ function lifeOp(room, p, m) {
     if (L.hygiene < 10) { p.cd.work = 0; return me('🚿 Shower first, you cannot work like this'); }
     const c = CAREERS[L.career.id], lv = levelOf(L.career), perf = (L.energy + L.hygiene) / 200;
     const pay = Math.round(c.lv[lv][1] * (0.8 + 0.4 * perf) * (p.inv[TOOLS[L.career.id]] ? 1.15 : 1));
-    addMoney(p, pay, c.title + ' shift');
+    const skillRank = L.skills[L.career.id] || 0;
+    const skilledPay = Math.round(pay * (1 + skillRank * 0.025));
+    addMoney(p, skilledPay, c.title + ' shift');
     L.energy -= 15; L.fun -= 6; L.hygiene -= 8; p.food = Math.max(0, p.food - 8); L.career.xp++; L.shifts++;
     const nl = levelOf(L.career);
     if (nl > lv) { L.promoted = true; broadcast(room, { t: 'toast', text: `🎉 ${p.name} was promoted to ${c.lv[nl][0]} (${c.title})!` }); }
-    else me(`💼 Shift done: +₦${pay}`);
+    else me(`💼 Shift done: +₦${skilledPay}${skillRank ? ` (skill bonus +${skillRank * 2.5}%)` : ''}`);
+  } else if (m.op === 'study') {
+    if (!L.career) return me('Choose a career before enrolling in job training.');
+    if (!(ownHome || p.inside === 'mall')) return me('Study at home or inside the Grand Market learning lounge.');
+    if ((L.skills[L.career.id] || 0) >= 10) return me('Your professional skill is already at maximum level.');
+    if (!cooldown(p, 'study', 15000)) return me('Take a short break before your next lesson.');
+    if (L.energy < 8) { p.cd.study = 0; return me('You need more energy before studying.'); }
+    if (!charge(p, 350, 'Career training')) return;
+    L.skills[L.career.id] = (L.skills[L.career.id] || 0) + 1; L.studySessions++; L.energy -= 8;
+    me(`📚 Training complete: ${cTitleFor(L.career.id)} skill level ${L.skills[L.career.id]}/10. Shift pay bonus +2.5%.`);
   } else if (m.op === 'sleep') {
     if (!ownHome) return me('Go inside your own house to sleep 🛏️');
     if (!cooldown(p, 'sleep', 20000)) return me('You are not sleepy yet');
