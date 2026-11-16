@@ -1465,7 +1465,7 @@ function extraMsg(room, p, m, now) {
       if (p.car >= 0) return toast('Park your current vehicle before retrieving another'), true;
       if (!E.storedCars.includes(col) || !E.cars.includes(col) || !VEHICLES[col]) return toast('That vehicle is not in your garage'), true;
       E.storedCars = E.storedCars.filter(x => x !== col);
-      const x = home.out.x + 5.5, z = home.out.z + 2.5, ry = Math.PI;
+      const x = home.kind === 'villa' ? home.x + 7.55 : home.out.x + 5.5, z = home.kind === 'villa' ? home.z + 4.2 : home.out.z + 2.5, ry = Math.PI;
       sendCars(p); send(p.ws, { t: 'garage_spawn', col, x, z, ry });
       toast('🔑 ' + VEHICLES[col].name + ' retrieved to your driveway');
       savePlayer(room, p); return true;
