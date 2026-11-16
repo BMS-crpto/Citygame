@@ -42,3 +42,19 @@ This is a playable greybox prototype foundation, not a complete production open-
 - Unity glTFast `com.unity.cloud.gltfast` 6.21.0 is enabled for Unity 6 GLB import.
 - The CC0 corner-shop model is mirrored at `Assets/Resources/CitygameModels/loja_esquina.glb` so it can be imported as a Unity asset and loaded through `Resources` at runtime.
 - Source: `kayquer/kit-cidade-lowpoly`, `models/comercial/loja_esquina.glb`, CC0 1.0 Universal. The same model is used by the browser build at `public/assets/glb/city-kit/loja_esquina.glb`.
+## Real Lagos map data (OpenStreetMap)
+
+The Unity scene now checks for `Assets/Resources/LagosMapData.json` and imports real coordinate-based road lines, building footprints, water features and parks when that file exists. It no longer labels the generated grid as real geography; the old procedural scene is retained only as a logged fallback until map data is installed.
+
+### Prepare a Lagos extract
+
+1. Obtain a Lagos-area GeoJSON extract from OpenStreetMap data. The Nigeria Geofabrik extract is available at https://download.geofabrik.de/africa/nigeria.html; use a GIS tool to clip it to the intended Lagos play area and export a GeoJSON FeatureCollection with OSM tags in each feature's `properties`.
+2. Keep OpenStreetMap attribution and comply with the ODbL 1.0 licence. Source: https://www.openstreetmap.org/copyright.
+3. Run from the repository root:
+   `python tools/convert_lagos_osm.py path/to/lagos.geojson unity/Assets/Resources/LagosMapData.json`
+4. Reopen Unity and choose **Citygame > Create Foundation Scene**.
+
+The converter projects longitude/latitude into local metres around central Lagos (6.5244, 3.3792). It keeps OSM road geometry, building footprints and tagged water/park polygons. Building heights use OSM height/level tags where available and conservative fallbacks otherwise.
+
+**Data limitation:** the GeoJSON extract itself is not included in this commit. Until a current Lagos extract is placed at the path above, Unity will log a warning and use the existing greybox fallback. This avoids falsely claiming the fallback is a real Lagos map.
+
