@@ -2361,6 +2361,7 @@ useBtn.onclick=()=>{
   else if(useTarget.type==='out')ws.send(JSON.stringify({t:'exit'}));
   else if(useTarget.type==='atm')showATM();
   else if(useTarget.type==='paint')ws.send(JSON.stringify({t:'paint'}));
+  else if(useTarget.type==='life')ws.send(JSON.stringify({t:'life',op:useTarget.op}));
   else if(useTarget.type==='eat')ws.send(JSON.stringify({t:'eat'}));
   else if(useTarget.type==='venue')ws.send(JSON.stringify({t:'venue'}));
   else if(useTarget.type==='getup')endPose(true);
@@ -2385,6 +2386,9 @@ function updateUse(){
     else if(R.multiFloor&&near(R.floorAccess.stairs.x,R.floorAccess.stairs.z,3.8)){t={type:'floor',floor:pos.floor?0:1,method:'stairs'};label=pos.floor?'⬇️ GO DOWNSTAIRS':'⬆️ CLIMB STAIRS'}
     else if(inside==='bank'&&near(R.x0-11,R.z0,5.5)){t={type:'atm'};label='💳 USE ATM'}
     else if(inside.startsWith('house')&&!R.model&&near(R.x0+8.5,R.z0+5,4)){t={type:'paint'};label='🎨 PAINT ₦300'}
+    else if(inside.startsWith('house')&&!R.model&&near(R.x0+6.5,R.z0-6,3.0)){t={type:'life',op:'sleep'};label='🛏️ SLEEP IN BED'}
+    else if(inside.startsWith('house')&&!R.model&&near(R.x0-6,R.z0-8.5,3.0)){t={type:'life',op:'fun'};label='📺 WATCH TV · ₦50'}
+    else if(inside.startsWith('house')&&!R.model&&near(R.x0-9.2,R.z0-0.1,2.6)){t={type:'life',op:'study'};label='📚 STUDY AT DESK'}
     else if(inside.startsWith('house')&&near(R.eat?R.eat.x:R.x0-9,R.eat?R.eat.z:R.z0-0.5,R.eat?4.6:3.5)){t={type:'eat'};label='🍳 EAT AT HOME'}
     else if(inside==='mall'&&near(R.x0+19,R.z0-8,4.5)){t={type:'eat'};label='🍲 BUY FOOD ₦40'}
     else if(inside==='dealer'&&(ensureCarList(),showCars.some(s=>near(s.x,s.z,4.2)))){const s=showCars.find(s=>near(s.x,s.z,4.2)),v=(typeof PX!=='undefined'&&PX.carList.find(c=>c.col===s.col))||{name:'car',price:0};t={type:'xshow',col:s.col};label='🔑 '+v.name+' '+fmtK(v.price)+' - VIEW / BUY'}
