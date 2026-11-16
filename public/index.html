@@ -1866,7 +1866,7 @@ function attachCarModel(g,col,role){
       car.traverse(o=>{
         if(!o.isMesh)return;
         const ms=Array.isArray(o.material)?o.material:[o.material];
-        const nm=ms.map(m=>{if(cfg.body&&cfg.body.test(m.name||'')){const c=m.clone();c.color.setHex(paint);return c}return m});
+        const nm=ms.map(m=>{if((cfg.body&&cfg.body.test(m.name||''))||(customPaint&&/body|paint|exterior|car/i.test((m.name||'')+' '+(o.name||''))&&!/glass|window|wheel|tire|light|chrome/i.test((m.name||'')+' '+(o.name||''))){const c=m.clone();if(paint.isColor)c.color.copy(paint);else c.color.setHex(paint);return c}return m});
         o.material=Array.isArray(o.material)?nm:nm[0];
       });
     }
