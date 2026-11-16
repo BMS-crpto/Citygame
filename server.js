@@ -414,6 +414,25 @@ function onConnection(ws) {
     const p = rooms[room].players[id], R = rooms[room];
     const now = Date.now();
     if (p.travelUntil > now && m.t !== 'chat') return;
+    if (m.t === 'customer_sale') {
+      const bid=Number.isInteger(+p.bld)?+p.bld:-1;
+      const venue=p.inside&&/^v_/.test(p.inside)?p.inside.slice(2):'';
+      const venueMap={restaurant:'restaurant',fashion:'fashion',tech:'office',supermarket:'supermarket',salon:'salon',lounge:'lounge',carwash:'carwash',pharmacy:'pharmacy'};
+      const business=bid>=0?businesses['b'+bid]:null;
+      if(!business||venueMap[business.kind]!==venue)return;
+      if(!cooldown(business,'visible_customer_sale',22000))return;
+      const ticket=({restaurant:950,fashion:2400,tech:3100,supermarket:1250,salon:1800,lounge:2200,carwash:1500,pharmacy:1100})[business.kind]||1200;
+      const quality=businessQuality(business);
+      const sale=Math.round(ticket*(0.9+Math.random()*0.2)*(1+quality));
+      business.balance=Math.min(1e9,Math.max(0,Math.floor(+business.balance||0))+sale);
+      business.customers=Math.min(1e9,Math.max(0,Math.floor(+business.customers||0))+1);
+      business.lastVisibleSaleAt=now;
+      saveBusinesses();
+      for(const RR of Object.values(rooms))if(RR)for(const viewer of Object.values(RR.players||{}))sendBusinesses(viewer);
+      const owner=Object.values(rooms).flatMap(RR=>Object.values(RR.players||{})).find(q=>q&&pKey(q)===business.ownerKey);
+      if(owner)send(owner.ws,{t:'toast',text:'🧾 Customer purchase at '+business.name+' · '+fmtN(sale)+' added to company earnings'});
+      return;
+    }
     if (extraMsg(room, p, m, now)) return;
     if (m.t === 'move') {
       if (p.jailUntil > now) return;
