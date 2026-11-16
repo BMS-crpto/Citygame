@@ -2489,7 +2489,7 @@ document.getElementById('play').onclick=()=>{
     const m=JSON.parse(ev.data);
     if(m.t==='lifeinfo'){if(m.home!==undefined)myHome=m.home;if(m.path)myPathInfo=m.path;lifeUpdate(m);return}
     if(m.t==='catalog'){lifeCatalog(m);return}
-    if(m.t==='x_businesses'){syncCityBusinesses(m.businesses);return}
+    if(m.t==='x_businesses'){syncCityBusinesses(m.businesses);if(window.CGCompanyReceive)window.CGCompanyReceive(m.businesses);return}
     if(m.t==='authfail'){try{localStorage.removeItem('ll_tok');localStorage.removeItem('ll_user')}catch(e){}location.reload();return}
     if(m.t==='welcome'){myId=m.id;buildWorld(m.world);myHome=m.home||null;myPathInfo=m.pathInfo||null;document.getElementById('info').textContent=`🇳🇬 Lagos Life • ${ROLES[myRole].emoji} ${ROLES[myRole].label}`+(m.pathInfo?` • ${m.pathInfo.emoji} ${m.pathInfo.name}`:'');if(m.first)showFate(m);else if(m.pathInfo)setTimeout(()=>toast(`${m.pathInfo.emoji} ${m.pathInfo.name} • welcome back`),600)}
     else if(m.t==='toast')toast(m.text);
