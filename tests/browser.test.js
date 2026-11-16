@@ -195,3 +195,14 @@ test('Unity mobile HUD exposes touch sprint and forwards held state to player mo
   assert.match(runtime, /GUI\.RepeatButton\([\s\S]*?"RUN"\);[\s\S]*?motor\.SetMobileSprint\(sprintHeld\);/);
   assert.match(runtime, /"JUMP"\)\)\s*motor\.MobileJump\(\);/);
 });
+
+
+test('Unity follow camera supports right-side touch orbit with pitch bounds', () => {
+  const camera = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'Player', 'FollowCamera.cs'), 'utf8');
+  assert.match(camera, /touchOrbitSensitivity/);
+  assert.match(camera, /Input\.touchCount > 0/);
+  assert.match(camera, /touch\.position\.x > Screen\.width \* 0\.45f/);
+  assert.match(camera, /orbitYaw \+= touch\.deltaPosition\.x \* touchOrbitSensitivity/);
+  assert.match(camera, /Mathf\.Clamp\(orbitPitch - touch\.deltaPosition\.y \* touchOrbitSensitivity, minimumPitch, maximumPitch\)/);
+  assert.match(camera, /Physics\.SphereCast/);
+});
