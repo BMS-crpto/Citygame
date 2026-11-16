@@ -1966,6 +1966,31 @@ function houseTaken(h){const ho=houseObjs[h.id];return h.units===1?!!ho.owner:(h
 function houseDot(h){return myHome&&myHome.id===h.id?'#ffd54a':houseTaken(h)?'#8d99a6':'#39e07a'}
 // =============== houses / shops / jail ===============
 let world=null;const houseObjs={};
+let cornerShopModel=null,cornerShopLoading=false,cornerShopGroups=[];
+function loadCornerShopModel(){
+  if(cornerShopModel){placeCornerShopModels();return}
+  if(cornerShopLoading)return;
+  cornerShopLoading=true;
+  new THREE.GLTFLoader().load('/assets/glb/city-kit/loja_esquina.glb',g=>{
+    cornerShopModel=g.scene;
+    const bounds=new THREE.Box3().setFromObject(cornerShopModel),size=bounds.getSize(new THREE.Vector3());
+    const span=Math.max(size.x,size.z)||1,scale=12/span;
+    cornerShopModel.scale.setScalar(scale);cornerShopModel.updateMatrixWorld(true);
+    const scaled=new THREE.Box3().setFromObject(cornerShopModel);
+    cornerShopModel.position.y-=scaled.min.y;
+    placeCornerShopModels();
+  },undefined,e=>{cornerShopLoading=false;console.warn('City shop GLB failed to load',e)});
+}
+function placeCornerShopModels(){
+  if(!cornerShopModel)return;
+  cornerShopGroups.forEach(g=>{
+    if(g.userData.glbPlaced)return;
+    const model=cornerShopModel.clone(true);
+    model.rotation.y=Math.PI;
+    model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+    g.add(model);g.userData.glbPlaced=true;
+  });
+}
 function buildWorld(w){
   world=w;
   w.houses.forEach(h=>{
@@ -1980,10 +2005,13 @@ function buildWorld(w){
     const g=makeCharacter('npc',n.name+' · '+n.title,n.look);
     g.position.set(n.x,0,n.z);g.rotation.y=n.ry||0;g.visible=false;scene.add(g);npcObjs.push({n,g});
   });
+  cornerShopGroups=[];
   w.shops.forEach(sh=>{
     const g=new THREE.Group();g.position.set(sh.x,0,sh.z);scene.add(g);
     g.add(makeLabel('🏪 Shop','#ffd54a',10,3.4));
+    cornerShopGroups.push(g);
   });
+  loadCornerShopModel();
   const jm=new THREE.Mesh(new THREE.BoxGeometry(15,0.1,15),new THREE.MeshLambertMaterial({color:0x555a60}));jm.position.set(w.jail.x,0.08,w.jail.z);jm.receiveShadow=true;scene.add(jm);
   const bars=[];for(let t=-7;t<=7;t+=1.25){bars.push([w.jail.x+t,0,w.jail.z-7.5]);bars.push([w.jail.x+t,0,w.jail.z+7.5]);bars.push([w.jail.x-7.5,0,w.jail.z+t]);bars.push([w.jail.x+7.5,0,w.jail.z+t])}
   const barGeo=new THREE.BoxGeometry(0.18,4,0.18);barGeo.translate(0,2,0);
