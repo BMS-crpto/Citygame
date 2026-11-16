@@ -308,6 +308,40 @@
 <link href="/lagos-3d-skin.css?v=5" rel="stylesheet">
 <link href="/citygame-premium-ui.css?v=4" rel="stylesheet">
 <link rel="stylesheet" href="/mobile-controls.css?v=2026111504">
+
+<style id="citygame-rebuild-shell">
+:root{color-scheme:dark;--cg-ink:#07131b;--cg-panel:rgba(9,24,34,.92);--cg-line:rgba(145,210,216,.24);--cg-teal:#45d6bd;--cg-gold:#f0c46b;--cg-muted:#9eb5bf}
+html,body{background:#07131b!important;color:#edf7f6!important;font-family:Inter,system-ui,-apple-system,sans-serif!important}
+button,.q,.pb{font-family:inherit!important;transition:transform .16s ease,filter .16s ease,border-color .16s ease}
+button:active,.q:active,.pb:active{transform:translateY(1px) scale(.98);filter:brightness(1.12)}
+#login,#menu{background:radial-gradient(ellipse at 50% 0%,#285a60 0%,#102b37 42%,#06131c 100%)!important}
+#login .card,#menu .card,.pbox,#npcbox,#atm .box,#ride{background:linear-gradient(155deg,rgba(20,43,54,.97),rgba(6,18,28,.97))!important;border:1px solid var(--cg-line)!important;box-shadow:0 24px 70px #0009, inset 0 1px #ffffff12!important;backdrop-filter:blur(18px)}
+.brand h1{letter-spacing:.04em!important;text-shadow:0 4px 24px #0008!important}
+.brand h1 span{color:var(--cg-teal)!important}
+.tag,.world,.pvhint,.sec{color:var(--cg-muted)!important}
+button.go,#play,#fgo{background:linear-gradient(105deg,#42d8c0,#f0c46b)!important;color:#071b20!important;border:1px solid #b7fff0!important;box-shadow:0 9px 30px #35cdb544!important}
+#hud{left:50%!important;right:auto!important;transform:translateX(-50%);width:min(94vw,900px);justify-content:center!important;flex-wrap:wrap}
+#hud div,#district,#needs,#tasks div{background:var(--cg-panel)!important;border:1px solid var(--cg-line)!important;border-radius:15px!important;backdrop-filter:blur(14px);box-shadow:0 8px 22px #0005}
+#money{color:var(--cg-gold)!important}
+#toast{background:#102b36ee!important;border:1px solid var(--cg-line);border-radius:14px!important}
+#stick{background:#0b202bb8!important;border:2px solid #70d9d0aa!important;box-shadow:0 8px 28px #0008}
+#knob{background:radial-gradient(circle at 35% 30%,#f2ffff,#63cfc4)!important;box-shadow:0 3px 12px #0007}
+#act{background:linear-gradient(145deg,#e65e4e,#a82e31)!important;box-shadow:0 8px 24px #0008}
+#use{background:linear-gradient(145deg,#42d8c0,#168b79)!important;color:#05221f!important}
+.sbtn{background:var(--cg-panel)!important;border:1px solid var(--cg-line)!important;box-shadow:0 7px 22px #0008}
+#phone{background:#020a10d9!important;backdrop-filter:blur(12px)}
+#phone .pbox{width:min(96vw,460px)!important;border-radius:34px!important;border:1px solid #6eabb0!important;background:linear-gradient(160deg,#142d38,#07141d 70%)!important}
+#phone .app{background:linear-gradient(145deg,#1d3b47,#10232e)!important;border:1px solid #47717a!important;border-radius:18px!important;min-height:72px!important;box-shadow:inset 0 1px #ffffff12,0 5px 12px #0004}
+#phone .app:active{border-color:var(--cg-teal)!important}
+#phoneSearch{background:#081923!important;border:1px solid #47717a!important;border-radius:14px!important}
+#appview .card{background:#102631!important;border:1px solid #355d66!important;border-radius:16px!important}
+#phx{background:#173540!important;border:1px solid #5a8b91!important}
+#bigmap{background:#081820!important}
+#speedo{background:#0b202b!important;border:1px solid #4b8a8a!important}
+@media(max-width:700px){#hud{top:max(6px,env(safe-area-inset-top))!important;width:96vw;gap:5px!important}#hud div{padding:6px 9px!important;font-size:11px!important}#money{font-size:14px!important}#stick{width:112px!important;height:112px!important;bottom:max(20px,env(safe-area-inset-bottom))!important}#act{right:16px!important;bottom:max(22px,env(safe-area-inset-bottom))!important;width:82px!important;height:82px!important}#use{right:14px!important}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+</style>
+
 </head>
 <body>
 <div id="login"><div class="skyline" aria-hidden="true"></div>
