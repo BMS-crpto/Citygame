@@ -36,3 +36,9 @@ This is the parallel Unity 6 migration workspace for Citygame. The existing brow
 
 ## Important scope
 This is a playable greybox prototype foundation, not a complete production open-world game. The Unity workspace does not yet contain ported online multiplayer/accounts, cloud persistence, realistic Lagos building/character/vehicle assets, advanced traffic/vehicle physics, detailed pedestrian AI and animation, full phone/social apps, production UI, or a generated Android APK. The current GitHub workflow tests the browser project and does not compile Unity C#; a Unity editor/device build is still required for verification. The browser game is unchanged and remains the current deployed experience unless a separate Unity build is created and deployed.
+
+### GLB asset pipeline
+
+- Unity glTFast `com.unity.cloud.gltfast` 6.21.0 is enabled for Unity 6 GLB import.
+- The CC0 corner-shop model is mirrored at `Assets/Resources/CitygameModels/loja_esquina.glb` so it can be imported as a Unity asset and loaded through `Resources` at runtime.
+- Source: `kayquer/kit-cidade-lowpoly`, `models/comercial/loja_esquina.glb`, CC0 1.0 Universal. The same model is used by the browser build at `public/assets/glb/city-kit/loja_esquina.glb`.
