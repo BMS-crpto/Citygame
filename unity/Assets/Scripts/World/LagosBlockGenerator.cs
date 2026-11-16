@@ -7,6 +7,19 @@ namespace Citygame.World
     {
         public static void Build(Transform root)
         {
+            Build(root, Vector3.zero, "Central");
+        }
+
+        // Build named tiles on a shared road grid so neighbouring districts connect.
+        public static void Build(Transform root, Vector3 worldOffset, string districtName)
+        {
+            if (root == null) return;
+            root.position = worldOffset;
+            BuildDistrict(root, string.IsNullOrEmpty(districtName) ? "Lagos" : districtName);
+        }
+
+        private static void BuildDistrict(Transform root, string districtName)
+        {
             ConfigureTropicalSky();
             Material road = MaterialFor(new Color(0.16f, 0.17f, 0.18f));
             Material concrete = MaterialFor(new Color(0.68f, 0.62f, 0.50f));
@@ -44,14 +57,14 @@ namespace Citygame.World
             CreateCube("Main Road curb north", root, new Vector3(0, 0.14f, 6.05f), new Vector3(90, 0.22f, 0.18f), curb);
             CreateCube("Main Road curb south", root, new Vector3(0, 0.14f, -6.05f), new Vector3(90, 0.22f, 0.18f), curb);
 
-            CreateBuilding(root, "Ikeja Plaza", new Vector3(-20, 0, 13), new Vector3(9, 9, 8), concrete, BusinessCategory.Technology);
-            CreateBuilding(root, "Lekki Fashion House", new Vector3(-7, 0, 13), new Vector3(8, 5, 8), paint, BusinessCategory.FashionStore);
-            CreateBuilding(root, "Yaba Chop House", new Vector3(7, 0, 13), new Vector3(8, 5, 8), concrete, BusinessCategory.Restaurant);
-            CreateBuilding(root, "Surulere Supermart", new Vector3(20, 0, 13), new Vector3(9, 6, 8), green, BusinessCategory.Supermarket);
-            CreateBuilding(root, "Victoria Island Lounge", new Vector3(-20, 0, -13), new Vector3(9, 7, 8), paint, BusinessCategory.Lounge);
-            CreateBuilding(root, "Agege Barbershop", new Vector3(-7, 0, -13), new Vector3(8, 4.5f, 8), green, BusinessCategory.Barbershop);
-            CreateBuilding(root, "Ojota Car Wash", new Vector3(7, 0, -13), new Vector3(8, 4, 8), concrete, BusinessCategory.CarWash);
-            CreateBuilding(root, "Apapa Pharmacy", new Vector3(20, 0, -13), new Vector3(9, 5, 8), paint, BusinessCategory.Pharmacy);
+            CreateBuilding(root, districtName + " Ikeja Plaza", new Vector3(-20, 0, 13), new Vector3(9, 9, 8), concrete, BusinessCategory.Technology);
+            CreateBuilding(root, districtName + " Lekki Fashion House", new Vector3(-7, 0, 13), new Vector3(8, 5, 8), paint, BusinessCategory.FashionStore);
+            CreateBuilding(root, districtName + " Yaba Chop House", new Vector3(7, 0, 13), new Vector3(8, 5, 8), concrete, BusinessCategory.Restaurant);
+            CreateBuilding(root, districtName + " Surulere Supermart", new Vector3(20, 0, 13), new Vector3(9, 6, 8), green, BusinessCategory.Supermarket);
+            CreateBuilding(root, districtName + " Victoria Island Lounge", new Vector3(-20, 0, -13), new Vector3(9, 7, 8), paint, BusinessCategory.Lounge);
+            CreateBuilding(root, districtName + " Agege Barbershop", new Vector3(-7, 0, -13), new Vector3(8, 4.5f, 8), green, BusinessCategory.Barbershop);
+            CreateBuilding(root, districtName + " Ojota Car Wash", new Vector3(7, 0, -13), new Vector3(8, 4, 8), concrete, BusinessCategory.CarWash);
+            CreateBuilding(root, districtName + " Apapa Pharmacy", new Vector3(20, 0, -13), new Vector3(9, 5, 8), paint, BusinessCategory.Pharmacy);
 
             for (int i = 0; i < 10; i++)
             {
@@ -205,7 +218,7 @@ namespace Citygame.World
                 GameObject pedestrian = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 pedestrian.name = "Lagos Sidewalk Pedestrian " + (i + 1);
                 pedestrian.transform.SetParent(root, false);
-                pedestrian.transform.position = new Vector3(-34f + i * 9f, 0.9f, i % 2 == 0 ? 7.5f : -7.5f);
+                pedestrian.transform.position = new Vector3(-34f + i * 9f, 0.9f, i % 2 == 0 ? 7.5f : -7.5f) + root.position;
                 pedestrian.transform.localScale = new Vector3(0.65f, 0.9f, 0.65f);
                 pedestrian.GetComponent<Renderer>().sharedMaterial = MaterialFor(new Color(
                     Random.Range(0.25f, 0.85f), Random.Range(0.2f, 0.75f), Random.Range(0.2f, 0.8f)));
@@ -285,7 +298,7 @@ namespace Citygame.World
 
             GameObject spotObject = new GameObject(name + " business interaction point");
             spotObject.transform.SetParent(root, false);
-            spotObject.transform.position = new Vector3(position.x, position.y, frontZ - 1.1f);
+            spotObject.transform.position = new Vector3(position.x, position.y, frontZ - 1.1f) + root.position;
             BusinessSpot spot = spotObject.AddComponent<BusinessSpot>();
             spot.Configure(name, category);
             BusinessDoorPortal doorway = spotObject.AddComponent<BusinessDoorPortal>();
@@ -362,7 +375,7 @@ namespace Citygame.World
             GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
             obj.name = name;
             obj.transform.SetParent(root, false);
-            obj.transform.position = position;
+            obj.transform.position = position + root.position;
             obj.transform.localScale = scale;
             obj.GetComponent<Renderer>().sharedMaterial = material;
             return obj;
