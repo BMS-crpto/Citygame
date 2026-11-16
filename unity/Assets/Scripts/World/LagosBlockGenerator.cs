@@ -80,10 +80,27 @@ namespace Citygame.World
             BuildCar(root, "Lagos Sports Coupe", new Vector3(26f, 0.65f, -3.2f), paint, VehicleStyle.Sports);
             BuildCar(root, "Lagos City Bus", new Vector3(42f, 0.65f, -3.2f), green, VehicleStyle.Bus);
 
+            BuildGarage(root, concrete, paint);
             BuildAmbientTraffic(root, paint, green);
             BuildStreetLights(root);
             BuildPedestrianCrossings(root);
             BuildPedestrians(root);
+        }
+
+        private static void BuildGarage(Transform root, Material wall, Material sign)
+        {
+            Vector3 centre = new Vector3(0f, 0f, -28f);
+            // A recognisable roadside service bay with a wide open vehicle entrance.
+            CreateCube("Lagos Motor Works left wall", root, centre + new Vector3(-7.2f, 1.8f, 0f), new Vector3(1f, 3.6f, 9f), wall);
+            CreateCube("Lagos Motor Works right wall", root, centre + new Vector3(7.2f, 1.8f, 0f), new Vector3(1f, 3.6f, 9f), wall);
+            CreateCube("Lagos Motor Works rear wall", root, centre + new Vector3(0f, 1.8f, 4f), new Vector3(15f, 3.6f, 1f), wall);
+            CreateCube("Lagos Motor Works roof", root, centre + new Vector3(0f, 3.8f, 0f), new Vector3(15f, 0.45f, 9f), wall);
+            CreateCube("Lagos Motor Works sign", root, centre + new Vector3(0f, 3.15f, -4.65f), new Vector3(8f, 0.65f, 0.2f), sign);
+            GameObject servicePoint = new GameObject("Lagos Motor Works service point");
+            servicePoint.transform.SetParent(root, false);
+            servicePoint.transform.position = centre + root.position + new Vector3(0f, 0f, -5.5f);
+            VehicleGarage garage = servicePoint.AddComponent<VehicleGarage>();
+            garage.Configure("Lagos Motor Works", new Vector3(18f, 2.8f, 12f));
         }
 
         private static void BuildAmbientTraffic(Transform root, Material firstPaint, Material secondPaint)
