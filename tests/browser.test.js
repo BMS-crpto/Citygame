@@ -206,3 +206,13 @@ test('Unity follow camera supports right-side touch orbit with pitch bounds', ()
   assert.match(camera, /Mathf\.Clamp\(orbitPitch - touch\.deltaPosition\.y \* touchOrbitSensitivity, minimumPitch, maximumPitch\)/);
   assert.match(camera, /Physics\.SphereCast/);
 });
+
+test('Unity follow camera supports bounded two-finger pinch zoom', () => {
+  const camera = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'Player', 'FollowCamera.cs'), 'utf8');
+  assert.match(camera, /pinchZoomSensitivity/);
+  assert.match(camera, /minimumZoomDistance/);
+  assert.match(camera, /maximumZoomDistance/);
+  assert.match(camera, /Input\.touchCount >= 2/);
+  assert.match(camera, /Vector2\.Distance\(first\.position, second\.position\)/);
+  assert.match(camera, /Mathf\.Clamp\(offset\.z - pinchDelta \* pinchZoomSensitivity,[\s\S]*-maximumZoomDistance, -minimumZoomDistance\)/);
+});
