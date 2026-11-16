@@ -235,3 +235,13 @@ test('Unity procedural city reuses color materials to reduce mobile render alloc
   assert.match(generator, /MaterialCache\[color\] = material/);
   assert.match(generator, /material\.name = "Citygame shared material " \+ color/);
 });
+
+ 
+test('Unity procedural city reuses a single tropical skybox material across rebuilds', () => {
+  const generator = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'LagosBlockGenerator.cs'), 'utf8');
+  assert.match(generator, /private static Material tropicalSkyMaterial;/);
+  assert.match(generator, /if \(tropicalSkyMaterial == null\)/);
+  assert.match(generator, /tropicalSkyMaterial = new Material\(skyShader\)/);
+  assert.match(generator, /RenderSettings\.skybox = tropicalSkyMaterial/);
+  assert.match(generator, /Citygame tropical sky/);
+});
