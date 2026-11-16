@@ -108,7 +108,7 @@ namespace Citygame.World
         {
             // Roadside forecourt placed at the west end of the main road, clear
             // of the vehicle workshop and the storefront entrances.
-            Vector3 centre = new Vector3(-43f, 0f, 0f);
+            Vector3 centre = new Vector3(0f, 0f, 31f);
             Material canopy = MaterialFor(new Color(0.92f, 0.91f, 0.84f));
             Material red = MaterialFor(new Color(0.78f, 0.055f, 0.035f));
             Material white = MaterialFor(new Color(0.94f, 0.94f, 0.9f));
