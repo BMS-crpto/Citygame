@@ -117,6 +117,17 @@ namespace Citygame.World
             westDriver.Configure(root.position.x - 42f, root.position.x + 42f, root.position.z + 21.5f, -1, 4.8f);
         }
 
+        public static RideableCar SpawnPurchasedVehicle(Vector3 position, string modelName, int styleIndex, Color paintColor)
+        {
+            GameObject holder = new GameObject("Purchased vehicle container");
+            VehicleStyle style = (VehicleStyle)Mathf.Clamp(styleIndex, 0, 4);
+            BuildCar(holder.transform, modelName, position, MaterialFor(paintColor), style);
+            RideableCar vehicle = holder.GetComponentInChildren<RideableCar>();
+            if (vehicle != null) vehicle.transform.SetParent(null, true);
+            Object.Destroy(holder);
+            return vehicle;
+        }
+
         private static void BuildCar(Transform root, string name, Vector3 position, Material bodyMaterial)
         {
             // The root collider remains the vehicle collision body. All added
