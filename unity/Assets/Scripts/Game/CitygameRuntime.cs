@@ -199,6 +199,13 @@ namespace Citygame.Game
             if (interiorActive && GUI.Button(new Rect(Screen.width - 172f, Screen.height - 92f, 160f, 48f), "EXIT BUILDING"))
                 ExitInterior();
 
+            if (nearbyCar != null && nearbyCar.IsOccupied)
+            {
+                GUI.Box(new Rect(12f, 58f, 210f, 76f),
+                    "SPEED  " + Mathf.RoundToInt(nearbyCar.SpeedKph) + " km/h\nGEAR  " + nearbyCar.CurrentGear +
+                    "\nFUEL  " + Mathf.RoundToInt(nearbyCar.FuelPercent) + "%");
+            }
+
             if (nearbyCar != null)
             {
                 string action = nearbyCar.IsOccupied ? "EXIT CAR" : "ENTER CAR";
