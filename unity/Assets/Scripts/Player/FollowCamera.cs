@@ -9,6 +9,9 @@ namespace Citygame.Player
         [SerializeField, Min(0.1f)] private float followSharpness = 8f;
         [SerializeField, Range(15f, 80f)] private float pitch = 24f;
         [SerializeField, Min(0.1f)] private float touchOrbitSensitivity = 0.18f;
+        [SerializeField, Min(0.001f)] private float pinchZoomSensitivity = 0.012f;
+        [SerializeField, Min(1f)] private float minimumZoomDistance = 3.2f;
+        [SerializeField, Min(2f)] private float maximumZoomDistance = 9f;
         [SerializeField, Range(10f, 75f)] private float minimumPitch = 18f;
         [SerializeField, Range(20f, 85f)] private float maximumPitch = 70f;
         private float orbitYaw;
@@ -47,7 +50,18 @@ namespace Citygame.Player
                 orbitPitch = Mathf.Clamp(orbitPitch - Input.GetAxis("Mouse Y") * 3f, minimumPitch, maximumPitch);
             }
 #endif
-            if (Input.touchCount > 0)
+            if (Input.touchCount >= 2)
+            {
+                Touch first = Input.GetTouch(0);
+                Touch second = Input.GetTouch(1);
+                float previousSeparation = Vector2.Distance(first.position - first.deltaPosition, second.position - second.deltaPosition);
+                float currentSeparation = Vector2.Distance(first.position, second.position);
+                float pinchDelta = currentSeparation - previousSeparation;
+                // Pinch outward zooms toward the player; pinch inward pulls the camera back.
+                offset.z = Mathf.Clamp(offset.z - pinchDelta * pinchZoomSensitivity,
+                    -maximumZoomDistance, -minimumZoomDistance);
+            }
+            else if (Input.touchCount == 1)
             {
                 Touch touch = Input.GetTouch(0);
                 if (touch.position.x > Screen.width * 0.45f && touch.phase == TouchPhase.Moved)
