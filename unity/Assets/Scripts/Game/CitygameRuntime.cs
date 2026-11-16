@@ -601,8 +601,29 @@ namespace Citygame.Game
                 // Never persist the temporary interior staging coordinates.
                 if (motor != null && !interiorActive)
                 {
-                    save.playerPosition = motor.transform.position;
-                    save.playerEulerAngles = motor.transform.eulerAngles;
+                    RideableCar occupiedCar = null;
+                    if (cityCars != null)
+                    {
+                        for (int i = 0; i < cityCars.Length; i++)
+                        {
+                            if (cityCars[i] != null && cityCars[i].IsOccupied)
+                            {
+                                occupiedCar = cityCars[i];
+                                break;
+                            }
+                        }
+                    }
+
+                    if (occupiedCar != null)
+                    {
+                        save.playerPosition = occupiedCar.GetSafePlayerSavePosition();
+                        save.playerEulerAngles = occupiedCar.GetSafePlayerSaveEulerAngles();
+                    }
+                    else
+                    {
+                        save.playerPosition = motor.transform.position;
+                        save.playerEulerAngles = motor.transform.eulerAngles;
+                    }
                     save.hasSavedPlayerPosition = true;
                 }
                 File.WriteAllText(SavePath, JsonUtility.ToJson(save, true));
