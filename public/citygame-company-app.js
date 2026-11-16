@@ -32,7 +32,7 @@
  function renderOwned(b){
   const staff=Array.isArray(b.staff)?b.staff:[];
   bridge.appview.innerHTML=appbar()+
-   '<section class="cgCoHero"><small>🏢 YOUR COMPANY</small><h2>'+esc(b.icon||'🏬')+' '+esc(b.name)+'</h2><p class="cgCoNote">'+esc(b.kind)+' · '+esc(b.area)+'<br>📍 '+esc(b.locationName||'Lagos')+'</p><div class="cgCoActions"><button class="xbtn gold" data-x="companyCollect">Collect earnings</button><button class="xbtn gray" data-x="companyRefresh">Refresh</button></div></section>'+
+   '<section class="cgCoHero"><small>🏢 YOUR COMPANY</small><h2>'+esc(b.icon||'🏬')+' '+esc(b.name)+'</h2><p class="cgCoNote">'+esc(b.kind)+' · '+esc(b.area)+'<br>📍 '+esc(b.locationName||'Lagos')+'</p><div class="cgCoActions"><button class="xbtn gold" data-x="companyCollect">Collect earnings</button><button class="xbtn gray" data-x="companyNavigate">Find company</button><button class="xbtn gray" data-x="companyRefresh">Refresh</button></div></section>'+
    '<div class="cgCoGrid"><div class="cgCoStat"><small>Company balance</small><b>'+money(b.balance)+'</b></div><div class="cgCoStat"><small>Customers served</small><b>'+Number(b.customers||0).toLocaleString()+'</b></div><div class="cgCoStat"><small>Staff members</small><b>'+staff.length+' / 10</b></div><div class="cgCoStat"><small>Business rating</small><b>'+Math.max(0,Math.min(100,Number(b.quality)||0))+'%</b></div></div>'+
    '<section class="card"><h3>Company settings</h3><div class="cgCoField"><label for="cgCoRename">Change business name</label><input id="cgCoRename" maxlength="28" value="'+esc(b.name)+'"></div><div class="cgCoActions"><button class="xbtn gray" data-x="companyRename">Save name</button></div></section>'+
    '<section class="card"><h3>Hire staff</h3><p class="cgCoNote">Hire a worker for ₦10,000. Staff help your company serve more customers.</p><div class="cgCoField"><label for="cgCoRole">Staff role</label><select id="cgCoRole">'+roles.map(([v,l])=>'<option value="'+v+'">'+l+'</option>').join('')+'</select></div><div class="cgCoActions"><button class="xbtn gold" data-x="companyHire" '+(staff.length>=10?'disabled':'')+'>Hire staff · ₦10,000</button></div></section>'+
@@ -53,6 +53,7 @@
   bridge.appview.innerHTML=appbar()+'<section class="card">Registering your company…</section>';
  };
  bridge.X.companyCollect=()=>bridge.S({t:'business',op:'collect'});
+ bridge.X.companyNavigate=()=>{const own=businesses.find(x=>x&&x.isMine);if(own&&typeof window.setGps==='function')window.setGps(own.id)};
  bridge.X.companyRename=()=>{
   const name=(bridge.appview.querySelector('#cgCoRename')||{}).value||'';
   if(name.trim().length<3)return;
