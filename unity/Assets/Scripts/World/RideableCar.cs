@@ -6,8 +6,11 @@ namespace Citygame.World
     [RequireComponent(typeof(Collider))]
     public sealed class RideableCar : MonoBehaviour
     {
-        [SerializeField, Min(1f)] private float driveSpeed = 10f;
-        [SerializeField, Min(1f)] private float turnSpeed = 65f;
+        [SerializeField, Min(1f)] private float driveSpeed = 14f;
+        [SerializeField, Min(1f)] private float turnSpeed = 72f;
+        [SerializeField, Min(0.1f)] private float acceleration = 5.5f;
+        [SerializeField, Min(0.1f)] private float braking = 11f;
+        [SerializeField, Min(0.1f)] private float steeringWheelAngle = 420f;
         [SerializeField] private Transform seatPoint;
         [SerializeField] private Transform exitPoint;
         private ThirdPersonMotor occupant;
@@ -19,10 +22,23 @@ namespace Citygame.World
         private bool cockpitView;
         private Light[] headlights;
         private bool headlightsOn;
+        private Transform steeringWheel;
+        private Transform[] wheelVisuals;
+        private TextMesh speedDisplay;
+        private float currentSpeed;
+        private float steeringVisual;
 
         public bool IsOccupied => occupied;
         public bool IsCockpitView => cockpitView;
         public bool HeadlightsOn => headlightsOn;
+        public float SpeedKph => Mathf.Abs(currentSpeed) * 3.6f;
+
+        public void ConfigureDrivingVisuals(Transform wheel, Transform[] tyres, TextMesh display)
+        {
+            steeringWheel = wheel;
+            wheelVisuals = tyres;
+            speedDisplay = display;
+        }
 
         public void ConfigureCockpit(Transform anchor) { cockpitAnchor = anchor; }
         public void ConfigureHeadlights(Light[] lights) { headlights = lights; SetHeadlights(false); }
@@ -84,9 +100,15 @@ namespace Citygame.World
             input = Vector2.ClampMagnitude(input, 1f);
             float throttle = input.y;
             float steering = input.x;
-            float yaw = steering * turnSpeed * Mathf.Clamp01(Mathf.Abs(throttle) + 0.15f) * Time.deltaTime;
+            float targetSpeed = throttle * driveSpeed;
+            float rate = Mathf.Abs(throttle) < 0.05f ? braking * 0.32f : (Mathf.Sign(targetSpeed) != Mathf.Sign(currentSpeed) ? braking : acceleration);
+            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, rate * Time.deltaTime);
+            if (Mathf.Abs(currentSpeed) < 0.025f) currentSpeed = 0f;
+
+            float steeringFactor = Mathf.Clamp01(Mathf.Abs(currentSpeed) / 2.5f);
+            float yaw = steering * turnSpeed * steeringFactor * Mathf.Sign(currentSpeed == 0f ? 1f : currentSpeed) * Time.deltaTime;
             Quaternion nextRotation = body != null ? body.rotation * Quaternion.Euler(0f, yaw, 0f) : transform.rotation * Quaternion.Euler(0f, yaw, 0f);
-            Vector3 nextPosition = transform.position + transform.forward * throttle * driveSpeed * Time.deltaTime;
+            Vector3 nextPosition = transform.position + transform.forward * currentSpeed * Time.deltaTime;
             if (body != null)
             {
                 body.MoveRotation(nextRotation);
@@ -97,6 +119,19 @@ namespace Citygame.World
                 transform.rotation = nextRotation;
                 transform.position = nextPosition;
             }
+
+            steeringVisual = Mathf.Lerp(steeringVisual, steering, 1f - Mathf.Exp(-10f * Time.deltaTime));
+            if (steeringWheel != null) steeringWheel.localRotation = Quaternion.Euler(0f, 0f, 90f + steeringVisual * steeringWheelAngle);
+            if (wheelVisuals != null)
+            {
+                float roll = currentSpeed * 360f / (2f * Mathf.PI * 0.34f) * Time.deltaTime;
+                for (int i = 0; i < wheelVisuals.Length; i++)
+                {
+                    if (wheelVisuals[i] == null) continue;
+                    wheelVisuals[i].Rotate(Vector3.right, roll, Space.Self);
+                }
+            }
+            if (speedDisplay != null) speedDisplay.text = Mathf.RoundToInt(SpeedKph).ToString("000") + " km/h";
 
             if (Input.GetKeyDown(KeyCode.E)) ExitVehicle();
             if (Input.GetKeyDown(KeyCode.C)) ToggleCameraView();
@@ -146,6 +181,8 @@ namespace Citygame.World
             occupant = null;
             occupied = false;
             mobileDriveInput = Vector2.zero;
+            currentSpeed = 0f;
+            if (speedDisplay != null) speedDisplay.text = "000 km/h";
         }
     }
 }
