@@ -158,7 +158,7 @@ function accountSnapshot(username) {
       bank: Math.max(0, Math.floor(+sv.bank || 0)),
       food: needs.food, needs,
       path: String(sv.path || ''),
-      look: Array.isArray(sv.look) ? sv.look.slice(0, 6) : [],
+      look: Array.isArray((accounts[username].profile || {}).avatar && accounts[username].profile.avatar.look) ? accounts[username].profile.avatar.look.slice(0, 6) : (Array.isArray(sv.look) ? sv.look.slice(0, 6) : []),
       career: career ? { id: String(career.id || ''), title: String(careerDef && careerDef.title || career.id || ''), level: careerLevel + 1, xp: Math.max(0, Math.floor(+career.xp || 0)), skill: Math.max(0, Math.floor(+(life.skills && life.skills[career.id]) || 0)) } : null,
       skills: life.skills && typeof life.skills === 'object' ? Object.entries(life.skills).slice(0, 20).map(([id, level]) => ({ id: String(id), level: Math.max(0, Math.min(10, Math.floor(+level || 0))) })) : [],
       inventoryItems: inventoryCount,
@@ -188,6 +188,22 @@ function accountApi(req, res) {
   req.on('end', () => {
     let input;
     try { input = JSON.parse(body || '{}'); } catch (e) { return sendJson(400, { error: 'Invalid profile data.' }); }
+    if (req.method === 'POST' && input.action === 'save-avatar') {
+      const raw = input.look;
+      if (!Array.isArray(raw) || raw.length !== 6 || raw.some((v, i) => !Number.isInteger(v) || v < 0 || v > [4,1,7,4,1,5][i])) return sendJson(400, { error: 'Invalid character appearance data.' });
+      const appearance = input.appearance && typeof input.appearance === 'object' ? input.appearance : {};
+      const safeAppearance = {};
+      for (const field of ['skin','hair','style','shirt','pants','shoes']) {
+        const value = String(appearance[field] || '');
+        if (field === 'style' ? !['short','fade','afro'].includes(value) : !/^#[0-9a-fA-F]{6}$/.test(value)) return sendJson(400, { error: 'Invalid character appearance.' });
+        safeAppearance[field] = value;
+      }
+      const a = accounts[username];
+      a.profile = Object.assign({}, a.profile || {}, { avatar: { look: raw.slice(), appearance: safeAppearance, updatedAt: Date.now() }, updatedAt: Date.now() });
+      saveAccounts();
+      return persistAccount(username).then(() => sendJson(200, { ok: true, account: accountSnapshot(username) }))
+        .catch(e => { console.log('account avatar save failed', username, e.message); sendJson(503, { error: 'Character appearance could not be saved. Please retry.' }); });
+    }
     if (req.method === 'POST' && input.action === 'change-password') {
       const currentPassword = String(input.currentPassword || '');
       const newPassword = String(input.newPassword || '');
@@ -505,7 +521,10 @@ function onConnection(ws) {
         x: (Math.random() - 0.5) * 8, z: (Math.random() - 0.5) * 8, ry: 0, moving: false, floor: 0
       };
       const np = rooms[room].players[id]; if (gu) { np.email = gu.email; np.acct = gu.acct; if (gu.acct) { const profileName = accounts[gu.acct] && accounts[gu.acct].profile && accounts[gu.acct].profile.displayName; np.name = String(profileName || gu.acct).slice(0, 14); } else if (!m.name) np.name = String(gu.name).slice(0, 14); }
-      const sv = saves[saveKey(room, np)];
+      const savedAvatar = gu && gu.acct && accounts[gu.acct].profile && accounts[gu.acct].profile.avatar;
+
+      if (savedAvatar && Array.isArray(savedAvatar.look) && savedAvatar.look.length === 6) np.look = savedAvatar.look.slice();
+const sv = saves[saveKey(room, np)];
       if (sv) {
         np.money = Math.max(0, Math.floor(+sv.money) || 0); np.bank = Math.max(0, Math.floor(+sv.bank) || 0); np.food = Math.max(0, Math.min(100, +sv.food || 100));
       }
