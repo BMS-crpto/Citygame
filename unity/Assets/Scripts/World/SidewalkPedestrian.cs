@@ -30,9 +30,20 @@ namespace Citygame.World
         {
             float pace = speed * (0.85f + Mathf.Sin(Time.time + phase) * 0.15f);
             Vector3 step = Vector3.right * direction * pace * Time.deltaTime;
-            transform.position += step;
-            if (transform.position.x >= maxX) direction = -1;
-            if (transform.position.x <= minX) direction = 1;
+            Vector3 nextPosition = transform.position + step;
+            // Clamp at the sidewalk endpoints so frame-rate spikes cannot push
+            // pedestrians beyond the walkable strip or cause boundary jitter.
+            if (nextPosition.x >= maxX)
+            {
+                nextPosition.x = maxX;
+                direction = -1;
+            }
+            else if (nextPosition.x <= minX)
+            {
+                nextPosition.x = minX;
+                direction = 1;
+            }
+            transform.position = nextPosition;
             transform.rotation = Quaternion.Euler(0f, direction > 0 ? 90f : -90f, 0f);
         }
     }
