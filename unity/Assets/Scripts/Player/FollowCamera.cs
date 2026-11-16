@@ -17,12 +17,19 @@ namespace Citygame.Player
         [SerializeField, Range(20f, 85f)] private float maximumPitch = 70f;
         private float orbitYaw;
         private float orbitPitch;
+        private Transform cockpitAnchor;
+        private bool cockpitView;
         [SerializeField, Min(0.05f)] private float collisionRadius = 0.22f;
         [SerializeField, Min(0.2f)] private float minimumDistance = 1.1f;
         [SerializeField] private LayerMask collisionMask = ~0;
 
         private void LateUpdate()
         {
+            if (cockpitView && cockpitAnchor != null)
+            {
+                transform.SetPositionAndRotation(cockpitAnchor.position, cockpitAnchor.rotation);
+                return;
+            }
             if (target == null) return;
             ReadOrbitInput();
 
@@ -71,6 +78,12 @@ namespace Citygame.Player
                     orbitPitch = Mathf.Clamp(orbitPitch - touch.deltaPosition.y * touchOrbitSensitivity, minimumPitch, maximumPitch);
                 }
             }
+        }
+
+        public void SetCockpitView(Transform anchor, bool enabled)
+        {
+            cockpitAnchor = anchor;
+            cockpitView = enabled && anchor != null;
         }
 
         public void SetTarget(Transform followTarget)
