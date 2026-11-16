@@ -50,4 +50,14 @@ test('HTTP server exposes the game, health endpoint and City Guide module', asyn
   const guide = await fetch(base + '/citygame-city-guide.js');
   assert.equal(guide.status, 200);
   assert.match(await guide.text(), /City Guide/);
+
+  const rebuild = await fetch(base + '/rebuild.html');
+  assert.equal(rebuild.status, 200);
+  assert.match(await rebuild.text(), /citygame-core.js/);
+  for (const asset of ['/citygame.css', '/citygame-world.js', '/citygame-core.js', '/citygame-apps.js']) {
+    const assetResponse = await fetch(base + asset);
+    assert.equal(assetResponse.status, 200, asset + ' should be served');
+  }
+  const privateAccount = await fetch(base + '/api/account');
+  assert.equal(privateAccount.status, 401, 'account snapshot must require authentication');
 });
