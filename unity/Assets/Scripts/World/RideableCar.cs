@@ -17,11 +17,25 @@ namespace Citygame.World
         private Vector2 mobileDriveInput;
         private Transform cockpitAnchor;
         private bool cockpitView;
+        private Light[] headlights;
+        private bool headlightsOn;
 
         public bool IsOccupied => occupied;
         public bool IsCockpitView => cockpitView;
+        public bool HeadlightsOn => headlightsOn;
 
         public void ConfigureCockpit(Transform anchor) { cockpitAnchor = anchor; }
+        public void ConfigureHeadlights(Light[] lights) { headlights = lights; SetHeadlights(false); }
+
+        public void ToggleHeadlights() { SetHeadlights(!headlightsOn); }
+
+        public void SetHeadlights(bool enabled)
+        {
+            headlightsOn = enabled;
+            if (headlights == null) return;
+            for (int i = 0; i < headlights.Length; i++)
+                if (headlights[i] != null) headlights[i].enabled = enabled;
+        }
         public float DistanceTo(Vector3 point) => Vector3.Distance(transform.position, point);
 
         // Persist the player outside the vehicle so a reload never leaves them at a stale seat transform.
@@ -86,6 +100,7 @@ namespace Citygame.World
 
             if (Input.GetKeyDown(KeyCode.E)) ExitVehicle();
             if (Input.GetKeyDown(KeyCode.C)) ToggleCameraView();
+            if (Input.GetKeyDown(KeyCode.L)) ToggleHeadlights();
         }
 
         public void SetMobileDriveInput(Vector2 value) { mobileDriveInput = Vector2.ClampMagnitude(value, 1f); }
