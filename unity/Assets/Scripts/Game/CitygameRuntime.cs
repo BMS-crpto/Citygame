@@ -53,6 +53,7 @@ namespace Citygame.Game
         private DayNightCycle dayNight;
         private BusinessSpot nearby;
         private RideableCar nearbyCar;
+        private VehicleGarage nearbyGarage;
         private BusinessSpot selectedDestination;
         private float incomeClock;
         private float needsClock;
@@ -62,6 +63,9 @@ namespace Citygame.Game
         private const float AutosaveInterval = 15f;
         private BusinessSpot[] cityBusinesses = Array.Empty<BusinessSpot>();
         private RideableCar[] cityCars = Array.Empty<RideableCar>();
+        private VehicleGarage[] cityGarages = Array.Empty<VehicleGarage>();
+        private bool garageOpen;
+        private int garagePaintIndex;
         private string notice = "Welcome to Lagos Life. Explore and build your business.";
         private bool menuOpen;
         private int selectedBusinessIndex;
@@ -134,6 +138,15 @@ namespace Citygame.Game
                 if (car == null) continue;
                 float distance = car.DistanceTo(playerPosition);
                 if (distance < carDistance) { carDistance = distance; nearbyCar = car; }
+            }
+
+            nearbyGarage = null;
+            float garageDistance = 6f;
+            foreach (VehicleGarage garage in cityGarages)
+            {
+                if (garage == null) continue;
+                float distance = Vector3.Distance(playerPosition, garage.transform.position);
+                if (distance < garageDistance) { garageDistance = distance; nearbyGarage = garage; }
             }
 
             autosaveClock += Time.deltaTime;
@@ -220,6 +233,50 @@ namespace Citygame.Game
                 if (nearbyCar.IsOccupied && GUI.Button(new Rect(Screen.width - button * 2.2f, Screen.height - button * 4.65f, button * 2f, button),
                     "HEADLIGHTS " + (nearbyCar.HeadlightsOn ? "ON" : "OFF")))
                     nearbyCar.ToggleHeadlights();
+            }
+
+            if (nearbyGarage != null && GUI.Button(new Rect(Screen.width - 190f, Screen.height - button * 5.8f, 178f, 48f),
+                garageOpen ? "CLOSE GARAGE" : "OPEN GARAGE"))
+                garageOpen = !garageOpen;
+
+            if (garageOpen && nearbyGarage != null)
+            {
+                float panelWidth = Mathf.Min(300f, Screen.width - 24f);
+                Rect panel = new Rect(Screen.width - panelWidth - 12f, Screen.height - 290f, panelWidth, 270f);
+                GUI.Box(panel, nearbyGarage.GarageName + "\nVEHICLE SERVICE");
+                RideableCar serviceCar = GetNearestGarageVehicle();
+                if (serviceCar == null)
+                {
+                    GUI.Label(new Rect(panel.x + 12f, panel.y + 52f, panel.width - 24f, 42f), "Bring a vehicle into the service bay.");
+                }
+                else
+                {
+                    GUI.Label(new Rect(panel.x + 12f, panel.y + 48f, panel.width - 24f, 34f),
+                        "Condition " + Mathf.RoundToInt(serviceCar.ConditionPercent) + "% · Fuel " + Mathf.RoundToInt(serviceCar.FuelPercent) + "%");
+                    if (GUI.Button(new Rect(panel.x + 12f, panel.y + 88f, panel.width - 24f, 42f), "REPAIR · ₦25,000"))
+                    {
+                        if (save.cash < 25000) notice = "Not enough cash for repairs.";
+                        else { save.cash -= 25000; serviceCar.Repair(); Save(); notice = "Vehicle repaired at Lagos Motor Works."; }
+                    }
+                    if (GUI.Button(new Rect(panel.x + 12f, panel.y + 136f, panel.width - 24f, 42f), "REFUEL · ₦8,000"))
+                    {
+                        if (save.cash < 8000) notice = "Not enough cash to refuel.";
+                        else { save.cash -= 8000; serviceCar.Refuel(); Save(); notice = "Fuel tank refilled."; }
+                    }
+                    if (GUI.Button(new Rect(panel.x + 12f, panel.y + 184f, panel.width - 24f, 42f), "CUSTOM PAINT · ₦12,000"))
+                    {
+                        if (save.cash < 12000) notice = "Not enough cash for custom paint.";
+                        else
+                        {
+                            Color[] paints = { new Color(0.08f, 0.28f, 0.72f), new Color(0.08f, 0.08f, 0.09f), new Color(0.72f, 0.08f, 0.06f), new Color(0.82f, 0.72f, 0.12f) };
+                            serviceCar.SetPaint(paints[garagePaintIndex % paints.Length]);
+                            garagePaintIndex++;
+                            save.cash -= 12000;
+                            Save();
+                            notice = "Custom vehicle paint applied.";
+                        }
+                    }
+                }
             }
 
             float phoneWidth = portrait ? Screen.width - 20f : Mathf.Min(420f, Screen.width * 0.43f);
@@ -549,10 +606,26 @@ namespace Citygame.Game
             GUI.color = Color.white;
         }
 
+        private RideableCar GetNearestGarageVehicle()
+        {
+            Vector3 playerPosition = motor != null ? motor.transform.position : transform.position;
+            RideableCar closest = null;
+            float best = 14f;
+            for (int i = 0; i < cityCars.Length; i++)
+            {
+                RideableCar car = cityCars[i];
+                if (car == null) continue;
+                float distance = car.DistanceTo(playerPosition);
+                if (distance < best) { best = distance; closest = car; }
+            }
+            return closest;
+        }
+
         private void RefreshCityObjects()
         {
             cityBusinesses = FindObjectsOfType<BusinessSpot>();
             cityCars = FindObjectsOfType<RideableCar>();
+            cityGarages = FindObjectsOfType<VehicleGarage>();
         }
 
         public void EnterInterior(BusinessSpot spot)
