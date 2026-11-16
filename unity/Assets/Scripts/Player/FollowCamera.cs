@@ -58,7 +58,7 @@ namespace Citygame.Player
                 float currentSeparation = Vector2.Distance(first.position, second.position);
                 float pinchDelta = currentSeparation - previousSeparation;
                 // Pinch outward zooms toward the player; pinch inward pulls the camera back.
-                offset.z = Mathf.Clamp(offset.z - pinchDelta * pinchZoomSensitivity,
+                offset.z = Mathf.Clamp(offset.z + pinchDelta * pinchZoomSensitivity,
                     -maximumZoomDistance, -minimumZoomDistance);
             }
             else if (Input.touchCount == 1)
