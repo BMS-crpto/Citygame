@@ -14,7 +14,7 @@ const css=`
 #assetdl .primary{background:#ffd54a;color:#171717}
 `;
 const style=document.createElement('style');style.textContent=css;document.head.append(style);
-const root=document.createElement('section');root.id='assetdl';root.innerHTML='<div class="wrap"><button class="close" id="assetClose">Close</button><h2>Citygame downloads</h2><div class="muted">Download 3D content once. The website shell and saved 3D models can reopen offline on this device. Online accounts, multiplayer and live services still need internet.</div><div id="assetStorage" class="status">Checking device storage…</div><div id="assetPacks"></div><div class="muted">The Lagos road/map dataset is not yet included as a downloadable pack. These are the 3D models already present in the project; pack sizes are estimates.</div></div>';
+const root=document.createElement('section');root.id='assetdl';root.innerHTML='<div class="wrap"><button class="close" id="assetClose">Close</button><h2>Citygame downloads</h2><div class="muted">Download 3D content once. The cached page shell and saved 3D models remain on this device. The full game may still need internet for external libraries, accounts, multiplayer and live services.</div><div id="assetStorage" class="status">Checking device storage…</div><div id="assetPacks"></div><div class="muted">The Lagos road/map dataset is not yet included as a downloadable pack. These are the 3D models already present in the project; pack sizes are estimates.</div></div>';
 document.body.append(root);
 const cacheName=CACHE;
 const open=()=>{root.classList.add('show');refresh()};
