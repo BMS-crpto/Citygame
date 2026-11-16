@@ -226,3 +226,12 @@ test('Unity follow camera exposes adjustable player focus height and mobile pinc
   assert.match(camera, /Mathf\.Clamp\(offset\.z \+ pinchDelta \* pinchZoomSensitivity,[\s\S]*-maximumZoomDistance, -minimumZoomDistance\)/);
   assert.match(camera, /orbitPitch = Mathf\.Clamp\([\s\S]*minimumPitch, maximumPitch\)/);
 });
+
+
+test('Unity procedural city reuses color materials to reduce mobile render allocations', () => {
+  const generator = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'LagosBlockGenerator.cs'), 'utf8');
+  assert.match(generator, /Dictionary<Color, Material> MaterialCache/);
+  assert.match(generator, /MaterialCache\.TryGetValue\(color, out Material cached\)/);
+  assert.match(generator, /MaterialCache\[color\] = material/);
+  assert.match(generator, /material\.name = "Citygame shared material " \+ color/);
+});
