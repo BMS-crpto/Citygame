@@ -24,7 +24,7 @@ namespace Citygame.World
             currentSpeed = speed;
             phaseOffset = direction > 0 ? 0f : 8f;
             transform.position = new Vector3(direction > 0 ? minX : maxX, 0.62f, laneZ);
-            transform.rotation = Quaternion.Euler(0f, direction > 0 ? 90f : -90f, 0f);
+            transform.rotation = Quaternion.Euler(0f, direction > 0 ? 0f : 180f, 0f);
         }
 
         private void Update()
