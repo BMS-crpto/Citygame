@@ -15,8 +15,13 @@ namespace Citygame.World
         private FollowCamera followCamera;
         private bool occupied;
         private Vector2 mobileDriveInput;
+        private Transform cockpitAnchor;
+        private bool cockpitView;
 
         public bool IsOccupied => occupied;
+        public bool IsCockpitView => cockpitView;
+
+        public void ConfigureCockpit(Transform anchor) { cockpitAnchor = anchor; }
         public float DistanceTo(Vector3 point) => Vector3.Distance(transform.position, point);
 
         // Persist the player outside the vehicle so a reload never leaves them at a stale seat transform.
@@ -80,9 +85,18 @@ namespace Citygame.World
             }
 
             if (Input.GetKeyDown(KeyCode.E)) ExitVehicle();
+            if (Input.GetKeyDown(KeyCode.C)) ToggleCameraView();
         }
 
         public void SetMobileDriveInput(Vector2 value) { mobileDriveInput = Vector2.ClampMagnitude(value, 1f); }
+
+        public void ToggleCameraView()
+        {
+            if (!occupied || followCamera == null || cockpitAnchor == null) return;
+            cockpitView = !cockpitView;
+            followCamera.SetCockpitView(cockpitAnchor, cockpitView);
+            if (!cockpitView) followCamera.SetTarget(transform);
+        }
 
         public bool Enter(ThirdPersonMotor player)
         {
@@ -93,7 +107,12 @@ namespace Citygame.World
             occupant.transform.SetParent(seatPoint, false);
             occupant.transform.localPosition = Vector3.zero;
             occupant.transform.localRotation = Quaternion.identity;
-            if (followCamera != null) followCamera.SetTarget(transform);
+            if (followCamera != null)
+            {
+                followCamera.SetTarget(transform);
+                followCamera.SetCockpitView(cockpitAnchor, false);
+            }
+            cockpitView = false;
             return true;
         }
 
@@ -103,7 +122,12 @@ namespace Citygame.World
             occupant.transform.SetParent(null, true);
             occupant.transform.position = exitPoint.position + Vector3.up * 0.2f;
             occupant.SetRiding(false);
-            if (followCamera != null) followCamera.SetTarget(occupant.transform);
+            cockpitView = false;
+            if (followCamera != null)
+            {
+                followCamera.SetCockpitView(null, false);
+                followCamera.SetTarget(occupant.transform);
+            }
             occupant = null;
             occupied = false;
             mobileDriveInput = Vector2.zero;
