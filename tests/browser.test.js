@@ -254,3 +254,11 @@ test('Unity sidewalk pedestrians clamp movement to walkable endpoints', () => {
   assert.match(pedestrian, /else if \(nextPosition\.x <= minX\)[\s\S]*nextPosition\.x = minX[\s\S]*direction = 1/);
   assert.match(pedestrian, /transform\.position = nextPosition/);
 });
+
+ 
+test('Unity tropical rain particle budget is reduced on mobile', () => {
+  const weather = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'LagosWeatherSystem.cs'), 'utf8');
+  assert.match(weather, /mobileRainMultiplier = 0\.45f/);
+  assert.match(weather, /main\.maxParticles = Application\.isMobilePlatform \? 600 : 1800/);
+  assert.match(weather, /emission\.rateOverTime = Application\.isMobilePlatform \? rainRate \* mobileRainMultiplier : rainRate/);
+});
