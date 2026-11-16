@@ -1148,6 +1148,20 @@ function buildHouseInside(id){
   zone('DINING',x0-5.5,z0+5.8,5.0,3.0,0xd8bd77);
   zone('KITCHEN',x0+7.2,z0+4.2,4.2,3.0,0x9bc7a3);
   zone('STUDY',x0-9.4,z0+0.8,2.0,3.4,0x9b9bd1);
+
+  // Kitchen fixtures: counter, worktop, sink and wall cupboards.
+  bx_(x0+7.1,0.48,z0+2.8,4.8,0.92,0.72,0x9a6848);
+  bx_(x0+7.1,0.98,z0+2.8,4.95,0.12,0.78,0xe6e1d8);
+  bx_(x0+8.0,1.07,z0+2.72,1.05,0.06,0.52,0x879da5);
+  bx_(x0+7.0,2.15,z0+1.85,4.6,1.0,0.35,0xf0e8dc);
+  bx_(x0+5.3,1.65,z0+2.8,0.1,0.75,0.65,0x6d4c41);
+  // Study desk, monitor and book storage.
+  bx_(x0-9.2,0.82,z0-0.1,2.2,0.16,1.0,0x79553b);
+  for(const dx of [-0.9,0.9])for(const dz of [-0.35,0.35])bx_(x0-9.2+dx,0.4,z0-0.1+dz,0.12,0.8,0.12,0x4e382b);
+  bx_(x0-9.2,1.35,z0-0.43,0.9,0.82,0.08,0x202b36);
+  bx_(x0-9.2,1.0,z0+0.1,0.42,0.08,0.42,0x30343a);
+  bx_(x0-10.0,1.35,z0+1.65,0.55,2.4,0.42,0x684b37);
+  for(let n=0;n<4;n++)bx_(x0-10.0,0.55+n*0.34,z0+1.4,0.58,0.22,0.36,[0xb94d42,0x3d6c8a,0x65804b,0xc29a4a][n]);
 }
 const IK=0.78;
 function roomFit(x0,z0,fn){T.set(x0,z0,1,IK);try{fn()}finally{T.off()}}
