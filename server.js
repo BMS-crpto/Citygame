@@ -165,12 +165,29 @@ function accountApi(req, res) {
   if (!auth || !accounts[auth.acct]) return sendJson(401, { error: 'Please sign in again to access your player account.' });
   const username = auth.acct;
   if (req.method === 'GET') return sendJson(200, { ok: true, account: accountSnapshot(username), storage: UP_ON && dbWritesOk ? 'persistent' : 'local-fallback' });
-  if (req.method !== 'PATCH') return sendJson(405, { error: 'Method not allowed' });
+  if (req.method !== 'PATCH' && req.method !== 'POST') return sendJson(405, { error: 'Method not allowed' });
   let body = '';
   req.on('data', chunk => { body += chunk; if (body.length > 3000) req.destroy(); });
   req.on('end', () => {
     let input;
     try { input = JSON.parse(body || '{}'); } catch (e) { return sendJson(400, { error: 'Invalid profile data.' }); }
+    if (req.method === 'POST' && input.action === 'change-password') {
+      const currentPassword = String(input.currentPassword || '');
+      const newPassword = String(input.newPassword || '');
+      const account = accounts[username];
+      if (!currentPassword || !newPassword) return sendJson(400, { error: 'Enter your current and new passwords.' });
+      if (newPassword.length < 10 || newPassword.length > 128 || WEAK.includes(newPassword.toLowerCase()) || newPassword.toLowerCase() === username) return sendJson(400, { error: 'Choose a stronger password with at least 10 characters.' });
+      const actual = Buffer.from(hashPw(currentPassword, account.salt), 'hex');
+      const expected = Buffer.from(String(account.hash || ''), 'hex');
+      if (actual.length !== expected.length || !crypto.timingSafeEqual(actual, expected)) return sendJson(403, { error: 'Current password is incorrect.' });
+      const salt = crypto.randomBytes(16).toString('hex');
+      account.salt = salt;
+      account.hash = hashPw(newPassword, salt);
+      saveAccounts();
+      return persistAccount(username).then(() => sendJson(200, { ok: true, message: 'Password updated successfully.' }))
+        .catch(e => { console.log('account password save failed', username, e.message); sendJson(503, { error: 'Password could not be saved. Please retry.' }); });
+    }
+    if (req.method !== 'PATCH') return sendJson(400, { error: 'Unsupported account action.' });
     const displayName = String(input.displayName == null ? '' : input.displayName).trim();
     const bio = String(input.bio == null ? '' : input.bio).trim();
     if (displayName.length < 2 || displayName.length > 24 || !/^[\p{L}\p{N} _.'-]+$/u.test(displayName)) return sendJson(400, { error: 'Display name must be 2–24 letters, numbers or simple punctuation.' });
