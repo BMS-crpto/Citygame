@@ -936,6 +936,7 @@ const NAMES={
 const SIGNBG=['#c62828','#1565c0','#2e7d32','#6a1b9a','#ef6c00','#00838f'];
 const pitchedA=[],pitchedB=[];     // pitched roofs (instanced cones)
 const palms=[],treesA=[],treesB=[];
+const garageDoorList=[];
 const lampPos=[];for(let i=-GN;i<=GN;i++)for(let j=-GN;j<=GN;j++)lampPos.push([i*BLOCK+7.5,0,j*BLOCK+7.5],[i*BLOCK+7.5+32,0,j*BLOCK+7.5],[i*BLOCK+7.5,0,j*BLOCK+7.5+32]);
 
 function villa(x,z){                       // Lekki: modern white villa in a walled compound
@@ -957,8 +958,14 @@ function villa(x,z){                       // Lekki: modern white villa in a wal
   // Attached private garage wing, reached through its own sliding compound gate.
   const gx=x+7.55,gz=z-0.55;
   bx_(gx,1.95,gz,4.8,3.9,6.1,0xd9dfe3);bx_(gx,4.0,gz,5.15,0.32,6.55,0x303943);
-  bx_(gx,1.48,gz+3.13,3.65,2.72,0.18,0x263445);bx_(gx,2.2,gz+3.24,3.55,0.12,0.08,0x687786);
-  for(let gy=0.75;gy<=2.55;gy+=0.6)bx_(gx,gy,gz+3.31,3.55,0.045,0.045,0x9aa7b4);
+  // Individually animated sectional door, separate from batched city geometry.
+   const garageDoor=new THREE.Group();
+   garageDoor.position.set(T.X(gx),T.Y(1.48),T.Z(gz+3.13));
+   garageDoor.scale.set(T.kx,T.ky,T.kx);
+   const garagePanel=new THREE.Mesh(new THREE.BoxGeometry(3.65,2.72,0.18),new THREE.MeshStandardMaterial({color:0x263445,roughness:0.62,metalness:0.28}));
+   garagePanel.castShadow=true;garagePanel.receiveShadow=true;garageDoor.add(garagePanel);
+   scene.add(garageDoor);garageDoorList.push({g:garageDoor,baseY:garageDoor.position.y,open:0,target:0,x:gx,z:gz});
+  for(let gy=-1.0;gy<=1.0;gy+=0.5){const slat=new THREE.Mesh(new THREE.BoxGeometry(3.55,0.045,0.035),new THREE.MeshStandardMaterial({color:0x9aa7b4,metalness:0.42,roughness:0.5}));slat.position.set(0,gy,0.105);garageDoor.add(slat)}
   bx_(gx-2.05,2.35,gz+2.85,0.16,0.35,0.16,0xffd879);bx_(gx+2.05,2.35,gz+2.85,0.16,0.35,0.16,0xffd879);
   bx_(gx,0.07,gz+5.0,3.9,0.035,4.5,0x858b91);
   bx_(x+5.65,0.9,z+W,0.7,1.8,0.3,wc);bx_(x+9.5,0.9,z+W,1.0,1.8,0.3,wc);
@@ -2216,6 +2223,7 @@ const dust=[];let dustI=0;
 for(let i=0;i<32;i++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:dustTex,transparent:true,depthWrite:false,opacity:0}));s.visible=false;scene.add(s);dust.push({s,life:0})}
 function puff(x,z){const d=dust[dustI++%dust.length];d.life=1;d.s.position.set(x,0.5,z);d.s.scale.set(1,1,1);d.s.visible=true}
 function updateDust(dt){for(const d of dust){if(d.life<=0)continue;d.life-=dt*1.6;if(d.life<=0){d.s.visible=false;continue}d.s.position.y+=dt*1.2;const sc=1+(1-d.life)*3.2;d.s.scale.set(sc,sc,1);d.s.material.opacity=d.life*0.6}}
+function updateGarageDoors(dt){for(const d of garageDoorList){d.open+=(d.target-d.open)*Math.min(1,dt*3.8);if(Math.abs(d.target-d.open)<0.006)d.open=d.target;d.g.position.y=d.baseY+d.open*2.9}}
 
 let ac=null,muted=false,eng=null;
 function audioInit(){
@@ -3335,7 +3343,7 @@ function loop(now){
   const sirenOf=g=>g&&g.userData.carG&&g.userData.carG.userData.siren;
   let s=sirenOf(me);if(s){s[0].visible=ph;s[1].visible=!ph}
   for(const id in others){s=sirenOf(others[id].g);if(s){s[0].visible=ph;s[1].visible=!ph}}
-  trafficUpdate(dt);updateDust(dt);updateRain(dt);
+  trafficUpdate(dt);updateDust(dt);updateGarageDoors(dt);updateRain(dt);
   renderer.render(scene,camera);
 }
 requestAnimationFrame(loop);
@@ -3496,7 +3504,8 @@ function onMsg(m){
     case 'catalog':PX.catalog=m.items||[];break;
     case 'x_cert':PX.cert=m;if(PX.app==='ID')renderApp();break;
     case 'x_cars':PX.cars=m.cars||[];PX.storedCars=m.storedCars||[];PX.garage=m.garage||null;PX.carPaint=m.carPaint||{};PX.license=!!m.license;PX.carList=m.list||[];try{refreshShowLabels();syncBay()}catch(e){console.warn(e)}if(PX.app==='Cars'||PX.app==='ID')renderApp();break;
-    case 'garage_stored':if(carObj){scene.remove(carObj.g);carObj=null;myCol=-1;speed=0;if(me)setCarMode(me,-1)}break;
+    case 'garage_door':{let best=null,bd=1e9;for(const d of garageDoorList){const dd=Math.hypot(d.x-(+m.x||0),d.z-(+m.z||0));if(dd<bd){bd=dd;best=d}}if(best&&bd<20)best.target=m.open?1:0;break;}
+     case 'garage_stored':if(carObj){scene.remove(carObj.g);carObj=null;myCol=-1;speed=0;if(me)setCarMode(me,-1)}break;
     case 'garage_spawn':{for(let i=lotCars.length-1;i>=0;i--){const b=lotCars[i];if(b.col===+m.col){scene.remove(b.g);const pi=parked.indexOf(b);if(pi>=0)parked.splice(pi,1);lotCars.splice(i,1)}}const g=makeCar(m.col,'owned');g.position.set(+m.x||0,0,+m.z||0);g.rotation.y=+m.ry||0;scene.add(g);const pc={g,x:+m.x||0,z:+m.z||0,ry:+m.ry||0,col:+m.col};parked.push(pc);break;}
     case 'x_mk':PX.mk=m;if(PX.app==='Invest')renderApp();break;
     case 'x_decor':PX.decor=m;if(PX.app==='Decor')renderApp();break;
