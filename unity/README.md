@@ -44,17 +44,28 @@ This is a playable greybox prototype foundation, not a complete production open-
 - Source: `kayquer/kit-cidade-lowpoly`, `models/comercial/loja_esquina.glb`, CC0 1.0 Universal. The same model is used by the browser build at `public/assets/glb/city-kit/loja_esquina.glb`.
 ## Real Lagos map data (OpenStreetMap)
 
-The Unity scene now checks for `Assets/Resources/LagosMapData.json` and imports real coordinate-based road lines, building footprints, water features and parks when that file exists. It no longer labels the generated grid as real geography; the old procedural scene is retained only as a logged fallback until map data is installed.
+The Unity scene checks for `Assets/Resources/LagosMapData.json` and imports coordinate-based roads, building footprints, water/coastline geometry and parks when that file exists. Roads are generated as mesh surfaces with colliders for driving. The old procedural blocks are retained only as a clearly logged fallback; they are not presented as real Lagos geography.
 
-### Prepare a Lagos extract
+### Build the first real Lagos region
 
-1. Obtain a Lagos-area GeoJSON extract from OpenStreetMap data. The Nigeria Geofabrik extract is available at https://download.geofabrik.de/africa/nigeria.html; use a GIS tool to clip it to the intended Lagos play area and export a GeoJSON FeatureCollection with OSM tags in each feature's `properties`.
-2. Keep OpenStreetMap attribution and comply with the ODbL 1.0 licence. Source: https://www.openstreetmap.org/copyright.
-3. Run from the repository root:
-   `python tools/convert_lagos_osm.py path/to/lagos.geojson unity/Assets/Resources/LagosMapData.json`
-4. Reopen Unity and choose **Citygame > Create Foundation Scene**.
+The initial extract covers Lagos Island, Ikoyi, Victoria Island and western Lekki. From the repository root:
 
-The converter projects longitude/latitude into local metres around central Lagos (6.5244, 3.3792). It keeps OSM road geometry, building footprints and tagged water/park polygons. Building heights use OSM height/level tags where available and conservative fallbacks otherwise.
+```bash
+python tools/download_lagos_osm.py /tmp/lagos-core.geojson
+python tools/convert_lagos_osm.py /tmp/lagos-core.geojson unity/Assets/Resources/LagosMapData.json
+```
 
-**Data limitation:** the GeoJSON extract itself is not included in this commit. Until a current Lagos extract is placed at the path above, Unity will log a warning and use the existing greybox fallback. This avoids falsely claiming the fallback is a real Lagos map.
+The downloader uses the read-only Overpass API and defaults to a focused bounding box. To choose another small area, pass `south west north east` (maximum 0.25 degrees per side), for example:
 
+```bash
+python tools/download_lagos_osm.py /tmp/lagos-area.geojson 6.40 3.30 6.60 3.55
+python tools/convert_lagos_osm.py /tmp/lagos-area.geojson unity/Assets/Resources/LagosMapData.json
+```
+
+Then reopen Unity and choose **Citygame > Create Foundation Scene**. The converter projects longitude/latitude into local metres around central Lagos (6.5244, 3.3792). Building heights use OSM height/level tags where available and conservative fallbacks otherwise.
+
+### Data and licensing
+
+OpenStreetMap data is licensed under the Open Data Commons Open Database License (ODbL). Preserve the attribution **© OpenStreetMap contributors** in the game credits and comply with ODbL obligations when distributing a database derived from the extract. Public Overpass instances are shared infrastructure: keep extracts focused, cache downloaded data, and do not run repeated bulk queries. For larger production-scale coverage, use a regional extract or a dedicated data provider.
+
+**Current limitation:** the extract is not committed to the repository yet. The downloader and converter are now included, but Unity will continue to use the greybox fallback until `LagosMapData.json` has been generated and placed in `Assets/Resources`. OSM geometry is a geographic foundation, not photorealistic 3D art; detailed facades, interiors, traffic and landmark models remain separate production work.
