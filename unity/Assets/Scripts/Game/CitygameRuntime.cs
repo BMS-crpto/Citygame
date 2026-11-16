@@ -479,7 +479,7 @@ namespace Citygame.Game
             cityCars = FindObjectsOfType<RideableCar>();
         }
 
-        private void EnterInterior(BusinessSpot spot)
+        public void EnterInterior(BusinessSpot spot)
         {
             if (spot == null || motor == null || interiorActive) return;
             interiorReturnPosition = motor.transform.position;
