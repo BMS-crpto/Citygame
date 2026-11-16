@@ -268,12 +268,16 @@ namespace Citygame.World
             CreateCube(name + " entrance lintel", root,
                 new Vector3(position.x, position.y + groundFloorHeight - 0.12f, frontZ),
                 new Vector3(1.6f, 0.24f, 0.22f), trim);
-            CreateCube(name + " entrance door", root,
+            GameObject entranceDoor = CreateCube(name + " entrance door", root,
                 new Vector3(position.x, position.y + groundFloorHeight * 0.48f, frontZ - 0.06f),
                 new Vector3(1.15f, groundFloorHeight * 0.88f, 0.08f), doorMaterial);
-            CreateCube(name + " door handle", root,
+            // The door is a visual panel: the portal handles entry, so a solid
+            // cube collider here would block the player before the trigger fires.
+            DisableVisualCollider(entranceDoor);
+            GameObject doorHandle = CreateCube(name + " door handle", root,
                 new Vector3(position.x + 0.42f, position.y + groundFloorHeight * 0.48f, frontZ - 0.12f),
                 new Vector3(0.06f, 0.28f, 0.04f), trim);
+            DisableVisualCollider(doorHandle);
             CreateCube(name + " storefront glass left", root,
                 new Vector3(position.x - size.x * 0.29f, position.y + groundFloorHeight * 0.52f, frontZ - 0.08f),
                 new Vector3(size.x * 0.28f, groundFloorHeight * 0.68f, 0.08f), glass);
