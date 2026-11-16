@@ -112,7 +112,7 @@ function authApi(req, res) {
 
 
 function accountFromRequest(req) {
-  const match = /^Bearer\\s+(.+)$/i.exec(String(req.headers.authorization || ''));
+  const match = /^Bearer\s+(.+)$/i.exec(String(req.headers.authorization || ''));
   return match ? readToken(match[1]) : null;
 }
 function accountSnapshot(username) {
