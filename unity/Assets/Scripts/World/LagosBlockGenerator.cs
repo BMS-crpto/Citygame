@@ -92,34 +92,82 @@ namespace Citygame.World
 
         private static void CreateBuilding(Transform root, string name, Vector3 position, Vector3 size, Material material, BusinessCategory category)
         {
-            GameObject building = CreateCube(name, root, position + Vector3.up * size.y * 0.5f, size, material);
             Material glass = MaterialFor(new Color(0.16f, 0.28f, 0.38f));
             Material trim = MaterialFor(new Color(0.78f, 0.72f, 0.62f));
-            // Repeated windows and floor bands give the block a recognisable Lagos mid-rise street frontage.
+            Material doorMaterial = MaterialFor(new Color(0.12f, 0.10f, 0.08f));
+            Material frameMaterial = MaterialFor(new Color(0.34f, 0.30f, 0.24f));
+
+            // Form a building shell with a visible ground-floor entrance instead of
+            // a solid cube. The door opening is aligned with the BusinessSpot.
+            float groundFloorHeight = Mathf.Min(1.8f, size.y * 0.42f);
+            float frontZ = position.z - size.z * 0.5f;
+            float sideWidth = Mathf.Max(0.65f, (size.x - 1.6f) * 0.5f);
+            float sideCenterOffset = 0.8f + sideWidth * 0.5f;
+
+            CreateCube(name + " upper building mass", root,
+                position + Vector3.up * (groundFloorHeight + (size.y - groundFloorHeight) * 0.5f),
+                new Vector3(size.x, Mathf.Max(0.2f, size.y - groundFloorHeight), size.z), material);
+            CreateCube(name + " ground floor left frontage", root,
+                new Vector3(position.x - sideCenterOffset, position.y + groundFloorHeight * 0.5f, frontZ),
+                new Vector3(sideWidth, groundFloorHeight, 0.22f), material);
+            CreateCube(name + " ground floor right frontage", root,
+                new Vector3(position.x + sideCenterOffset, position.y + groundFloorHeight * 0.5f, frontZ),
+                new Vector3(sideWidth, groundFloorHeight, 0.22f), material);
+            CreateCube(name + " entrance lintel", root,
+                new Vector3(position.x, position.y + groundFloorHeight - 0.12f, frontZ),
+                new Vector3(1.6f, 0.24f, 0.22f), trim);
+            CreateCube(name + " entrance door", root,
+                new Vector3(position.x, position.y + groundFloorHeight * 0.48f, frontZ - 0.06f),
+                new Vector3(1.15f, groundFloorHeight * 0.88f, 0.08f), doorMaterial);
+            CreateCube(name + " door handle", root,
+                new Vector3(position.x + 0.42f, position.y + groundFloorHeight * 0.48f, frontZ - 0.12f),
+                new Vector3(0.06f, 0.28f, 0.04f), trim);
+            CreateCube(name + " storefront glass left", root,
+                new Vector3(position.x - size.x * 0.29f, position.y + groundFloorHeight * 0.52f, frontZ - 0.08f),
+                new Vector3(size.x * 0.28f, groundFloorHeight * 0.68f, 0.08f), glass);
+            CreateCube(name + " storefront glass right", root,
+                new Vector3(position.x + size.x * 0.29f, position.y + groundFloorHeight * 0.52f, frontZ - 0.08f),
+                new Vector3(size.x * 0.28f, groundFloorHeight * 0.68f, 0.08f), glass);
+
+            // Side and rear shell details add depth and frame upper-storey windows.
+            CreateCube(name + " left exterior wall", root,
+                new Vector3(position.x - size.x * 0.5f, position.y + size.y * 0.5f, position.z),
+                new Vector3(0.22f, size.y, size.z), material);
+            CreateCube(name + " right exterior wall", root,
+                new Vector3(position.x + size.x * 0.5f, position.y + size.y * 0.5f, position.z),
+                new Vector3(0.22f, size.y, size.z), material);
+            CreateCube(name + " rear exterior wall", root,
+                new Vector3(position.x, position.y + size.y * 0.5f, position.z + size.z * 0.5f),
+                new Vector3(size.x, size.y, 0.22f), material);
+
             int floors = Mathf.Max(1, Mathf.FloorToInt(size.y / 2.1f));
             int windowsPerFloor = Mathf.Max(2, Mathf.FloorToInt(size.x / 2.1f));
             float windowWidth = Mathf.Min(1.05f, size.x / (windowsPerFloor + 1f));
             for (int floor = 0; floor < floors; floor++)
             {
-                float windowY = position.y + 1.05f + floor * (size.y / floors);
+                float windowY = position.y + groundFloorHeight + 0.7f + floor * (size.y / floors);
                 for (int window = 0; window < windowsPerFloor; window++)
                 {
                     float windowX = position.x - size.x * 0.5f + (window + 1) * (size.x / (windowsPerFloor + 1f));
-                    CreateCube(name + " facade window", root, new Vector3(windowX, windowY, position.z - size.z * 0.5f - 0.055f), new Vector3(windowWidth, 0.72f, 0.08f), glass);
+                    CreateCube(name + " facade upper window", root,
+                        new Vector3(windowX, windowY, frontZ - 0.055f),
+                        new Vector3(windowWidth, 0.72f, 0.08f), glass);
                 }
                 if (floor > 0)
-                    CreateCube(name + " facade floor trim", root, new Vector3(position.x, position.y + floor * (size.y / floors), position.z - size.z * 0.5f - 0.07f), new Vector3(size.x * 0.96f, 0.09f, 0.1f), trim);
+                    CreateCube(name + " facade floor trim", root,
+                        new Vector3(position.x, position.y + groundFloorHeight + floor * (size.y / floors), frontZ - 0.07f),
+                        new Vector3(size.x * 0.96f, 0.09f, 0.1f), trim);
             }
-            // Shopfront glazing at street level.
-            CreateCube(name + " storefront", root, position + new Vector3(0f, 0.9f, -size.z * 0.5f - 0.08f), new Vector3(size.x * 0.62f, 1.45f, 0.1f), glass);
+
             GameObject spotObject = new GameObject(name + " business interaction point");
             spotObject.transform.SetParent(root, false);
-            spotObject.transform.position = position + new Vector3(0f, 0.0f, -size.z * 0.65f);
+            spotObject.transform.position = new Vector3(position.x, position.y, frontZ - 1.1f);
             BusinessSpot spot = spotObject.AddComponent<BusinessSpot>();
             spot.Configure(name, category);
-            CreateCube(name + " sign", root, position + new Vector3(0, size.y + 0.45f, -size.z * 0.51f), new Vector3(size.x * 0.8f, 0.6f, 0.2f), MaterialFor(new Color(0.12f, 0.16f, 0.2f)));
+            CreateCube(name + " sign", root,
+                position + new Vector3(0, size.y + 0.45f, frontZ - 0.01f),
+                new Vector3(size.x * 0.8f, 0.6f, 0.2f), MaterialFor(new Color(0.12f, 0.16f, 0.2f)));
         }
-
 
         // Keep one procedural sky material across scene rebuilds to avoid leaking
         // duplicate skybox materials when the runtime regenerates the city.
