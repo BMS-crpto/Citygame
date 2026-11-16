@@ -60,4 +60,17 @@ test('HTTP server exposes the game, health endpoint and City Guide module', asyn
   }
   const privateAccount = await fetch(base + '/api/account');
   assert.equal(privateAccount.status, 401, 'account snapshot must require authentication');
+
+  const registration = await fetch(base + '/api/register', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: 'account_test', password: 'A-secure-test-pass-9831', name: 'Test Player', email: 'test@example.invalid', dob: '1990-01-01', agree: true })
+  });
+  assert.equal(registration.status, 200);
+  const credentials = await registration.json();
+  const account = await fetch(base + '/api/account', { headers: { Authorization: 'Bearer ' + credentials.token } });
+  assert.equal(account.status, 200);
+  const snapshot = await account.json();
+  assert.equal(snapshot.account.username, 'account_test');
+  assert.equal(snapshot.account.displayName, 'Test Player');
+  assert.equal(typeof snapshot.account.player.money, 'number');
 });
