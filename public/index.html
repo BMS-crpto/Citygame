@@ -77,6 +77,38 @@
   #appview{margin:8px 0 4px;min-height:100px}
   #appview .card{background:linear-gradient(145deg,#191f2c,#11151e);border:1px solid #2b3445;border-radius:15px;padding:12px;box-shadow:0 5px 16px #0002}
   #phx{background:#292f3d;border-color:#505a6d;border-radius:13px;padding:8px 12px}
+  /* Reference-inspired in-game handset: gold alloy frame, emerald launcher, compact app icons. */
+  #phone:not(.app-open) .pbox{
+    background:linear-gradient(155deg,#063d31 0%,#075743 48%,#042c25 100%);
+    border:2px solid #d7b66b;
+    box-shadow:0 0 0 2px #6f5426,0 22px 70px #000e,0 0 28px #d5ad5b44;
+    color:#f7fff9;
+  }
+  #phone:not(.app-open) .pbox:before{color:#f5e7bf;text-shadow:0 1px 3px #001b14}
+  #phone:not(.app-open) .pbox:after{background:#e6d6a8}
+  #phone:not(.app-open) .pgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;border-bottom-color:#d6ead522}
+  #phone:not(.app-open) .app{
+    min-width:0;min-height:66px;padding:8px 3px;
+    border:1px solid #d6e8d344;border-radius:15px;
+    background:linear-gradient(145deg,#ffffff24,#001e1740);
+    box-shadow:inset 0 1px #ffffff35,0 5px 12px #001b1540;
+    color:#f8fff9;font-size:10px;font-weight:700;
+  }
+  #phone:not(.app-open) .app b{
+    display:grid;place-items:center;width:36px;height:36px;margin:0 auto 4px;
+    border-radius:11px;background:linear-gradient(145deg,#fff,#dce9df);
+    color:#123d31;font-size:22px;line-height:1;
+    box-shadow:0 2px 7px #001b1555;
+  }
+  #phone:not(.app-open) #phoneSearch{
+    background:#012e25a8;border:1px solid #d8c17a88;color:#fff;
+  }
+  #phone:not(.app-open) #phoneSearch::placeholder{color:#d4e9dc}
+  #phone:not(.app-open) #appview .card{
+    background:linear-gradient(145deg,#073e32dd,#042b24ee);
+    border-color:#d8bd7755;color:#f4fff7;
+  }
+  #phone #phx{background:#173f34;border:1px solid #d7bd78;color:#fff}
   /* Landscape phones: keep the whole phone interface reachable by scrolling. */
   @media (orientation:landscape) and (max-height:600px){
     #phone{align-items:flex-start;justify-content:center;overflow-y:auto;padding:5px 8px;overscroll-behavior:contain}
@@ -135,8 +167,8 @@
   /* Native-feeling full-screen phone apps */
   #phone.app-open .pbox>div:first-child{display:none!important}
   #phone.app-open #pgrid,#phone.app-open #phoneSearch{display:none!important}
-  #phone.app-open #appview{display:block;flex:1;min-height:0;margin:0;overflow:visible;text-align:left}
-  #phone.app-open .pbox{display:flex;flex-direction:column;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  #phone.app-open #appview{display:block;flex:1 1 auto;min-height:0;margin:0;max-height:100%;overflow-y:auto!important;overflow-x:hidden;text-align:left;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+  #phone.app-open .pbox{display:flex;flex-direction:column;max-height:calc(100dvh - 16px)!important;overflow:hidden!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
   .phone-appbar{position:sticky;top:0;z-index:4;display:flex;align-items:center;gap:9px;margin:0 -2px 12px;padding:7px 4px 11px;background:#0c111d;border-bottom:1px solid #ffffff20}
   .phone-appbar>div{flex:1;min-width:0;text-align:left}
   .phone-appbar b{display:block;font-size:16px}
@@ -144,8 +176,8 @@
   .phone-appbar .pb{margin:0;padding:8px 11px}
   #phone.app-open .pbox:after{margin:14px auto 3px}
   @media (orientation:landscape) and (max-height:600px){
-    #phone.app-open .pbox{width:min(96vw,900px);height:auto!important;max-height:none!important;overflow:visible}
-    #phone.app-open #appview{max-height:none!important;overflow:visible!important}
+    #phone.app-open .pbox{width:min(96vw,900px);height:auto!important;max-height:calc(100dvh - 16px)!important;overflow:hidden!important}
+    #phone.app-open #appview{max-height:100%!important;overflow-y:auto!important;overflow-x:hidden!important}
   }
   #bigmap{position:fixed;inset:0;background:#0b1424;display:none;z-index:9;flex-direction:row}
   #bigmap canvas{flex:none;touch-action:none}
@@ -304,6 +336,148 @@
 #toast{background:#ff7a1aee!important;border-radius:22px!important;font-weight:700;box-shadow:0 4px 14px #0007}
 .sbtn{background:#0c1118d9!important;border:2px solid #ff8a2a88!important;box-shadow:0 3px 10px #0007}
 #act{background:linear-gradient(#ff5a3c,#d9341c)!important;box-shadow:0 4px 14px #0008}
+
+  /* EPIC LAGOS ENTRY EXPERIENCE — cinematic character creation */
+  #menu{
+    isolation:isolate;
+    background:
+      radial-gradient(ellipse at 50% 4%,rgba(37,99,235,.36),transparent 42%),
+      radial-gradient(ellipse at 82% 38%,rgba(245,158,11,.20),transparent 38%),
+      radial-gradient(ellipse at 10% 72%,rgba(16,185,129,.16),transparent 36%),
+      linear-gradient(160deg,#050b18 0%,#0b1830 46%,#17263a 72%,#291b24 100%)!important;
+    padding:clamp(14px,3vh,30px) 16px max(28px,env(safe-area-inset-bottom));
+    overflow-x:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  #menu:before{
+    content:"";
+    position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.24;
+    background-image:linear-gradient(115deg,transparent 0 48%,#ffffff0b 49%,transparent 50% 100%);
+    background-size:90px 100%;
+    mask-image:linear-gradient(to bottom,#000,transparent 82%);
+  }
+  #menu .skyline{height:42vh;opacity:.88;filter:drop-shadow(0 -12px 35px #f59e0b18)}
+  #menu .skyline b{background-color:#07101f;background-image:
+    radial-gradient(circle,rgba(255,202,108,.95) 0 1px,transparent 1.5px),
+    linear-gradient(90deg,#101d32,#07101f 55%,#132039);
+    background-size:10px 13px,100% 100%;
+    border-top:1px solid #ffffff18;
+  }
+  #menu .stage{width:min(510px,100%);gap:15px}
+  #menu .brand{position:relative;padding:8px 0 2px}
+  #menu .brand:before{
+    content:"LAGOS, NIGERIA  •  YOUR CITY. YOUR STORY.";
+    display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid #ffffff24;border-radius:99px;padding:6px 12px;
+    margin:0 auto 14px;background:#07111fc9;color:#cbd5e1;
+    font-size:9px;font-weight:800;letter-spacing:2px;
+    box-shadow:0 8px 26px #0004;
+  }
+  #menu .brand.small h1,#menu .brand h1{
+    font-size:clamp(35px,8vw,48px);letter-spacing:8px;
+    text-shadow:0 5px 25px #000b,0 0 34px #f59e0b22;
+  }
+  #menu .brand h1 span{
+    font-size:clamp(38px,8vw,50px);letter-spacing:13px;
+    background:linear-gradient(100deg,#fff1b8 2%,#ffc247 38%,#f28b24 72%,#ffe2a0 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 7px 18px #f59e0b30);
+  }
+  #menu .brand .tag{
+    margin-top:13px;font-size:12px;letter-spacing:2.2px;
+    text-transform:uppercase;color:#dbeafe;font-weight:700;opacity:.9;
+  }
+  #menu .card{
+    position:relative;overflow:hidden;gap:9px;
+    background:linear-gradient(145deg,rgba(15,28,49,.91),rgba(7,13,25,.91))!important;
+    border:1px solid #ffffff24!important;border-radius:26px!important;
+    padding:clamp(13px,3vw,20px)!important;
+    box-shadow:0 26px 80px #0009,0 0 0 1px #fbbf2410,inset 0 1px #ffffff16!important;
+    backdrop-filter:blur(22px)!important;
+  }
+  #menu .card:before{
+    content:"";position:absolute;left:8%;right:8%;top:0;height:1px;
+    background:linear-gradient(90deg,transparent,#fbbf24aa,#fff8,transparent);
+  }
+  #menu .pvwrap{
+    height:clamp(190px,31vh,290px);border-radius:20px;
+    border:1px solid #ffffff25;
+    background:
+      radial-gradient(ellipse at 50% 100%,#f59e0b2b,transparent 52%),
+      linear-gradient(180deg,#10294b 0%,#142d45 56%,#172b37 100%);
+    box-shadow:inset 0 1px #ffffff14,0 12px 32px #0005;
+  }
+  #menu .pvhint{font-size:9px;letter-spacing:1.5px;color:#e2e8f0;text-shadow:0 2px 8px #000}
+  #menu .sec{
+    display:flex;align-items:center;gap:9px;margin-top:10px;
+    color:#f8d58a;opacity:1;font-size:10px;letter-spacing:1.7px;
+  }
+  #menu .sec:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,#fbbf2444,transparent)}
+  #menu input{
+    background:#ffffff0b!important;border:1px solid #ffffff25!important;
+    border-radius:14px!important;padding:14px 15px!important;
+    box-shadow:inset 0 1px 4px #0004;
+  }
+  #menu .role{
+    min-height:88px;padding:12px 5px!important;border-radius:17px!important;
+    background:linear-gradient(145deg,#ffffff12,#ffffff05)!important;
+    border:1px solid #ffffff20!important;box-shadow:inset 0 1px #ffffff0b;
+  }
+  #menu .role b{font-size:29px!important;filter:drop-shadow(0 3px 5px #0006)}
+  #menu .role small{font-size:9px!important;letter-spacing:.3px}
+  #menu .role.sel{
+    border-color:#f9c74f!important;
+    background:linear-gradient(145deg,#fbbf2433,#f59e0b0c)!important;
+    box-shadow:0 0 0 2px #fbbf2422,0 10px 25px #0005,inset 0 1px #fff4!important;
+  }
+  #menu .q{
+    border:1px solid #ffffff20!important;border-radius:13px!important;
+    background:#ffffff0b!important;color:#e5e7eb!important;
+  }
+  #menu .q.sel{
+    border-color:#fbbf24!important;background:#fbbf2422!important;
+    box-shadow:0 0 0 2px #fbbf241a;
+  }
+  #menu #play{
+    position:relative;overflow:hidden;min-height:58px;
+    border:1px solid #ffe8a2!important;border-radius:17px!important;
+    background:linear-gradient(105deg,#ffe08a 0%,#ffbd35 42%,#ed8b16 100%)!important;
+    box-shadow:0 14px 38px #e88a244d,0 0 0 1px #fff4!important;
+    font-size:16px;letter-spacing:2px;
+  }
+  #menu #play:before{
+    content:"";position:absolute;top:-80%;left:-25%;width:20%;height:260%;
+    transform:rotate(22deg);background:#ffffff55;filter:blur(8px);
+    animation:lagosPlayShine 4.8s ease-in-out infinite;
+  }
+  @keyframes lagosPlayShine{0%,55%{left:-30%;opacity:0}65%{opacity:1}100%{left:125%;opacity:0}}
+  #menu .world{
+    padding:9px 12px;border:1px solid #ffffff1c;border-radius:99px;
+    background:#06101c9c;color:#dbeafe;font-size:10px;letter-spacing:.4px;
+    box-shadow:0 8px 24px #0003;
+  }
+  #menu .world i{flex:none}
+  @media(max-width:420px){
+    #menu{padding-left:12px;padding-right:12px}
+    #menu .stage{gap:11px}
+    #menu .card{border-radius:21px!important}
+    #menu .roles{gap:6px}
+    #menu .role{min-height:80px}
+  }
+  @media(orientation:landscape) and (max-height:520px){
+    #menu{align-items:center;padding:12px 16px 24px}
+    #menu .stage{width:min(620px,100%);gap:9px}
+    #menu .brand{padding:0}
+    #menu .brand:before{margin-bottom:5px;padding:4px 10px}
+    #menu .brand .tag{margin-top:5px}
+    #menu .card{padding:10px 14px!important;gap:5px}
+    #menu .pvwrap{height:145px}
+    #menu .sec{margin-top:5px}
+    #menu .role{min-height:65px;padding:6px 3px!important}
+    #menu #play{min-height:48px;padding:11px}
+  }
+
 </style>
 <link href="/lagos-3d-skin.css?v=5" rel="stylesheet">
 <link href="/citygame-premium-ui.css?v=4" rel="stylesheet">
@@ -780,7 +954,11 @@ function addSign(text,x,y,z,ry,w,bg,fg){
   x=T.X(x);y=T.Y(y);z=T.Z(z);w=T.SX(w);
   const k=text+bg;let mt=signCache[k];
   if(!mt){
-    const t=canvasTex(512,128,(g,W,H)=>{g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.28)';g.fillRect(0,H-9,W,9);g.fillStyle=fg||'#fff';g.font='bold 54px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(text,W/2,H/2-3)});
+    const t=canvasTex(512,128,(g,W,H)=>{g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.28)';g.fillRect(0,H-9,W,9);g.fillStyle=fg||'#fff';g.font='bold 54px sans-serif';g.textAlign='center';g.textBaseline='middle';
+  // District labels make the map readable as a Lagos city map, not only a dot field.
+  g.save();g.font='700 12px system-ui';g.lineWidth=3;g.strokeStyle='rgba(5,15,25,.82)';g.fillStyle='rgba(255,255,255,.88)';
+  for(let bx=-GN+1;bx<GN;bx+=3)for(let bz=-GN+1;bz<GN;bz+=3){const name=districtNameForMap(bx,bz),a=P(bx*BLOCK,bz*BLOCK);if(a[0]>-90&&a[0]<S+90&&a[1]>-30&&a[1]<S+30){g.strokeText(name,a[0],a[1]);g.fillText(name,a[0],a[1])}}
+  g.restore();g.fillText(text,W/2,H/2-3)});
     t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;mt=signCache[k]=new THREE.MeshBasicMaterial({map:t});
   }
   const s=new THREE.Mesh(new THREE.PlaneGeometry(w,w/4),mt);s.position.set(x,y,z);s.rotation.y=ry||0;scene.add(s);return s;
@@ -794,6 +972,7 @@ const NAMES={
 const SIGNBG=['#c62828','#1565c0','#2e7d32','#6a1b9a','#ef6c00','#00838f'];
 const pitchedA=[],pitchedB=[];     // pitched roofs (instanced cones)
 const palms=[],treesA=[],treesB=[];
+const garageDoorList=[];
 const lampPos=[];for(let i=-GN;i<=GN;i++)for(let j=-GN;j<=GN;j++)lampPos.push([i*BLOCK+7.5,0,j*BLOCK+7.5],[i*BLOCK+7.5+32,0,j*BLOCK+7.5],[i*BLOCK+7.5,0,j*BLOCK+7.5+32]);
 
 function villa(x,z){                       // Lekki: modern white villa in a walled compound
@@ -811,8 +990,27 @@ function villa(x,z){                       // Lekki: modern white villa in a wal
   bx_(x-3.45,0.9,z+W,3.7,1.8,0.3,wc);bx_(x+3.45,0.9,z+W,3.7,1.8,0.3,wc);               // front wall with gate gap
   bx_(x-1.7,1.25,z+W,0.5,2.5,0.5,0x2a2a2a);bx_(x+1.7,1.25,z+W,0.5,2.5,0.5,0x2a2a2a);bx_(x-0.8,0.9,z+W,1.5,1.6,0.1,0x1c1c1c);
   bx_(x-1.7,2.65,z+W,0.3,0.3,0.3,0xfff0c0);bx_(x+1.7,2.65,z+W,0.3,0.3,0.3,0xfff0c0);   // gate lights
-  bx_(x,0.07,z+3,3,0.03,6.6,0x9a948a);                                                 // driveway
-  bx_(x-4,0.5,z+4.2,1.1,1,1.1,0x2f7a35);bx_(x+4,0.5,z+4.2,1.1,1,1.1,0x2f7a35);       // hedges
+  bx_(x,0.07,z+3,3,0.03,6.6,0x9a948a);                                                 // main driveway
+  // Attached private garage wing, reached through its own sliding compound gate.
+  const gx=x+7.55,gz=z-0.55;
+  bx_(gx,1.95,gz,4.8,3.9,6.1,0xd9dfe3);bx_(gx,4.0,gz,5.15,0.32,6.55,0x303943);
+  // Individually animated sectional door, separate from batched city geometry.
+   const garageDoor=new THREE.Group();
+   garageDoor.position.set(T.X(gx),T.Y(1.48),T.Z(gz+3.13));
+   garageDoor.scale.set(T.kx,T.ky,T.kx);
+   const garagePanel=new THREE.Mesh(new THREE.BoxGeometry(3.65,2.72,0.18),new THREE.MeshStandardMaterial({color:0x263445,roughness:0.62,metalness:0.28}));
+   garagePanel.castShadow=true;garagePanel.receiveShadow=true;garageDoor.add(garagePanel);
+   scene.add(garageDoor);garageDoorList.push({g:garageDoor,baseY:garageDoor.position.y,open:0,target:0,x:gx,z:gz});
+  for(let gy=-1.0;gy<=1.0;gy+=0.5){const slat=new THREE.Mesh(new THREE.BoxGeometry(3.55,0.045,0.035),new THREE.MeshStandardMaterial({color:0x9aa7b4,metalness:0.42,roughness:0.5}));slat.position.set(0,gy,0.105);garageDoor.add(slat)}
+  bx_(gx-2.05,2.35,gz+2.85,0.16,0.35,0.16,0xffd879);bx_(gx+2.05,2.35,gz+2.85,0.16,0.35,0.16,0xffd879);
+  bx_(gx,0.07,gz+5.0,3.9,0.035,4.5,0x858b91);
+  bx_(x+5.65,0.9,z+W,0.7,1.8,0.3,wc);bx_(x+9.5,0.9,z+W,1.0,1.8,0.3,wc);
+  bx_(x+7.55,1.0,z+W,2.8,1.6,0.12,0x263445);
+  for(let gxline=-1.2;gxline<=1.2;gxline+=0.4)bx_(x+7.55+gxline,1.0,z+W+0.08,0.045,1.5,0.04,0x9aa7b4);
+  bx_(x+7.55,2.15,z+W,3.1,0.16,0.18,0xd4af37);
+  addSign('PRIVATE GARAGE',gx,4.75,gz+3.28,0,3.8,'#142333','#f4d38d');
+  bx_(x-4,0.5,z+4.2,1.1,1,1.1,0x2f7a35);bx_(x+4,0.5,z+4.2,1.1,1,1.1,0x2f7a35);
+  solid(gx,gz,2.45,3.05);
   palms.push([T.X(x+3.9),T.Z(z-3.7)]);
   solid(x,z,4.3,3.9);solid(x,z-W,W,0.4);solid(x-W,z,0.4,W);solid(x+W,z,0.4,W);solid(x-3.45,z+W,1.9,0.4);solid(x+3.45,z+W,1.9,0.4);
   T.off();
@@ -1078,7 +1276,7 @@ function refreshShowLabels(){
 let lotCars=[],lotSig='';
 function rebuildLot(force){
   if(typeof PX==='undefined'||!lotName)return;
-  const ppl=[{name:lotName,cars:PX.cars||[],mine:true}];
+  const stored=new Set(PX.storedCars||[]);const ppl=[{name:lotName,cars:(PX.cars||[]).filter(c=>!stored.has(c)),mine:true}];
   for(const id in others){const o=others[id];if(o.name&&o.bay&&o.bay.length)ppl.push({name:o.name,cars:o.bay,mine:false})}
   ppl.sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0);
   const sig=ppl.map(q=>q.name+':'+q.cars.join('.')+(q.mine?'*':'')).join('|');
@@ -1087,7 +1285,7 @@ function rebuildLot(force){
   let slot=0;
   for(const q of ppl)for(const col of q.cars){
     if(slot>=18)break;
-    const x=9+(slot%9)*5.6,z=114.5+((slot/9)|0)*4.2,g=makeCar(col);g.position.set(x,0,z);g.rotation.y=Math.PI/2;scene.add(g);
+    const x=9+(slot%9)*5.6,z=114.5+((slot/9)|0)*4.2,g=makeCar(col,q.mine?'owned':undefined);g.position.set(x,0,z);g.rotation.y=Math.PI/2;scene.add(g);
     const o={g,x,z,ry:Math.PI/2,col};lotCars.push(o);if(q.mine)parked.push(o);slot++;
   }
 }
@@ -1134,6 +1332,34 @@ function buildHouseInside(id){
   bx_(x0+0.5,2.8,z0-8.95,4,1.8,0.08,0x9fd6e8);bx_(x0-6,2.8,z0+8.95,3,1.6,0.08,0x9fd6e8);bx_(x0+6,2.8,z0+8.95,3,1.6,0.08,0x9fd6e8);bx_(x0-10.95,2.8,z0-5.5,0.08,1.6,2.6,0x9fd6e8);
   bx_(x0+8.5,0.35,z0+5,0.8,0.7,0.8,0xd32f2f);bx_(x0+8.5,0.75,z0+5,0.9,0.12,0.9,0xeeeeee);solid(x0+8.5,z0+5,0.5,0.5);   // paint pot
   const L=makeLabel('🎨 Paint ₦300','#fff',2.4,3.4);L.position.set(x0+8.5,2.6,z0+5);scene.add(L);
+
+  // Give the home a readable room layout without changing its existing collision map.
+  const zoneMat=(color)=>new THREE.MeshLambertMaterial({color,transparent:true,opacity:0.72});
+  const zone=(name,x,z,w,d,color)=>{
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),zoneMat(color));
+    m.rotation.x=-Math.PI/2;m.position.set(x,0.055,z);scene.add(m);
+    const tag=makeLabel(name,'#17212b',2.7,0.8);
+    tag.position.set(x,2.45,z);scene.add(tag);
+  };
+  zone('LIVING ROOM',x0-6,z0-5.3,6.8,2.5,0xc98b55);
+  zone('BEDROOM',x0+6.4,z0-4.2,5.4,4.2,0x8ab6d8);
+  zone('DINING',x0-5.5,z0+5.8,5.0,3.0,0xd8bd77);
+  zone('KITCHEN',x0+7.2,z0+4.2,4.2,3.0,0x9bc7a3);
+  zone('STUDY',x0-9.4,z0+0.8,2.0,3.4,0x9b9bd1);
+
+  // Kitchen fixtures: counter, worktop, sink and wall cupboards.
+  bx_(x0+7.1,0.48,z0+2.8,4.8,0.92,0.72,0x9a6848);
+  bx_(x0+7.1,0.98,z0+2.8,4.95,0.12,0.78,0xe6e1d8);
+  bx_(x0+8.0,1.07,z0+2.72,1.05,0.06,0.52,0x879da5);
+  bx_(x0+7.0,2.15,z0+1.85,4.6,1.0,0.35,0xf0e8dc);
+  bx_(x0+5.3,1.65,z0+2.8,0.1,0.75,0.65,0x6d4c41);
+  // Study desk, monitor and book storage.
+  bx_(x0-9.2,0.82,z0-0.1,2.2,0.16,1.0,0x79553b);
+  for(const dx of [-0.9,0.9])for(const dz of [-0.35,0.35])bx_(x0-9.2+dx,0.4,z0-0.1+dz,0.12,0.8,0.12,0x4e382b);
+  bx_(x0-9.2,1.35,z0-0.43,0.9,0.82,0.08,0x202b36);
+  bx_(x0-9.2,1.0,z0+0.1,0.42,0.08,0.42,0x30343a);
+  bx_(x0-10.0,1.35,z0+1.65,0.55,2.4,0.42,0x684b37);
+  for(let n=0;n<4;n++)bx_(x0-10.0,0.55+n*0.34,z0+1.4,0.58,0.22,0.36,[0xb94d42,0x3d6c8a,0x65804b,0xc29a4a][n]);
 }
 const IK=0.78;
 function roomFit(x0,z0,fn){T.set(x0,z0,1,IK);try{fn()}finally{T.off()}}
@@ -1494,7 +1720,8 @@ const blackMat=new THREE.MeshLambertMaterial({color:0x1c1c1c});
 function makeCarProc(col,role){
   if(col===5)return makeDanfo();if(col===6)return makeKeke();if(col===8)return makeBikeProc();
   const G=carGeos();const grp=new THREE.Group();
-  const paint=role==='police'?0x1b3d91:role==='taxi'?0xfdd835:col===7?0xff6a00:col===9?0x1c69d4:carCols[col%carCols.length];
+  const customPaint=role==='owned'&&typeof PX!=='undefined'&&PX.carPaint&&PX.carPaint[col];
+  const paint=customPaint?new THREE.Color(customPaint):role==='police'?0x1b3d91:role==='taxi'?0xfdd835:col===7?0xff6a00:col===9?0x1c69d4:carCols[col%carCols.length];
   const pm=new THREE.MeshPhongMaterial({color:paint,shininess:90,specular:0x666666});
   const add=(geo,mat,x,y,z)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;grp.add(m);return m};
   add(G.lower,pm,0,0,0);add(G.cabin,glassMat,0,0,0);
@@ -1690,16 +1917,24 @@ function attachCarModel(g,col,role){
   if(!key)return;
   whenModel(key,()=>{
     const car=cloneModel(key),cfg=MODEL_CFG[key];
-    if(cfg.body||role==='taxi'){
-      const paint=role==='taxi'?0xfdd835:carCols[col%carCols.length];
+    const customPaint=role==='owned'&&PX.carPaint&&PX.carPaint[col];
+    if(cfg.body||role==='taxi'||customPaint){
+      const paint=customPaint?new THREE.Color(customPaint):role==='taxi'?0xfdd835:carCols[col%carCols.length];
       car.traverse(o=>{
         if(!o.isMesh)return;
         const ms=Array.isArray(o.material)?o.material:[o.material];
-        const nm=ms.map(m=>{if(cfg.body&&cfg.body.test(m.name||'')){const c=m.clone();c.color.setHex(paint);return c}return m});
+        const nm=ms.map(m=>{
+          const materialName=(m.name||'')+' '+(o.name||'');
+          const isBody=(cfg.body&&cfg.body.test(m.name||''))||(customPaint&&/body|paint|exterior|car/i.test(materialName)&&!/glass|window|wheel|tire|light|chrome/i.test(materialName));
+          if(!isBody)return m;
+          const c=m.clone();
+          if(paint.isColor)c.color.copy(paint);else c.color.setHex(paint);
+          return c;
+        });
         o.material=Array.isArray(o.material)?nm:nm[0];
       });
     }
-    // the okada keeps its procedural rider (tagged in makeBikeProc); everything else of the old placeholder is hidden
+    // The Okada keeps its procedural rider; the downloaded model replaces its placeholder.
     g.children.slice().forEach(c=>{c.visible=key==='okada'&&!!c.userData.rider;if(c.visible)c.position.y-=0.3});
     g.userData.siren=null;
     g.add(car);g.userData.model=car;
@@ -1931,13 +2166,53 @@ function lobbyEntrance(h){
   addSign(h.area.toUpperCase(),x,5.5,z+1.55,0,6.4,'#0d2b45','#ffd54a');
   bx_(x-3.9,0.5,z+1.4,0.9,1,0.9,0x2f7a35);bx_(x+3.9,0.5,z+1.4,0.9,1,0.9,0x2f7a35);
 }
+function apartmentParking(h){
+  // Dedicated residents' parking court beside apartment and penthouse entrances.
+  const x=h.x+10.5,z=h.kind==='lobby'?h.z+2.4:h.z;
+  const bays=h.kind==='lobby'?3:2,depth=bays===3?18:12;
+  bx_(x,0.065,z,7.2,0.13,depth+1.2,0x555b61);
+  bx_(x-3.25,0.11,z,0.12,0.035,depth,0xe7e7e7);
+  bx_(x+3.25,0.11,z,0.12,0.035,depth,0xe7e7e7);
+  for(let i=0;i<=bays;i++)bx_(x,0.115,z-depth/2+i*(depth/bays),6.5,0.035,0.12,0xf3f0df);
+  for(const dx of [-3.05,3.05])for(const dz0 of [-depth/2+0.5,depth/2-0.5])bx_(x+dx,1.45,z+dz0,0.16,2.9,0.16,0x3c4650);
+  bx_(x,3.0,z,6.5,0.18,depth,0x303943);
+  bx_(x,3.12,z,6.1,0.035,depth-0.5,0x68727b);
+  addSign('RESIDENT PARKING',x,4.0,z+depth/2+0.8,0,4.8,'#142333','#f4d38d');
+}
 function buildRental(h){
-  if(h.kind==='flat')flatBuilding(h);else if(h.kind==='lobby')lobbyEntrance(h);else villa(h.x,h.z);
+  if(h.kind==='flat'){flatBuilding(h);apartmentParking(h);}
+  else if(h.kind==='lobby'){lobbyEntrance(h);apartmentParking(h);}
+  else villa(h.x,h.z);
 }
 function houseTaken(h){const ho=houseObjs[h.id];return h.units===1?!!ho.owner:(ho.occ||0)>=h.units}
 function houseDot(h){return myHome&&myHome.id===h.id?'#ffd54a':houseTaken(h)?'#8d99a6':'#39e07a'}
 // =============== houses / shops / jail ===============
 let world=null;const houseObjs={};
+let cornerShopModel=null,cornerShopLoading=false,cornerShopGroups=[];
+function loadCornerShopModel(){
+  if(cornerShopModel){placeCornerShopModels();return}
+  if(cornerShopLoading)return;
+  cornerShopLoading=true;
+  new THREE.GLTFLoader().load('/assets/glb/city-kit/loja_esquina.glb',g=>{
+    cornerShopModel=g.scene;
+    const bounds=new THREE.Box3().setFromObject(cornerShopModel),size=bounds.getSize(new THREE.Vector3());
+    const span=Math.max(size.x,size.z)||1,scale=12/span;
+    cornerShopModel.scale.setScalar(scale);cornerShopModel.updateMatrixWorld(true);
+    const scaled=new THREE.Box3().setFromObject(cornerShopModel);
+    cornerShopModel.position.y-=scaled.min.y;
+    placeCornerShopModels();
+  },undefined,e=>{cornerShopLoading=false;console.warn('City shop GLB failed to load',e)});
+}
+function placeCornerShopModels(){
+  if(!cornerShopModel)return;
+  cornerShopGroups.forEach(g=>{
+    if(g.userData.glbPlaced)return;
+    const model=cornerShopModel.clone(true);
+    model.rotation.y=Math.PI;
+    model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+    g.add(model);g.userData.glbPlaced=true;
+  });
+}
 function buildWorld(w){
   world=w;
   w.houses.forEach(h=>{
@@ -1952,10 +2227,13 @@ function buildWorld(w){
     const g=makeCharacter('npc',n.name+' · '+n.title,n.look);
     g.position.set(n.x,0,n.z);g.rotation.y=n.ry||0;g.visible=false;scene.add(g);npcObjs.push({n,g});
   });
+  cornerShopGroups=[];
   w.shops.forEach(sh=>{
     const g=new THREE.Group();g.position.set(sh.x,0,sh.z);scene.add(g);
     g.add(makeLabel('🏪 Shop','#ffd54a',10,3.4));
+    cornerShopGroups.push(g);
   });
+  loadCornerShopModel();
   const jm=new THREE.Mesh(new THREE.BoxGeometry(15,0.1,15),new THREE.MeshLambertMaterial({color:0x555a60}));jm.position.set(w.jail.x,0.08,w.jail.z);jm.receiveShadow=true;scene.add(jm);
   const bars=[];for(let t=-7;t<=7;t+=1.25){bars.push([w.jail.x+t,0,w.jail.z-7.5]);bars.push([w.jail.x+t,0,w.jail.z+7.5]);bars.push([w.jail.x-7.5,0,w.jail.z+t]);bars.push([w.jail.x+7.5,0,w.jail.z+t])}
   const barGeo=new THREE.BoxGeometry(0.18,4,0.18);barGeo.translate(0,2,0);
@@ -1981,6 +2259,7 @@ const dust=[];let dustI=0;
 for(let i=0;i<32;i++){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:dustTex,transparent:true,depthWrite:false,opacity:0}));s.visible=false;scene.add(s);dust.push({s,life:0})}
 function puff(x,z){const d=dust[dustI++%dust.length];d.life=1;d.s.position.set(x,0.5,z);d.s.scale.set(1,1,1);d.s.visible=true}
 function updateDust(dt){for(const d of dust){if(d.life<=0)continue;d.life-=dt*1.6;if(d.life<=0){d.s.visible=false;continue}d.s.position.y+=dt*1.2;const sc=1+(1-d.life)*3.2;d.s.scale.set(sc,sc,1);d.s.material.opacity=d.life*0.6}}
+function updateGarageDoors(dt){for(const d of garageDoorList){d.open+=(d.target-d.open)*Math.min(1,dt*3.8);if(Math.abs(d.target-d.open)<0.006)d.open=d.target;d.g.position.y=d.baseY+d.open*2.9}}
 
 let ac=null,muted=false,eng=null;
 function audioInit(){
@@ -2242,7 +2521,7 @@ document.getElementById('play').onclick=()=>{
     const m=JSON.parse(ev.data);
     if(m.t==='lifeinfo'){if(m.home!==undefined)myHome=m.home;if(m.path)myPathInfo=m.path;lifeUpdate(m);return}
     if(m.t==='catalog'){lifeCatalog(m);return}
-    if(m.t==='x_businesses'){syncCityBusinesses(m.businesses);return}
+    if(m.t==='x_businesses'){syncCityBusinesses(m.businesses);if(window.CGCompanyReceive)window.CGCompanyReceive(m.businesses);return}
     if(m.t==='authfail'){try{localStorage.removeItem('ll_tok');localStorage.removeItem('ll_user')}catch(e){}location.reload();return}
     if(m.t==='welcome'){myId=m.id;buildWorld(m.world);myHome=m.home||null;myPathInfo=m.pathInfo||null;document.getElementById('info').textContent=`🇳🇬 Lagos Life • ${ROLES[myRole].emoji} ${ROLES[myRole].label}`+(m.pathInfo?` • ${m.pathInfo.emoji} ${m.pathInfo.name}`:'');if(m.first)showFate(m);else if(m.pathInfo)setTimeout(()=>toast(`${m.pathInfo.emoji} ${m.pathInfo.name} • welcome back`),600)}
     else if(m.t==='toast')toast(m.text);
@@ -2333,6 +2612,7 @@ useBtn.onclick=()=>{
   else if(useTarget.type==='out')ws.send(JSON.stringify({t:'exit'}));
   else if(useTarget.type==='atm')showATM();
   else if(useTarget.type==='paint')ws.send(JSON.stringify({t:'paint'}));
+  else if(useTarget.type==='life')ws.send(JSON.stringify({t:'life',op:useTarget.op}));
   else if(useTarget.type==='eat')ws.send(JSON.stringify({t:'eat'}));
   else if(useTarget.type==='venue')ws.send(JSON.stringify({t:'venue'}));
   else if(useTarget.type==='getup')endPose(true);
@@ -2357,6 +2637,9 @@ function updateUse(){
     else if(R.multiFloor&&near(R.floorAccess.stairs.x,R.floorAccess.stairs.z,3.8)){t={type:'floor',floor:pos.floor?0:1,method:'stairs'};label=pos.floor?'⬇️ GO DOWNSTAIRS':'⬆️ CLIMB STAIRS'}
     else if(inside==='bank'&&near(R.x0-11,R.z0,5.5)){t={type:'atm'};label='💳 USE ATM'}
     else if(inside.startsWith('house')&&!R.model&&near(R.x0+8.5,R.z0+5,4)){t={type:'paint'};label='🎨 PAINT ₦300'}
+    else if(inside.startsWith('house')&&!R.model&&near(R.x0+6.5,R.z0-6,3.0)){t={type:'life',op:'sleep'};label='🛏️ SLEEP IN BED'}
+    else if(inside.startsWith('house')&&!R.model&&near(R.x0-6,R.z0-8.5,3.0)){t={type:'life',op:'fun'};label='📺 WATCH TV · ₦50'}
+    else if(inside.startsWith('house')&&!R.model&&near(R.x0-9.2,R.z0-0.1,2.6)){t={type:'life',op:'study'};label='📚 STUDY AT DESK'}
     else if(inside.startsWith('house')&&near(R.eat?R.eat.x:R.x0-9,R.eat?R.eat.z:R.z0-0.5,R.eat?4.6:3.5)){t={type:'eat'};label='🍳 EAT AT HOME'}
     else if(inside==='mall'&&near(R.x0+19,R.z0-8,4.5)){t={type:'eat'};label='🍲 BUY FOOD ₦40'}
     else if(inside==='dealer'&&(ensureCarList(),showCars.some(s=>near(s.x,s.z,4.2)))){const s=showCars.find(s=>near(s.x,s.z,4.2)),v=(typeof PX!=='undefined'&&PX.carList.find(c=>c.col===s.col))||{name:'car',price:0};t={type:'xshow',col:s.col};label='🔑 '+v.name+' '+fmtK(v.price)+' - VIEW / BUY'}
@@ -2433,6 +2716,7 @@ function mmDraw(){
 const $=id=>document.getElementById(id);
 const phone=$('phone'),appview=$('appview'),bigmap=$('bigmap'),bmc=$('bmc'),bmg=bmc.getContext('2d'),mapside=$('mapside');
 let gps=null,jobInfo=null,jobTarget=null,selPlace=null,mapTimer=null,bmHits=[],cityBusinesses=[];
+let mapZoom=1,mapPanX=0,mapPanY=0,mapDrag=null,mapDragged=false;
 function syncCityBusinesses(list){
   cityBusinesses=Array.isArray(list)?list:[];
   if(world)for(const b of cityBusinesses){const p=world.places.find(x=>x.id===b.id);if(p){p.name=b.name;p.icon=b.icon;p.business=true;p.owner=b.owner;p.area=b.area}}
@@ -2522,6 +2806,8 @@ function openApp(n){
   appview.insertAdjacentHTML('afterbegin','<div class="phone-appbar"><button class="pb q" id="appBack">‹ Apps</button><div><b>'+icons[n]+' '+escapeBusinessText(n)+'</b><small> LAGOS LIFE • APP</small></div><button class="pb q" id="appHome">⌂</button></div>');
   $('appBack').onclick=closeAppView;
   $('appHome').onclick=closeAppView;
+  // Let registered add-on apps replace the legacy preview with their full working screen.
+  if(typeof APPR!=='undefined'&&APPR[n]&&typeof APPR[n]==='function')APPR[n]();
 }
 
 function setQuality(q){quality=q;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===q));applyQuality();openApp('Settings')}
@@ -2632,8 +2918,9 @@ function openMap(){
 
 function closeMap(){bigmap.style.display='none';clearInterval(mapTimer)}
 function sizeMap(){const S=Math.floor(Math.min(innerHeight-4,innerWidth*0.58));bmc.width=bmc.height=S;bmc.style.width=bmc.style.height=S+'px'}
+function districtNameForMap(bx,bz){const k=districtOf(bx,bz);return k==='airport'?'AIRPORT':(DIST[k]||outerInfo(bx,bz)[1]).toUpperCase()}
 function drawBigMap(){
-  const S=bmc.width,sc=S/(GN*BLOCK*2+60),g=bmg,P=(x,z)=>[S/2-x*sc,S/2-z*sc];
+  const S=bmc.width,sc=S/(GN*BLOCK*2+60)*mapZoom,g=bmg,P=(x,z)=>[S/2-x*sc+mapPanX,S/2-z*sc+mapPanY];
   g.fillStyle='#0f2a45';g.fillRect(0,0,S,S);
   for(let bx=-GN;bx<GN;bx++)for(let bz=-GN;bz<GN;bz++){
     const a=P(bx*BLOCK+6,bz*BLOCK+6),b=P(bx*BLOCK+BLOCK-6,bz*BLOCK+BLOCK-6);
@@ -2659,20 +2946,24 @@ function drawBigMap(){
       g.font='bold 11px sans-serif';g.lineWidth=3;g.strokeStyle='#000';g.strokeText(p.name,a[0],a[1]+17);g.fillStyle='#fff';g.fillText(p.name,a[0],a[1]+17);
     }
   });
-  if(gps){const a=P(gps.x,gps.z);g.font='22px sans-serif';g.fillText('📍',a[0],a[1]-8)}
+  if(gps){const a=P(gps.x,gps.z),m=P(pos.x,pos.z);g.save();g.setLineDash([7,5]);g.strokeStyle='#58c7ff';g.lineWidth=3;g.beginPath();g.moveTo(m[0],m[1]);g.lineTo(a[0],a[1]);g.stroke();g.setLineDash([]);g.restore();g.font='22px sans-serif';g.fillText('📍',a[0],a[1]-8)}
   if(jobTarget){const a=P(jobTarget.x,jobTarget.z);g.font='22px sans-serif';g.fillText('📦',a[0],a[1]-8)}
   const m=P(pos.x,pos.z);g.save();g.translate(m[0],m[1]);g.rotate(-pos.ry);g.fillStyle='#fff';g.strokeStyle='#000';g.lineWidth=2;
   g.beginPath();g.moveTo(0,-11);g.lineTo(8,9);g.lineTo(0,5);g.lineTo(-8,9);g.closePath();g.fill();g.stroke();g.restore();
 }
+bmc.addEventListener('wheel',e=>{e.preventDefault();const r=bmc.getBoundingClientRect(),x=(e.clientX-r.left)*bmc.width/r.width,y=(e.clientY-r.top)*bmc.height/r.height,old=mapZoom;mapZoom=Math.max(0.75,Math.min(3.2,mapZoom*(e.deltaY<0?1.12:0.89)));const f=mapZoom/old;mapPanX=x-(x-mapPanX)*f;mapPanY=y-(y-mapPanY)*f;drawBigMap()},{passive:false});
+bmc.addEventListener('pointerdown',e=>{mapDrag={x:e.clientX,y:e.clientY,px:mapPanX,py:mapPanY,id:e.pointerId};mapDragged=false;bmc.setPointerCapture(e.pointerId)});
+bmc.addEventListener('pointermove',e=>{if(!mapDrag||mapDrag.id!==e.pointerId)return;const dx=e.clientX-mapDrag.x,dy=e.clientY-mapDrag.y;if(Math.abs(dx)+Math.abs(dy)>5)mapDragged=true;if(mapDragged){const r=bmc.getBoundingClientRect();mapPanX=mapDrag.px+dx*bmc.width/r.width;mapPanY=mapDrag.py+dy*bmc.height/r.height;drawBigMap()}});
+const stopMapDrag=e=>{if(mapDrag&&mapDrag.id===e.pointerId)mapDrag=null};bmc.addEventListener('pointerup',stopMapDrag);bmc.addEventListener('pointercancel',stopMapDrag);
 bmc.addEventListener('click',e=>{
-  const r=bmc.getBoundingClientRect(),x=(e.clientX-r.left)*bmc.width/r.width,y=(e.clientY-r.top)*bmc.height/r.height;
+  if(mapDragged){mapDragged=false;return}const r=bmc.getBoundingClientRect(),x=(e.clientX-r.left)*bmc.width/r.width,y=(e.clientY-r.top)*bmc.height/r.height;
   let best=null,bd=16;for(const h of bmHits){const d=Math.hypot(h.x-x,h.y-y),limit=h.building?10:16;if(d<Math.min(bd,limit)){bd=d;best=h}}
   if(best){selPlace=best.id;renderSide();drawBigMap()}
 });
 function renderSide(){
   const L=placesList(),me_=pos;
   L.forEach(p=>p.d=Math.round(Math.hypot(p.x-me_.x,p.z-me_.z)));L.sort((a,b)=>a.d-b.d);
-  let h=`<div class="mh">🗺️ Lagos Map <button class="pb q" data-act="close" style="margin:0">✖</button></div>`;
+  let h=`<div class="mh">🗺️ LAGOS CITY MAP <button class="pb q" data-act="close" style="margin:0">✖</button></div><div style="display:flex;gap:5px;flex-wrap:wrap;padding:5px 0"><button class="pb q" data-act="zoomIn">＋ Zoom</button><button class="pb q" data-act="zoomOut">－ Zoom</button><button class="pb q" data-act="mapReset">◎ Re-centre</button></div><div style="font-size:10px;opacity:.8;margin-bottom:6px">Drag map to pan · pinch/scroll to zoom · blue line shows straight-line GPS bearing</div>`;
   h+=L.map(p=>`<div class="pl ${selPlace===p.id?'sel':''}" data-act="sel" data-id="${p.id}"><span>${p.icon} ${p.name}</span><span>${p.d}m</span></div>`).join('');
   const sp=L.find(p=>p.id===selPlace);
   if(sp){
@@ -2686,6 +2977,9 @@ function renderSide(){
 mapside.onclick=e=>{
   const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
   if(a==='close')closeMap();
+  else if(a==='zoomIn'){mapZoom=Math.min(3.2,mapZoom*1.25);drawBigMap()}
+  else if(a==='zoomOut'){mapZoom=Math.max(0.75,mapZoom/1.25);drawBigMap()}
+  else if(a==='mapReset'){mapZoom=1;mapPanX=0;mapPanY=0;drawBigMap()}
   else if(a==='sel'){selPlace=b.dataset.id;renderSide();drawBigMap()}
   else if(a==='gps')setGps(selPlace);
   else if(a==='cleargps'){gps=null;renderSide();drawBigMap()}
@@ -3096,7 +3390,7 @@ function loop(now){
   const sirenOf=g=>g&&g.userData.carG&&g.userData.carG.userData.siren;
   let s=sirenOf(me);if(s){s[0].visible=ph;s[1].visible=!ph}
   for(const id in others){s=sirenOf(others[id].g);if(s){s[0].visible=ph;s[1].visible=!ph}}
-  trafficUpdate(dt);updateDust(dt);updateRain(dt);
+  trafficUpdate(dt);updateDust(dt);updateGarageDoors(dt);updateRain(dt);
   renderer.render(scene,camera);
 }
 requestAnimationFrame(loop);
@@ -3256,7 +3550,10 @@ function onMsg(m){
   switch(m.t){
     case 'catalog':PX.catalog=m.items||[];break;
     case 'x_cert':PX.cert=m;if(PX.app==='ID')renderApp();break;
-    case 'x_cars':PX.cars=m.cars||[];PX.license=!!m.license;PX.carList=m.list||[];try{refreshShowLabels();syncBay()}catch(e){console.warn(e)}if(PX.app==='Cars'||PX.app==='ID')renderApp();break;
+    case 'x_cars':PX.cars=m.cars||[];PX.storedCars=m.storedCars||[];PX.garage=m.garage||null;PX.carPaint=m.carPaint||{};PX.license=!!m.license;PX.carList=m.list||[];try{refreshShowLabels();syncBay()}catch(e){console.warn(e)}if(PX.app==='Cars'||PX.app==='ID')renderApp();break;
+    case 'garage_door':{let best=null,bd=1e9;for(const d of garageDoorList){const dd=Math.hypot(d.x-(+m.x||0),d.z-(+m.z||0));if(dd<bd){bd=dd;best=d}}if(best&&bd<20)best.target=m.open?1:0;break;}
+     case 'garage_stored':if(carObj){scene.remove(carObj.g);carObj=null;myCol=-1;speed=0;if(me)setCarMode(me,-1)}break;
+    case 'garage_spawn':{for(let i=lotCars.length-1;i>=0;i--){const b=lotCars[i];if(b.col===+m.col){scene.remove(b.g);const pi=parked.indexOf(b);if(pi>=0)parked.splice(pi,1);lotCars.splice(i,1)}}const g=makeCar(m.col,'owned');g.position.set(+m.x||0,0,+m.z||0);g.rotation.y=+m.ry||0;scene.add(g);const pc={g,x:+m.x||0,z:+m.z||0,ry:+m.ry||0,col:+m.col};parked.push(pc);break;}
     case 'x_mk':PX.mk=m;if(PX.app==='Invest')renderApp();break;
     case 'x_decor':PX.decor=m;if(PX.app==='Decor')renderApp();break;
     case 'x_role':PX.role=m.role;if(PX.app==='Jobs')openApp('Jobs');break;
@@ -3457,27 +3754,83 @@ X.payTo=b=>{const a=Math.floor(+prompt('Send how much? (₦)','1000'));if(a>=1)S
 
 /* Cars */
 const CARCAT={saloon:[0,3,9,14],suv:[1,4],sports:[2,7,10,12,13],bike:[8,6],work:[5,11]};
-const CARCATL=[['all','All'],['saloon','🚗 Saloons'],['suv','🚙 SUVs'],['sports','🏎️ Sports'],['bike','🏍️ Bikes'],['work','🚌 Work']];
+const CARCATL=[['all','ALL RIDES'],['saloon','🚗 SEDANS'],['suv','🚙 SUVs'],['sports','🏎️ SUPERCARS'],['bike','🏍️ BIKES'],['work','🚌 COMMERCIAL']];
 PX.carQ='';PX.carCat='all';PX.carSort='';
+(function installEpicGarageStyles(){
+ if(document.getElementById('epic-garage-styles'))return;
+ const st=document.createElement('style');st.id='epic-garage-styles';
+ st.textContent=[
+ ".epic-garage{color:#edf3ff;padding:2px 1px 18px}",
+ ".eg-hero{position:relative;overflow:hidden;border:1px solid #e7b95c55;border-radius:19px;padding:16px;background:radial-gradient(ellipse at 90% 0%,#e5a83a38,transparent 48%),linear-gradient(135deg,#172b43,#101725 58%,#211b24);box-shadow:0 14px 34px #0005}",
+ ".eg-hero:after{content:'✦';position:absolute;right:17px;top:13px;color:#f7d58b;font-size:30px;text-shadow:0 0 22px #f7c65c88}",
+ ".eg-kicker{font-size:9px;letter-spacing:2.2px;font-weight:900;color:#f6d58c}.eg-hero h2{font-size:23px;letter-spacing:-.7px;margin:5px 0 4px;color:#fff}.eg-hero p{font-size:11px;color:#b9c6d8;margin:0;max-width:245px;line-height:1.5}",
+ ".eg-statrow{display:flex;gap:7px;margin-top:13px}.eg-stat{flex:1;min-width:0;border:1px solid #ffffff1c;border-radius:11px;padding:8px;background:#07111c88}.eg-stat b{display:block;color:#ffe1a1;font-size:15px}.eg-stat small{font-size:8px;color:#9cacc0;letter-spacing:.8px}",
+ ".eg-search{display:block;width:100%;box-sizing:border-box;margin:11px 0 8px;padding:12px 14px!important;border-radius:13px!important;background:#0d1725!important;border:1px solid #334155!important;color:#fff!important}",
+ ".eg-cats{display:flex;gap:6px;overflow-x:auto;padding:2px 1px 9px;scrollbar-width:none}.eg-cats::-webkit-scrollbar{display:none}.eg-cat{white-space:nowrap;border:1px solid #34445a;border-radius:99px;padding:8px 11px;background:#172438;color:#cbd5e1;font-size:9px;font-weight:900;letter-spacing:.5px}.eg-cat.active{background:linear-gradient(120deg,#f7d88c,#d99a35);color:#1a2230;border-color:#ffe5a8;box-shadow:0 5px 16px #d99a3533}",
+ ".eg-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 1px 9px}.eg-toolbar b{font-size:11px;color:#f4d38d;letter-spacing:1px}.eg-toolbar select{max-width:145px;background:#101c2b;color:#dce7f5;border:1px solid #334155;border-radius:9px;padding:7px;font-size:10px}",
+ ".eg-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.eg-car{min-width:0;overflow:hidden;position:relative;border:1px solid #ffffff1b;border-radius:15px;background:linear-gradient(155deg,#1d2b3d,#101722 74%);box-shadow:0 7px 18px #0003}.eg-car.owned{border-color:#3c997b88}",
+ ".eg-car-art{height:88px;display:flex;align-items:center;justify-content:center;position:relative;background:radial-gradient(ellipse at 50% 100%,#e8ad4a22,transparent 60%),linear-gradient(145deg,#26394d,#111b29)}.eg-car-art:after{content:'';position:absolute;left:15%;right:15%;bottom:15px;height:1px;background:linear-gradient(90deg,transparent,#f5d18a99,transparent);box-shadow:0 0 14px #f5d18a55}.eg-car-emoji{font-size:49px;filter:drop-shadow(0 9px 6px #0009);transform:translateY(-2px)}",
+ ".eg-car-tag{position:absolute;top:7px;left:7px;z-index:1;border-radius:99px;padding:4px 7px;background:#07111ddd;color:#f7d58c;font-size:8px;font-weight:900;letter-spacing:.7px}.eg-car-tag.owned{background:#0b3a31;color:#8ff0c6}.eg-car-body{padding:9px}.eg-car-name{font-size:12px;font-weight:900;color:#f8fafc;min-height:30px;line-height:1.25}.eg-car-price{font-size:14px;font-weight:900;color:#ffd98b;margin:5px 0 7px}",
+ ".eg-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin-bottom:8px}.eg-spec{background:#ffffff08;border-radius:7px;padding:5px}.eg-spec small{display:block;font-size:7px;color:#8294aa;letter-spacing:.7px}.eg-spec b{font-size:9px;color:#dce7f5}.eg-actions{display:flex;gap:5px}.eg-btn{flex:1;min-width:0;border:1px solid #59677a;border-radius:8px;padding:8px 4px;background:#26364a;color:#f5f7fb;font-size:9px;font-weight:900}.eg-btn.primary{background:linear-gradient(120deg,#f7d88c,#d99a35);border-color:#ffe5a8;color:#18202b}.eg-btn:disabled{opacity:.45}",
+ ".eg-paintrow{margin-top:8px;padding-top:7px;border-top:1px solid #ffffff16}.eg-paintrow small{display:block;color:#b5c2d3;font-size:7px;letter-spacing:.8px;margin-bottom:6px}.eg-paints{display:flex;gap:5px;flex-wrap:wrap}.eg-paint{width:17px;height:17px;border-radius:50%;padding:0;box-shadow:0 1px 4px #0008}.eg-empty{grid-column:1/-1;text-align:center;border:1px dashed #46566a;border-radius:14px;padding:22px;color:#aab8ca;font-size:11px}.eg-license{margin:9px 0;border:1px solid #d6a94b55;border-radius:12px;padding:10px;background:#d6a94b12;font-size:10px;color:#e7d6ae}.eg-license button{margin-top:7px}.eg-foot{font-size:9px;color:#788ba3;text-align:center;padding:12px 3px}",
+ "@media(max-width:360px){.eg-grid{gap:6px}.eg-car-body{padding:7px}.eg-car-art{height:76px}.eg-car-emoji{font-size:42px}}"
+ ].join("");
+ document.head.appendChild(st);
+})();
 function carListHtml(){
-  let L=PX.carList.slice();
-  if(PX.carCat!=='all')L=L.filter(v=>CARCAT[PX.carCat].includes(v.col));
-  if(PX.carQ)L=L.filter(v=>v.name.toLowerCase().includes(PX.carQ.toLowerCase()));
-  if(PX.carSort==='lo')L.sort((a,b)=>a.price-b.price);else if(PX.carSort==='hi')L.sort((a,b)=>b.price-a.price);
-  const own=v=>PX.cars.includes(v.col);
-  return '<div style="color:#9ca3af;margin:6px 2px">'+L.length+' ads</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'+L.map(v=>`<div style="background:#1f2937;border-radius:10px;padding:8px;text-align:center"><div style="font-size:34px">${v.icon}</div><span style="background:#16a34a;color:#fff;border-radius:4px;font-size:10px;padding:1px 5px">In stock</span><div style="font-weight:700;margin-top:4px">${esc(v.name)}</div><div style="color:#ffd54a">${fmtK(v.price)}</div>${own(v)?'<div style="margin-top:6px;color:#86efac">✔ Owned</div>':`<button class="xbtn" data-x="buycar" data-c="${v.col}" style="margin-top:6px">Buy</button>`}</div>`).join('')+'</div>';
+ let L=(PX.carList||[]).slice();
+ if(PX.carCat!=='all')L=L.filter(v=>(CARCAT[PX.carCat]||[]).includes(v.col));
+ if(PX.carQ)L=L.filter(v=>v.name.toLowerCase().includes(PX.carQ.toLowerCase()));
+ if(PX.carSort==='lo')L.sort((a,b)=>a.price-b.price);else if(PX.carSort==='hi')L.sort((a,b)=>b.price-a.price);
+ const own=v=>PX.cars.includes(v.col);
+ return '<div class="eg-grid">'+(L.length?L.map(v=>{
+  const sp=SPECS[v.col]||[v.name,'—','—','—'],isOwn=own(v);
+  const category=(Object.keys(CARCAT).find(k=>CARCAT[k].includes(v.col))||'ride').toUpperCase();
+  return '<article class="eg-car'+(isOwn?' owned':'')+'"><div class="eg-car-art"><span class="eg-car-tag'+(isOwn?' owned':'')+'">'+(isOwn?'✓ IN YOUR GARAGE':category)+'</span><span class="eg-car-emoji">'+esc(v.icon||'🚘')+'</span></div><div class="eg-car-body"><div class="eg-car-name">'+esc(v.name)+'</div><div class="eg-car-price">'+fmtK(v.price)+'</div><div class="eg-specs"><div class="eg-spec"><small>TOP SPEED</small><b>'+esc(sp[1])+'</b></div><div class="eg-spec"><small>0–100 KM/H</small><b>'+esc(sp[2])+'</b></div><div class="eg-spec"><small>POWER</small><b>'+esc(sp[3])+'</b></div><div class="eg-spec"><small>STATUS</small><b>'+(isOwn?'OWNED':'AVAILABLE')+'</b></div></div><div class="eg-actions"><button class="eg-btn" data-x="carinfo" data-c="'+v.col+'">DETAILS</button>'+(isOwn?'<button class="eg-btn primary" disabled>OWNED ✓</button>':'<button class="eg-btn primary" data-x="buycar" data-c="'+v.col+'">BUY RIDE</button>')+(isOwn?'<div class="eg-paintrow"><small>RESPray · ₦75,000</small><div class="eg-paints">'+[['#f5f5f5','PEARL'],['#111827','MIDNIGHT'],['#dc2626','RACING RED'],['#2563eb','OCEAN'],['#16a34a','EMERALD'],['#f59e0b','GOLD'],['#a855f7','VIOLET'],['#ec4899','ROSE']].map(([c,n])=>'<button class="eg-paint" title="'+n+'" data-x="carpaint" data-c="'+v.col+'" data-paint="'+c+'" style="background:'+c+';border-color:'+((PX.carPaint&&PX.carPaint[v.col]||'#f5f5f5')===c?'#fff':'#64748b')+'"></button>').join('')+'</div></div>':'')+'</div></div></article>';
+ }).join(''):'<div class="eg-empty">No vehicles match this search. Try another category or name.</div>')+'</div>';
 }
 APPR.Cars=function(){
-  const lic=PX.license?'':`<div class="card">🪪 You need a <b>Driver's License</b> to buy or drive.<br><button class="xbtn gold" data-x="lic">Get license ${fmtN(PX.cert?PX.cert.price:20000)}</button></div>`;
-  appview.innerHTML=`<div style="background:#16a34a;border-radius:12px;padding:10px;margin-bottom:8px"><b style="color:#fff">Elite Auto Gallery</b><br><small style="color:#dcfce7">delivered to the gallery lot</small><input id="cq" value="${esc(PX.carQ)}" placeholder="🔍 I am looking for..." style="width:100%;box-sizing:border-box;margin-top:8px;padding:9px;border:0;border-radius:18px"></div>${lic}
-  <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px">${CARCATL.map(c=>`<button class="xbtn" data-x="carcat" data-c="${c[0]}" style="white-space:nowrap;${PX.carCat===c[0]?'background:#16a34a;color:#fff':''}">${c[1]}</button>`).join('')}</div>
-  <select id="cs" style="width:100%;padding:7px;border-radius:8px;margin-bottom:4px"><option value="">Any price</option><option value="lo"${PX.carSort==='lo'?' selected':''}>Price: low to high</option><option value="hi"${PX.carSort==='hi'?' selected':''}>Price: high to low</option></select><div id="clist">${carListHtml()}</div>`;
-  const q=document.getElementById('cq');q.oninput=()=>{PX.carQ=q.value;document.getElementById('clist').innerHTML=carListHtml()};
-  document.getElementById('cs').onchange=e=>{PX.carSort=e.target.value;document.getElementById('clist').innerHTML=carListHtml()};
+ const lic=PX.license?'':'<div class="eg-license">🪪 A valid driver\'s licence is required before you can buy or drive a vehicle.<br><button class="eg-btn primary" data-x="lic">GET DRIVER\'S LICENCE · '+fmtN(PX.cert?PX.cert.price:20000)+'</button></div>';
+ const owned=(PX.cars||[]).length,total=(PX.carList||[]).length;
+ appview.innerHTML='<section class="epic-garage"><header class="eg-hero"><div class="eg-kicker">LAGOS MOTORING • PRIVATE COLLECTION</div><h2>ELITE AUTO GALLERY</h2><p>Find your next ride. Explore the collection, compare performance and build your personal garage.</p><div class="eg-statrow"><div class="eg-stat"><b>'+owned+'</b><small>YOUR RIDES</small></div><div class="eg-stat"><b>'+total+'</b><small>SHOWROOM MODELS</small></div><div class="eg-stat"><b>'+(PX.license?'READY':'PENDING')+'</b><small>DRIVER STATUS</small></div></div></header><section style="margin:12px 0;padding:14px;border:1px solid #d8ad5c66;border-radius:16px;background:linear-gradient(135deg,#18283b,#0b1421);color:#f8fafc"><div style="font-size:10px;letter-spacing:1.8px;color:#f4d38d;font-weight:900">🏡 PRIVATE PROPERTY GARAGE</div><b style="display:block;font-size:16px;margin:6px 0">'+(PX.garage?esc(PX.garage.home)+' · '+esc(PX.garage.area):'No rented home')+'</b><div style="font-size:12px;color:#cbd5e1;margin-bottom:10px">'+(PX.garage?((PX.garage.used||0)+' / '+PX.garage.capacity+' vehicle spaces occupied'):'Rent a home to unlock secure vehicle storage.')+'</div>'+(PX.garage&&myCol>=0?'<button class="eg-btn primary" data-x="garageStore">STORE CURRENT VEHICLE AT HOME</button>':'')+((PX.storedCars||[]).length?'<div style="display:grid;gap:7px;margin-top:10px">'+PX.storedCars.map(c=>{const v=(PX.carList||[]).find(q=>q.col===c);return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px;border-radius:10px;background:#ffffff12"><span>'+esc(v?v.name:'Vehicle #'+c)+'</span><button class="eg-btn" data-x="garageRetrieve" data-c="'+c+'">RETRIEVE</button></div>'}).join('')+'</div>':'<div style="font-size:11px;color:#94a3b8;margin-top:6px">No vehicles stored yet.</div>')+'</section><input class="eg-search" id="cq value="'+esc(PX.carQ)+'" placeholder="⌕ Search the collection..." autocomplete="off">'+lic+'<div class="eg-cats">'+CARCATL.map(c=>'<button class="eg-cat'+(PX.carCat===c[0]?' active':'')+'" data-x="carcat" data-c="'+c[0]+'">'+c[1]+'</button>').join('')+'</div><div class="eg-toolbar"><b>THE COLLECTION · '+total+' MODELS</b><select id="cs"><option value=""'+(PX.carSort===''?' selected':'')+'>FEATURED ORDER</option><option value="lo"'+(PX.carSort==='lo'?' selected':'')+'>PRICE: LOW TO HIGH</option><option value="hi"'+(PX.carSort==='hi'?' selected':'')+'>PRICE: HIGH TO LOW</option></select></div><div id="clist">'+carListHtml()+'</div><div class="eg-foot">Vehicle ownership and purchases are confirmed by the Citygame server.</div></section>';
+ const q=document.getElementById('cq');q.oninput=()=>{PX.carQ=q.value;document.getElementById('clist').innerHTML=carListHtml()};
+ document.getElementById('cs').onchange=e=>{PX.carSort=e.target.value;document.getElementById('clist').innerHTML=carListHtml()};
 };
+X.garageStore=()=>S({t:'garage',op:'store'});
+X.garageRetrieve=b=>S({t:'garage',op:'retrieve',col:+b.dataset.c});
 X.carcat=b=>{PX.carCat=b.dataset.c;APPR.Cars()};
 X.lic=()=>S({t:'cert',op:'buy',id:'license'});
 X.buycar=b=>S({t:'buycar',col:+b.dataset.c});
+X.carpaint=b=>{const col=+b.dataset.c,color=String(b.dataset.paint||'');if(!PX.cars.includes(col))return toast('Own this vehicle before respraying it');if(!confirm('Respray this vehicle for ₦75,000?'))return;S({t:'carpaint',col,color})};
+X.carinfo=b=>{
+ const col=+b.dataset.c,v=(PX.carList||[]).find(x=>x.col===col);if(!v)return;
+ const sp=SPECS[col]||[v.name,'—','—','—'],owned=PX.cars.includes(col);
+ let old=document.getElementById('epicCarDetails');if(old)old.remove();
+ const el=document.createElement('div');el.id='epicCarDetails';
+ el.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:18px;background:#020711e8;backdrop-filter:blur(10px)';
+ el.innerHTML='<section style="width:min(410px,100%);border:1px solid #d8ad5c99;border-radius:22px;padding:15px;background:linear-gradient(145deg,#1d2c40,#0b121e);color:#f8fafc;box-shadow:0 24px 80px #000b"><div style="font-size:9px;letter-spacing:2px;color:#f4d38d;font-weight:900">ELITE AUTO GALLERY • 3D VEHICLE VIEW</div><div id="egCarStage" style="height:190px;margin:10px 0 13px;border-radius:15px;overflow:hidden;border:1px solid #ffffff20;background:radial-gradient(ellipse at 50% 85%,#d89f4b38,transparent 60%),linear-gradient(145deg,#26394d,#0b1421);position:relative"><canvas id="egCarCanvas" style="width:100%;height:100%;display:block"></canvas><span style="position:absolute;bottom:7px;left:0;right:0;text-align:center;font-size:8px;letter-spacing:1.5px;color:#d8e2ef;pointer-events:none">DRAG IS NOT REQUIRED · AUTO ROTATING PREVIEW</span></div><h2 style="margin:0;font-size:22px">'+esc(v.name)+'</h2><div style="font-size:20px;color:#ffd98b;font-weight:900;margin:6px 0 12px">'+fmtK(v.price)+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">'+[['TOP SPEED',sp[1]],['0–100 KM/H',sp[2]],['ENGINE POWER',sp[3]],['OWNERSHIP',owned?'IN YOUR GARAGE':'AVAILABLE']].map(x=>'<div style="padding:10px;border-radius:10px;background:#ffffff0b"><small style="display:block;color:#8fa2b9;font-size:8px;letter-spacing:1px">'+x[0]+'</small><b style="font-size:12px">'+esc(x[1])+'</b></div>').join('')+'</div><div style="display:flex;gap:8px;margin-top:14px"><button id="egClose" style="flex:1;padding:12px;border-radius:10px;border:1px solid #52637a;background:#25364c;color:#fff;font-weight:800">CLOSE</button>'+(owned?'<button disabled style="flex:1;padding:12px;border-radius:10px;border:0;background:#245a49;color:#b9f4d8;font-weight:800">OWNED ✓</button>':'<button id="egBuy" style="flex:1;padding:12px;border-radius:10px;border:0;background:linear-gradient(110deg,#f8df9d,#d99a35);color:#17202d;font-weight:900">BUY RIDE</button>')+'</div></section>';
+ document.body.appendChild(el);
+ let renderer=null,frame=0,car=null;
+ try{
+  const canvas=document.getElementById('egCarCanvas'),stage=document.getElementById('egCarStage');
+  renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:'low-power'});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,1.5));
+  renderer.setSize(stage.clientWidth,stage.clientHeight,false);
+  renderer.outputEncoding=THREE.sRGBEncoding;
+  const scene3=new THREE.Scene(),camera3=new THREE.PerspectiveCamera(34,stage.clientWidth/stage.clientHeight,.1,100);
+  camera3.position.set(7,4.2,7);camera3.lookAt(0,.7,0);
+  scene3.add(new THREE.HemisphereLight(0xe4efff,0x263246,1.45));
+  const keyLight=new THREE.DirectionalLight(0xffe0a6,2.2);keyLight.position.set(5,8,5);scene3.add(keyLight);
+  const rimLight=new THREE.DirectionalLight(0x7bbcff,1.1);rimLight.position.set(-5,3,-4);scene3.add(rimLight);
+  const floor=new THREE.Mesh(new THREE.CircleGeometry(4.5,48),new THREE.MeshBasicMaterial({color:0x18283b,transparent:true,opacity:.72}));
+  floor.rotation.x=-Math.PI/2;floor.position.y=-.05;scene3.add(floor);
+  car=makeCar(col,PX.cars.includes(col)?'owned':undefined);car.position.y=.02;scene3.add(car);
+  const render=()=>{if(!document.body.contains(el)){if(frame)cancelAnimationFrame(frame);if(renderer)renderer.dispose();return}car.rotation.y+=.004;renderer.render(scene3,camera3);frame=requestAnimationFrame(render)};
+  render();
+ }catch(e){console.warn('3D vehicle preview unavailable; showroom fallback remains visible',e)}
+ const cleanup=()=>{if(frame)cancelAnimationFrame(frame);if(renderer)renderer.dispose()};
+ el.addEventListener('click',e=>{if(e.target===el||e.target.id==='egClose'){cleanup();el.remove()}if(e.target.id==='egBuy'){cleanup();S({t:'buycar',col});el.remove()}});
+};
 
 /* ID & certificates */
 APPR.ID=function(){
@@ -3523,19 +3876,25 @@ APPR.Hustle=function(){appview.innerHTML=`<div class="card">💪🏾 Side hustle
 X.hustle=b=>S({t:'hustle',id:b.dataset.id});
 
 /* Decor */
+let decorRotationOffset=0;
 APPR.Decor=function(){
   const D=PX.decor,R=inside&&ROOMS[inside],ownHome=inside&&/^house/.test(inside)&&myHome&&inside==='house'+myHome.unit;
   const unit=ownHome?String(myHome.unit):null,placed=unit&&D.placed&&D.placed[unit]?D.placed[unit]:[];
   const nm=id=>{const s=(D.shop||[]).find(x=>x.id===id);return s?s.icon+' '+s.name:id};
-  let h=`<div class="card">🛋️ Decorate your home in 3D. ${ownHome?'Stand where you want it, face the direction, then press <b>Place</b>.':'<b>Go inside your own home</b> to place things.'}</div>`;
+  const roomName=R?(R.name||R.label||(/house/.test(inside)?'Home interior':'Interior')):'Outside your home';
+  let h=`<div class="card"><b>🛋️ HOME DESIGN STUDIO</b><p>${ownHome?'You are editing your own property. Choose an item, set its facing direction, then place it from your current position.':'Enter your own home to place or remove furniture. You can still browse and buy items here.'}</p><small>Current location: ${esc(roomName)} · ${ownHome?'Placement enabled':'Placement locked'}</small></div>`;
+  h+='<div class="card"><b>↻ Furniture direction</b><p style="font-size:12px;opacity:.8">Rotation offset: '+Math.round(decorRotationOffset*180/Math.PI)+'°</p><div class="xrow"><button class="xbtn" data-x="drotleft">↶ Rotate 15°</button><button class="xbtn" data-x="drotright">↷ Rotate 15°</button><button class="xbtn gray" data-x="drotreset">Reset</button></div></div>';
   const inv=Object.entries(D.inv||{});
-  h+='<h4>🎒 Your items</h4>'+(inv.length?inv.map(([id,q])=>`<div class="xrow"><div><b>${nm(id)}</b><small>x${q}</small></div>${ownHome?`<button class="xbtn" data-x="dplace" data-id="${id}">Place</button>`:''}</div>`).join(''):'<div style="font-size:12px;opacity:.7">Nothing yet. Buy something below.</div>');
-  if(ownHome)h+='<h4>🏠 In your home</h4>'+(placed.length?placed.map((it,i)=>`<div class="xrow"><b>${nm(it.id)}</b><button class="xbtn red" data-x="dremove" data-n="${i}">Remove</button></div>`).join(''):'<div style="font-size:12px;opacity:.7">Empty</div>');
-  h+='<h4>🛍️ Shop</h4>'+(D.shop||[]).map(s=>`<div class="xrow"><div><b>${s.icon} ${esc(s.name)}</b><small>${fmtN(s.price)}</small></div><button class="xbtn gold" data-x="dbuy" data-id="${s.id}">Buy</button></div>`).join('');
+  h+='<h4>🎒 Furniture storage</h4>'+(inv.length?inv.map(([id,q])=>`<div class="xrow"><div><b>${nm(id)}</b><small>Available: x${q}</small></div>${ownHome?`<button class="xbtn" data-x="dplace" data-id="${id}">Place here</button>`:''}</div>`).join(''):'<div style="font-size:12px;opacity:.7">Your storage is empty. Browse the furniture shop below.</div>');
+  if(ownHome)h+='<h4>🏠 Furniture in this property · '+placed.length+'/60</h4>'+(placed.length?placed.map((it,i)=>`<div class="xrow"><div><b>${nm(it.id)}</b><small>Position ${Number(it.x||0).toFixed(1)}, ${Number(it.z||0).toFixed(1)} · Facing ${Math.round((Number(it.ry)||0)*180/Math.PI)}°</small></div><button class="xbtn red" data-x="dremove" data-n="${i}">Remove</button></div>`).join(''):'<div style="font-size:12px;opacity:.7">This property has no placed furniture yet.</div>');
+  h+='<h4>🛍️ Furniture shop</h4>'+(D.shop||[]).map(s=>`<div class="xrow"><div><b>${s.icon} ${esc(s.name)}</b><small>${fmtN(s.price)}</small></div><button class="xbtn gold" data-x="dbuy" data-id="${s.id}">Buy</button></div>`).join('');
   appview.innerHTML=h;
 };
 X.dbuy=b=>S({t:'decor',op:'buy',id:b.dataset.id});
-X.dplace=b=>{const R=ROOMS[inside];if(!R)return;const x=pos.x+Math.sin(pos.ry)*1.8-R.x0,z=pos.z+Math.cos(pos.ry)*1.8-R.z0;S({t:'decor',op:'place',id:b.dataset.id,x,z,ry:pos.ry})};
+X.drotleft=()=>{decorRotationOffset-=Math.PI/12;renderApp()};
+X.drotright=()=>{decorRotationOffset+=Math.PI/12;renderApp()};
+X.drotreset=()=>{decorRotationOffset=0;renderApp()};
+X.dplace=b=>{const R=ROOMS[inside];if(!R||!inside||!/^house/.test(inside)||!myHome||inside!=='house'+myHome.unit){toast('Enter your own home before placing furniture');return}const x=pos.x+Math.sin(pos.ry)*1.8-R.x0,z=pos.z+Math.cos(pos.ry)*1.8-R.z0;if(Math.abs(x)>8||Math.abs(z)>8){toast('Move further inside the room before placing furniture');return}S({t:'decor',op:'place',id:b.dataset.id,x,z,ry:pos.ry+decorRotationOffset})};
 X.dremove=b=>S({t:'decor',op:'remove',n:+b.dataset.n});
 const decorGroup=new THREE.Group();scene.add(decorGroup);let decorKey='';
 function decorMesh(id){
@@ -4433,5 +4792,9 @@ catch(e){console.warn('palms fallback',e);try{palmBatchBoxes();flushBatch()}catc
 <script src="/lagos-3d-polish.js?v=2026111503"></script>
 <script src="/citygame-world-finish.js?v=1"></script>
 <script src="/citygame-city-guide.js?v=2026111505"></script>
+<script src="/citygame-map-experience.js?v=20261116"></script>
+<script src="/player-account-center.js?v=20261116"></script>
+<script src="/citygame-company-app.js?v=1"></script>
+<script src="/asset-download-manager.js?v=1"></script>
 </body>
 </html>

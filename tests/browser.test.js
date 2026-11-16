@@ -309,3 +309,38 @@ test('Unity Lagos map connects the main, market and southern streets with north-
   assert.match(map, /Adeniran Connector edge east/);
   assert.ok(map.indexOf('Material laneWhite =') < map.indexOf('Balogun Connector edge west'));
 });
+
+test('shared phone bridge is initialized after its phone app registry', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  const plus = html.indexOf('<script id="plus">');
+  const registry = html.indexOf('const APPR={};', plus);
+  const mainBridge = html.indexOf('window.LAGOS_PHONE =', plus);
+  assert.ok(plus >= 0 && registry > plus && mainBridge > registry);
+  assert.match(html.slice(mainBridge, mainBridge + 180), /\{ APPR, X, PX, S, phoneOpen,/);
+});
+
+test('Company phone app is wired to the real server business protocol', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  const company = fs.readFileSync(path.join(root, 'public', 'citygame-company-app.js'), 'utf8');
+  const server = fs.readFileSync(path.join(root, 'server.js'), 'utf8');
+  assert.match(html, /citygame-company-app\.js/);
+  assert.match(html, /CGCompanyReceive\(m\.businesses\)/);
+  for (const op of ['create','collect','rename','hire','fire']) {
+    assert.ok(company.includes("op:'" + op + "'"), 'Company app missing operation: ' + op);
+    assert.ok(server.includes("m.op === '" + op + "'"), 'server missing operation: ' + op);
+  }
+  assert.match(company, /bridge\.APPR\.Company/);
+  assert.match(company, /dataset\.app='Company'/);
+});
+
+test('downloadable asset packs only list models that exist in the repository', () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, 'public', 'asset-packs.json'), 'utf8'));
+  assert.ok(Array.isArray(manifest.packs) && manifest.packs.length >= 3);
+  for (const pack of manifest.packs) {
+    assert.ok(Array.isArray(pack.assets) && pack.assets.length > 0, pack.id + ' must list files');
+    for (const file of pack.assets) {
+      const target = path.join(root, 'public', file.slice(1));
+      assert.ok(fs.existsSync(target), 'missing asset pack file: ' + file);
+    }
+  }
+});

@@ -89,13 +89,21 @@ function apply(){
 ids.forEach(id=>document.getElementById(id).addEventListener('input',apply));
 function rgb(hex){hex=hex.replace('#','');return [parseInt(hex.slice(0,2),16),parseInt(hex.slice(2,4),16),parseInt(hex.slice(4,6),16)];}
 function nearest(hex,palette){const c=rgb(hex);let best=0,dist=Infinity;palette.forEach((p,i)=>{const q=rgb(p),d=(c[0]-q[0])**2+(c[1]-q[1])**2+(c[2]-q[2])**2;if(d<dist){dist=d;best=i;}});return best;}
-document.getElementById('save').addEventListener('click',()=>{const v=Object.fromEntries(ids.map(id=>[id,document.getElementById(id).value]));localStorage.setItem('citylife-avatar',JSON.stringify(v));
+document.getElementById('save').addEventListener('click',async()=>{const v=Object.fromEntries(ids.map(id=>[id,document.getElementById(id).value]));localStorage.setItem('citylife-avatar',JSON.stringify(v));
 let look=[1,0,1,1,0,0];try{const prior=JSON.parse(localStorage.getItem('look')||'null');if(Array.isArray(prior)&&prior.length>=6)look=prior.slice(0,6).map(n=>n|0);}catch(e){}
 look[0]=nearest(v.skin,['#f1c27d','#c68642','#8d5524','#e0ac69','#5c3a21']);
 look[1]=v.style==='afro'?1:0;
 look[2]=nearest(v.shirt,['#e53935','#1e88e5','#43a047','#fdd835','#ffffff','#8e24aa','#ff7043','#212121']);
 look[3]=nearest(v.pants,['#1a237e','#212121','#5d4037','#455a64','#827717']);
 look[5]=nearest(v.hair,['#0d0b0a','#2b1a10','#5a3a22','#c9a24a','#9b2d20','#9a9a9a']);
-localStorage.setItem('look',JSON.stringify(look));document.getElementById('status').textContent='Saved! Return to Lagos Life and refresh the character menu ✓';});
+localStorage.setItem('look',JSON.stringify(look));
+const status=document.getElementById('status'),token=localStorage.getItem('ll_tok');
+if(!token){status.textContent='Saved on this device. Sign in to sync this character to your account.';return;}
+status.textContent='Saving character to your account…';
+try{const response=await fetch('/api/account',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({action:'save-avatar',look,appearance:{skin:v.skin,hair:v.hair,style:v.style,shirt:v.shirt,pants:v.pants,shoes:v.shoes}})});
+const result=await response.json();if(!response.ok)throw new Error(result.error||'Account save failed');
+status.textContent='Character saved to your account ✓ It will load when you join the city.';
+}catch(error){status.textContent='Saved on this device, but account sync failed: '+error.message;}
+});
 try{const saved=JSON.parse(localStorage.getItem('citylife-avatar')||'null');if(saved)ids.forEach(id=>{if(saved[id])document.getElementById(id).value=saved[id];});}catch(e){}initAvatar3D();apply();
 </script></body></html>

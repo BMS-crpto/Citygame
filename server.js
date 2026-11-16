@@ -110,6 +110,143 @@ function authApi(req, res) {
   });
 }
 
+// ---- authenticated player account/profile API ----
+function accountFromRequest(req) {
+  const header = String(req.headers.authorization || '');
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  return match ? readToken(match[1]) : null;
+}
+function accountSnapshot(username) {
+  const a = accounts[username];
+  if (!a) return null;
+  const key = 'CITY1:a:' + username;
+  const sv = saves[key] && typeof saves[key] === 'object' ? saves[key] : {};
+  const ext = sv.ext && typeof sv.ext === 'object' ? sv.ext : {};
+  const life = sv.life && typeof sv.life === 'object' ? sv.life : {};
+  const career = life.career && typeof life.career === 'object' ? life.career : null;
+  const careerDef = career && typeof CAREERS !== 'undefined' ? CAREERS[career.id] : null;
+  const careerLevel = career && careerDef ? levelOf(career) : 0;
+  const homeEntry = Object.entries(tenants).find(([, t]) => t && t.key === key && t.until > Date.now());
+  const homeId = homeEntry ? homeEntry[0] : '';
+  const homeUnit = homeId && typeof UNITS !== 'undefined' ? UNITS[+homeId] : null;
+  const homeHouse = homeUnit && typeof HOUSES !== 'undefined' ? HOUSES[homeUnit.house] : null;
+  const ownedBusinesses = Object.values(businesses).filter(b => b && b.ownerKey === key).map(b => ({
+    id: b.id, name: b.name, kind: b.kind, area: b.area,
+    locationName: String(b.locationName || ''), balance: Math.max(0, Math.floor(+b.balance || 0)),
+    staffCount: Array.isArray(b.staff) ? b.staff.length : 0,
+    customers: Math.max(0, Math.floor(+b.customers || 0))
+  }));
+  const decorInventory = ext.decorInv && typeof ext.decorInv === 'object' ? ext.decorInv : {};
+  const homeDecor = homeId && ext.decor && Array.isArray(ext.decor[homeId]) ? ext.decor[homeId] : [];
+  const homeFurniture = homeDecor.filter(item => item && DECOR[item.id]).slice(0, 60).map(item => ({
+    id: String(item.id), name: DECOR[item.id].name, icon: DECOR[item.id].icon,
+    x: Math.max(-8, Math.min(8, +item.x || 0)), z: Math.max(-8, Math.min(8, +item.z || 0)),
+    rotation: Math.round((+item.ry || 0) * 100) / 100
+  }));
+  const furnitureInventory = Object.entries(decorInventory).filter(([id, count]) => DECOR[id] && +count > 0).map(([id, count]) => ({
+    id, name: DECOR[id].name, icon: DECOR[id].icon, quantity: Math.min(200, Math.floor(+count || 0))
+  }));
+  const inventory = sv.inv && typeof sv.inv === 'object' ? sv.inv : {};
+  const inventoryCount = Object.values(inventory).reduce((n, q) => n + Math.max(0, Math.floor(+q || 0)), 0);
+  const needs = {
+    food: Math.max(0, Math.min(100, +sv.food || 0)),
+    energy: Math.max(0, Math.min(100, +life.energy || 0)),
+    hygiene: Math.max(0, Math.min(100, +life.hygiene || 0)),
+    fun: Math.max(0, Math.min(100, +life.fun || 0)),
+    social: Math.max(0, Math.min(100, +life.social || 0)),
+    bladder: Math.max(0, Math.min(100, +life.bladder || 0))
+  };
+  return {
+    username,
+    displayName: String((a.profile && a.profile.displayName) || a.name || username).slice(0, 30),
+    bio: String((a.profile && a.profile.bio) || '').slice(0, 120),
+    email: String(a.email || ''),
+    createdAt: +a.created || 0,
+    lastSavedAt: +sv.saved || 0,
+    player: {
+      money: Math.max(0, Math.floor(+sv.money || 0)),
+      bank: Math.max(0, Math.floor(+sv.bank || 0)),
+      food: needs.food, needs,
+      path: String(sv.path || ''),
+      look: Array.isArray((accounts[username].profile || {}).avatar && accounts[username].profile.avatar.look) ? accounts[username].profile.avatar.look.slice(0, 6) : (Array.isArray(sv.look) ? sv.look.slice(0, 6) : []),
+      career: career ? { id: String(career.id || ''), title: String(careerDef && careerDef.title || career.id || ''), level: careerLevel + 1, xp: Math.max(0, Math.floor(+career.xp || 0)), skill: Math.max(0, Math.floor(+(life.skills && life.skills[career.id]) || 0)) } : null,
+      skills: life.skills && typeof life.skills === 'object' ? Object.entries(life.skills).slice(0, 20).map(([id, level]) => ({ id: String(id), level: Math.max(0, Math.min(10, Math.floor(+level || 0))) })) : [],
+      inventoryItems: inventoryCount,
+      vehicles: Array.isArray(ext.cars) ? ext.cars.length : 0,
+      vehicleIds: Array.isArray(ext.cars) ? ext.cars.slice(0, 30) : [],
+      hasDriversLicense: !!ext.license,
+      homeActive: !!homeEntry,
+      home: homeEntry ? { id: homeId, name: String(homeUnit && homeHouse ? unitName(homeHouse, homeUnit) : homeHouse && homeHouse.name || 'Rented home'), area: String(homeHouse && homeHouse.area || ''), until: +homeEntry[1].until } : null,
+      homeUntil: homeEntry ? +homeEntry[1].until : 0,
+      homeFurniture,
+      furnitureInventory,
+      furniturePlacedCount: homeFurniture.length,
+      homeRent: homeHouse ? Math.max(0, Math.floor(+homeHouse.rent || 0)) : 0,
+      businesses: ownedBusinesses,
+      dailyStreak: Math.max(0, Math.floor(+ext.streak || 0))
+    }
+  };
+}
+function accountApi(req, res) {
+  const sendJson = (code, data) => {
+    res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
+    res.end(JSON.stringify(data));
+  };
+  const auth = accountFromRequest(req);
+  if (!auth || !accounts[auth.acct]) return sendJson(401, { error: 'Please sign in again to access your player account.' });
+  const username = auth.acct;
+  if (req.method === 'GET') return sendJson(200, { ok: true, account: accountSnapshot(username), storage: UP_ON && dbWritesOk ? 'persistent' : 'local-fallback' });
+  if (req.method !== 'PATCH' && req.method !== 'POST') return sendJson(405, { error: 'Method not allowed' });
+  let body = '';
+  req.on('data', chunk => { body += chunk; if (body.length > 3000) req.destroy(); });
+  req.on('end', () => {
+    let input;
+    try { input = JSON.parse(body || '{}'); } catch (e) { return sendJson(400, { error: 'Invalid profile data.' }); }
+    if (req.method === 'POST' && input.action === 'save-avatar') {
+      const raw = input.look;
+      if (!Array.isArray(raw) || raw.length !== 6 || raw.some((v, i) => !Number.isInteger(v) || v < 0 || v > [4,4,7,4,1,5][i])) return sendJson(400, { error: 'Invalid character appearance data.' });
+      const appearance = input.appearance && typeof input.appearance === 'object' ? input.appearance : {};
+      const safeAppearance = {};
+      for (const field of ['skin','hair','style','shirt','pants','shoes']) {
+        const value = String(appearance[field] || '');
+        if (field === 'style' ? !['short','fade','afro'].includes(value) : !/^#[0-9a-fA-F]{6}$/.test(value)) return sendJson(400, { error: 'Invalid character appearance.' });
+        safeAppearance[field] = value;
+      }
+      const a = accounts[username];
+      a.profile = Object.assign({}, a.profile || {}, { avatar: { look: raw.slice(), appearance: safeAppearance, updatedAt: Date.now() }, updatedAt: Date.now() });
+      saveAccounts();
+      return persistAccount(username).then(() => sendJson(200, { ok: true, account: accountSnapshot(username) }))
+        .catch(e => { console.log('account avatar save failed', username, e.message); sendJson(503, { error: 'Character appearance could not be saved. Please retry.' }); });
+    }
+    if (req.method === 'POST' && input.action === 'change-password') {
+      const currentPassword = String(input.currentPassword || '');
+      const newPassword = String(input.newPassword || '');
+      const account = accounts[username];
+      if (!currentPassword || !newPassword) return sendJson(400, { error: 'Enter your current and new passwords.' });
+      if (newPassword.length < 10 || newPassword.length > 128 || WEAK.includes(newPassword.toLowerCase()) || newPassword.toLowerCase() === username) return sendJson(400, { error: 'Choose a stronger password with at least 10 characters.' });
+      const actual = Buffer.from(hashPw(currentPassword, account.salt), 'hex');
+      const expected = Buffer.from(String(account.hash || ''), 'hex');
+      if (actual.length !== expected.length || !crypto.timingSafeEqual(actual, expected)) return sendJson(403, { error: 'Current password is incorrect.' });
+      const salt = crypto.randomBytes(16).toString('hex');
+      account.salt = salt;
+      account.hash = hashPw(newPassword, salt);
+      saveAccounts();
+      return persistAccount(username).then(() => sendJson(200, { ok: true, message: 'Password updated successfully.' }))
+        .catch(e => { console.log('account password save failed', username, e.message); sendJson(503, { error: 'Password could not be saved. Please retry.' }); });
+    }
+    if (req.method !== 'PATCH') return sendJson(400, { error: 'Unsupported account action.' });
+    const displayName = String(input.displayName == null ? '' : input.displayName).trim();
+    const bio = String(input.bio == null ? '' : input.bio).trim();
+    if (displayName.length < 2 || displayName.length > 24 || !/^[\p{L}\p{N} _.'-]+$/u.test(displayName)) return sendJson(400, { error: 'Display name must be 2–24 letters, numbers or simple punctuation.' });
+    if (bio.length > 120) return sendJson(400, { error: 'Bio must be 120 characters or fewer.' });
+    const a = accounts[username];
+    a.profile = Object.assign({}, a.profile || {}, { displayName, bio, updatedAt: Date.now() });
+    saveAccounts();
+    persistAccount(username).then(() => sendJson(200, { ok: true, account: accountSnapshot(username) }))
+      .catch(e => { console.log('account profile save failed', username, e.message); sendJson(503, { error: 'Profile could not be saved. Please retry.' }); });
+  });
+}
+
 const PUB = path.join(__dirname, 'public');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.wasm': 'application/wasm', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.wav': 'audio/wav', '.ktx2': 'image/ktx2', '.bin': 'application/octet-stream' };
 const server = http.createServer((req, res) => {
@@ -120,6 +257,7 @@ const server = http.createServer((req, res) => {
   catch (e) { res.writeHead(400); return res.end(); }
   const route = url.replace(/[/]+$/, '') || '/';
   if (req.method === 'POST' && (route === '/api/register' || route === '/api/login')) return authApi(req, res);
+  if (route === '/api/account' || route === '/api/account/profile') return accountApi(req, res);
   if (req.method === 'GET' && route === '/api/health') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ ok: true, storage: UP_ON ? (dbWritesOk ? 'upstash (accounts are permanent)' : 'upstash unreachable - using temporary files') : 'temporary file (accounts are WIPED when Render restarts or redeploys)', accounts: Object.keys(accounts).length - 1, lastError: dbLastError })); }
   if (req.method === 'GET' && route === '/api/world-status') {
     const activeRooms = Object.values(rooms || {});
@@ -396,8 +534,11 @@ function onConnection(ws) {
         ws, id, name: String(m.name || 'Player').slice(0, 14), role, money: 500, bank: 0, inside: null, food: 100, job: null, travelUntil: 0, dest: null, look: (Array.isArray(m.look) ? m.look : []).slice(0, 6).concat([0,0,0,0,0,0]).slice(0, 6).map((v, i) => Math.max(0, Math.min(MAXLOOK[i], Math.floor(+v) || 0))), car: -1, jailUntil: 0, cd: {},
         x: (Math.random() - 0.5) * 8, z: (Math.random() - 0.5) * 8, ry: 0, moving: false, floor: 0
       };
-      const np = rooms[room].players[id]; if (gu) { np.email = gu.email; np.acct = gu.acct; if (gu.acct) np.name = gu.acct; else if (!m.name) np.name = String(gu.name).slice(0, 14); }
-      const sv = saves[saveKey(room, np)];
+      const np = rooms[room].players[id]; if (gu) { np.email = gu.email; np.acct = gu.acct; if (gu.acct) { const profileName = accounts[gu.acct] && accounts[gu.acct].profile && accounts[gu.acct].profile.displayName; np.name = String(profileName || gu.acct).slice(0, 14); } else if (!m.name) np.name = String(gu.name).slice(0, 14); }
+      const savedAvatar = gu && gu.acct && accounts[gu.acct].profile && accounts[gu.acct].profile.avatar;
+
+      if (savedAvatar && Array.isArray(savedAvatar.look) && savedAvatar.look.length === 6) np.look = savedAvatar.look.slice();
+const sv = saves[saveKey(room, np)];
       if (sv) {
         np.money = Math.max(0, Math.floor(+sv.money) || 0); np.bank = Math.max(0, Math.floor(+sv.bank) || 0); np.food = Math.max(0, Math.min(100, +sv.food || 100));
       }
@@ -1131,9 +1272,11 @@ const DECOR = {
 };
 const clampN = (v, m) => Math.max(-m, Math.min(m, +v || 0));
 function loadExt(s) {
-  const e = { cars: [], license: 0, since: Date.now(), stocks: {}, decorInv: {}, decor: {}, guardUntil: 0, role: '', acct: '', pinH: '', pinS: '', daily: 0, streak: 0, socialPosts: 0, emotes: 0 };
+  const e = { cars: [], storedCars: [], carPaint: {}, license: 0, since: Date.now(), stocks: {}, decorInv: {}, decor: {}, guardUntil: 0, role: '', acct: '', pinH: '', pinS: '', daily: 0, streak: 0, socialPosts: 0, emotes: 0 };
   if (!s || typeof s !== 'object') return e;
   e.cars = (Array.isArray(s.cars) ? s.cars.map(Number) : []).filter((c, i, a) => VEHICLES[c] && a.indexOf(c) === i);
+  e.storedCars = (Array.isArray(s.storedCars) ? s.storedCars.map(Number) : []).filter((c, i, a) => VEHICLES[c] && e.cars.includes(c) && a.indexOf(c) === i);
+  e.carPaint = {}; for (const [id,color] of Object.entries(s.carPaint || {})) { const col=+id; if (VEHICLES[col] && e.cars.includes(col) && /^#[0-9a-f]{6}$/i.test(String(color))) e.carPaint[col]=String(color).toLowerCase(); }
   e.license = +s.license || 0; e.since = +s.since || e.since;
   for (const id in MARKET) { const q = Math.floor(+(s.stocks || {})[id]) || 0; if (q > 0) e.stocks[id] = Math.min(q, 1e7); }
   for (const id in DECOR) { const q = Math.floor(+(s.decorInv || {})[id]) || 0; if (q > 0) e.decorInv[id] = Math.min(q, 200); }
@@ -1199,7 +1342,7 @@ function payRide(p, m, fare, why) {
 }
 const idNo = p => 'LG-' + (parseInt(crypto.createHash('sha1').update(pKey(p)).digest('hex').slice(0, 8), 16) % 90000000 + 10000000);
 function sendCert(p) { const E = p.ext; send(p.ws, { t: 'x_cert', id: idNo(p), name: p.name, since: E.since, license: E.license, role: p.role, path: p.path, price: LICENSE_PRICE }); }
-function sendCars(p) { const E = p.ext; send(p.ws, { t: 'x_cars', cars: E.cars, license: !!E.license, list: Object.entries(VEHICLES).map(([c, v]) => ({ col: +c, name: v.name, icon: v.icon, price: v.price })) }); }
+function sendCars(p) { const E = p.ext, u = myUnit(p), h = u && HOUSES[u.house], capacity = !h ? 0 : h.kind === 'villa' ? 4 : h.kind === 'lobby' ? 3 : 2; send(p.ws, { t: 'x_cars', cars: E.cars, storedCars: E.storedCars || [], garage: h ? { home: unitName(h,u), area: h.area, capacity, used: (E.storedCars || []).length } : null, carPaint: E.carPaint || {}, license: !!E.license, list: Object.entries(VEHICLES).map(([c, v]) => ({ col: +c, name: v.name, icon: v.icon, price: v.price })) }); }
 function sendMarket(p) { const E = p.ext, prices = {}; for (const id in MARKET) prices[id] = { name: MARKET[id].name, icon: MARKET[id].icon, price: MARKET[id].price, hist: mkHist[id] }; send(p.ws, { t: 'x_mk', prices, hold: E.stocks, cash: p.money }); }
 function sendDecor(p) { const E = p.ext; send(p.ws, { t: 'x_decor', shop: Object.entries(DECOR).map(([id, d]) => ({ id, name: d.name, icon: d.icon, price: d.price })), inv: E.decorInv, placed: E.decor }); }
 function sendExtras(p) { sendCert(p); sendCars(p); sendDecor(p); sendBusinesses(p); send(p.ws, { t: 'x_role', role: p.role }); }
@@ -1217,7 +1360,7 @@ const HUSTLES = {
   tutor: { name: 'Give lessons', icon: '📚', min: 800, max: 1200, cd: 40000 },
   content: { name: 'Post content online', icon: '🎬', min: 300, max: 3000, cd: 30000 }
 };
-const EXTRA = new Set(['getx', 'buycar', 'cert', 'setrole', 'inv', 'dm', 'pay', 'order', 'hire', 'decor', 'rtc', 'phone', 'mic', 'hustle', 'business']);
+const EXTRA = new Set(['getx', 'buycar', 'carpaint', 'garage', 'cert', 'setrole', 'inv', 'dm', 'pay', 'order', 'hire', 'decor', 'rtc', 'phone', 'mic', 'hustle', 'business']);
 function extraMsg(room, p, m, now) {
   if (!EXTRA.has(m.t)) return false;
   const E = p.ext = p.ext || loadExt(null), R = rooms[room];
@@ -1299,6 +1442,53 @@ function extraMsg(room, p, m, now) {
       if (!charge(p, LICENSE_PRICE, "Driver's License")) return true;
       E.license = now; toast('🪪 Driver\'s License issued! You can now buy and drive vehicles.'); sendCert(p); sendCars(p); savePlayer(room, p);
     }
+  } else if (m.t === 'garage') {
+    if (jailed) return toast('You cannot use your garage while in jail'), true;
+    if (p.inside || p.ride) return toast('Exit the building or passenger seat first'), true;
+    const unit = myUnit(p), home = unit && HOUSES[unit.house];
+    if (!home) return toast('Rent a home before using a private garage'), true;
+    if (dist(p, home.out) > 18 && dist(p, home.door) > 18) return toast('Drive to your own home driveway first'), true;
+    E.storedCars = Array.isArray(E.storedCars) ? E.storedCars : [];
+    const capacity = home.kind === 'villa' ? 4 : home.kind === 'lobby' ? 3 : 2;
+    if (m.op === 'store') {
+      const col = Math.floor(+p.car);
+      if (col < 0 || !E.cars.includes(col) || !VEHICLES[col]) return toast('Get into one of your own vehicles first'), true;
+      if (E.storedCars.includes(col)) return toast('That vehicle is already in your garage'), true;
+      if (E.storedCars.length >= capacity) return toast('Your home garage is full'), true;
+      E.storedCars.push(col); p.car = -1;
+       send(p.ws, { t: 'garage_door', x: home.x, z: home.z, open: 1 });
+       setTimeout(() => send(p.ws, { t: 'garage_door', x: home.x, z: home.z, open: 0 }), 3800);
+      sendCars(p); send(p.ws, { t: 'garage_stored', col });
+      toast('🏠 ' + VEHICLES[col].name + ' safely stored at ' + home.name);
+      savePlayer(room, p); return true;
+    }
+    if (m.op === 'retrieve') {
+      const col = Math.floor(+m.col);
+      if (p.car >= 0) return toast('Park your current vehicle before retrieving another'), true;
+      if (!E.storedCars.includes(col) || !E.cars.includes(col) || !VEHICLES[col]) return toast('That vehicle is not in your garage'), true;
+      E.storedCars = E.storedCars.filter(x => x !== col);
+      let x, z;
+      if (home.kind === 'villa') { x = home.x + 7.55; z = home.z + 4.2; }
+      else {
+        // Match the marked resident parking bays built beside flats and penthouses.
+        x = home.x + 10.5;
+        const slots = home.kind === 'lobby' ? [-5.2, 0, 5.2] : [-2.8, 2.8];
+        z = (home.kind === 'lobby' ? home.z + 2.4 : home.z) + slots[Math.min(E.storedCars.length, slots.length - 1)];
+      }
+      const ry = Math.PI;
+      send(p.ws, { t: 'garage_door', x: home.x, z: home.z, open: 1 });
+      setTimeout(() => send(p.ws, { t: 'garage_door', x: home.x, z: home.z, open: 0 }), 3800);
+      sendCars(p); send(p.ws, { t: 'garage_spawn', col, x, z, ry });
+      toast('🔑 ' + VEHICLES[col].name + ' retrieved to your driveway');
+      savePlayer(room, p); return true;
+    }
+    return true;
+  } else if (m.t === 'carpaint') {
+    const col=Math.floor(+m.col), color=String(m.color||'').toLowerCase(), palette=['#f5f5f5','#111827','#dc2626','#2563eb','#16a34a','#f59e0b','#a855f7','#ec4899'];
+    if(!VEHICLES[col]||!E.cars.includes(col))return toast('You must own this vehicle before customising it'),true;
+    if(!palette.includes(color))return toast('That paint finish is unavailable'),true;
+    const price=75000;if(!charge(p,price,'Vehicle respray: '+VEHICLES[col].name))return true;
+    E.carPaint=E.carPaint||{};E.carPaint[col]=color;sendCars(p);toast('🎨 Vehicle resprayed successfully');savePlayer(room,p);
   } else if (m.t === 'buycar') {
     const col = Math.floor(+m.col), v = VEHICLES[col];
     if (!v) return true;
