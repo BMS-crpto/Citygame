@@ -1220,7 +1220,7 @@ function refreshShowLabels(){
 let lotCars=[],lotSig='';
 function rebuildLot(force){
   if(typeof PX==='undefined'||!lotName)return;
-  const ppl=[{name:lotName,cars:PX.cars||[],mine:true}];
+  const stored=new Set(PX.storedCars||[]);const ppl=[{name:lotName,cars:(PX.cars||[]).filter(c=>!stored.has(c)),mine:true}];
   for(const id in others){const o=others[id];if(o.name&&o.bay&&o.bay.length)ppl.push({name:o.name,cars:o.bay,mine:false})}
   ppl.sort((a,b)=>a.name<b.name?-1:a.name>b.name?1:0);
   const sig=ppl.map(q=>q.name+':'+q.cars.join('.')+(q.mine?'*':'')).join('|');
@@ -3469,7 +3469,7 @@ function onMsg(m){
     case 'x_cert':PX.cert=m;if(PX.app==='ID')renderApp();break;
     case 'x_cars':PX.cars=m.cars||[];PX.storedCars=m.storedCars||[];PX.garage=m.garage||null;PX.carPaint=m.carPaint||{};PX.license=!!m.license;PX.carList=m.list||[];try{refreshShowLabels();syncBay()}catch(e){console.warn(e)}if(PX.app==='Cars'||PX.app==='ID')renderApp();break;
     case 'garage_stored':if(carObj){scene.remove(carObj.g);carObj=null;myCol=-1;speed=0;if(me)setCarMode(me,-1)}break;
-    case 'garage_spawn':{const g=makeCar(m.col,'owned');g.position.set(+m.x||0,0,+m.z||0);g.rotation.y=+m.ry||0;scene.add(g);const pc={g,x:+m.x||0,z:+m.z||0,ry:+m.ry||0,col:+m.col};parked.push(pc);break;}
+    case 'garage_spawn':{for(let i=lotCars.length-1;i>=0;i--){const b=lotCars[i];if(b.col===+m.col){scene.remove(b.g);const pi=parked.indexOf(b);if(pi>=0)parked.splice(pi,1);lotCars.splice(i,1)}}const g=makeCar(m.col,'owned');g.position.set(+m.x||0,0,+m.z||0);g.rotation.y=+m.ry||0;scene.add(g);const pc={g,x:+m.x||0,z:+m.z||0,ry:+m.ry||0,col:+m.col};parked.push(pc);break;}
     case 'x_mk':PX.mk=m;if(PX.app==='Invest')renderApp();break;
     case 'x_decor':PX.decor=m;if(PX.app==='Decor')renderApp();break;
     case 'x_role':PX.role=m.role;if(PX.app==='Jobs')openApp('Jobs');break;
