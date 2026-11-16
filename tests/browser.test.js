@@ -310,14 +310,13 @@ test('Unity Lagos map connects the main, market and southern streets with north-
   assert.ok(map.indexOf('Material laneWhite =') < map.indexOf('Balogun Connector edge west'));
 });
 
-test('shared phone bridge is initialized before add-on app registries are attached', () => {
+test('shared phone bridge is initialized after its phone app registry', () => {
   const html = fs.readFileSync(htmlPath, 'utf8');
-  assert.doesNotMatch(html, /window\.LAGOS_PHONE\s*=\s*\{\s*APPR\s*,\s*X\s*,\s*PX\s*,\s*S\s*,\s*phoneOpen/);
-  assert.match(html, /Object\.assign\(window\.LAGOS_PHONE,\s*\{APPR,X,PX,S,phoneOpen\}\)/);
-  const mainBridge = html.indexOf('window.LAGOS_PHONE =');
   const plus = html.indexOf('<script id="plus">');
   const registry = html.indexOf('const APPR={};', plus);
-  assert.ok(mainBridge >= 0 && plus > mainBridge && registry > plus);
+  const mainBridge = html.indexOf('window.LAGOS_PHONE =', plus);
+  assert.ok(plus >= 0 && registry > plus && mainBridge > registry);
+  assert.match(html.slice(mainBridge, mainBridge + 180), /\{ APPR, X, PX, S, phoneOpen,/);
 });
 
 test('Company phone app is wired to the real server business protocol', () => {
