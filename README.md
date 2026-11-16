@@ -1,19 +1,19 @@
 # Citygame — Lagos Life Simulator
 
-Citygame is being rebuilt as a browser-based 3D Lagos life simulation for desktop and mobile. The current rebuild foundation is a modular Three.js client served by a dependency-free Node.js server.
+Citygame is a browser-based 3D Lagos life simulation for desktop and mobile. The current live entry point remains the existing playable game while a clean modular client is rebuilt alongside it.
 
-## Current rebuild foundation
+## Rebuild preview
 
-- New responsive game shell and Citygame identity.
+Open `/rebuild.html` to inspect the new client foundation:
+
+- Modular responsive game shell and Citygame identity.
 - Procedurally generated Lagos-inspired districts, roads and named landmarks.
 - Third-person player movement with keyboard and touch controls.
-- Mobile portrait and landscape layouts.
+- Portrait and landscape mobile layouts.
 - In-game city map with searchable destinations, pan, zoom, map markers and GPS destination selection.
 - Separate full-screen phone/app views.
 
-## In progress
-
-The new client foundation is not yet a complete life simulator. Persistent player accounts, multiplayer synchronisation, businesses, homes/interiors, careers, social posting, vehicles/traffic, NPC routines and Unity migration require further implementation and verification. Do not treat placeholder app screens as live services.
+The preview is an early foundation, not yet a replacement for the full game. Existing account, multiplayer, career, business, social, vehicle and property systems are still being migrated. The root `/` route continues to serve the existing playable game during this migration.
 
 ## Run locally
 
@@ -21,11 +21,11 @@ The new client foundation is not yet a complete life simulator. Persistent playe
 node server.js
 ```
 
-Open `http://localhost:3000`. Node.js 18 or newer is required. The server remains dependency-free.
+Open `http://localhost:3000` for the current game or `http://localhost:3000/rebuild.html` for the rebuild preview. Node.js 18 or newer is required.
 
 ## Persistence and deployment
 
-The existing server's account and save stores are retained during the rebuild. Existing deployments may use `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` for persistent storage. Keep these secrets configured in the hosting dashboard; never commit credentials or player data.
+The existing server's account and save stores are retained. Existing deployments may use `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` for persistent storage. Keep secrets in the hosting dashboard; never commit credentials or player data.
 
 ## Validation
 
