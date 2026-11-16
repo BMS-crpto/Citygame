@@ -10,7 +10,7 @@ namespace Citygame.World
         [SerializeField] private DayNightCycle dayNight;
         [SerializeField, Min(45f)] private float weatherChangeSeconds = 180f;
         [SerializeField, Min(50f)] private float rainRate = 420f;
-        [SerializeField, Range(0.25f, 1f)] private float mobileRainMultiplier = 0.65f;
+        [SerializeField, Range(0.25f, 1f)] private float mobileRainMultiplier = 0.45f;
         private ParticleSystem rain;
         private float changeClock;
         private int presetIndex;
@@ -79,7 +79,7 @@ namespace Citygame.World
             main.startColor = new Color(0.72f, 0.82f, 0.94f, 0.62f);
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             // Keep the rain effect attractive while limiting particle cost on phones.
-            main.maxParticles = Application.isMobilePlatform ? 900 : 1800;
+            main.maxParticles = Application.isMobilePlatform ? 600 : 1800;
             main.gravityModifier = 0.15f;
             var emission = rain.emission;
             emission.rateOverTime = 0f;
