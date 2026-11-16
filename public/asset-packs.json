@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "packs": [
+    {"id":"homes","name":"Lagos homes","description":"Ajah houses and home interiors.","sizeLabel":"3.8 MB","assets":["/models/ajah_houses.glb"]},
+    {"id":"vehicles","name":"Vehicles","description":"Cars and everyday transport models.","sizeLabel":"~34 MB","assets":["/models/sedan.glb","/models/suv.glb","/models/gtr.glb","/models/lambo.glb","/models/challenger.glb","/models/chiron.glb","/models/car3d.glb","/models/bmw_light.glb","/models/bmw_m4_competition_m_package.glb","/models/okada.glb"]},
+    {"id":"clothing","name":"Clothes & characters","description":"Character and clothing models currently included in Citygame.","sizeLabel":"~4.5 MB","assets":["/models/tshirt.glb","/models/suit.glb","/models/man.glb","/models/woman.glb","/models/businessman.glb","/models/punk.glb"]},
+    {"id":"city","name":"City & street props","description":"Beach, highway, stalls, shops and street objects.","sizeLabel":"~5 MB","assets":["/models/beach.glb","/models/highway.glb","/models/stalls.glb","/models/bikerack.glb","/models/dumpster.glb","/models/dryer.glb","/models/closet.glb","/models/computer.glb","/models/phone.glb","/assets/glb/city-kit/loja_esquina.glb"]}
+  ]
+}
