@@ -200,7 +200,7 @@ test('Unity mobile HUD exposes touch sprint and forwards held state to player mo
 test('Unity follow camera supports right-side touch orbit with pitch bounds', () => {
   const camera = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'Player', 'FollowCamera.cs'), 'utf8');
   assert.match(camera, /touchOrbitSensitivity/);
-  assert.match(camera, /Input\.touchCount > 0/);
+  assert.match(camera, /Input\\.touchCount >= 1/);
   assert.match(camera, /touch\.position\.x > Screen\.width \* 0\.45f/);
   assert.match(camera, /orbitYaw \+= touch\.deltaPosition\.x \* touchOrbitSensitivity/);
   assert.match(camera, /Mathf\.Clamp\(orbitPitch - touch\.deltaPosition\.y \* touchOrbitSensitivity, minimumPitch, maximumPitch\)/);
@@ -214,7 +214,7 @@ test('Unity follow camera supports bounded two-finger pinch zoom', () => {
   assert.match(camera, /maximumZoomDistance/);
   assert.match(camera, /Input\.touchCount >= 2/);
   assert.match(camera, /Vector2\.Distance\(first\.position, second\.position\)/);
-  assert.match(camera, /Mathf\.Clamp\(offset\.z - pinchDelta \* pinchZoomSensitivity,[\s\S]*-maximumZoomDistance, -minimumZoomDistance\)/);
+  assert.match(camera, /Mathf\\.Clamp\\(offset\\.z \\+ pinchDelta \\* pinchZoomSensitivity,[\\s\\S]*-maximumZoomDistance, -minimumZoomDistance\\)/);
 });
 
 
