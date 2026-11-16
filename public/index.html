@@ -2798,6 +2798,17 @@ const sigMat={g:new THREE.MeshBasicMaterial({color:0x2ee86b}),y:new THREE.MeshBa
 const sigPostGeo=new THREE.BoxGeometry(0.28,5.4,0.28),sigPostMat=new THREE.MeshLambertMaterial({color:0x3a3f45}),sigLampGeo=new THREE.SphereGeometry(0.55,10,8),sigHouseGeo=new THREE.BoxGeometry(0.95,1.2,0.95),sigHouseMat=new THREE.MeshLambertMaterial({color:0x15181c});
 function mkSig(i,j){
   const g=new THREE.Group();g.position.set(i*BLOCK,0,j*BLOCK);const lamps=[];
+  // Zebra crossings and stop bars at every signalised junction.
+  const paint=new THREE.MeshBasicMaterial({color:0xe8e8e2});
+  for(const side of [-1,1]){
+    for(let n=0;n<6;n++){
+      const off=(n-2.5)*1.05;
+      const z=new THREE.Mesh(new THREE.BoxGeometry(17,0.045,0.62),paint);z.position.set(0,0.055,side*12.2+off);g.add(z);
+      const x=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.045,17),paint);x.position.set(side*12.2+off,0.055,0);g.add(x);
+    }
+    const stopZ=new THREE.Mesh(new THREE.BoxGeometry(17,0.05,0.42),paint);stopZ.position.set(0,0.058,side*17.2);g.add(stopZ);
+    const stopX=new THREE.Mesh(new THREE.BoxGeometry(0.42,0.05,17),paint);stopX.position.set(side*17.2,0.058,0);g.add(stopX);
+  }
   for(const [sx,sz] of [[1,1],[-1,-1],[1,-1],[-1,1]]){
     const post=new THREE.Mesh(sigPostGeo,sigPostMat);post.position.set(sx*9,2.7,sz*9);g.add(post);
     const hs=new THREE.Mesh(sigHouseGeo,sigHouseMat);hs.position.set(sx*9,5.7,sz*9);g.add(hs);
