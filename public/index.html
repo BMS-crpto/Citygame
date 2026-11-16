@@ -77,6 +77,38 @@
   #appview{margin:8px 0 4px;min-height:100px}
   #appview .card{background:linear-gradient(145deg,#191f2c,#11151e);border:1px solid #2b3445;border-radius:15px;padding:12px;box-shadow:0 5px 16px #0002}
   #phx{background:#292f3d;border-color:#505a6d;border-radius:13px;padding:8px 12px}
+  /* Reference-inspired in-game handset: gold alloy frame, emerald launcher, compact app icons. */
+  #phone:not(.app-open) .pbox{
+    background:linear-gradient(155deg,#063d31 0%,#075743 48%,#042c25 100%);
+    border:2px solid #d7b66b;
+    box-shadow:0 0 0 2px #6f5426,0 22px 70px #000e,0 0 28px #d5ad5b44;
+    color:#f7fff9;
+  }
+  #phone:not(.app-open) .pbox:before{color:#f5e7bf;text-shadow:0 1px 3px #001b14}
+  #phone:not(.app-open) .pbox:after{background:#e6d6a8}
+  #phone:not(.app-open) .pgrid{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;border-bottom-color:#d6ead522}
+  #phone:not(.app-open) .app{
+    min-width:0;min-height:66px;padding:8px 3px;
+    border:1px solid #d6e8d344;border-radius:15px;
+    background:linear-gradient(145deg,#ffffff24,#001e1740);
+    box-shadow:inset 0 1px #ffffff35,0 5px 12px #001b1540;
+    color:#f8fff9;font-size:10px;font-weight:700;
+  }
+  #phone:not(.app-open) .app b{
+    display:grid;place-items:center;width:36px;height:36px;margin:0 auto 4px;
+    border-radius:11px;background:linear-gradient(145deg,#fff,#dce9df);
+    color:#123d31;font-size:22px;line-height:1;
+    box-shadow:0 2px 7px #001b1555;
+  }
+  #phone:not(.app-open) #phoneSearch{
+    background:#012e25a8;border:1px solid #d8c17a88;color:#fff;
+  }
+  #phone:not(.app-open) #phoneSearch::placeholder{color:#d4e9dc}
+  #phone:not(.app-open) #appview .card{
+    background:linear-gradient(145deg,#073e32dd,#042b24ee);
+    border-color:#d8bd7755;color:#f4fff7;
+  }
+  #phone #phx{background:#173f34;border:1px solid #d7bd78;color:#fff}
   /* Landscape phones: keep the whole phone interface reachable by scrolling. */
   @media (orientation:landscape) and (max-height:600px){
     #phone{align-items:flex-start;justify-content:center;overflow-y:auto;padding:5px 8px;overscroll-behavior:contain}
