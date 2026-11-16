@@ -16,9 +16,19 @@ namespace Citygame.Editor
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             GameObject floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
             floor.name = "Lagos Greybox Ground";
-            floor.transform.localScale = new Vector3(12f, 1f, 12f);
-            GameObject cityRoot = new GameObject("Lagos Street Block");
-            LagosBlockGenerator.Build(cityRoot.transform);
+            floor.transform.localScale = new Vector3(40f, 1f, 40f);
+            // Build a connected 3x3 Lagos region on a shared road grid.
+            string[] districtNames = { "Ikeja", "Yaba", "Surulere", "Agege", "Central Lagos", "Lekki", "Ojota", "Victoria Island", "Apapa" };
+            int districtIndex = 0;
+            for (int z = -1; z <= 1; z++)
+            {
+                for (int x = -1; x <= 1; x++)
+                {
+                    GameObject districtRoot = new GameObject(districtNames[districtIndex] + " District");
+                    LagosBlockGenerator.Build(districtRoot.transform, new Vector3(x * 90f, 0f, z * 54f), districtNames[districtIndex]);
+                    districtIndex++;
+                }
+            }
 
             GameObject player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             player.name = "Player";
