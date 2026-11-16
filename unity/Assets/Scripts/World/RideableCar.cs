@@ -19,6 +19,17 @@ namespace Citygame.World
         public bool IsOccupied => occupied;
         public float DistanceTo(Vector3 point) => Vector3.Distance(transform.position, point);
 
+        // Persist the player outside the vehicle so a reload never leaves them at a stale seat transform.
+        public Vector3 GetSafePlayerSavePosition()
+        {
+            return occupied && exitPoint != null ? exitPoint.position + Vector3.up * 0.2f : transform.position;
+        }
+
+        public Vector3 GetSafePlayerSaveEulerAngles()
+        {
+            return occupied && exitPoint != null ? exitPoint.eulerAngles : transform.eulerAngles;
+        }
+
         private void Awake()
         {
             Collider carCollider = GetComponent<Collider>();
