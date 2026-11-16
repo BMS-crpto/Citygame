@@ -1134,6 +1134,20 @@ function buildHouseInside(id){
   bx_(x0+0.5,2.8,z0-8.95,4,1.8,0.08,0x9fd6e8);bx_(x0-6,2.8,z0+8.95,3,1.6,0.08,0x9fd6e8);bx_(x0+6,2.8,z0+8.95,3,1.6,0.08,0x9fd6e8);bx_(x0-10.95,2.8,z0-5.5,0.08,1.6,2.6,0x9fd6e8);
   bx_(x0+8.5,0.35,z0+5,0.8,0.7,0.8,0xd32f2f);bx_(x0+8.5,0.75,z0+5,0.9,0.12,0.9,0xeeeeee);solid(x0+8.5,z0+5,0.5,0.5);   // paint pot
   const L=makeLabel('🎨 Paint ₦300','#fff',2.4,3.4);L.position.set(x0+8.5,2.6,z0+5);scene.add(L);
+
+  // Give the home a readable room layout without changing its existing collision map.
+  const zoneMat=(color)=>new THREE.MeshLambertMaterial({color,transparent:true,opacity:0.72});
+  const zone=(name,x,z,w,d,color)=>{
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),zoneMat(color));
+    m.rotation.x=-Math.PI/2;m.position.set(x,0.055,z);scene.add(m);
+    const tag=makeLabel(name,'#17212b',2.7,0.8);
+    tag.position.set(x,2.45,z);scene.add(tag);
+  };
+  zone('LIVING ROOM',x0-6,z0-5.3,6.8,2.5,0xc98b55);
+  zone('BEDROOM',x0+6.4,z0-4.2,5.4,4.2,0x8ab6d8);
+  zone('DINING',x0-5.5,z0+5.8,5.0,3.0,0xd8bd77);
+  zone('KITCHEN',x0+7.2,z0+4.2,4.2,3.0,0x9bc7a3);
+  zone('STUDY',x0-9.4,z0+0.8,2.0,3.4,0x9b9bd1);
 }
 const IK=0.78;
 function roomFit(x0,z0,fn){T.set(x0,z0,1,IK);try{fn()}finally{T.off()}}
