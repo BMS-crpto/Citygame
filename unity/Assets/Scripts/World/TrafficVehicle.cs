@@ -40,17 +40,14 @@ namespace Citygame.World
 
             // Follow traffic ahead instead of driving through another vehicle.
             Vector3 forward = direction > 0 ? Vector3.right : Vector3.left;
-            RaycastHit[] hits = Physics.RaycastAll(transform.position + Vector3.up * 0.2f, forward, 6f,
-                Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
-            float nearest = float.MaxValue;
-            for (int i = 0; i < hits.Length; i++)
+            if (Physics.Raycast(transform.position + Vector3.up * 0.2f, forward, out RaycastHit hit, 6f,
+                Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             {
-                TrafficVehicle other = hits[i].collider.GetComponentInParent<TrafficVehicle>();
-                if (other == null || other == this || other.direction != direction) continue;
-                if (Mathf.Abs(other.laneZ - laneZ) > 1.2f) continue;
-                if (hits[i].distance < nearest) nearest = hits[i].distance;
+                TrafficVehicle other = hit.collider.GetComponentInParent<TrafficVehicle>();
+                if (other != null && other != this && other.direction == direction &&
+                    Mathf.Abs(other.laneZ - laneZ) <= 1.2f && hit.distance < 5f)
+                    targetSpeed = Mathf.Min(targetSpeed, Mathf.Max(0f, (hit.distance - 2f) * speed / 3f));
             }
-            if (nearest < 5f) targetSpeed = Mathf.Min(targetSpeed, Mathf.Max(0f, (nearest - 2f) * speed / 3f));
 
             currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, (targetSpeed < currentSpeed ? 8f : 2.5f) * Time.deltaTime);
             p.x += direction * currentSpeed * Time.deltaTime;
