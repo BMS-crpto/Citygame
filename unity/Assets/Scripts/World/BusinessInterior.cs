@@ -95,10 +95,6 @@ namespace Citygame.World
                     new Vector3(-0.7f + railPost * 1.24f, 2.62f, 0.68f),
                     new Vector3(0.08f, 0.55f, 0.08f), accent);
 
-            // The exit trigger returns the player to the pavement outside this shop.
-            BusinessDoorPortal.CreateExit(root.transform, new Vector3(0f, 1f, -4.45f),
-                origin + new Vector3(0f, 0f, -7.5f));
-
             SpawnInteriorNpcs(root.transform, npcCount);
             return interior;
         }
