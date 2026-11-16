@@ -331,7 +331,7 @@ test('Company phone app is wired to the real server business protocol', () => {
     assert.ok(server.includes("m.op === '" + op + "'"), 'server missing operation: ' + op);
   }
   assert.match(company, /bridge\.APPR\.Company/);
-  assert.match(company, /data-app="Company"/);
+  assert.match(company, /dataset\.app='Company'/);
 });
 
 test('downloadable asset packs only list models that exist in the repository', () => {
