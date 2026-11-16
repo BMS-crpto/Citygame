@@ -215,9 +215,9 @@ namespace Citygame.Game
 
             if (nearbyCar != null && nearbyCar.IsOccupied)
             {
-                GUI.Box(new Rect(12f, 58f, 210f, 76f),
+                GUI.Box(new Rect(12f, 58f, 220f, 94f),
                     "SPEED  " + Mathf.RoundToInt(nearbyCar.SpeedKph) + " km/h\nGEAR  " + nearbyCar.CurrentGear +
-                    "\nFUEL  " + Mathf.RoundToInt(nearbyCar.FuelPercent) + "%");
+                    "\nFUEL  " + Mathf.RoundToInt(nearbyCar.FuelPercent) + "%\nCONDITION  " + Mathf.RoundToInt(nearbyCar.ConditionPercent) + "%");
             }
 
             if (nearbyCar != null)
