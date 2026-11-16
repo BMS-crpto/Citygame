@@ -121,17 +121,27 @@ namespace Citygame.World
         }
 
 
+        // Keep one procedural sky material across scene rebuilds to avoid leaking
+        // duplicate skybox materials when the runtime regenerates the city.
+        private static Material tropicalSkyMaterial;
+
         private static void ConfigureTropicalSky()
         {
-            Shader skyShader = Shader.Find("Skybox/Procedural");
-            if (skyShader == null) return;
-            Material sky = new Material(skyShader);
-            if (sky.HasProperty("_AtmosphereThickness")) sky.SetFloat("_AtmosphereThickness", 1.15f);
-            if (sky.HasProperty("_SkyTint")) sky.SetColor("_SkyTint", new Color(0.48f, 0.66f, 0.88f));
-            if (sky.HasProperty("_GroundColor")) sky.SetColor("_GroundColor", new Color(0.42f, 0.38f, 0.32f));
-            if (sky.HasProperty("_Exposure")) sky.SetFloat("_Exposure", 1.12f);
-            if (sky.HasProperty("_SunSize")) sky.SetFloat("_SunSize", 0.035f);
-            RenderSettings.skybox = sky;
+            if (tropicalSkyMaterial == null)
+            {
+                Shader skyShader = Shader.Find("Skybox/Procedural");
+                if (skyShader == null) return;
+
+                tropicalSkyMaterial = new Material(skyShader);
+                tropicalSkyMaterial.name = "Citygame tropical sky";
+                if (tropicalSkyMaterial.HasProperty("_AtmosphereThickness")) tropicalSkyMaterial.SetFloat("_AtmosphereThickness", 1.15f);
+                if (tropicalSkyMaterial.HasProperty("_SkyTint")) tropicalSkyMaterial.SetColor("_SkyTint", new Color(0.48f, 0.66f, 0.88f));
+                if (tropicalSkyMaterial.HasProperty("_GroundColor")) tropicalSkyMaterial.SetColor("_GroundColor", new Color(0.42f, 0.38f, 0.32f));
+                if (tropicalSkyMaterial.HasProperty("_Exposure")) tropicalSkyMaterial.SetFloat("_Exposure", 1.12f);
+                if (tropicalSkyMaterial.HasProperty("_SunSize")) tropicalSkyMaterial.SetFloat("_SunSize", 0.035f);
+            }
+
+            RenderSettings.skybox = tropicalSkyMaterial;
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Skybox;
             RenderSettings.ambientIntensity = 1.1f;
             DynamicGI.UpdateEnvironment();
