@@ -304,6 +304,148 @@
 #toast{background:#ff7a1aee!important;border-radius:22px!important;font-weight:700;box-shadow:0 4px 14px #0007}
 .sbtn{background:#0c1118d9!important;border:2px solid #ff8a2a88!important;box-shadow:0 3px 10px #0007}
 #act{background:linear-gradient(#ff5a3c,#d9341c)!important;box-shadow:0 4px 14px #0008}
+
+  /* EPIC LAGOS ENTRY EXPERIENCE — cinematic character creation */
+  #menu{
+    isolation:isolate;
+    background:
+      radial-gradient(ellipse at 50% 4%,rgba(37,99,235,.36),transparent 42%),
+      radial-gradient(ellipse at 82% 38%,rgba(245,158,11,.20),transparent 38%),
+      radial-gradient(ellipse at 10% 72%,rgba(16,185,129,.16),transparent 36%),
+      linear-gradient(160deg,#050b18 0%,#0b1830 46%,#17263a 72%,#291b24 100%)!important;
+    padding:clamp(14px,3vh,30px) 16px max(28px,env(safe-area-inset-bottom));
+    overflow-x:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  #menu:before{
+    content:"";
+    position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.24;
+    background-image:linear-gradient(115deg,transparent 0 48%,#ffffff0b 49%,transparent 50% 100%);
+    background-size:90px 100%;
+    mask-image:linear-gradient(to bottom,#000,transparent 82%);
+  }
+  #menu .skyline{height:42vh;opacity:.88;filter:drop-shadow(0 -12px 35px #f59e0b18)}
+  #menu .skyline b{background-color:#07101f;background-image:
+    radial-gradient(circle,rgba(255,202,108,.95) 0 1px,transparent 1.5px),
+    linear-gradient(90deg,#101d32,#07101f 55%,#132039);
+    background-size:10px 13px,100% 100%;
+    border-top:1px solid #ffffff18;
+  }
+  #menu .stage{width:min(510px,100%);gap:15px}
+  #menu .brand{position:relative;padding:8px 0 2px}
+  #menu .brand:before{
+    content:"LAGOS, NIGERIA  •  YOUR CITY. YOUR STORY.";
+    display:inline-flex;align-items:center;justify-content:center;
+    border:1px solid #ffffff24;border-radius:99px;padding:6px 12px;
+    margin:0 auto 14px;background:#07111fc9;color:#cbd5e1;
+    font-size:9px;font-weight:800;letter-spacing:2px;
+    box-shadow:0 8px 26px #0004;
+  }
+  #menu .brand.small h1,#menu .brand h1{
+    font-size:clamp(35px,8vw,48px);letter-spacing:8px;
+    text-shadow:0 5px 25px #000b,0 0 34px #f59e0b22;
+  }
+  #menu .brand h1 span{
+    font-size:clamp(38px,8vw,50px);letter-spacing:13px;
+    background:linear-gradient(100deg,#fff1b8 2%,#ffc247 38%,#f28b24 72%,#ffe2a0 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 7px 18px #f59e0b30);
+  }
+  #menu .brand .tag{
+    margin-top:13px;font-size:12px;letter-spacing:2.2px;
+    text-transform:uppercase;color:#dbeafe;font-weight:700;opacity:.9;
+  }
+  #menu .card{
+    position:relative;overflow:hidden;gap:9px;
+    background:linear-gradient(145deg,rgba(15,28,49,.91),rgba(7,13,25,.91))!important;
+    border:1px solid #ffffff24!important;border-radius:26px!important;
+    padding:clamp(13px,3vw,20px)!important;
+    box-shadow:0 26px 80px #0009,0 0 0 1px #fbbf2410,inset 0 1px #ffffff16!important;
+    backdrop-filter:blur(22px)!important;
+  }
+  #menu .card:before{
+    content:"";position:absolute;left:8%;right:8%;top:0;height:1px;
+    background:linear-gradient(90deg,transparent,#fbbf24aa,#fff8,transparent);
+  }
+  #menu .pvwrap{
+    height:clamp(190px,31vh,290px);border-radius:20px;
+    border:1px solid #ffffff25;
+    background:
+      radial-gradient(ellipse at 50% 100%,#f59e0b2b,transparent 52%),
+      linear-gradient(180deg,#10294b 0%,#142d45 56%,#172b37 100%);
+    box-shadow:inset 0 1px #ffffff14,0 12px 32px #0005;
+  }
+  #menu .pvhint{font-size:9px;letter-spacing:1.5px;color:#e2e8f0;text-shadow:0 2px 8px #000}
+  #menu .sec{
+    display:flex;align-items:center;gap:9px;margin-top:10px;
+    color:#f8d58a;opacity:1;font-size:10px;letter-spacing:1.7px;
+  }
+  #menu .sec:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,#fbbf2444,transparent)}
+  #menu input{
+    background:#ffffff0b!important;border:1px solid #ffffff25!important;
+    border-radius:14px!important;padding:14px 15px!important;
+    box-shadow:inset 0 1px 4px #0004;
+  }
+  #menu .role{
+    min-height:88px;padding:12px 5px!important;border-radius:17px!important;
+    background:linear-gradient(145deg,#ffffff12,#ffffff05)!important;
+    border:1px solid #ffffff20!important;box-shadow:inset 0 1px #ffffff0b;
+  }
+  #menu .role b{font-size:29px!important;filter:drop-shadow(0 3px 5px #0006)}
+  #menu .role small{font-size:9px!important;letter-spacing:.3px}
+  #menu .role.sel{
+    border-color:#f9c74f!important;
+    background:linear-gradient(145deg,#fbbf2433,#f59e0b0c)!important;
+    box-shadow:0 0 0 2px #fbbf2422,0 10px 25px #0005,inset 0 1px #fff4!important;
+  }
+  #menu .q{
+    border:1px solid #ffffff20!important;border-radius:13px!important;
+    background:#ffffff0b!important;color:#e5e7eb!important;
+  }
+  #menu .q.sel{
+    border-color:#fbbf24!important;background:#fbbf2422!important;
+    box-shadow:0 0 0 2px #fbbf241a;
+  }
+  #menu #play{
+    position:relative;overflow:hidden;min-height:58px;
+    border:1px solid #ffe8a2!important;border-radius:17px!important;
+    background:linear-gradient(105deg,#ffe08a 0%,#ffbd35 42%,#ed8b16 100%)!important;
+    box-shadow:0 14px 38px #e88a244d,0 0 0 1px #fff4!important;
+    font-size:16px;letter-spacing:2px;
+  }
+  #menu #play:before{
+    content:"";position:absolute;top:-80%;left:-25%;width:20%;height:260%;
+    transform:rotate(22deg);background:#ffffff55;filter:blur(8px);
+    animation:lagosPlayShine 4.8s ease-in-out infinite;
+  }
+  @keyframes lagosPlayShine{0%,55%{left:-30%;opacity:0}65%{opacity:1}100%{left:125%;opacity:0}}
+  #menu .world{
+    padding:9px 12px;border:1px solid #ffffff1c;border-radius:99px;
+    background:#06101c9c;color:#dbeafe;font-size:10px;letter-spacing:.4px;
+    box-shadow:0 8px 24px #0003;
+  }
+  #menu .world i{flex:none}
+  @media(max-width:420px){
+    #menu{padding-left:12px;padding-right:12px}
+    #menu .stage{gap:11px}
+    #menu .card{border-radius:21px!important}
+    #menu .roles{gap:6px}
+    #menu .role{min-height:80px}
+  }
+  @media(orientation:landscape) and (max-height:520px){
+    #menu{align-items:center;padding:12px 16px 24px}
+    #menu .stage{width:min(620px,100%);gap:9px}
+    #menu .brand{padding:0}
+    #menu .brand:before{margin-bottom:5px;padding:4px 10px}
+    #menu .brand .tag{margin-top:5px}
+    #menu .card{padding:10px 14px!important;gap:5px}
+    #menu .pvwrap{height:145px}
+    #menu .sec{margin-top:5px}
+    #menu .role{min-height:65px;padding:6px 3px!important}
+    #menu #play{min-height:48px;padding:11px}
+  }
+
 </style>
 <link href="/lagos-3d-skin.css?v=5" rel="stylesheet">
 <link href="/citygame-premium-ui.css?v=4" rel="stylesheet">
