@@ -111,17 +111,59 @@ namespace Citygame.World
             Material headlamp = MaterialFor(new Color(0.92f, 0.88f, 0.68f));
             Material tailLamp = MaterialFor(new Color(0.72f, 0.035f, 0.025f));
 
-            GameObject cabin = CreateCube(name + " glazed cabin", root,
-                position + new Vector3(-0.12f, 0.62f, 0f),
-                new Vector3(1.95f, 0.78f, 1.48f), glass);
-            cabin.transform.SetParent(car.transform, true);
-            DisableVisualCollider(cabin);
+            Material interior = MaterialFor(new Color(0.075f, 0.068f, 0.058f));
+            Material seatFabric = MaterialFor(new Color(0.16f, 0.18f, 0.19f));
+            Material metal = MaterialFor(new Color(0.28f, 0.31f, 0.33f));
+            Material display = MaterialFor(new Color(0.035f, 0.12f, 0.15f));
 
-            GameObject roof = CreateCube(name + " roof", root,
-                position + new Vector3(-0.12f, 1.03f, 0f),
-                new Vector3(1.62f, 0.12f, 1.42f), bodyMaterial);
-            roof.transform.SetParent(car.transform, true);
-            DisableVisualCollider(roof);
+            // Open framed cabin: glass panels leave the dashboard and seats visible.
+            CreateCarPart(name + " windshield", car.transform, new Vector3(0.78f, 0.79f, 0f), new Vector3(0.07f, 0.62f, 1.34f), glass);
+            CreateCarPart(name + " rear window", car.transform, new Vector3(-1.02f, 0.79f, 0f), new Vector3(0.07f, 0.58f, 1.28f), glass);
+            for (int side = -1; side <= 1; side += 2)
+            {
+                CreateCarPart(name + " side window", car.transform, new Vector3(-0.1f, 0.82f, side * 0.72f), new Vector3(1.55f, 0.52f, 0.045f), glass);
+                CreateCarPart(name + " cabin pillar", car.transform, new Vector3(-0.1f, 0.83f, side * 0.75f), new Vector3(1.7f, 0.08f, 0.09f), bodyMaterial);
+                CreateCarPart(name + " door inner trim", car.transform, new Vector3(-0.08f, 0.28f, side * 0.77f), new Vector3(1.62f, 0.42f, 0.1f), interior);
+                CreateCarPart(name + " door armrest", car.transform, new Vector3(-0.05f, 0.49f, side * 0.79f), new Vector3(0.62f, 0.07f, 0.12f), metal);
+                CreateCarPart(name + " door handle", car.transform, new Vector3(-0.52f, 0.43f, side * 0.85f), new Vector3(0.2f, 0.045f, 0.035f), alloy);
+            }
+            CreateCarPart(name + " roof", car.transform, new Vector3(-0.12f, 1.09f, 0f), new Vector3(1.72f, 0.12f, 1.48f), bodyMaterial);
+            // Dashboard, instrument binnacle, digital display and centre console.
+            CreateCarPart(name + " dashboard", car.transform, new Vector3(0.62f, 0.48f, 0f), new Vector3(0.38f, 0.28f, 1.42f), interior);
+            CreateCarPart(name + " instrument cluster", car.transform, new Vector3(0.79f, 0.67f, -0.39f), new Vector3(0.12f, 0.19f, 0.42f), metal);
+            CreateCarPart(name + " instrument display", car.transform, new Vector3(0.855f, 0.68f, -0.39f), new Vector3(0.025f, 0.11f, 0.31f), display);
+            CreateCarPart(name + " centre console", car.transform, new Vector3(0.02f, 0.32f, 0f), new Vector3(0.72f, 0.16f, 0.34f), interior);
+            CreateCarPart(name + " infotainment screen", car.transform, new Vector3(0.48f, 0.69f, 0.02f), new Vector3(0.035f, 0.2f, 0.34f), display);
+            CreateCarPart(name + " gear selector", car.transform, new Vector3(-0.02f, 0.52f, 0.02f), new Vector3(0.13f, 0.28f, 0.13f), metal);
+            CreateCarPart(name + " rear view mirror", car.transform, new Vector3(0.63f, 1.0f, 0f), new Vector3(0.08f, 0.07f, 0.34f), metal);
+            // Driver and passenger seats, plus rear bench and headrests.
+            for (int side = -1; side <= 1; side += 2)
+            {
+                float seatZ = side * 0.39f;
+                CreateCarPart(name + " front seat cushion", car.transform, new Vector3(-0.34f, 0.26f, seatZ), new Vector3(0.62f, 0.18f, 0.5f), seatFabric);
+                CreateCarPart(name + " front seat back", car.transform, new Vector3(-0.72f, 0.56f, seatZ), new Vector3(0.18f, 0.64f, 0.5f), seatFabric);
+                CreateCarPart(name + " front headrest", car.transform, new Vector3(-0.78f, 0.94f, seatZ), new Vector3(0.2f, 0.2f, 0.34f), seatFabric);
+                CreateCarPart(name + " rear seat cushion", car.transform, new Vector3(-0.98f, 0.25f, seatZ * 0.85f), new Vector3(0.38f, 0.16f, 0.54f), seatFabric);
+            }
+            CreateCarPart(name + " steering column", car.transform, new Vector3(0.54f, 0.58f, -0.39f), new Vector3(0.22f, 0.12f, 0.12f), metal);
+            GameObject steeringWheel = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            steeringWheel.name = name + " steering wheel";
+            steeringWheel.transform.SetParent(car.transform, false);
+            steeringWheel.transform.localPosition = new Vector3(0.67f, 0.72f, -0.39f);
+            steeringWheel.transform.localRotation = Quaternion.Euler(0f, 0f, 90f);
+            steeringWheel.transform.localScale = new Vector3(0.43f, 0.035f, 0.43f);
+            steeringWheel.GetComponent<Renderer>().sharedMaterial = interior;
+            DisableVisualCollider(steeringWheel);
+            CreateCarPart(name + " left side mirror", car.transform, new Vector3(0.55f, 0.77f, -0.94f), new Vector3(0.25f, 0.16f, 0.18f), metal);
+            CreateCarPart(name + " right side mirror", car.transform, new Vector3(0.55f, 0.77f, 0.94f), new Vector3(0.25f, 0.16f, 0.18f), metal);
+            CreateCarPart(name + " footwell", car.transform, new Vector3(0.35f, 0.08f, -0.38f), new Vector3(0.45f, 0.08f, 0.42f), interior);
+
+            GameObject cockpitAnchor = new GameObject(name + " cockpit camera anchor");
+            cockpitAnchor.transform.SetParent(car.transform, false);
+            cockpitAnchor.transform.localPosition = new Vector3(0.52f, 0.92f, -0.05f);
+            cockpitAnchor.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
+            RideableCar rideable = car.GetComponent<RideableCar>();
+            rideable.ConfigureCockpit(cockpitAnchor.transform);
 
             for (int side = -1; side <= 1; side += 2)
             {
@@ -167,6 +209,18 @@ namespace Citygame.World
                 new Vector3(0.16f, 0.16f, 1.72f), alloy);
             bumper.transform.SetParent(car.transform, true);
             DisableVisualCollider(bumper);
+        }
+
+        private static GameObject CreateCarPart(string name, Transform parent, Vector3 localPosition, Vector3 localScale, Material material)
+        {
+            GameObject part = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            part.name = name;
+            part.transform.SetParent(parent, false);
+            part.transform.localPosition = localPosition;
+            part.transform.localScale = localScale;
+            part.GetComponent<Renderer>().sharedMaterial = material;
+            DisableVisualCollider(part);
+            return part;
         }
 
         private static void DisableVisualCollider(GameObject visual)
