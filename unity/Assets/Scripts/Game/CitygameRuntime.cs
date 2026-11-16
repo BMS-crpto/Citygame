@@ -323,7 +323,7 @@ namespace Citygame.Game
                 }
                 else if (activePhoneApp == "Map")
                 {
-                    GUI.Label(new Rect(x, y, w, 34f), "LAGOS CITY MAP"); y += 38f;
+                    GUI.Label(new Rect(x, y, w, 34f), "LAGOS CITY MAP · 9 CONNECTED DISTRICTS"); y += 38f;
                     GUI.Label(new Rect(x, y, w, 34f), "Nearby: " + (nearby != null ? nearby.BusinessName : "No storefront in range")); y += 38f;
                     Rect mapRect = new Rect(x, y, w, 260f);
                     GUI.color = new Color(0.78f, 0.84f, 0.76f);
@@ -339,8 +339,8 @@ namespace Citygame.Game
                     {
                         if (spot == null) continue;
                         Vector3 pos = spot.transform.position;
-                        float markerX = mapRect.x + Mathf.Clamp01((pos.x + 40f) / 80f) * (mapRect.width - 82f);
-                        float markerY = mapRect.y + Mathf.Clamp01((20f - pos.z) / 40f) * (mapRect.height - 30f);
+                        float markerX = mapRect.x + Mathf.Clamp01((pos.x + 135f) / 270f) * (mapRect.width - 82f);
+                        float markerY = mapRect.y + Mathf.Clamp01((81f - pos.z) / 162f) * (mapRect.height - 30f);
                         if (GUI.Button(new Rect(markerX, markerY, 82f, 28f), spot.BusinessName))
                         {
                             selectedDestination = spot;
