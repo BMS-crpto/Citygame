@@ -51,6 +51,7 @@ namespace Citygame.Editor
 
             GameObject gameSystems = new GameObject("Citygame Runtime Systems");
             gameSystems.AddComponent<CitygameRuntime>();
+            gameSystems.AddComponent<CitygameMobileGraphics>();
             gameSystems.AddComponent<LagosWeatherSystem>();
             if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
                 AssetDatabase.CreateFolder("Assets", "Scenes");
