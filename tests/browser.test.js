@@ -184,3 +184,14 @@ test('landscape full-screen phone apps fit the viewport and scroll within app co
   assert.match(landscape, /height:94dvh!important/);
   assert.match(landscape, /grid-template-columns:repeat\(8,minmax\(0,1fr\)\)!important/);
 });
+
+
+test('Unity mobile HUD exposes touch sprint and forwards held state to player motor', () => {
+  const motor = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'Player', 'ThirdPersonMotor.cs'), 'utf8');
+  const runtime = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'Game', 'CitygameRuntime.cs'), 'utf8');
+  assert.match(motor, /private bool mobileSprintRequested;/);
+  assert.match(motor, /mobileSprintRequested \|\| Input\.GetKey\(KeyCode\.LeftShift\)/);
+  assert.match(motor, /public void SetMobileSprint\(bool value\) \{ mobileSprintRequested = value; \}/);
+  assert.match(runtime, /GUI\.RepeatButton\([\s\S]*?"RUN"\);[\s\S]*?motor\.SetMobileSprint\(sprintHeld\);/);
+  assert.match(runtime, /"JUMP"\)\)\s*motor\.MobileJump\(\);/);
+});
