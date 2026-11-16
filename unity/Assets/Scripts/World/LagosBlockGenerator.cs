@@ -194,7 +194,6 @@ namespace Citygame.World
             cockpitAnchor.transform.SetParent(car.transform, false);
             cockpitAnchor.transform.localPosition = new Vector3(0.52f, 0.92f, -0.05f);
             cockpitAnchor.transform.localRotation = Quaternion.Euler(0f, 90f, 0f);
-            RideableCar rideable = car.GetComponent<RideableCar>();
             rideable.ConfigureCockpit(cockpitAnchor.transform);
             Light[] headlamps = new Light[2];
             for (int lampIndex = 0; lampIndex < 2; lampIndex++)
