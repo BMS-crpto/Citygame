@@ -1272,9 +1272,10 @@ const DECOR = {
 };
 const clampN = (v, m) => Math.max(-m, Math.min(m, +v || 0));
 function loadExt(s) {
-  const e = { cars: [], license: 0, since: Date.now(), stocks: {}, decorInv: {}, decor: {}, guardUntil: 0, role: '', acct: '', pinH: '', pinS: '', daily: 0, streak: 0, socialPosts: 0, emotes: 0 };
+  const e = { cars: [], carPaint: {}, license: 0, since: Date.now(), stocks: {}, decorInv: {}, decor: {}, guardUntil: 0, role: '', acct: '', pinH: '', pinS: '', daily: 0, streak: 0, socialPosts: 0, emotes: 0 };
   if (!s || typeof s !== 'object') return e;
   e.cars = (Array.isArray(s.cars) ? s.cars.map(Number) : []).filter((c, i, a) => VEHICLES[c] && a.indexOf(c) === i);
+  e.carPaint = {}; for (const [id,color] of Object.entries(s.carPaint || {})) { const col=+id; if (VEHICLES[col] && e.cars.includes(col) && /^#[0-9a-f]{6}$/i.test(String(color))) e.carPaint[col]=String(color).toLowerCase(); }
   e.license = +s.license || 0; e.since = +s.since || e.since;
   for (const id in MARKET) { const q = Math.floor(+(s.stocks || {})[id]) || 0; if (q > 0) e.stocks[id] = Math.min(q, 1e7); }
   for (const id in DECOR) { const q = Math.floor(+(s.decorInv || {})[id]) || 0; if (q > 0) e.decorInv[id] = Math.min(q, 200); }
@@ -1340,7 +1341,7 @@ function payRide(p, m, fare, why) {
 }
 const idNo = p => 'LG-' + (parseInt(crypto.createHash('sha1').update(pKey(p)).digest('hex').slice(0, 8), 16) % 90000000 + 10000000);
 function sendCert(p) { const E = p.ext; send(p.ws, { t: 'x_cert', id: idNo(p), name: p.name, since: E.since, license: E.license, role: p.role, path: p.path, price: LICENSE_PRICE }); }
-function sendCars(p) { const E = p.ext; send(p.ws, { t: 'x_cars', cars: E.cars, license: !!E.license, list: Object.entries(VEHICLES).map(([c, v]) => ({ col: +c, name: v.name, icon: v.icon, price: v.price })) }); }
+function sendCars(p) { const E = p.ext; send(p.ws, { t: 'x_cars', cars: E.cars, carPaint: E.carPaint || {}, license: !!E.license, list: Object.entries(VEHICLES).map(([c, v]) => ({ col: +c, name: v.name, icon: v.icon, price: v.price })) }); }
 function sendMarket(p) { const E = p.ext, prices = {}; for (const id in MARKET) prices[id] = { name: MARKET[id].name, icon: MARKET[id].icon, price: MARKET[id].price, hist: mkHist[id] }; send(p.ws, { t: 'x_mk', prices, hold: E.stocks, cash: p.money }); }
 function sendDecor(p) { const E = p.ext; send(p.ws, { t: 'x_decor', shop: Object.entries(DECOR).map(([id, d]) => ({ id, name: d.name, icon: d.icon, price: d.price })), inv: E.decorInv, placed: E.decor }); }
 function sendExtras(p) { sendCert(p); sendCars(p); sendDecor(p); sendBusinesses(p); send(p.ws, { t: 'x_role', role: p.role }); }
@@ -1440,6 +1441,12 @@ function extraMsg(room, p, m, now) {
       if (!charge(p, LICENSE_PRICE, "Driver's License")) return true;
       E.license = now; toast('🪪 Driver\'s License issued! You can now buy and drive vehicles.'); sendCert(p); sendCars(p); savePlayer(room, p);
     }
+  } else if (m.t === 'carpaint') {
+    const col=Math.floor(+m.col), color=String(m.color||'').toLowerCase(), palette=['#f5f5f5','#111827','#dc2626','#2563eb','#16a34a','#f59e0b','#a855f7','#ec4899'];
+    if(!VEHICLES[col]||!E.cars.includes(col))return toast('You must own this vehicle before customising it'),true;
+    if(!palette.includes(color))return toast('That paint finish is unavailable'),true;
+    const price=75000;if(!charge(p,price,'Vehicle respray: '+VEHICLES[col].name))return true;
+    E.carPaint=E.carPaint||{};E.carPaint[col]=color;sendCars(p);toast('🎨 Vehicle resprayed successfully');savePlayer(room,p);
   } else if (m.t === 'buycar') {
     const col = Math.floor(+m.col), v = VEHICLES[col];
     if (!v) return true;
