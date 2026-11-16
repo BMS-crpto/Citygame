@@ -2791,7 +2791,7 @@ const nodeOK=(i,j)=>Math.abs(i)<=GN&&Math.abs(j)<=GN&&!(Math.abs(i*BLOCK+288)<10
 const lanePt=(i,j,d)=>[i*BLOCK-d[1]*LANE,j*BLOCK+d[0]*LANE];                                              // drive on the right
 const TKINDS=[[0,''],[1,''],[3,''],[4,''],[0,'taxi'],[3,'taxi'],[0,'taxi'],[0,'taxi'],[3,'taxi'],[0,'taxi'],[5,''],[5,''],[5,''],[6,''],[6,''],[8,''],[8,''],[1,''],[0,''],[2,'']];   // lots of danfo, keke and okada
 // ---- traffic lights on every second crossing: cars queue on red (go-slow) and move on green
-let sigT=0;const SIGS={};
+let sigT=0,trafficSpawnTimer=0;const SIGS={};
 const sigNode=(i,j)=>i%2===0&&j%2===0&&nodeOK(i,j);
 function sigState(axis,t){const c=t%26;return axis===1?(c<11?'g':c<13?'y':'r'):(c<13?'r':c<24?'g':'y')}   // axis 1 = driving along z, 0 = along x
 const sigMat={g:new THREE.MeshBasicMaterial({color:0x2ee86b}),y:new THREE.MeshBasicMaterial({color:0xffc400}),r:new THREE.MeshBasicMaterial({color:0xff2b2b})};
@@ -2821,9 +2821,11 @@ function carNext(c){
   const s=o.find(d=>d[0]===c.d[0]&&d[1]===c.d[1]);
   return(s&&Math.random()<0.6)?s:o[ri(o.length)];
 }
-function spawnCar(){
+function spawnCar(nearPlayer=false){
   for(let t=0;t<40;t++){
-    const i=ri(2*GN+1)-GN,j=ri(2*GN+1)-GN,d=DIRS[ri(4)];
+    const ci=Math.round(pos.x/BLOCK),cj=Math.round(pos.z/BLOCK);
+    const i=nearPlayer?Math.max(-GN,Math.min(GN,ci+ri(7)-3)):ri(2*GN+1)-GN;
+    const j=nearPlayer?Math.max(-GN,Math.min(GN,cj+ri(7)-3)):ri(2*GN+1)-GN,d=DIRS[ri(4)];
     if(!nodeOK(i,j)||!nodeOK(i+d[0],j+d[1]))continue;
     const a=lanePt(i,j,d),b=lanePt(i+d[0],j+d[1],d),f=rnd(0.15,0.85),x=a[0]+(b[0]-a[0])*f,z=a[1]+(b[1]-a[1])*f;
     if(Math.hypot(x-pos.x,z-pos.z)<30||TR.cars.some(c=>Math.hypot(c.x-x,c.z-z)<14))continue;
@@ -2856,8 +2858,16 @@ function trafficBlocks(nx,nz){
 function trafficUpdate(dt){
   if(!me)return;
   sigT+=dt;if(!inside)updateSignals();
-  if(!TR.ready){TR.ready=true;const nc=quality==='low'?24:quality==='high'?64:46,np=quality==='low'?30:quality==='high'?96:70;for(let i=0;i<nc;i++)spawnCar();for(let i=0;i<np;i++)spawnPed()}
+  if(!TR.ready){TR.ready=true;const nc=quality==='low'?24:quality==='high'?64:46,np=quality==='low'?30:quality==='high'?96:70;TR.carCap=nc;TR.localTarget=quality==='low'?14:quality==='high'?30:22;for(let i=0;i<nc;i++)spawnCar();for(let i=0;i<np;i++)spawnPed()}
   if(inside){for(const c of TR.cars)c.g.visible=false;for(const p of TR.peds)p.g.visible=false;return}
+  trafficSpawnTimer+=dt;
+  if(trafficSpawnTimer>=5){
+    trafficSpawnTimer=0;
+    for(let i=TR.cars.length-1;i>=0;i--){const c=TR.cars[i];if(Math.hypot(c.x-pos.x,c.z-pos.z)>420){scene.remove(c.g);TR.cars.splice(i,1)}}
+    const nearby=TR.cars.filter(c=>Math.hypot(c.x-pos.x,c.z-pos.z)<230).length;
+    let add=Math.min(TR.localTarget-nearby,TR.carCap-TR.cars.length,5);
+    while(add-->0)spawnCar(true);
+  }
   for(const c of TR.cars){
     const sy=Math.sin(c.ry),cy=Math.cos(c.ry);
     const S=lanePt(c.ni-c.d[0],c.nj-c.d[1],c.d),E=lanePt(c.ni,c.nj,c.d),len=Math.hypot(E[0]-S[0],E[1]-S[1]);
