@@ -210,6 +210,9 @@ namespace Citygame.Game
                 if (nearbyCar.IsOccupied && GUI.Button(new Rect(Screen.width - button * 2.2f, Screen.height - button * 3.55f, button * 2f, button),
                     nearbyCar.IsCockpitView ? "3RD PERSON" : "COCKPIT VIEW"))
                     nearbyCar.ToggleCameraView();
+                if (nearbyCar.IsOccupied && GUI.Button(new Rect(Screen.width - button * 2.2f, Screen.height - button * 4.65f, button * 2f, button),
+                    "HEADLIGHTS " + (nearbyCar.HeadlightsOn ? "ON" : "OFF")))
+                    nearbyCar.ToggleHeadlights();
             }
 
             float phoneWidth = portrait ? Screen.width - 20f : Mathf.Min(420f, Screen.width * 0.43f);
