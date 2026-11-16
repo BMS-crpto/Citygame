@@ -288,6 +288,8 @@ namespace Citygame.World
             spotObject.transform.position = new Vector3(position.x, position.y, frontZ - 1.1f);
             BusinessSpot spot = spotObject.AddComponent<BusinessSpot>();
             spot.Configure(name, category);
+            BusinessDoorPortal doorway = spotObject.AddComponent<BusinessDoorPortal>();
+            doorway.ConfigureEntry(name, category, position);
             Material signMaterial = MaterialFor(new Color(0.12f, 0.16f, 0.2f));
             CreateCube(name + " signboard", root,
                 position + new Vector3(0, size.y + 0.45f, frontZ - 0.01f),
