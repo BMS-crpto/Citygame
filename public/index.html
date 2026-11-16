@@ -2886,13 +2886,16 @@ function trafficUpdate(dt){
       const dn=(c.ni*BLOCK-c.x)*c.d[0]+(c.nj*BLOCK-c.z)*c.d[1];
       if(dn>6.5&&dn<24&&sigState(c.d[0]!==0?0:1,sigT)!=='g')want=Math.min(want,c.vmax*Math.max(0,(dn-7.5)/16));
     }
+    // Maintain safe following distance across the whole simulated traffic stream,
+    // not only near the player, so queues form naturally behind red lights and stopped danfos.
+    const test=(ox,oz,gap,wid)=>{const dx=ox-c.x,dz=oz-c.z,f=dx*sy+dz*cy,side=Math.abs(dx*cy-dz*sy);if(f>0.5&&f<gap&&side<wid){const k=Math.max(0,(f-5)/(gap-5));want=Math.min(want,c.vmax*k)}};
+    if(c.free<=0)for(const o of TR.cars)if(o!==c)test(o.x,o.z,16,2.7);
     if(Math.hypot(c.x-pos.x,c.z-pos.z)<110){
-      const test=(ox,oz,gap,wid)=>{const dx=ox-c.x,dz=oz-c.z,f=dx*sy+dz*cy,s=Math.abs(dx*cy-dz*sy);if(f>0.5&&f<gap&&s<wid){const k=Math.max(0,(f-5)/(gap-5));want=Math.min(want,c.vmax*k)}};
-      if(c.free<=0)for(const o of TR.cars)if(o!==c)test(o.x,o.z,13,2.5);
       for(const p of TR.peds)if(Math.abs(p.x-c.x)<16&&Math.abs(p.z-c.z)<16)test(p.x,p.z,11,1.9);
       test(pos.x,pos.z,13,2.3);
     }
-    c.v+=(want-c.v)*Math.min(1,dt*(want<c.v?3.2:1.2));
+    // Brake firmly, accelerate progressively: avoids harsh stop-start oscillation in queues.
+    c.v+=(want-c.v)*Math.min(1,dt*(want<c.v?4.4:0.9));
     c.stuck=c.v<0.4?c.stuck+dt:0;if(c.stuck>5){c.free=3.5;c.stuck=0}if(c.free>0)c.free-=dt;
     c.x+=Math.sin(c.ry)*c.v*dt;c.z+=Math.cos(c.ry)*c.v*dt;
     c.g.position.set(c.x,0,c.z);c.g.rotation.y=c.ry;
