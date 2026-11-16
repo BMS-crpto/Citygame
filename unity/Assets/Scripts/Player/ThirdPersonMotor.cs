@@ -19,6 +19,7 @@ namespace Citygame.Player
         private float verticalVelocity;
         private Vector2 mobileInput;
         private bool mobileJumpRequested;
+        private bool mobileSprintRequested;
 
         private void Awake()
         {
@@ -41,7 +42,7 @@ namespace Citygame.Player
             right.Normalize();
 
             Vector3 move = forward * input.y + right * input.x;
-            bool sprint = Input.GetKey(KeyCode.LeftShift);
+            bool sprint = mobileSprintRequested || Input.GetKey(KeyCode.LeftShift);
             float speed = sprint ? sprintSpeed : walkSpeed;
 
             if (move.sqrMagnitude > 0.001f)
@@ -66,6 +67,8 @@ namespace Citygame.Player
         public void SetMobileInput(Vector2 value) { mobileInput = Vector2.ClampMagnitude(value, 1f); }
 
         public void MobileJump() { mobileJumpRequested = true; }
+
+        public void SetMobileSprint(bool value) { mobileSprintRequested = value; }
 
         public void SetRiding(bool riding)
         {
