@@ -194,7 +194,8 @@ const tenants = saves._tenants = (saves._tenants && typeof saves._tenants === 'o
 // Player-owned businesses are shared across the Lagos server and stored with saved game data.
 const businesses = saves._businesses = (saves._businesses && typeof saves._businesses === 'object') ? saves._businesses : {};
 function saveBusinesses() { saveDirty = true; dirtySaves.add('_businesses'); }
-function businessList(viewerKey) { return Object.values(businesses).filter(b => b && BLD[+String(b.id).replace(/^b/, '')]).map(b => ({ id:b.id, name:b.name, kind:b.kind, icon:b.icon, area:b.area, locationName:b.locationName||b.name, x:b.x, z:b.z, owner:b.ownerName, isMine:b.ownerKey===viewerKey, balance:b.ownerKey===viewerKey?Math.max(0,Math.floor(+b.balance||0)):0, staff:b.ownerKey===viewerKey&&Array.isArray(b.staff)?b.staff:[], created:b.created||0 })); }
+function businessQuality(b) { const staff=Array.isArray(b.staff)?b.staff:[]; let bonus=0; for(const x of staff){if(x.role==='manager')bonus+=0.08;else if(x.role==='cashier')bonus+=0.06;else if(x.role==='security')bonus+=0.025;else if(x.role==='cleaner')bonus+=0.02;else if((b.kind==='restaurant'&&x.role==='chef')||(b.kind==='salon'&&x.role==='stylist'))bonus+=0.12;} return Math.min(0.45,bonus); }
+function businessList(viewerKey) { return Object.values(businesses).filter(b => b && BLD[+String(b.id).replace(/^b/, '')]).map(b => ({ id:b.id, name:b.name, kind:b.kind, icon:b.icon, area:b.area, locationName:b.locationName||b.name, x:b.x, z:b.z, owner:b.ownerName, isMine:b.ownerKey===viewerKey, balance:b.ownerKey===viewerKey?Math.max(0,Math.floor(+b.balance||0)):0, staff:b.ownerKey===viewerKey&&Array.isArray(b.staff)?b.staff:[], quality:b.ownerKey===viewerKey?Math.round(businessQuality(b)*100):0, created:b.created||0 })); }
 function sendBusinesses(p) { send(p.ws, { t:'x_businesses', businesses:businessList(pKey(p)) }); }
 function broadcastBusinesses(room) { for(const p of Object.values(rooms[room].players)) sendBusinesses(p); }
 function setTenant(id, t) { tenants[id] = t; saveDirty = true; dbPut('tenants', id, JSON.stringify(t)); }
@@ -558,7 +559,8 @@ function onConnection(ws) {
       // Customers support player-owned venues; earnings accrue safely to the owner's business wallet.
       const ownedVenue = p.bld != null && businesses['b' + p.bld];
       if (ownedVenue && ownedVenue.ownerKey !== pKey(p) && cooldown(p, 'biz_' + ownedVenue.id, 300000)) {
-        const cut = Math.max(100, Math.min(2500, Math.round((vt.cost || 500) * 0.12)));
+        const staffQuality = businessQuality(ownedVenue);
+        const cut = Math.max(100, Math.min(3500, Math.round((vt.cost || 500) * (0.12 + staffQuality))));
         ownedVenue.balance = Math.min(1e9, (Math.floor(+ownedVenue.balance) || 0) + cut);
         saveBusinesses();
         const owner = Object.values(R.players).find(q => pKey(q) === ownedVenue.ownerKey);
