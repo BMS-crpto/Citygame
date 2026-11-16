@@ -195,8 +195,27 @@ const tenants = saves._tenants = (saves._tenants && typeof saves._tenants === 'o
 const businesses = saves._businesses = (saves._businesses && typeof saves._businesses === 'object') ? saves._businesses : {};
 function saveBusinesses() { saveDirty = true; dirtySaves.add('_businesses'); }
 function businessQuality(b) { const staff=Array.isArray(b.staff)?b.staff:[]; let bonus=0; for(const x of staff){if(x.role==='manager')bonus+=0.08;else if(x.role==='cashier')bonus+=0.06;else if(x.role==='security')bonus+=0.025;else if(x.role==='cleaner')bonus+=0.02;else if((b.kind==='restaurant'&&x.role==='chef')||(b.kind==='salon'&&x.role==='stylist'))bonus+=0.12;} return Math.min(0.45,bonus); }
-function businessList(viewerKey) { return Object.values(businesses).filter(b => b && BLD[+String(b.id).replace(/^b/, '')]).map(b => ({ id:b.id, name:b.name, kind:b.kind, icon:b.icon, area:b.area, locationName:b.locationName||b.name, x:b.x, z:b.z, owner:b.ownerName, isMine:b.ownerKey===viewerKey, balance:b.ownerKey===viewerKey?Math.max(0,Math.floor(+b.balance||0)):0, staff:b.ownerKey===viewerKey&&Array.isArray(b.staff)?b.staff:[], quality:b.ownerKey===viewerKey?Math.round(businessQuality(b)*100):0, created:b.created||0 })); }
+function businessList(viewerKey) { return Object.values(businesses).filter(b => b && BLD[+String(b.id).replace(/^b/, '')]).map(b => ({ id:b.id, name:b.name, kind:b.kind, icon:b.icon, area:b.area, locationName:b.locationName||b.name, x:b.x, z:b.z, owner:b.ownerName, isMine:b.ownerKey===viewerKey, balance:b.ownerKey===viewerKey?Math.max(0,Math.floor(+b.balance||0)):0, staff:b.ownerKey===viewerKey&&Array.isArray(b.staff)?b.staff:[], quality:b.ownerKey===viewerKey?Math.round(businessQuality(b)*100):0, customers:b.ownerKey===viewerKey?Math.max(0,Math.floor(+b.customers||0)):0, created:b.created||0 })); }
 function sendBusinesses(p) { send(p.ws, { t:'x_businesses', businesses:businessList(pKey(p)) }); }
+let lastCustomerSimulationMinute = 0;
+function simulateBusinessCustomers(now) {
+  const minute=Math.floor(now/60000); if(!minute||minute===lastCustomerSimulationMinute)return;
+  lastCustomerSimulationMinute=minute;
+  const active=Object.values(rooms).some(R=>R&&Object.keys(R.players||{}).length>0); if(!active)return;
+  let changed=false;
+  for(const b of Object.values(businesses)){
+    if(!b||!b.ownerKey||now-(+b.lastCustomerAt||0)<55000)continue;
+    const quality=businessQuality(b),staff=Array.isArray(b.staff)?b.staff.length:0;
+    const chance=Math.min(.88,.28+quality*.9+(staff? .06:0)); if(Math.random()>chance)continue;
+    const ticket=({restaurant:950,fashion:2400,tech:3100,supermarket:1250,salon:1800,lounge:2200,carwash:1500,pharmacy:1100})[b.kind]||1200;
+    const sale=Math.round(ticket*(.65+Math.random()*.7)*(1+quality));
+    b.balance=Math.min(1e9,Math.max(0,Math.floor(+b.balance||0))+sale);
+    b.customers=Math.min(1e9,Math.max(0,Math.floor(+b.customers||0))+1);b.lastCustomerAt=now;changed=true;
+    const owner=Object.values(rooms).flatMap(R=>Object.values(R.players||{})).find(p=>p&&pKey(p)===b.ownerKey);
+    if(owner&&now-(+b.lastCustomerNoticeAt||0)>300000){send(owner.ws,{t:'toast',text:'🛍️ A customer visited '+b.name+' · '+fmtN(sale)+' added to company earnings'});b.lastCustomerNoticeAt=now;}
+  }
+  if(changed){saveBusinesses();for(const R of Object.values(rooms))if(R)for(const p of Object.values(R.players||{}))sendBusinesses(p);}
+}
 function broadcastBusinesses(room) { for(const p of Object.values(rooms[room].players)) sendBusinesses(p); }
 function setTenant(id, t) { tenants[id] = t; saveDirty = true; dbPut('tenants', id, JSON.stringify(t)); }
 async function loadStore() {
@@ -719,6 +738,7 @@ function onConnection(ws) {
 
 setInterval(() => {
   const now = Date.now();
+  simulateBusinessCustomers(now);
   for (const code in rooms) {
     const R = rooms[code];
     for (const p of Object.values(R.players)) {
