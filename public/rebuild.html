@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101923">
+<title>Citygame — Lagos Life Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/citygame.css">
+</head>
+<body>
+<div id="game">
+  <canvas id="world" aria-label="Citygame 3D world"></canvas>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">C</span><span>CITYGAME<small>LAGOS LIFE SIMULATOR</small></span></div>
+    <div class="top-stats"><span id="clock">08:00</span><span id="weather">☀ Clear</span><span id="wallet">₦500</span></div>
+    <button id="account-open" class="icon-button" aria-label="Player account">●</button>
+  </header>
+  <section id="welcome" class="welcome-panel">
+    <div class="eyebrow">YOUR CITY. YOUR STORY.</div>
+    <h1>Welcome to<br><em>Lagos.</em></h1>
+    <p>Build your life, find your place and make the city yours.</p>
+    <label for="player-name">PLAYER NAME</label>
+    <input id="player-name" maxlength="14" autocomplete="nickname" placeholder="Enter your name">
+    <button id="enter-city" class="primary">Enter the city <span>→</span></button>
+    <small class="welcome-foot">A living city simulation · Made for exploration</small>
+  </section>
+  <div id="hud" class="hud hidden">
+    <div class="location-chip"><span class="pulse"></span><span id="district">AGEGE</span><small id="street">LAGOS, NIGERIA</small></div>
+    <div class="needs"><span>ENERGY <b id="energy-value">100</b></span><div><i id="energy-bar"></i></div><span>HUNGER <b id="hunger-value">100</b></span><div><i id="hunger-bar"></i></div></div>
+    <div class="controls-hint" id="controls-hint">WASD move · E interact · M map</div>
+  </div>
+  <nav id="quickbar" class="quickbar hidden">
+    <button data-app="map"><span>⌖</span>Map</button>
+    <button data-app="phone"><span>▣</span>Phone</button>
+    <button data-app="jobs"><span>▤</span>Work</button>
+    <button data-app="home"><span>⌂</span>Home</button>
+    <button data-app="social"><span>◎</span>Social</button>
+  </nav>
+  <div id="touch-controls" class="touch-controls hidden">
+    <div class="dpad"><button data-move="forward">▲</button><div><button data-move="left">◀</button><button data-move="back">▼</button><button data-move="right">▶</button></div></div>
+    <button id="interact" class="interact-button">E<br><small>INTERACT</small></button>
+  </div>
+  <section id="app-screen" class="app-screen hidden" aria-live="polite">
+    <header><button id="app-back" aria-label="Back">‹</button><div><small id="app-kicker">CITYGAME</small><h2 id="app-title">Map</h2></div><button id="app-close" aria-label="Close">×</button></header>
+    <div id="app-content" class="app-content"></div>
+  </section>
+  <div id="toast" class="toast hidden"></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="/citygame-world.js"></script>
+<script src="/citygame-core.js"></script>
+<script src="/citygame-apps.js"></script>
+</body>
+</html>

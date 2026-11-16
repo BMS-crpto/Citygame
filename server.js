@@ -110,6 +110,42 @@ function authApi(req, res) {
   });
 }
 
+
+function accountFromRequest(req) {
+  const match = /^Bearer\s+(.+)$/i.exec(String(req.headers.authorization || ''));
+  return match ? readToken(match[1]) : null;
+}
+function accountSnapshot(username) {
+  const key = 'CITY1:a:' + username, account = accounts[username] || {};
+  const save = saves[key] || {}, ext = save.ext || {}, life = save.life || {};
+  const ownedBusinesses = Object.values(businesses || {}).filter(b => b && b.ownerKey === key).map(b => ({
+    id: String(b.id || ''), name: String(b.name || 'Business'), kind: String(b.kind || 'business'),
+    area: String(b.area || ''), balance: Math.max(0, Math.floor(+b.balance || 0)),
+    staffCount: Array.isArray(b.staff) ? b.staff.length : 0, customers: Math.max(0, Math.floor(+b.customers || 0))
+  }));
+  const home = Object.values(tenants || {}).find(t => t && t.key === key && +t.until > Date.now());
+  return {
+    username, displayName: String(account.profile && account.profile.displayName || account.name || username),
+    email: String(account.email || ''), createdAt: +account.created || 0,
+    savedAt: +save.saved || 0,
+    player: {
+      money: Math.max(0, Math.floor(+save.money || 0)), bank: Math.max(0, Math.floor(+save.bank || 0)),
+      food: Math.max(0, Math.min(100, +save.food || 0)), path: String(save.path || ''),
+      career: life.career && typeof life.career === 'object' ? { id: String(life.career.id || ''), xp: Math.max(0, Math.floor(+life.career.xp || 0)) } : null,
+      vehicles: Array.isArray(ext.cars) ? ext.cars.length : 0, hasLicence: !!ext.license,
+      inventory: Array.isArray(save.inv) ? save.inv.length : 0, homeActive: !!home,
+      homeUntil: home ? +home.until : 0, businesses: ownedBusinesses
+    }
+  };
+}
+function accountApi(req, res) {
+  const sendJson = (status, data) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(JSON.stringify(data)); };
+  if (req.method !== 'GET') return sendJson(405, { error: 'Method not allowed' });
+  const auth = accountFromRequest(req);
+  if (!auth || !accounts[auth.acct]) return sendJson(401, { error: 'Please sign in with your player account.' });
+  return sendJson(200, { ok: true, account: accountSnapshot(auth.acct), storage: UP_ON && dbWritesOk ? 'persistent' : 'local-fallback' });
+}
+
 const PUB = path.join(__dirname, 'public');
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.wasm': 'application/wasm', '.glb': 'model/gltf-binary', '.gltf': 'model/gltf+json', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.wav': 'audio/wav', '.ktx2': 'image/ktx2', '.bin': 'application/octet-stream' };
 const server = http.createServer((req, res) => {
@@ -120,6 +156,7 @@ const server = http.createServer((req, res) => {
   catch (e) { res.writeHead(400); return res.end(); }
   const route = url.replace(/[/]+$/, '') || '/';
   if (req.method === 'POST' && (route === '/api/register' || route === '/api/login')) return authApi(req, res);
+  if (route === '/api/account') return accountApi(req, res);
   if (req.method === 'GET' && route === '/api/health') { res.writeHead(200, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }); return res.end(JSON.stringify({ ok: true, storage: UP_ON ? (dbWritesOk ? 'upstash (accounts are permanent)' : 'upstash unreachable - using temporary files') : 'temporary file (accounts are WIPED when Render restarts or redeploys)', accounts: Object.keys(accounts).length - 1, lastError: dbLastError })); }
   if (req.method === 'GET' && route === '/api/world-status') {
     const activeRooms = Object.values(rooms || {});

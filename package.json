@@ -1,7 +1,7 @@
 {
-  "name": "lagos-life-online",
-  "version": "0.7.0",
-  "description": "Multiplayer 3D Lagos life sim. Dependency-free Node server + Three.js browser client.",
+  "name": "citygame-lagos-life",
+  "version": "1.0.0-rebuild",
+  "description": "Citygame: a modular browser-based 3D Lagos life simulation with an interactive GPS city map and mobile controls.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
