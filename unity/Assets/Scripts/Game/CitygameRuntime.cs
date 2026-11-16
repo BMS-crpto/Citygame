@@ -65,6 +65,7 @@ namespace Citygame.Game
         private RideableCar[] cityCars = Array.Empty<RideableCar>();
         private VehicleGarage[] cityGarages = Array.Empty<VehicleGarage>();
         private bool garageOpen;
+        private bool garageShopOpen;
         private int garagePaintIndex;
         private string notice = "Welcome to Lagos Life. Explore and build your business.";
         private bool menuOpen;
@@ -238,44 +239,70 @@ namespace Citygame.Game
             if (nearbyGarage != null && GUI.Button(new Rect(Screen.width - 190f, Screen.height - button * 5.8f, 178f, 48f),
                 garageOpen ? "CLOSE GARAGE" : "OPEN GARAGE"))
                 garageOpen = !garageOpen;
+            if (!garageOpen) garageShopOpen = false;
 
             if (garageOpen && nearbyGarage != null)
             {
-                float panelWidth = Mathf.Min(300f, Screen.width - 24f);
-                Rect panel = new Rect(Screen.width - panelWidth - 12f, Screen.height - 290f, panelWidth, 270f);
-                GUI.Box(panel, nearbyGarage.GarageName + "\nVEHICLE SERVICE");
-                RideableCar serviceCar = GetNearestGarageVehicle();
-                if (serviceCar == null)
+                float panelWidth = Mathf.Min(320f, Screen.width - 24f);
+                Rect panel = new Rect(Screen.width - panelWidth - 12f, Screen.height - 350f, panelWidth, 330f);
+                GUI.Box(panel, nearbyGarage.GarageName + (garageShopOpen ? "\nVEHICLE SHOWROOM" : "\nVEHICLE SERVICE"));
+                if (garageShopOpen)
                 {
-                    GUI.Label(new Rect(panel.x + 12f, panel.y + 52f, panel.width - 24f, 42f), "Bring a vehicle into the service bay.");
+                    GUI.Label(new Rect(panel.x + 12f, panel.y + 48f, panel.width - 24f, 28f), "Choose a vehicle to purchase:");
+                    float gap = 8f;
+                    float w = (panel.width - 36f) * 0.5f;
+                    float x1 = panel.x + 12f;
+                    float x2 = x1 + w + gap;
+                    float y1 = panel.y + 82f;
+                    float y2 = y1 + 54f;
+                    if (GUI.Button(new Rect(x1, y1, w, 46f), "SEDAN\n₦850,000"))
+                        PurchaseGarageVehicle("City Sedan", 0, 850000, new Color(0.18f, 0.32f, 0.58f));
+                    if (GUI.Button(new Rect(x2, y1, w, 46f), "SUV\n₦2,200,000"))
+                        PurchaseGarageVehicle("Lagos SUV", 2, 2200000, new Color(0.12f, 0.14f, 0.17f));
+                    if (GUI.Button(new Rect(x1, y2, w, 46f), "SPORTS COUPE\n₦3,000,000"))
+                        PurchaseGarageVehicle("Sports Coupe", 4, 3000000, new Color(0.72f, 0.08f, 0.06f));
+                    if (GUI.Button(new Rect(x2, y2, w, 46f), "CITY BUS\n₦4,000,000"))
+                        PurchaseGarageVehicle("City Bus", 3, 4000000, new Color(0.18f, 0.42f, 0.24f));
+                    if (GUI.Button(new Rect(panel.x + 12f, panel.y + 204f, panel.width - 24f, 42f), "BACK TO SERVICE"))
+                        garageShopOpen = false;
                 }
                 else
                 {
-                    GUI.Label(new Rect(panel.x + 12f, panel.y + 48f, panel.width - 24f, 34f),
-                        "Condition " + Mathf.RoundToInt(serviceCar.ConditionPercent) + "% · Fuel " + Mathf.RoundToInt(serviceCar.FuelPercent) + "%");
-                    if (GUI.Button(new Rect(panel.x + 12f, panel.y + 88f, panel.width - 24f, 42f), "REPAIR · ₦25,000"))
+                    RideableCar serviceCar = GetNearestGarageVehicle();
+                    if (serviceCar == null)
                     {
-                        if (save.cash < 25000) notice = "Not enough cash for repairs.";
-                        else { save.cash -= 25000; serviceCar.Repair(); Save(); notice = "Vehicle repaired at Lagos Motor Works."; }
+                        GUI.Label(new Rect(panel.x + 12f, panel.y + 52f, panel.width - 24f, 42f), "Drive a vehicle into the service bay to repair, refuel or repaint it.");
                     }
-                    if (GUI.Button(new Rect(panel.x + 12f, panel.y + 136f, panel.width - 24f, 42f), "REFUEL · ₦8,000"))
+                    else
                     {
-                        if (save.cash < 8000) notice = "Not enough cash to refuel.";
-                        else { save.cash -= 8000; serviceCar.Refuel(); Save(); notice = "Fuel tank refilled."; }
-                    }
-                    if (GUI.Button(new Rect(panel.x + 12f, panel.y + 184f, panel.width - 24f, 42f), "CUSTOM PAINT · ₦12,000"))
-                    {
-                        if (save.cash < 12000) notice = "Not enough cash for custom paint.";
-                        else
+                        GUI.Label(new Rect(panel.x + 12f, panel.y + 48f, panel.width - 24f, 34f),
+                            "Condition " + Mathf.RoundToInt(serviceCar.ConditionPercent) + "% · Fuel " + Mathf.RoundToInt(serviceCar.FuelPercent) + "%");
+                        if (GUI.Button(new Rect(panel.x + 12f, panel.y + 88f, panel.width - 24f, 42f), "REPAIR · ₦25,000"))
                         {
-                            Color[] paints = { new Color(0.08f, 0.28f, 0.72f), new Color(0.08f, 0.08f, 0.09f), new Color(0.72f, 0.08f, 0.06f), new Color(0.82f, 0.72f, 0.12f) };
-                            serviceCar.SetPaint(paints[garagePaintIndex % paints.Length]);
-                            garagePaintIndex++;
-                            save.cash -= 12000;
-                            Save();
-                            notice = "Custom vehicle paint applied.";
+                            if (save.cash < 25000) notice = "Not enough cash for repairs.";
+                            else { save.cash -= 25000; serviceCar.Repair(); Save(); notice = "Vehicle repaired at Lagos Motor Works."; }
+                        }
+                        if (GUI.Button(new Rect(panel.x + 12f, panel.y + 136f, panel.width - 24f, 42f), "REFUEL · ₦8,000"))
+                        {
+                            if (save.cash < 8000) notice = "Not enough cash to refuel.";
+                            else { save.cash -= 8000; serviceCar.Refuel(); Save(); notice = "Fuel tank refilled."; }
+                        }
+                        if (GUI.Button(new Rect(panel.x + 12f, panel.y + 184f, panel.width - 24f, 42f), "CUSTOM PAINT · ₦12,000"))
+                        {
+                            if (save.cash < 12000) notice = "Not enough cash for custom paint.";
+                            else
+                            {
+                                Color[] paints = { new Color(0.08f, 0.28f, 0.72f), new Color(0.08f, 0.08f, 0.09f), new Color(0.72f, 0.08f, 0.06f), new Color(0.82f, 0.72f, 0.12f) };
+                                serviceCar.SetPaint(paints[garagePaintIndex % paints.Length]);
+                                garagePaintIndex++;
+                                save.cash -= 12000;
+                                Save();
+                                notice = "Custom vehicle paint applied.";
+                            }
                         }
                     }
+                    if (GUI.Button(new Rect(panel.x + 12f, panel.y + 236f, panel.width - 24f, 42f), "BUY A VEHICLE"))
+                        garageShopOpen = true;
                 }
             }
 
@@ -604,6 +631,20 @@ namespace Citygame.Game
             if (GUI.Button(new Rect(screen.center.x - 42f, screen.yMax - 32f, 84f, 24f), "● HOME"))
                 activePhoneApp = "Home";
             GUI.color = Color.white;
+        }
+
+        private void PurchaseGarageVehicle(string modelName, int styleIndex, long price, Color paint)
+        {
+            if (nearbyGarage == null) return;
+            if (save.cash < price) { notice = "Not enough cash to purchase this vehicle."; return; }
+            Vector3 spawn = nearbyGarage.transform.position + new Vector3(4f, 0.65f, 5f);
+            RideableCar purchased = LagosBlockGenerator.SpawnPurchasedVehicle(spawn, modelName, styleIndex, paint);
+            if (purchased == null) { notice = "Vehicle purchase could not be completed."; return; }
+            save.cash -= price;
+            Save();
+            garageShopOpen = false;
+            notice = modelName + " purchased. Your vehicle is ready at Lagos Motor Works.";
+            RefreshCityObjects();
         }
 
         private RideableCar GetNearestGarageVehicle()
