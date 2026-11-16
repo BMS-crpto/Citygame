@@ -600,8 +600,11 @@ function onConnection(ws) {
         const staffQuality = businessQuality(ownedVenue);
         const cut = Math.max(100, Math.min(3500, Math.round((vt.cost || 500) * (0.12 + staffQuality))));
         ownedVenue.balance = Math.min(1e9, (Math.floor(+ownedVenue.balance) || 0) + cut);
+        ownedVenue.customers = Math.min(1e9, (Math.floor(+ownedVenue.customers) || 0) + 1);
+        ownedVenue.lastCustomerAt = now;
         saveBusinesses();
-        const owner = Object.values(R.players).find(q => pKey(q) === ownedVenue.ownerKey);
+        for (const RR of Object.values(rooms)) if (RR) for (const viewer of Object.values(RR.players || {})) sendBusinesses(viewer);
+        const owner = Object.values(rooms).flatMap(RR => Object.values(RR.players || {})).find(q => pKey(q) === ownedVenue.ownerKey);
         if (owner) send(owner.ws, { t:'toast', text:'🏪 '+ownedVenue.name+' earned '+fmtN(cut)+' from a customer' });
       }
       const fx = vt.fx || {};
