@@ -205,3 +205,65 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
  #act{min-width:56px!important;min-height:56px!important}
 }
 @media(prefers-reduced-motion:reduce){button,.btn,[role=button]{transition:none!important}}
+
+
+/* 2026 LagosLife reference refinement — unified in-world interface layer.
+   Presentation-only: preserves existing game DOM, controls and app handlers. */
+:root{
+ --cg-ink:#09151b;--cg-panel:#14272d;--cg-panel-hi:#1d3639;
+ --cg-edge:#3d5a50;--cg-gold:#d8b968;--cg-emerald:#277b58;
+ --cg-paper:#f1eee4;--cg-muted:#a9b8b2;
+}
+#hud{z-index:20!important;gap:7px!important;align-items:flex-start!important}
+#hud>div{
+ background:linear-gradient(155deg,rgba(15,34,34,.94),rgba(7,19,23,.94))!important;
+ border:1px solid rgba(216,185,104,.38)!important;border-radius:11px!important;
+ box-shadow:0 5px 18px #0007,inset 0 1px #ffffff12!important;
+ color:#f3f1e9!important;backdrop-filter:blur(12px)!important;
+}
+#info{font-weight:750!important;letter-spacing:.15px}
+#money{color:#a8e2bd!important;font-variant-numeric:tabular-nums}
+#mm{border:2px solid var(--cg-gold)!important;box-shadow:0 0 0 3px #09151b,0 5px 18px #0009!important}
+#district,#needs,#tasks,#chatlog{
+ filter:drop-shadow(0 5px 12px #0005)
+}
+#district,#needs,#tasks>div,#chatlog>div{
+ background:linear-gradient(150deg,#142b2dF2,#09191dF2)!important;
+ border:1px solid #d8b96844!important;border-radius:12px!important;
+ color:#f1eee4!important;backdrop-filter:blur(10px)!important
+}
+#bigmap{background:linear-gradient(145deg,#172d2b,#0b191d)!important}
+#bigmap canvas{border:1px solid #d8b96855!important;border-radius:14px!important}
+#mapside{background:linear-gradient(165deg,#172d2d,#0a181c)!important;border-left:1px solid #d8b96855!important}
+#mapside .mh{color:#e6cc83!important;letter-spacing:.06em!important}
+#mapside .pl,#mapside .det{background:linear-gradient(145deg,#203b36,#142722)!important;border:1px solid #496454!important;border-radius:12px!important}
+#mapside .pl.sel{border-color:#e0c477!important;box-shadow:0 0 0 1px #e0c47755!important}
+#phone .pbox{border-color:#d8b968!important;box-shadow:0 0 0 2px #332b19,0 24px 65px #000c!important}
+#pgrid{background:linear-gradient(145deg,#176d4c,#0d4937)!important;border:1px solid #55a982!important}
+#pgrid .app{border-radius:14px!important;border:1px solid #ffffff20!important}
+#phoneSearch{border-color:#496456!important}
+#appview .card,#appview .xrow{
+ background:linear-gradient(150deg,#1b3334,#112326)!important;
+ border:1px solid #405b50!important;border-radius:13px!important
+}
+#appview h1,#appview h2,#appview h3{color:#f3eddb!important}
+#appview button:not(.app){border-radius:10px!important}
+#appview button.gold,#appview .gold{background:linear-gradient(145deg,#ead28d,#bd9948)!important;color:#201a0d!important;border-color:#f3dfa5!important}
+#ride{background:radial-gradient(ellipse at 50% 20%,#1b3735f5,#071216fa 75%)!important}
+#ride .rb{background:#ffffff1a!important;border:1px solid #ffffff18!important}
+#ride .rb i{background:linear-gradient(90deg,#65c89a,#e0c477)!important}
+#speedo{border:1px solid #d8b96888!important;background:linear-gradient(150deg,#162d2c,#081519)!important;color:#f5f0df!important}
+#speedo small{color:#e2c779!important}
+#toast{background:linear-gradient(150deg,#183330f5,#09191cf5)!important;border:1px solid #d8b96866!important;color:#f5f0df!important}
+#stick{border-color:#e6d49b88!important}
+#knob{background:linear-gradient(145deg,#f5efdc,#c5b47e)!important}
+#act{background:linear-gradient(145deg,#e7c878,#bc8c39)!important;color:#1e1a10!important;border:1px solid #fff0c2!important}
+#use{background:linear-gradient(145deg,#76d2a0,#267c59)!important;color:#071a12!important;border:1px solid #c4f3d6!important}
+@media(max-width:600px){
+ #hud>div{font-size:10px!important;padding:5px 7px!important}
+ #mapside{max-width:min(48vw,230px)!important}
+ #phone .pbox{border-width:2px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #hud>div,#mapside .pl,#pgrid .app{transition:none!important}
+}
