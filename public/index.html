@@ -4394,7 +4394,7 @@ const mk=(id,ic,fn)=>{const b=document.createElement('button');b.id=id;b.classNa
 mk('giftbtn','🎁',()=>{S({t:'daily',op:'info'});showDaily()});
 mk('jobbtn','💼',showJobs);
 let auto=true,tries=0;
-const iv=setInterval(()=>{if(typeof me!=='undefined'&&me){clearInterval(iv);setTimeout(()=>S({t:'daily',op:'info'}),2500)}else if(++tries>200)clearInterval(iv)},1000);
+const iv=setInterval(()=>{if(window.CG_ME?.()){clearInterval(iv);setTimeout(()=>S({t:'daily',op:'info'}),2500)}else if(++tries>200)clearInterval(iv)},1000);
 })();
 
 </script>
@@ -4570,7 +4570,7 @@ beatCB=n=>{beat=n>>2};
 /* ----- decide what should be playing ----- */
 function sync(){
   try{
-    if(typeof me==='undefined'||!me){stop();chip.style.display='none';return}
+    if(!window.CG_ME?.()){stop();chip.style.display='none';return}
     if(inClub()){const id=djTrack();play(id,0.9);chip.style.display='flex';chip.innerHTML='<i>🎶</i> DJ Fatty · '+TRACKS[id].name}
     else if(atHome()&&homeTrack){play(homeTrack,homeVol);chip.style.display='flex';chip.innerHTML='<i>🎵</i> '+TRACKS[homeTrack].name;chip.onclick=playerUI}
     else{stop();chip.style.display='none'}
@@ -4628,7 +4628,7 @@ function meta(p){if(p.act===undefined){const k=Math.floor(Math.random()*ACTS.len
 let nearP=null;
 function scan(){
   try{
-    if(!me||window.CG_INSIDE?.()||typeof TR==='undefined'||!TR.ready){for(const k in sprites)sprites[k].visible=false;nearP=null;return}
+    if(!window.CG_ME?.()||window.CG_INSIDE?.()||typeof TR==='undefined'||!TR.ready){for(const k in sprites)sprites[k].visible=false;nearP=null;return}
     let best=null,bd=14;
     for(const p of TR.peds){if(!p.g.visible)continue;const d=Math.hypot(p.x-pos.x,p.z-pos.z);if(d<bd){bd=d;best=p}}
     nearP=bd<3.8?best:null;
