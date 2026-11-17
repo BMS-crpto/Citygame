@@ -112,6 +112,27 @@ async function waitForServer() {
     assert.equal(companyNavigation.friendlyType, true,
       'Company details must show a readable business type');
 
+    const registrationRecovery = await page.evaluate(() => {
+      const bridge = window.LAGOS_PHONE;
+      bridge.APPR.Company();
+      const before = !!bridge.appview.querySelector('#cgCoName');
+      const originalSend = bridge.S;
+      let sent = null;
+      bridge.S = message => { sent = message; };
+      bridge.X.companyCreate();
+      bridge.S = originalSend;
+      return {
+        before,
+        after: !!bridge.appview.querySelector('#cgCoName'),
+        request: sent && sent.t === 'business' && sent.op === 'create'
+      };
+    });
+    assert.equal(registrationRecovery.before, true, 'Company registration form must render');
+    assert.equal(registrationRecovery.after, true,
+      'registration form must remain available while server response is pending or rejected');
+    assert.equal(registrationRecovery.request, true,
+      'Company registration must send the expected create request');
+
     assert.deepEqual(runtimeErrors, [], 'browser runtime must not throw uncaught JavaScript errors');
     process.stdout.write('Browser startup passed: ' + JSON.stringify(state) + '\\n');
   } finally {
