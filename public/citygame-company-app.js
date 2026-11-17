@@ -50,8 +50,10 @@
   const kind=(bridge.appview.querySelector('#cgCoKind')||{}).value||'restaurant';
   const area=(bridge.appview.querySelector('#cgCoArea')||{}).value||'';
   if(name.trim().length<3){bridge.appview.querySelector('#cgCoName')?.focus();return}
+  // Keep the registration form visible while the server processes the request.
+  // Rejected registrations only return a toast; they do not emit x_businesses,
+  // so replacing this view with a permanent spinner would trap the player.
   bridge.S({t:'business',op:'create',name:name.trim(),kind,area});
-  bridge.appview.innerHTML=appbar()+'<section class="card">Registering your company…</section>';
  };
  bridge.X.companyCollect=()=>bridge.S({t:'business',op:'collect'});
  bridge.X.companyNavigate=()=>{const own=businesses.find(x=>x&&x.isMine);if(own&&typeof window.setGps==='function'){const buildingId=Number(String(own.id).replace(/^b/,''));if(Number.isFinite(buildingId))window.setGps(buildingId)}};
