@@ -4,7 +4,7 @@
  */
 (function () {
   'use strict';
-  if (typeof placesList !== 'function' || typeof pos === 'undefined' || typeof mapside === 'undefined') {
+  if (typeof placesList !== 'function' || typeof window.CG_POS !== 'function' || typeof mapside === 'undefined') {
     console.warn('Citygame Map Experience: base map is not ready');
     return;
   }
@@ -62,7 +62,7 @@
 
   function allPlaces() {
     return placesList().map(p => {
-      const distance = Math.round(Math.hypot(p.x - pos.x, p.z - pos.z));
+      const distance = Math.round(Math.hypot(p.x - window.CG_POS().x, p.z - window.CG_POS().z));
       return Object.assign({}, p, { _distance: distance, _category: String(labelFor(p)).toLowerCase() });
     }).sort((a, b) => a._distance - b._distance);
   }
