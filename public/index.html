@@ -2304,7 +2304,7 @@ function popMoney(d){const e=document.createElement('div');e.className='pop';e.t
 
 // =============== state & input ===============
 let ridingId=0,lotName='';const others={};let myId=null,ws=null,myMoney=null,jailed=false;
-const pos={x:0,z:0,ry:0,floor:0};
+const pos={x:0,z:0,ry:0,floor:0};window.CG_POS=()=>pos;
 let joy={x:0,y:0};let camYaw=0,camH=7,camInit=false;
 let myCol=-1,carObj=null,speed=0,moving=false,myBank=0,myFood=100;
 
