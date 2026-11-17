@@ -72,6 +72,26 @@ async function waitForServer() {
     assert.deepEqual(phoneApps.tiles.sort(), ['Company', 'Emotes', 'Gallery', 'Market', 'News', 'Social'].sort(),
       'all phone app launch tiles must be present');
 
+    // Verify that each registered app actually opens inside the full-screen phone
+    // app view, rather than merely existing as a launcher tile.
+    const appLaunches = await page.evaluate(() => {
+      const bridge = window.LAGOS_PHONE;
+      const names = ['Company', 'Social', 'Emotes', 'News', 'Gallery', 'Market'];
+      return names.map(name => {
+        bridge.openApp(name);
+        const phone = document.querySelector('#phone');
+        const view = document.querySelector('#appview');
+        return {
+          name,
+          opened: !!phone?.classList.contains('app-open'),
+          selected: view?.dataset.app === name,
+          hasContent: !!view && view.innerText.trim().length > 0
+        };
+      });
+    });
+    assert.ok(appLaunches.every(x => x.opened && x.selected && x.hasContent),
+      'each phone app must open a populated full-screen app view: ' + JSON.stringify(appLaunches));
+
     assert.deepEqual(runtimeErrors, [], 'browser runtime must not throw uncaught JavaScript errors');
     process.stdout.write('Browser startup passed: ' + JSON.stringify(state) + '\\n');
   } finally {
