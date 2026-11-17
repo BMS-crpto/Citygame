@@ -56,6 +56,22 @@ async function waitForServer() {
 
     assert.ok(state.hasEntryScreen, 'the game entry screen must be present');
     assert.ok(state.hasCanvas, 'the 3D game or character-preview canvas must initialize');
+
+    const phoneApps = await page.evaluate(() => {
+      const bridge = window.LAGOS_PHONE;
+      const names = ['Company', 'Social', 'Emotes', 'News', 'Gallery', 'Market'];
+      return {
+        bridgeReady: !!bridge && !!bridge.APPR && !!bridge.X && !!bridge.appview,
+        registered: names.filter(name => typeof bridge?.APPR?.[name] === 'function'),
+        tiles: names.filter(name => !!document.querySelector('#pgrid [data-app="' + name + '"]'))
+      };
+    });
+    assert.ok(phoneApps.bridgeReady, 'the in-game phone bridge must initialize');
+    assert.deepEqual(phoneApps.registered.sort(), ['Company', 'Emotes', 'Gallery', 'Market', 'News', 'Social'].sort(),
+      'all separately loaded phone app renderers must register');
+    assert.deepEqual(phoneApps.tiles.sort(), ['Company', 'Emotes', 'Gallery', 'Market', 'News', 'Social'].sort(),
+      'all phone app launch tiles must be present');
+
     assert.deepEqual(runtimeErrors, [], 'browser runtime must not throw uncaught JavaScript errors');
     process.stdout.write('Browser startup passed: ' + JSON.stringify(state) + '\\n');
   } finally {
