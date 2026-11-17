@@ -621,7 +621,7 @@ const ROLES = {
   taxi:{emoji:'🚕',label:'Taxi',desc:'Pick up riders'}
 };
 let myRole='police',myName='Player';
-const LOOKC={skin:[0xf1c27d,0xc68642,0x8d5524,0xe0ac69,0x5c3a21],top:[0xe53935,0x1e88e5,0x43a047,0xfdd835,0xffffff,0x8e24aa,0xff7043,0x212121],pants:[0x1a237e,0x212121,0x5d4037,0x455a64,0x827717],hair:['Short','Afro','Cap','Bald','Braids'],hairc:[0x0d0b0a,0x2b1a10,0x5a3a22,0xc9a24a,0x9b2d20,0x9a9a9a],body:['Man','Woman']};
+const LOOKC={skin:[0xf1c27d,0xc68642,0x8d5524,0xe0ac69,0x5c3a21],top:[0xe53935,0x1e88e5,0x43a047,0xfdd835,0xffffff,0x8e24aa,0xff7043,0x212121],pants:[0x1a237e,0x212121,0x5d4037,0x455a64,0x827717],hair:['Short','Afro','Cap','Bald','Braids'],hairc:[0x0d0b0a,0x2b1a10,0x5a3a22,0xc9a24a,0x9b2d20,0x9a9a9a],body:['Man','Woman','Business','Streetwear']};
 let look=[1,0,1,1,0,0];
 try{const sv=JSON.parse(localStorage.getItem('look')||'null');if(Array.isArray(sv)&&sv.length>=4){const MX=[4,4,7,4,1,5];for(let i=0;i<6;i++)look[i]=Math.max(0,Math.min(MX[i],(sv[i]|0)))}}catch(e){}
 function buildLookBox(){
@@ -1238,15 +1238,15 @@ function buildBankInside(){
   for(const bxx of [-5,3]){bx_(x0+bxx,0.5,z0+4,4,0.5,1.2,0x8a5a3c);bx_(x0+bxx,1.1,z0+4.5,4,0.9,0.2,0x8a5a3c);solid(x0+bxx,z0+4,2,0.7)}
   for(const [px,pz] of [[x0+12.5,z0+8.5],[x0-12.5,z0+8.5],[x0+12.5,z0-3]]){bx_(px,0.4,pz,0.9,0.8,0.9,0x8d4a3a);bx_(px,1.3,pz,1.1,1.0,1.1,0x2f7a35);solid(px,pz,0.6,0.6)}
 }
-const SHOW_ORDER=[12,7,9,2,10, 13,14,1,4,3, 0,5,6,11,8];   // every vehicle for sale is inside the gallery
-const SPECS={0:['Toyota Corolla','180 km/h','10.5 s','132 hp'],1:['Toyota Prado','175 km/h','9.8 s','272 hp'],2:['Nissan GT-R','315 km/h','2.9 s','565 hp'],3:['Honda Accord','200 km/h','8.0 s','192 hp'],4:['Lexus RX 350','200 km/h','7.4 s','275 hp'],5:['Danfo Bus','120 km/h','18 s','110 hp'],6:['Keke Napep','55 km/h','--','9 hp'],7:['Lamborghini','350 km/h','2.9 s','630 hp'],8:['Bajaj Boxer Okada','95 km/h','--','11 hp'],9:['BMW M4 Competition','290 km/h','3.5 s','503 hp'],10:['Dodge Challenger','315 km/h','3.6 s','717 hp'],11:['Fire Engine','110 km/h','20 s','400 hp'],12:['Bugatti Chiron','420 km/h','2.4 s','1500 hp'],13:['Dominus GT','260 km/h','4.0 s','450 hp'],14:['Classic Coupe','230 km/h','5.5 s','340 hp']};
+const SHOW_ORDER=[12,7,9,15,2,10, 13,14,1,4,3, 0,5,6,11,8];   // every vehicle for sale is inside the gallery
+const SPECS={0:['Toyota Corolla','180 km/h','10.5 s','132 hp'],1:['Toyota Prado','175 km/h','9.8 s','272 hp'],2:['Nissan GT-R','315 km/h','2.9 s','565 hp'],3:['Honda Accord','200 km/h','8.0 s','192 hp'],4:['Lexus RX 350','200 km/h','7.4 s','275 hp'],5:['Danfo Bus','120 km/h','18 s','110 hp'],6:['Keke Napep','55 km/h','--','9 hp'],7:['Lamborghini','350 km/h','2.9 s','630 hp'],8:['Bajaj Boxer Okada','95 km/h','--','11 hp'],9:['BMW M4 Competition','290 km/h','3.5 s','503 hp'],10:['Dodge Challenger','315 km/h','3.6 s','717 hp'],11:['Fire Engine','110 km/h','20 s','400 hp'],12:['Bugatti Chiron','420 km/h','2.4 s','1500 hp'],13:['Dominus GT','260 km/h','4.0 s','450 hp'],14:['Classic Coupe','230 km/h','5.5 s','340 hp'],15:['BMW M4 Competition M Package','290 km/h','3.5 s','503 hp']};
 const showCars=[];let showLabels=[];
 function buildDealerInside(){
   const R=makeRoom('dealer',1000,-200,22,16,5.6,checkerBase,0xe9ecef),x0=R.x0,z0=R.z0;
   addSign('ELITE AUTO GALLERY',x0,4.4,z0-15.9,0,14,'#111827');
   bx_(x0,0.55,z0-14.2,9,1.1,1.2,0x1f2937);bx_(x0,1.15,z0-14.2,9.2,0.1,1.4,0xd4af37);solid(x0,z0-14.2,4.6,0.8);   // sales desk
   bx_(x0+19.5,0.5,z0+11,1.4,1,3.2,0x4a3226);solid(x0+19.5,z0+11,0.8,1.7);                                 // manager's desk
-  for(let k=0;k<15;k++){
+  for(let k=0;k<16;k++){
     const c=k%5,r=(k/5)|0,x=x0-16+c*8,z=z0-7+r*7.2;
     bx_(x,0.1,z,5.6,0.2,7,0x20242b);bx_(x,0.21,z,5.2,0.02,6.6,0x3b4252);
     bx_(x-2.7,0.25,z,0.1,0.06,6.8,0xffd54a);bx_(x+2.7,0.25,z,0.1,0.06,6.8,0xffd54a);
@@ -1787,14 +1787,14 @@ function makeKeke(){                        // three-wheeler (keke napep)
 
 // =============== 3D models (GLB) with automatic fallback ===============
 // If a model or the loader fails to load, the built-in boxy cars/people keep working.
-const MODEL_FILES={sedan:'models/sedan.glb',suv:'models/suv.glb',police:'models/police.glb',man:'models/man.glb',woman:'models/woman.glb',gtr:'models/gtr.glb',lambo:'models/lambo.glb',bmw:'models/bmw_light.glb',suit:'models/suit.glb',
+const MODEL_FILES={sedan:'models/sedan.glb',suv:'models/suv.glb',police:'models/police.glb',man:'models/man.glb',woman:'models/woman.glb',businessman:'models/businessman.glb',gtr:'models/gtr.glb',lambo:'models/lambo.glb',bmw:'models/bmw_light.glb',bmwCompetition:'models/bmw_m4_competition_m_package.glb',suit:'models/suit.glb',
   challenger:'models/challenger.glb',fireengine:'models/fireengine.glb',okada:'models/okada.glb',punk:'models/punk.glb',
   chiron:'models/chiron.glb',dominusrl:'models/dominus_rl.glb',car3d:'models/car3d.glb',
   airplane:'models/airplane.glb',closet:'models/closet.glb',dryer:'models/dryer.glb',computer:'models/computer.glb'};
 // len = target length (cars) or height (people) in game units; yaw = extra turn in degrees if a model faces the wrong way
 const MODEL_CFG={
   sedan:{len:4.6,body:/lightblue/i},suv:{len:4.8,body:/^white$/i},police:{len:4.7},gtr:{len:4.7,body:/chasis/i},
-  lambo:{len:4.9,yaw:0},bmw:{len:4.8},man:{len:1.78,person:1},woman:{len:1.68,person:1},suit:{len:1.78,person:1},
+  lambo:{len:4.9,yaw:0},bmw:{len:4.8},man:{len:1.78,person:1},woman:{len:1.68,person:1},businessman:{len:1.78,person:1},bmwCompetition:{len:4.8},suit:{len:1.78,person:1},
   // v0.8 models. okada is modelled facing -z so it gets a 180 turn. prop:1 = keep the model's own orientation, only apply yaw and scale by height h (or length len).
   challenger:{len:4.9},fireengine:{len:6.4},okada:{len:2.3,yaw:180},punk:{len:1.78,person:1},
   chiron:{len:4.55},dominusrl:{len:4.4},car3d:{len:4.9},   // v0.9: Bugatti Chiron (12), Dominus (13), 3d_car (14)
@@ -1881,7 +1881,7 @@ function cloneModel(key){
 if(THREE.GLTFLoader){
   const loader=new THREE.GLTFLoader();
   loader.setCrossOrigin('anonymous');
-  const order=['man','woman','suit','punk','sedan','suv','police','gtr','lambo','bmw','okada','challenger','fireengine','chiron','dominusrl','car3d','airplane','closet','dryer','computer'];
+  const order=['man','woman','businessman','suit','punk','sedan','suv','police','gtr','lambo','bmw','okada','challenger','fireengine','chiron','dominusrl','car3d','airplane','closet','dryer','computer'];
   // Resolve assets relative to the active game page first (works on root and project subpaths).
   // If the deployment rewrites the page URL, retry from the site root before leaving the procedural fallback.
   function loadModelAsset(key,attempt=0){
@@ -1918,6 +1918,7 @@ function attachCarModel(g,col,role){
   if(role==='police')key='police';
   else if(col===7)key='lambo';
   else if(col===9)key='bmw';
+   else if(col===15)key='bmwCompetition';
   else if(col===8)key='okada';
   else if(col===10)key='challenger';
   else if(col===11)key='fireengine';
@@ -1985,7 +1986,7 @@ function addHeadgear(body,H,lk,role){
 function attachCharModel(g,body,role,name,look){
   look=look&&look.length?look:null;
   let h=0;for(const ch of name||'')h=(h*31+ch.charCodeAt(0))>>>0;
-  const female=look?look[4]===1:(h%2===1),key=role==='lawyer'?'suit':(role==='thief'&&!female?'punk':(female?'woman':'man'));
+  const bodyStyle=look?look[4]:0,female=bodyStyle===1||(h%2===1&&!look),key=role==='lawyer'?'suit':(bodyStyle===2?'businessman':(bodyStyle===3?'punk':(role==='thief'&&!female?'punk':(female?'woman':'man'))));
   whenModel(key,()=>{
     if(g.userData.modelDone)return;
     try{
