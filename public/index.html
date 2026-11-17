@@ -656,6 +656,7 @@ scene.fog=new THREE.Fog(HORIZON,180,520);
 const camera=new THREE.PerspectiveCamera(62,innerWidth/innerHeight,0.1,650);
 const CITYGAME_MOBILE=window.matchMedia('(max-width: 700px)').matches||/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const renderer=new THREE.WebGLRenderer({antialias:!CITYGAME_MOBILE,powerPreference:'high-performance'});
+window.CITYGAME_RENDERER=renderer; // Explicit bridge for external graphics-quality controller.
 renderer.setSize(innerWidth,innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,CITYGAME_MOBILE?1.25:1.75));
 renderer.shadowMap.enabled=!CITYGAME_MOBILE;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -4807,5 +4808,5 @@ catch(e){console.warn('palms fallback',e);try{palmBatchBoxes();flushBatch()}catc
 <script src="/player-account-center.js?v=20261116"></script>
 <script src="/citygame-company-app.js?v=20261117a"></script>
 <script src="/asset-download-manager.js?v=1"></script>
-<script src="/citygame-performance.js?v=20261117b"></script>\n</body>
+<script src="/citygame-performance.js?v=20261117c"></script>\n</body>
 </html>
