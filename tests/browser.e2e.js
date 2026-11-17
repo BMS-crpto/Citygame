@@ -42,8 +42,11 @@ async function waitForServer() {
     const runtimeErrors = [];
     page.on('pageerror', error => runtimeErrors.push(error.message));
 
-    const response = await page.goto(origin, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    const response = await page.goto(origin, { waitUntil: 'commit', timeout: 30000 });
     assert.ok(response && response.ok(), 'game page must return a successful HTTP response');
+    // Third-party CDN scripts can delay DOMContentLoaded in restricted CI networks.
+    // The game shell is served locally, so wait for its real entry screen instead.
+    await page.locator('#login, #menu').first().waitFor({ state: 'attached', timeout: 15000 });
 
     // Give deferred scripts, the Three.js scene and first render a chance to initialize.
     await page.waitForTimeout(9000);
