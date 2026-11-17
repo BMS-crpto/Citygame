@@ -22,3 +22,20 @@ jobs:
         run: find public -type f -name '*.js' -print0 | xargs -0 -r -n 1 node --check
       - name: Run HTTP smoke tests
         run: npm test
+
+  browser-gameplay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Chromium test runner
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Test real browser startup and runtime
+        run: node tests/browser.e2e.js
