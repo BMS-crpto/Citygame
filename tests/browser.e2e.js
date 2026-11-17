@@ -125,6 +125,7 @@ async function waitForServer() {
       const before = !!bridge.appview.querySelector('#cgCoName');
       const originalSend = bridge.S;
       let sent = null;
+      bridge.appview.querySelector('#cgCoName').value = 'Test Mainland Motors';
       bridge.S = message => { sent = message; };
       bridge.X.companyCreate();
       bridge.S = originalSend;
@@ -139,6 +140,43 @@ async function waitForServer() {
       'registration form must remain available while server response is pending or rejected');
     assert.equal(registrationRecovery.request, true,
       'Company registration must send the expected create request');
+
+    const dealership = await page.evaluate(() => {
+      const bridge = window.LAGOS_PHONE;
+      const px = bridge.PX;
+      Object.assign(px, {
+        carList: [
+          { col: 0, name: 'Toyota Corolla', icon: '🚗', price: 900000 },
+          { col: 1, name: 'Honda Accord', icon: '🚘', price: 1800000 }
+        ],
+        cars: [], storedCars: [], garage: null, license: true, cert: null,
+        carQ: '', carCat: 'all', carSort: '', carPaint: {}
+      });
+      bridge.APPR.Cars();
+      const searchExists = !!bridge.appview.querySelector('#cq');
+      const initialCards = bridge.appview.querySelectorAll('.eg-car').length;
+      const search = bridge.appview.querySelector('#cq');
+      if (search) {
+        search.value = 'Honda';
+        search.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      const filtered = bridge.appview.querySelectorAll('.eg-car').length;
+      const filteredName = bridge.appview.querySelector('.eg-car-name')?.textContent || '';
+      px.carQ = '';
+      bridge.APPR.Cars();
+      bridge.appview.querySelector('[data-x="carinfo"]')?.click();
+      return {
+        searchExists, initialCards, filtered, filteredName,
+        detailOpened: !!document.querySelector('#epicCarDetails'),
+        detailHasVehicle: document.querySelector('#epicCarDetails')?.innerText.includes('Toyota Corolla') || false
+      };
+    });
+    assert.equal(dealership.searchExists, true, 'Elite Auto Gallery search field must render');
+    assert.equal(dealership.initialCards, 2, 'dealership must render every supplied showroom vehicle');
+    assert.equal(dealership.filtered, 1, 'dealership search must filter the vehicle catalogue');
+    assert.equal(dealership.filteredName, 'Honda Accord', 'search must show the matching vehicle');
+    assert.equal(dealership.detailOpened, true, 'vehicle details preview must open');
+    assert.equal(dealership.detailHasVehicle, true, 'vehicle details must identify the selected model');
 
     assert.deepEqual(runtimeErrors, [], 'browser runtime must not throw uncaught JavaScript errors');
     process.stdout.write('Browser startup passed: ' + JSON.stringify(state) + '\\n');
