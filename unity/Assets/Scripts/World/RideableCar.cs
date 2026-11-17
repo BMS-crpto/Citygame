@@ -136,42 +136,22 @@ namespace Citygame.World
             }
         }
 
+        private Vector2 driveInput;
+
         private void Update()
         {
             if (!occupied || occupant == null) return;
+
             Vector2 keyboard = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-            Vector2 input = mobileDriveInput.sqrMagnitude > 0.001f ? mobileDriveInput : keyboard;
-            input = Vector2.ClampMagnitude(input, 1f);
-            float throttle = input.y;
-            float steering = input.x;
-            float vehiclePower = Mathf.Lerp(0.45f, 1f, conditionPercent / 100f);
-            float targetSpeed = throttle * driveSpeed * vehiclePower;
-            bool brakingInput = Mathf.Abs(throttle) < 0.05f || (Mathf.Abs(currentSpeed) > 0.1f && Mathf.Sign(targetSpeed) != Mathf.Sign(currentSpeed));
-            float rate = brakingInput ? braking : acceleration;
-            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, rate * Time.deltaTime);
-            if (Mathf.Abs(currentSpeed) > 0.1f)
-                fuelPercent = Mathf.Max(0f, fuelPercent - Mathf.Abs(currentSpeed) * Time.deltaTime * 0.0018f);
-            if (fuelPercent <= 0f) currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, braking * Time.deltaTime);
-            currentGear = throttle < -0.08f ? "R" : (throttle > 0.08f || Mathf.Abs(currentSpeed) > 0.1f ? "D" : "N");
-            if (Mathf.Abs(currentSpeed) < 0.025f) currentSpeed = 0f;
+            driveInput = Vector2.ClampMagnitude(mobileDriveInput.sqrMagnitude > 0.001f ? mobileDriveInput : keyboard, 1f);
 
-            float steeringFactor = Mathf.Clamp01(Mathf.Abs(currentSpeed) / 2.5f);
-            float yaw = -steering * turnSpeed * steeringFactor * Mathf.Sign(currentSpeed == 0f ? 1f : currentSpeed) * Time.deltaTime;
-            Quaternion nextRotation = body != null ? body.rotation * Quaternion.Euler(0f, yaw, 0f) : transform.rotation * Quaternion.Euler(0f, yaw, 0f);
-            Vector3 nextPosition = transform.position + transform.right * currentSpeed * Time.deltaTime;
-            if (body != null)
-            {
-                body.MoveRotation(nextRotation);
-                body.MovePosition(nextPosition);
-            }
-            else
-            {
-                transform.rotation = nextRotation;
-                transform.position = nextPosition;
-            }
+            // Physics movement is handled in FixedUpdate; keep presentation and input
+            // responsive to the rendered frame so steering and wheel visuals stay smooth.
+            float steeringVisualTarget = driveInput.x;
+            steeringVisual = Mathf.Lerp(steeringVisual, steeringVisualTarget, 1f - Mathf.Exp(-10f * Time.deltaTime));
+            if (steeringWheel != null)
+                steeringWheel.localRotation = Quaternion.Euler(0f, 0f, 90f + steeringVisual * steeringWheelAngle);
 
-            steeringVisual = Mathf.Lerp(steeringVisual, steering, 1f - Mathf.Exp(-10f * Time.deltaTime));
-            if (steeringWheel != null) steeringWheel.localRotation = Quaternion.Euler(0f, 0f, 90f + steeringVisual * steeringWheelAngle);
             if (wheelVisuals != null)
             {
                 float roll = currentSpeed * 360f / (2f * Mathf.PI * 0.34f) * Time.deltaTime;
@@ -182,18 +162,52 @@ namespace Citygame.World
                     if (suspensionPivots != null && (i == 1 || i == 3) && suspensionPivots[i] != null)
                     {
                         Vector3 pivotAngles = suspensionPivots[i].localEulerAngles;
-                        pivotAngles.y = -steering * 25f;
+                        pivotAngles.y = -driveInput.x * 25f;
                         suspensionPivots[i].localEulerAngles = pivotAngles;
                     }
                 }
             }
+
             if (speedDisplay != null)
-                speedDisplay.text = Mathf.RoundToInt(SpeedKph).ToString("000") + " km/h\n" + currentGear + "  |  FUEL " + Mathf.RoundToInt(fuelPercent) + "%";
+                speedDisplay.text = Mathf.RoundToInt(SpeedKph).ToString("000") + " km/h\\n" + currentGear + "  |  FUEL " + Mathf.RoundToInt(fuelPercent) + "%";
             UpdateSuspension();
 
             if (Input.GetKeyDown(KeyCode.E)) ExitVehicle();
             if (Input.GetKeyDown(KeyCode.C)) ToggleCameraView();
             if (Input.GetKeyDown(KeyCode.L)) ToggleHeadlights();
+        }
+
+        private void FixedUpdate()
+        {
+            if (!occupied || occupant == null) return;
+
+            float throttle = driveInput.y;
+            float steering = driveInput.x;
+            float vehiclePower = Mathf.Lerp(0.45f, 1f, conditionPercent / 100f);
+            float targetSpeed = throttle * driveSpeed * vehiclePower;
+            bool brakingInput = Mathf.Abs(throttle) < 0.05f || (Mathf.Abs(currentSpeed) > 0.1f && Mathf.Sign(targetSpeed) != Mathf.Sign(currentSpeed));
+            float rate = brakingInput ? braking : acceleration;
+            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, rate * Time.fixedDeltaTime);
+            if (Mathf.Abs(currentSpeed) > 0.1f)
+                fuelPercent = Mathf.Max(0f, fuelPercent - Mathf.Abs(currentSpeed) * Time.fixedDeltaTime * 0.0018f);
+            if (fuelPercent <= 0f) currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, braking * Time.fixedDeltaTime);
+            currentGear = throttle < -0.08f ? "R" : (throttle > 0.08f || Mathf.Abs(currentSpeed) > 0.1f ? "D" : "N");
+            if (Mathf.Abs(currentSpeed) < 0.025f) currentSpeed = 0f;
+
+            float steeringFactor = Mathf.Clamp01(Mathf.Abs(currentSpeed) / 2.5f);
+            float yaw = -steering * turnSpeed * steeringFactor * Mathf.Sign(currentSpeed == 0f ? 1f : currentSpeed) * Time.fixedDeltaTime;
+            Quaternion nextRotation = body != null ? body.rotation * Quaternion.Euler(0f, yaw, 0f) : transform.rotation * Quaternion.Euler(0f, yaw, 0f);
+            Vector3 nextPosition = transform.position + transform.right * currentSpeed * Time.fixedDeltaTime;
+            if (body != null)
+            {
+                body.MoveRotation(nextRotation);
+                body.MovePosition(nextPosition);
+            }
+            else
+            {
+                transform.rotation = nextRotation;
+                transform.position = nextPosition;
+            }
         }
 
         private void UpdateSuspension()
