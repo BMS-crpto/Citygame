@@ -360,3 +360,19 @@ test('premium stylesheet does not shrink the full-screen phone in landscape', ()
   assert.match(finalRules, /#phone\.app-open #appview\{[\s\S]*overflow-y:auto!important/);
   assert.match(finalRules, /#phone:not\(\.app-open\) #pgrid\{grid-template-columns:repeat\(8,minmax\(0,1fr\)\)!important/);
 });
+
+test('rideable vehicle physics uses the fixed timestep while steering visuals remain frame responsive', () => {
+  const car = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'RideableCar.cs'), 'utf8');
+  const updateStart = car.indexOf('private void Update()');
+  const fixedStart = car.indexOf('private void FixedUpdate()');
+  const suspensionStart = car.indexOf('private void UpdateSuspension()');
+  assert.ok(updateStart >= 0 && fixedStart > updateStart && suspensionStart > fixedStart);
+  const update = car.slice(updateStart, fixedStart);
+  const fixed = car.slice(fixedStart, suspensionStart);
+  assert.match(update, /driveInput = Vector2\.ClampMagnitude/);
+  assert.match(update, /steeringWheel\.localRotation/);
+  assert.doesNotMatch(update, /body\.Move(Position|Rotation)/);
+  assert.match(fixed, /Time\.fixedDeltaTime/);
+  assert.match(fixed, /body\.MovePosition/);
+  assert.match(fixed, /body\.MoveRotation/);
+});
