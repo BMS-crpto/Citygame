@@ -380,9 +380,9 @@ test('rideable vehicle physics uses the fixed timestep while steering visuals re
 
 test('Unity rideable car reuses suspension raycast buffers and preserves dashboard line breaks', () => {
   const car = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'RideableCar.cs'), 'utf8');
-  assert.match(car, /private readonly RaycastHit\\[\\] suspensionHits = new RaycastHit\\[16\\];/);
-  assert.match(car, /int hitCount = Physics\\.RaycastNonAlloc\\(origin, -transform\\.up, suspensionHits, 0\\.95f, Physics\\.DefaultRaycastLayers, QueryTriggerInteraction\\.Ignore\\);/);
-  assert.match(car, /for \\(int h = 0; h < hitCount; h\\+\\+\\)/);
-  assert.doesNotMatch(car, /Physics\\.RaycastAll\\(/);
-  assert.match(car, /" km\\/h\\\\n" \\+/);
+  assert.ok(car.includes('private readonly RaycastHit[] suspensionHits = new RaycastHit[16];'));
+  assert.ok(car.includes('int hitCount = Physics.RaycastNonAlloc(origin, -transform.up, suspensionHits, 0.95f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);'));
+  assert.ok(car.includes('for (int h = 0; h < hitCount; h++)'));
+  assert.ok(!car.includes('Physics.RaycastAll('));
+  assert.ok(car.includes('" km/h\\n" + currentGear'));
 });
