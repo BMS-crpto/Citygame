@@ -957,10 +957,7 @@ function addSign(text,x,y,z,ry,w,bg,fg){
   const k=text+bg;let mt=signCache[k];
   if(!mt){
     const t=canvasTex(512,128,(g,W,H)=>{g.fillStyle=bg;g.fillRect(0,0,W,H);g.fillStyle='rgba(255,255,255,.28)';g.fillRect(0,H-9,W,9);g.fillStyle=fg||'#fff';g.font='bold 54px sans-serif';g.textAlign='center';g.textBaseline='middle';
-  // District labels make the map readable as a Lagos city map, not only a dot field.
-  g.save();g.font='700 12px system-ui';g.lineWidth=3;g.strokeStyle='rgba(5,15,25,.82)';g.fillStyle='rgba(255,255,255,.88)';
-  for(let bx=-GN+1;bx<GN;bx+=3)for(let bz=-GN+1;bz<GN;bz+=3){const name=districtNameForMap(bx,bz),a=P(bx*BLOCK,bz*BLOCK);if(a[0]>-90&&a[0]<S+90&&a[1]>-30&&a[1]<S+30){g.strokeText(name,a[0],a[1]);g.fillText(name,a[0],a[1])}}
-  g.restore();g.fillText(text,W/2,H/2-3)});
+g.fillText(text,W/2,H/2-3)});
     t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;mt=signCache[k]=new THREE.MeshBasicMaterial({map:t});
   }
   const s=new THREE.Mesh(new THREE.PlaneGeometry(w,w/4),mt);s.position.set(x,y,z);s.rotation.y=ry||0;scene.add(s);return s;
