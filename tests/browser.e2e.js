@@ -95,6 +95,23 @@ async function waitForServer() {
     assert.ok(appLaunches.every(x => x.opened && x.selected && x.hasContent),
       'each phone app must open a populated full-screen app view: ' + JSON.stringify(appLaunches));
 
+    const companyNavigation = await page.evaluate(() => {
+      const bridge = window.LAGOS_PHONE;
+      let destination = null;
+      window.setGps = id => { destination = id; };
+      window.CGCompanyReceive([{ id: 'b123', isMine: true, name: 'Mainland Foods', kind: 'restaurant', area: 'Yaba' }]);
+      bridge.APPR.Company();
+      bridge.X.companyNavigate();
+      return {
+        destination,
+        friendlyType: bridge.appview.innerText.includes('Restaurant')
+      };
+    });
+    assert.equal(companyNavigation.destination, 123,
+      'Company Find company must pass the numeric building ID to GPS');
+    assert.equal(companyNavigation.friendlyType, true,
+      'Company details must show a readable business type');
+
     assert.deepEqual(runtimeErrors, [], 'browser runtime must not throw uncaught JavaScript errors');
     process.stdout.write('Browser startup passed: ' + JSON.stringify(state) + '\\n');
   } finally {
