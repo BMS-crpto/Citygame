@@ -623,7 +623,7 @@ const ROLES = {
 let myRole='police',myName='Player';
 const LOOKC={skin:[0xf1c27d,0xc68642,0x8d5524,0xe0ac69,0x5c3a21],top:[0xe53935,0x1e88e5,0x43a047,0xfdd835,0xffffff,0x8e24aa,0xff7043,0x212121],pants:[0x1a237e,0x212121,0x5d4037,0x455a64,0x827717],hair:['Short','Afro','Cap','Bald','Braids'],hairc:[0x0d0b0a,0x2b1a10,0x5a3a22,0xc9a24a,0x9b2d20,0x9a9a9a],body:['Man','Woman','Business','Streetwear']};
 let look=[1,0,1,1,0,0];
-try{const sv=JSON.parse(localStorage.getItem('look')||'null');if(Array.isArray(sv)&&sv.length>=4){const MX=[4,4,7,4,1,5];for(let i=0;i<6;i++)look[i]=Math.max(0,Math.min(MX[i],(sv[i]|0)))}}catch(e){}
+try{const sv=JSON.parse(localStorage.getItem('look')||'null');if(Array.isArray(sv)&&sv.length>=4){const MX=[4,4,7,4,3,5];for(let i=0;i<6;i++)look[i]=Math.max(0,Math.min(MX[i],(sv[i]|0)))}}catch(e){}
 function buildLookBox(){
   const box=document.getElementById('lookbox');box.innerHTML='';
   const rows=[['Body',LOOKC.body,4],['Skin',LOOKC.skin,0],['Hair',LOOKC.hair,1],['Hair colour',LOOKC.hairc,5],['Top',LOOKC.top,2],['Trousers',LOOKC.pants,3]];
@@ -1881,7 +1881,7 @@ function cloneModel(key){
 if(THREE.GLTFLoader){
   const loader=new THREE.GLTFLoader();
   loader.setCrossOrigin('anonymous');
-  const order=['man','woman','businessman','suit','punk','sedan','suv','police','gtr','lambo','bmw','okada','challenger','fireengine','chiron','dominusrl','car3d','airplane','closet','dryer','computer'];
+  const order=['man','woman','businessman','suit','punk','sedan','suv','police','gtr','lambo','bmw','okada','challenger','fireengine','chiron','dominusrl','car3d','airplane','closet','dryer','computer','bmwCompetition'];
   // Resolve assets relative to the active game page first (works on root and project subpaths).
   // If the deployment rewrites the page URL, retry from the site root before leaving the procedural fallback.
   function loadModelAsset(key,attempt=0){
