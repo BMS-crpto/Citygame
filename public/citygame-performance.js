@@ -23,10 +23,8 @@
   let lastVisibility = document.visibilityState;
 
   function getRenderer() {
-    try {
-      if (typeof renderer !== 'undefined' && renderer && renderer.setPixelRatio) return renderer;
-    } catch (_) {}
-    return window.renderer && window.renderer.setPixelRatio ? window.renderer : null;
+    const r = window.CITYGAME_RENDERER || window.renderer;
+    return r && typeof r.setPixelRatio === 'function' ? r : null;
   }
 
   function apply(target) {
