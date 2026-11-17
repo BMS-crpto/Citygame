@@ -3890,10 +3890,10 @@ X.hustle=b=>S({t:'hustle',id:b.dataset.id});
 /* Decor */
 let decorRotationOffset=0;
 APPR.Decor=function(){
-  const D=PX.decor,R=inside&&ROOMS[inside],ownHome=inside&&/^house/.test(inside)&&myHome&&inside==='house'+myHome.unit;
+  const place=window.CG_INSIDE?.(),D=PX.decor,R=place&&ROOMS[place],ownHome=place&&/^house/.test(place)&&myHome&&place==='house'+myHome.unit;
   const unit=ownHome?String(myHome.unit):null,placed=unit&&D.placed&&D.placed[unit]?D.placed[unit]:[];
   const nm=id=>{const s=(D.shop||[]).find(x=>x.id===id);return s?s.icon+' '+s.name:id};
-  const roomName=R?(R.name||R.label||(/house/.test(inside)?'Home interior':'Interior')):'Outside your home';
+  const roomName=R?(R.name||R.label||(/house/.test(place)?'Home interior':'Interior')):'Outside your home';
   let h=`<div class="card"><b>🛋️ HOME DESIGN STUDIO</b><p>${ownHome?'You are editing your own property. Choose an item, set its facing direction, then place it from your current position.':'Enter your own home to place or remove furniture. You can still browse and buy items here.'}</p><small>Current location: ${esc(roomName)} · ${ownHome?'Placement enabled':'Placement locked'}</small></div>`;
   h+='<div class="card"><b>↻ Furniture direction</b><p style="font-size:12px;opacity:.8">Rotation offset: '+Math.round(decorRotationOffset*180/Math.PI)+'°</p><div class="xrow"><button class="xbtn" data-x="drotleft">↶ Rotate 15°</button><button class="xbtn" data-x="drotright">↷ Rotate 15°</button><button class="xbtn gray" data-x="drotreset">Reset</button></div></div>';
   const inv=Object.entries(D.inv||{});
@@ -3906,7 +3906,7 @@ X.dbuy=b=>S({t:'decor',op:'buy',id:b.dataset.id});
 X.drotleft=()=>{decorRotationOffset-=Math.PI/12;renderApp()};
 X.drotright=()=>{decorRotationOffset+=Math.PI/12;renderApp()};
 X.drotreset=()=>{decorRotationOffset=0;renderApp()};
-X.dplace=b=>{const R=ROOMS[inside];if(!R||!inside||!/^house/.test(inside)||!myHome||inside!=='house'+myHome.unit){toast('Enter your own home before placing furniture');return}const x=pos.x+Math.sin(pos.ry)*1.8-R.x0,z=pos.z+Math.cos(pos.ry)*1.8-R.z0;if(Math.abs(x)>8||Math.abs(z)>8){toast('Move further inside the room before placing furniture');return}S({t:'decor',op:'place',id:b.dataset.id,x,z,ry:pos.ry+decorRotationOffset})};
+X.dplace=b=>{const place=window.CG_INSIDE?.(),R=ROOMS[place];if(!R||!place||!/^house/.test(place)||!myHome||place!=='house'+myHome.unit){toast('Enter your own home before placing furniture');return}const x=pos.x+Math.sin(pos.ry)*1.8-R.x0,z=pos.z+Math.cos(pos.ry)*1.8-R.z0;if(Math.abs(x)>8||Math.abs(z)>8){toast('Move further inside the room before placing furniture');return}S({t:'decor',op:'place',id:b.dataset.id,x,z,ry:pos.ry+decorRotationOffset})};
 X.dremove=b=>S({t:'decor',op:'remove',n:+b.dataset.n});
 const decorGroup=new THREE.Group();scene.add(decorGroup);let decorKey='';
 function decorMesh(id){
@@ -3938,12 +3938,12 @@ function decorMesh(id){
 }
 function placedFor(place){const u=place.replace('house','');return(PX.decor.placed&&PX.decor.placed[u])||[]}
 setInterval(()=>guard('decor',()=>{
-  const inHome=inside&&/^house/.test(inside)&&ROOMS[inside];
-  const key=inHome?inside+'|'+JSON.stringify(placedFor(inside)):'';
+  const place=window.CG_INSIDE?.(),inHome=place&&/^house/.test(place)&&ROOMS[place];
+  const key=inHome?place+'|'+JSON.stringify(placedFor(place)):'';
   if(key===decorKey)return;decorKey=key;
   while(decorGroup.children.length)decorGroup.remove(decorGroup.children[0]);
-  if(!inHome)return;const R=ROOMS[inside];
-  for(const it of placedFor(inside)){const m=decorMesh(it.id);if(!m)continue;m.position.set(R.x0+it.x,0,R.z0+it.z);m.rotation.y=it.ry;decorGroup.add(m)}
+  if(!inHome)return;const R=ROOMS[place];
+  for(const it of placedFor(place)){const m=decorMesh(it.id);if(!m)continue;m.position.set(R.x0+it.x,0,R.z0+it.z);m.rotation.y=it.ry;decorGroup.add(m)}
 }),400);
 
 /* ---------- 8. voice chat (nearby players) ---------- */
@@ -4024,7 +4024,7 @@ const mmss=s=>{s=Math.max(0,Math.round(s));return Math.floor(s/60)+':'+String(s%
 let navEl=null;
 guard('nav',()=>{navEl=document.createElement('div');navEl.id='navbar';document.body.appendChild(navEl)});
 setInterval(()=>guard('route',()=>{
-  if(!gps||inside||!me){PX.route=null;if(navEl)navEl.style.display='none';return}
+  if(!gps||window.CG_INSIDE?.()||!me){PX.route=null;if(navEl)navEl.style.display='none';return}
   const r=buildRoute(pos,gps);PX.route=r;const total=routeLen(r);PX.routeLen=total;
   // next turn
   const p0=r[0],p1=r[1]||p0,p2=r[2];
@@ -4044,7 +4044,7 @@ guard('routeRibbon',()=>{
   let mesh=null,key='';
   setInterval(()=>guard('rib',()=>{
     const r=PX.route;
-    if(!r||r.length<2||inside){if(mesh)mesh.visible=false;return}
+    if(!r||r.length<2||window.CG_INSIDE?.()){if(mesh)mesh.visible=false;return}
     const k=r.length+'_'+Math.round(r[0].x)+'_'+Math.round(r[0].z)+'_'+Math.round(r[r.length-1].x)+'_'+Math.round(r[r.length-1].z);
     if(k===key&&mesh){mesh.visible=true;return}
     key=k;
@@ -4065,7 +4065,7 @@ guard('mmroute',()=>{
   mmDraw=function(){
     _mm();
     guard('mmr',()=>{
-      if(!me||inside||!PX.route)return;
+      if(!me||window.CG_INSIDE?.()||!PX.route)return;
       const g=mmg,C=112,sc=C/MMR,cy=Math.cos(camYaw),sy=Math.sin(camYaw);
       const P=(wx,wz)=>{const dx=wx-pos.x,dz=wz-pos.z;return[C+(-cy*dx+sy*dz)*sc,C-(sy*dx+cy*dz)*sc]};
       g.save();g.beginPath();g.arc(C,C,C,0,7);g.clip();g.lineWidth=5;g.lineJoin='round';g.lineCap='round';g.strokeStyle='#2196f3';g.globalAlpha=.9;g.beginPath();
@@ -4235,7 +4235,7 @@ function go(msg){closeModal();S(msg);setTimeout(()=>cancelUber(),1500)}
 let ul=performance.now(),idleT=0;
 setInterval(()=>{
   const n=performance.now(),dt=Math.min(.1,(n-ul)/1000);ul=n;
-  if(typeof inside!=='undefined'&&inside&&U.s){cancelUber();return}
+  if(window.CG_INSIDE?.()&&U.s){cancelUber();return}
   if(U.s==='coming'){
     const dx=U.ex-U.x,dz=U.ez-U.z,d=Math.hypot(dx,dz);
     if(d<0.6){U.s='arrived';offerRide();return}
@@ -4249,7 +4249,7 @@ const G={t:null};
 const gd=document.createElement('div');gd.id='guide2';gd.innerHTML='<b></b><span></span>';document.body.appendChild(gd);
 let mk=null;
 function marker(){
-  const R=typeof inside!=='undefined'&&inside&&ROOMS[inside];
+  const place=window.CG_INSIDE?.(),R=place&&ROOMS[place];
   if(!R||!R.exit||!me){if(mk)mk.visible=false;return}
   if(!mk){
     mk=new THREE.Group();
@@ -4261,8 +4261,8 @@ function marker(){
 }
 function guide(){
   let tg=null;
-  if(me&&typeof inside!=='undefined'&&inside&&!myPose){
-    const R=ROOMS[inside];
+  if(me&&window.CG_INSIDE?.()&&!myPose){
+    const R=ROOMS[window.CG_INSIDE?.()];
     if(G.t){if(Math.hypot(G.t.x-pos.x,G.t.z-pos.z)<3)G.t=null;else tg=G.t}
     if(!tg&&R&&R.exit)tg={x:R.exit.x,z:R.exit.z,l:'EXIT'};
   }else{G.t=null;if(U.s&&U.g)tg={x:U.x,z:U.z,l:'YOUR UBER'};else if(typeof gps!=='undefined'&&gps)tg={x:gps.x,z:gps.z,l:'📍 '+gps.name}}
@@ -4282,9 +4282,9 @@ function setRows(rows){
   rows.forEach(r=>{const b=document.createElement('button');b.className='g2row';b.innerHTML='<i>'+r.i+'</i><span>'+r.t+'</span>'+(r.s?'<small>'+r.s+'</small>':'');b.onclick=r.f;menu.appendChild(b)});
   menu.style.display=rows.length?'grid':'none';
 }
-const ownHome=()=>typeof inside!=='undefined'&&inside&&myHome&&inside==='house'+myHome.unit;
+const ownHome=()=>{const place=window.CG_INSIDE?.();return !!place&&myHome&&place==='house'+myHome.unit};
 function cookNow(){
-  const R=ROOMS[inside];if(!R)return;
+  const R=ROOMS[window.CG_INSIDE?.()];if(!R)return;
   const k=R.eat?{x:R.eat.x,z:R.eat.z,r:4.6}:{x:R.x0-9,z:R.z0-0.5,r:3.5};
   if(Math.hypot(k.x-pos.x,k.z-pos.z)<k.r+1.2)S({t:'eat'});
   else{G.t={x:k.x,z:k.z,l:'KITCHEN'};toast('🍳 Walk to the kitchen. Follow the green arrow')}
@@ -4293,18 +4293,18 @@ const ACTL={police:'ARREST',thief:'ROB',lawyer:'FREE',nurse:'HEAL',taxi:'PICK UP
 function tick(){
   try{
     const rows=[],inCar=(typeof myCol!=='undefined'&&myCol>=0)||(typeof ridingId!=='undefined'&&ridingId>0);
-    if(me&&!myPose&&typeof inside!=='undefined'&&inside){
+    if(me&&!myPose&&window.CG_INSIDE?.()){
       if(ownHome()){
         ((window.LG_FURN&&window.LG_FURN())||[]).forEach(r=>rows.push(r));
         rows.push({k:'cook',i:'🍳',t:'Cook',f:cookNow});
         rows.push({k:'shower',i:'🚿',t:'Shower',f:()=>S({t:'life',op:'shower'})});
       }
       (window.LG_EXTRA||[]).forEach(fn=>{try{(fn()||[]).forEach(r=>rows.push(r))}catch(e){}});
-      {const R_=ROOMS[inside];if(R_&&R_.exit&&Math.hypot(R_.exit.x-pos.x,R_.exit.z-pos.z)<4.5)rows.push({k:'out',i:'🚪',t:'Exit',f:()=>S({t:'exit'})})}
+      {const R_=ROOMS[window.CG_INSIDE?.()];if(R_&&R_.exit&&Math.hypot(R_.exit.x-pos.x,R_.exit.z-pos.z)<4.5)rows.push({k:'out',i:'🚪',t:'Exit',f:()=>S({t:'exit'})})}
     }else if(me&&!myPose&&!inCar&&!U.s&&!mo&&nearStop()){
       rows.push({k:'uber',i:'🚕',t:'Uber',f:()=>callUber(nearStop())});
     }
-    if(me&&typeof inside!=='undefined'&&!inside&&!myPose&&!inCar)(window.LG_OUT||[]).forEach(fn=>{try{(fn()||[]).forEach(r=>rows.push(r))}catch(e){}});
+    if(me&&!window.CG_INSIDE?.()&&!myPose&&!inCar)(window.LG_OUT||[]).forEach(fn=>{try{(fn()||[]).forEach(r=>rows.push(r))}catch(e){}});
     setRows(rows);
     const a=$('act');if(a){const show=ACTL[myRole];a.style.display=show?'':'none';if(show)a.textContent=ACTL[myRole]}
     marker();guide();
@@ -4333,7 +4333,7 @@ function relocCar(c){
 }
 setInterval(()=>{
   try{
-    if(!me||inside||!TR.ready)return;
+    if(!me||window.CG_INSIDE?.()||!TR.ready)return;
     let n=0;for(const p of TR.peds)if(n<5&&Math.hypot(p.x-pos.x,p.z-pos.z)>115){relocPed(p);n++}
     n=0;for(const c of TR.cars)if(n<2&&Math.hypot(c.x-pos.x,c.z-pos.z)>200){relocCar(c);n++}
   }catch(e){}
