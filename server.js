@@ -1240,7 +1240,8 @@ const VEHICLES = {
   2: { name: 'Nissan GT-R', icon: '🏎️', price: 1800000000 },
   9: { name: 'BMW M4 Competition', icon: '🚘', price: 3800000000 },
   7: { name: 'Lamborghini', icon: '🏎️', price: 6500000000 },
-  12: { name: 'Bugatti Chiron', icon: '🏎️', price: 25000000000 }
+  12: { name: 'Bugatti Chiron', icon: '🏎️', price: 25000000000 },
+  15: { name: 'BMW M4 Competition M Package', icon: '🏁', price: 4200000000 }
 };
 const LICENSE_PRICE = 20000;
 RIDES.driver = { name: 'Private Driver', rate: 0.12, min: 150, speed: 36 };
