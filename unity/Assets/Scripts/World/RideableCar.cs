@@ -32,6 +32,7 @@ namespace Citygame.World
         private Color originalPaint = Color.white;
         private string currentGear = "N";
         private Transform[] suspensionPivots;
+        private readonly RaycastHit[] suspensionHits = new RaycastHit[16];
         private readonly float[] suspensionRest = { -0.18f, -0.18f, -0.18f, -0.18f };
         private float steeringVisual;
 
@@ -169,7 +170,7 @@ namespace Citygame.World
             }
 
             if (speedDisplay != null)
-                speedDisplay.text = Mathf.RoundToInt(SpeedKph).ToString("000") + " km/h\\n" + currentGear + "  |  FUEL " + Mathf.RoundToInt(fuelPercent) + "%";
+                speedDisplay.text = Mathf.RoundToInt(SpeedKph).ToString("000") + " km/h\n" + currentGear + "  |  FUEL " + Mathf.RoundToInt(fuelPercent) + "%";
             UpdateSuspension();
 
             if (Input.GetKeyDown(KeyCode.E)) ExitVehicle();
@@ -218,16 +219,16 @@ namespace Citygame.World
                 Transform spring = suspensionPivots[i];
                 if (spring == null) continue;
                 Vector3 origin = spring.position + transform.up * 0.42f;
-                RaycastHit[] hits = Physics.RaycastAll(origin, -transform.up, 0.95f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+                int hitCount = Physics.RaycastNonAlloc(origin, -transform.up, suspensionHits, 0.95f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
                 float target = suspensionRest[i];
                 float nearest = float.MaxValue;
-                for (int h = 0; h < hits.Length; h++)
+                for (int h = 0; h < hitCount; h++)
                 {
-                    Transform hitTransform = hits[h].transform;
+                    Transform hitTransform = suspensionHits[h].transform;
                     if (hitTransform == transform || hitTransform.IsChildOf(transform)) continue;
-                    if (hits[h].distance < nearest)
+                    if (suspensionHits[h].distance < nearest)
                     {
-                        nearest = hits[h].distance;
+                        nearest = suspensionHits[h].distance;
                         target = suspensionRest[i] + Mathf.Clamp(0.89f - nearest, -0.16f, 0.16f);
                     }
                 }
