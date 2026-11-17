@@ -2933,6 +2933,9 @@ function closeMap(){bigmap.style.display='none';clearInterval(mapTimer)}
 function sizeMap(){const S=Math.floor(Math.min(innerHeight-4,innerWidth*0.58));bmc.width=bmc.height=S;bmc.style.width=bmc.style.height=S+'px'}
 function districtNameForMap(bx,bz){const k=districtOf(bx,bz);return k==='airport'?'AIRPORT':(DIST[k]||outerInfo(bx,bz)[1]).toUpperCase()}
 function drawBigMap(){
+  // The world can be reset while the map refresh timer is still running.
+  // Stop drawing until a new world has been created instead of dereferencing null.
+  if(!world){clearInterval(mapTimer);mapTimer=null;if(bigmap)bigmap.style.display='none';return}
   const S=bmc.width,sc=S/(GN*BLOCK*2+60)*mapZoom,g=bmg,P=(x,z)=>[S/2-x*sc+mapPanX,S/2-z*sc+mapPanY];
   g.fillStyle='#0f2a45';g.fillRect(0,0,S,S);
   for(let bx=-GN;bx<GN;bx++)for(let bz=-GN;bz<GN;bz++){
