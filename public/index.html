@@ -611,6 +611,8 @@ button.go,#play,#fgo{background:linear-gradient(105deg,#42d8c0,#f0c46b)!importan
 window.scene = window.scene || new THREE.Scene();
 </script>
 <script>
+// Initialize the player binding before any game code can reference it.
+let me=null;window.CG_ME=()=>me;
 const ROLES = {
   police:{emoji:'🚔',label:'Police',desc:'Arrest thieves'},
   thief:{emoji:'🦹',label:'Thief',desc:'Rob shops'},
@@ -2301,7 +2303,7 @@ function flash(color){const f=document.getElementById('flash');f.style.backgroun
 function popMoney(d){const e=document.createElement('div');e.className='pop';e.textContent=(d>0?'+₦':'-₦')+Math.abs(d);e.style.color=d>0?'#7CFC8A':'#ff8a80';document.body.appendChild(e);setTimeout(()=>e.remove(),1500)}
 
 // =============== state & input ===============
-let ridingId=0,lotName='';const others={};let myId=null,ws=null,me=null,myMoney=null,jailed=false;
+let ridingId=0,lotName='';const others={};let myId=null,ws=null,myMoney=null,jailed=false;
 const pos={x:0,z:0,ry:0,floor:0};
 let joy={x:0,y:0};let camYaw=0,camH=7,camInit=false;
 let myCol=-1,carObj=null,speed=0,moving=false,myBank=0,myFood=100;
