@@ -267,3 +267,16 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 @media(prefers-reduced-motion:reduce){
  #hud>div,#mapside .pl,#pgrid .app{transition:none!important}
 }
+
+/* Final landscape cascade override.
+   This stylesheet loads after lagos-3d-skin.css, so keep the full-width phone
+   and its internal app scroller authoritative on short landscape displays. */
+@media (orientation:landscape) and (max-height:600px){
+  #phone .pbox{width:min(96vw,900px)!important;height:94dvh!important;max-height:94dvh!important}
+  #phone.app-open .pbox{width:min(96vw,900px)!important;height:94dvh!important;max-height:94dvh!important;overflow:hidden!important}
+  #phone.app-open #appview{display:block!important;flex:1 1 auto!important;min-height:0!important;height:0!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior-y:contain!important;-webkit-overflow-scrolling:touch!important;touch-action:pan-y!important}
+  #phone:not(.app-open) #pgrid{grid-template-columns:repeat(8,minmax(0,1fr))!important}
+}
+@media (orientation:landscape) and (max-height:420px){
+  #phone .pbox,#phone.app-open .pbox{width:98vw!important;height:96dvh!important;max-height:96dvh!important}
+}
