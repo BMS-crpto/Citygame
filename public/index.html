@@ -3766,7 +3766,7 @@ APPR.Pay=function(){
 X.payTo=b=>{const a=Math.floor(+prompt('Send how much? (₦)','1000'));if(a>=1)S({t:'pay',to:+b.dataset.id,amt:a})};
 
 /* Cars */
-const CARCAT={saloon:[0,3,9,14],suv:[1,4],sports:[2,7,10,12,13],bike:[8,6],work:[5,11]};
+const CARCAT={saloon:[0,3,9,14],suv:[1,4],sports:[2,7,10,12,13,15],bike:[8,6],work:[5,11]};
 const CARCATL=[['all','ALL RIDES'],['saloon','🚗 SEDANS'],['suv','🚙 SUVs'],['sports','🏎️ SUPERCARS'],['bike','🏍️ BIKES'],['work','🚌 COMMERCIAL']];
 PX.carQ='';PX.carCat='all';PX.carSort='';
 (function installEpicGarageStyles(){
