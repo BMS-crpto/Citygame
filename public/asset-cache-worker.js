@@ -1,5 +1,5 @@
 'use strict';
-const SHELL='citygame-shell-v2';
+const SHELL='citygame-shell-v3';
 const ASSETS='citygame-assets-v1';
 const SHELL_FILES=['/','/index.html','/asset-packs.json','/buildings.js','/lagos-3d-skin.css','/citygame-premium-ui.css','/mobile-controls.css','/city3d-social-emotes.js','/city-missions-career.js','/city-app-suite.js','/citygame-company-app.js','/lagos-3d-polish.js','/citygame-world-finish.js','/citygame-city-guide.js','/citygame-map-experience.js','/player-account-center.js','/asset-download-manager.js'];
 self.addEventListener('install',event=>{
