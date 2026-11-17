@@ -118,6 +118,9 @@ async function waitForServer() {
 
     const registrationRecovery = await page.evaluate(() => {
       const bridge = window.LAGOS_PHONE;
+      // The navigation test above injects an owned company. Clear it so this
+      // assertion exercises the first-time registration form, not the owner view.
+      window.CGCompanyReceive([]);
       bridge.APPR.Company();
       const before = !!bridge.appview.querySelector('#cgCoName');
       const originalSend = bridge.S;
