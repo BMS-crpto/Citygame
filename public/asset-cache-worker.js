@@ -1,5 +1,5 @@
 'use strict';
-const SHELL='citygame-shell-v3';
+const SHELL='citygame-shell-v4';
 const ASSETS='citygame-assets-v1';
 const SHELL_FILES=['/','/index.html','/asset-packs.json','/buildings.js','/lagos-3d-skin.css','/citygame-premium-ui.css','/mobile-controls.css','/city3d-social-emotes.js','/city-missions-career.js','/city-app-suite.js','/citygame-company-app.js','/lagos-3d-polish.js','/citygame-world-finish.js','/citygame-city-guide.js','/citygame-map-experience.js','/player-account-center.js','/asset-download-manager.js'];
 self.addEventListener('install',event=>{
@@ -21,7 +21,7 @@ self.addEventListener('fetch',event=>{
  if(request.method!=='GET')return;
  const url=new URL(request.url);
  if(url.origin!==self.location.origin)return;
- if(/\.glb$/i.test(url.pathname)){
+ if(/\.(?:glb|png|jpe?g|webp|avif|ktx2|basis|mp3|ogg|wav|woff2?|ttf|otf)$/i.test(url.pathname)){
   event.respondWith((async()=>{
    const cache=await caches.open(ASSETS);
    const cached=await cache.match(request,{ignoreSearch:true});
