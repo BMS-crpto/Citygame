@@ -4106,7 +4106,7 @@ guard('mmroute',()=>{
 });
 
 // Public bridge for separately loaded phone-app modules.
-window.LAGOS_PHONE = { APPR, X, PX, S, phoneOpen, openApp: n => openApp(n), appview, getCash:()=>myMoney, capturePhoto:()=>{renderer.render(scene,camera);const src=renderer.domElement,w=src.width,h=src.height,scale=Math.min(1,720/Math.max(w,h)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(w*scale));cv.height=Math.max(1,Math.round(h*scale));const ctx=cv.getContext('2d');ctx.drawImage(src,0,0,cv.width,cv.height);return cv.toDataURL('image/jpeg',0.76)} };
+window.LAGOS_PHONE = { APPR, X, PX, S, phoneOpen, openApp: n => openApp(n), appview: document.getElementById('appview'), getCash:()=>myMoney, capturePhoto:()=>{renderer.render(scene,camera);const src=renderer.domElement,w=src.width,h=src.height,scale=Math.min(1,720/Math.max(w,h)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(w*scale));cv.height=Math.max(1,Math.round(h*scale));const ctx=cv.getContext('2d');ctx.drawImage(src,0,0,cv.width,cv.height);return cv.toDataURL('image/jpeg',0.76)} };
 console.log('Lagos Life v0.7 add-on loaded');
 })();
 
