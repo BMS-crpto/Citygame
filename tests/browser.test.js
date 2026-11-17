@@ -344,3 +344,19 @@ test('downloadable asset packs only list models that exist in the repository', (
     }
   }
 });
+
+ 
+test('premium stylesheet does not shrink the full-screen phone in landscape', () => {
+  const index = fs.readFileSync(htmlPath, 'utf8');
+  const premium = fs.readFileSync(path.join(root, 'public', 'citygame-premium-ui.css'), 'utf8');
+  const skinLink = index.indexOf('/lagos-3d-skin.css');
+  const premiumLink = index.indexOf('/citygame-premium-ui.css');
+  assert.ok(skinLink >= 0 && premiumLink > skinLink, 'premium stylesheet loads after the base skin');
+  const narrowRule = premium.lastIndexOf('@media(max-height:520px) and (orientation:landscape)');
+  const override = premium.lastIndexOf('Final landscape cascade override');
+  assert.ok(narrowRule >= 0 && override > narrowRule, 'final override follows the narrow landscape rule');
+  const finalRules = premium.slice(override);
+  assert.match(finalRules, /#phone\.app-open \.pbox\{width:min\(96vw,900px\)!important/);
+  assert.match(finalRules, /#phone\.app-open #appview\{[\s\S]*overflow-y:auto!important/);
+  assert.match(finalRules, /#phone:not\(\.app-open\) #pgrid\{grid-template-columns:repeat\(8,minmax\(0,1fr\)\)!important/);
+});
