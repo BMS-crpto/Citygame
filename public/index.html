@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>Lagos Life</title>
+<title>CITYGAME — Lagos Life Simulator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
 
@@ -2535,7 +2535,7 @@ document.getElementById('play').onclick=()=>{
     if(m.t==='catalog'){lifeCatalog(m);return}
     if(m.t==='x_businesses'){syncCityBusinesses(m.businesses);if(window.CGCompanyReceive)window.CGCompanyReceive(m.businesses);return}
     if(m.t==='authfail'){try{localStorage.removeItem('ll_tok');localStorage.removeItem('ll_user')}catch(e){}location.reload();return}
-    if(m.t==='welcome'){myId=m.id;buildWorld(m.world);myHome=m.home||null;myPathInfo=m.pathInfo||null;document.getElementById('info').textContent=`🇳🇬 Lagos Life • ${ROLES[myRole].emoji} ${ROLES[myRole].label}`+(m.pathInfo?` • ${m.pathInfo.emoji} ${m.pathInfo.name}`:'');if(m.first)showFate(m);else if(m.pathInfo)setTimeout(()=>toast(`${m.pathInfo.emoji} ${m.pathInfo.name} • welcome back`),600)}
+    if(m.t==='welcome'){myId=m.id;buildWorld(m.world);myHome=m.home||null;myPathInfo=m.pathInfo||null;document.getElementById('info').textContent=`🇳🇬 CITYGAME • ${ROLES[myRole].emoji} ${ROLES[myRole].label}`+(m.pathInfo?` • ${m.pathInfo.emoji} ${m.pathInfo.name}`:'');if(m.first)showFate(m);else if(m.pathInfo)setTimeout(()=>toast(`${m.pathInfo.emoji} ${m.pathInfo.name} • welcome back`),600)}
     else if(m.t==='toast')toast(m.text);
     else if(m.t==='npcsay')showNpc(m);
     else if(m.t==='speaker')showSpeaker(m);
@@ -2760,7 +2760,7 @@ function renderBusinesses(){
   appview.dataset.app='Business';
   const areas=['Ikeja GRA','Allen Avenue','Surulere','Ojuelegba','Lekki Phase 1','Lekki Phase 2','Victoria Island','Ikoyi','Agege','Mushin','Yaba','Oshodi','Ajah','Eko Atlantic','Epe','Ojo','Festac Town','Ikorodu','Ojota','Apapa','Badagry Road','Maryland','Lagos Mainland'];
   const areaOptions=areas.map(a=>'<option value="'+a+'">'+a+'</option>').join('');
-  let h='<div class="card"><div style="font-size:12px;color:#a78bfa;font-weight:800;letter-spacing:1.5px">LAGOS LIFE • COMPANY HQ</div><h2 style="margin:7px 0">🏢 Company Manager</h2><p>Register and manage your company from your phone. Pick a Lagos district for your company location—no need to travel to the building.</p><b>One-time registration: ₦150,000</b></div>';
+  let h='<div class="card"><div style="font-size:12px;color:#a78bfa;font-weight:800;letter-spacing:1.5px">CITYGAME • COMPANY HQ</div><h2 style="margin:7px 0">🏢 Company Manager</h2><p>Register and manage your company from your phone. Pick a Lagos district for your company location—no need to travel to the building.</p><b>One-time registration: ₦150,000</b></div>';
   if(mine){
     const staff=Array.isArray(mine.staff)?mine.staff:[];
     h+='<div class="card" style="background:linear-gradient(145deg,#173b34,#111e25)"><small>YOUR COMPANY</small><h2 style="margin:6px 0">'+mine.icon+' '+escapeBusinessText(mine.name)+'</h2><b>'+escapeBusinessText(mine.kind)+'</b><p>📍 '+escapeBusinessText(mine.locationName||mine.area)+' · '+escapeBusinessText(mine.area)+'</p><p>⭐ Service quality: '+(mine.quality||0)+'% · '+staff.length+' staff supporting operations</p><p>🛍️ Simulated customer visits: '+Math.max(0,Number(mine.customers)||0).toLocaleString('en-NG')+'</p><div style="font-size:26px;color:#73e6a0;font-weight:900">₦'+Math.round(mine.balance||0).toLocaleString('en-NG')+'</div><small>Available earnings · better staffing improves customer revenue</small><br><button class="pb q" id="bizCollect">💰 Collect earnings</button> <button class="pb q" id="bizRename">✏️ Rename company</button><button class="pb q" id="bizNavigate">📍 Set GPS location</button></div>';
@@ -2815,7 +2815,7 @@ function openApp(n){
   else if(n==='Settings')appview.innerHTML=`<div class="card"><b>⚙️ DISPLAY & GRAPHICS</b><p>Choose your graphics quality.</p>${['low','med','high'].map(q=>`<button class="pb q ${quality===q?'sel':''}" onclick="setQuality('${q}')">${q.toUpperCase()}</button>`).join('')}</div><div class="card"><b>🔊 SOUND</b><button class="pb q" onclick="$('mutebtn').click();openApp('Settings')">${muted?'🔇 Sound off':'🔊 Sound on'}</button></div><div class="card"><b>⚡ QUICK SETTINGS</b><button class="pb q" onclick="openApp('Properties')">🏘️ Properties</button><button class="pb q" onclick="openApp('GPS')">📍 GPS</button></div>`;
   else appview.innerHTML='<div class="card"><h2>'+escapeBusinessText(n)+'</h2><p>Welcome to '+escapeBusinessText(n)+'.</p></div>';
   const icons=Object.fromEntries(APPS.map(a=>[a[1],a[0]]));
-  appview.insertAdjacentHTML('afterbegin','<div class="phone-appbar"><button class="pb q" id="appBack">‹ Apps</button><div><b>'+icons[n]+' '+escapeBusinessText(n)+'</b><small> LAGOS LIFE • APP</small></div><button class="pb q" id="appHome">⌂</button></div>');
+  appview.insertAdjacentHTML('afterbegin','<div class="phone-appbar"><button class="pb q" id="appBack">‹ Apps</button><div><b>'+icons[n]+' '+escapeBusinessText(n)+'</b><small> CITYGAME • APP</small></div><button class="pb q" id="appHome">⌂</button></div>');
   $('appBack').onclick=closeAppView;
   $('appHome').onclick=closeAppView;
   // Let registered add-on apps replace the legacy preview with their full working screen.
@@ -2840,7 +2840,7 @@ function renderSocialFeed(){
  feed.innerHTML=socialPosts.length?socialPosts.map(p=>{
   const comments=Array.isArray(p.comments)?p.comments:[];
   const likes=Array.isArray(p.likes)?p.likes.length:(+p.likes||0);
-  return '<article class="card social-post" style="margin:12px 0;padding:15px;background:linear-gradient(145deg,#20283a,#101722);border:1px solid #ffffff20;border-radius:18px"><div style="display:flex;align-items:center;gap:9px"><span style="font-size:25px">👤</span><div><b>'+escapeBusinessText(p.name||'Player')+'</b><br><small>'+escapeBusinessText(p.area||'Lagos City')+'</small></div><span style="margin-left:auto;font-size:11px;color:#aeb9cc">LAGOS LIFE</span></div><p style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:16px;line-height:1.5;margin:15px 0">'+escapeBusinessText(p.text)+'</p><div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap"><button class="pb q" data-social-like="'+escapeBusinessText(p.id)+'" style="background:'+(p.likedByMe?'#9b3158':'#303b50')+';color:white;padding:9px 13px">❤️ '+(p.likedByMe?'Liked':'Like')+' · '+likes+'</button><span style="font-size:12px;color:#c4cede">💬 '+comments.length+' replies</span></div><div style="margin-top:10px;padding-left:10px;border-left:2px solid #58657c">'+(comments.length?comments.slice(-4).map(c=>'<p style="margin:6px 0;font-size:13px"><b>'+escapeBusinessText(c.name||'Player')+':</b> '+escapeBusinessText(c.text)+'</p>').join(''):'<small style="color:#aeb9cc">Be the first to reply.</small>')+'</div><div style="display:flex;gap:6px;margin-top:10px"><input data-social-reply-input="'+escapeBusinessText(p.id)+'" maxlength="140" placeholder="Write a reply…" style="min-width:0;flex:1;width:0;padding:10px;border-radius:10px;background:#0c1220;color:white;border:1px solid #46516a;text-align:left"><button class="pb q" data-social-reply="'+escapeBusinessText(p.id)+'" style="padding:9px 12px">Reply</button></div></article>';
+  return '<article class="card social-post" style="margin:12px 0;padding:15px;background:linear-gradient(145deg,#20283a,#101722);border:1px solid #ffffff20;border-radius:18px"><div style="display:flex;align-items:center;gap:9px"><span style="font-size:25px">👤</span><div><b>'+escapeBusinessText(p.name||'Player')+'</b><br><small>'+escapeBusinessText(p.area||'Lagos City')+'</small></div><span style="margin-left:auto;font-size:11px;color:#aeb9cc">CITYGAME</span></div><p style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:16px;line-height:1.5;margin:15px 0">'+escapeBusinessText(p.text)+'</p><div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap"><button class="pb q" data-social-like="'+escapeBusinessText(p.id)+'" style="background:'+(p.likedByMe?'#9b3158':'#303b50')+';color:white;padding:9px 13px">❤️ '+(p.likedByMe?'Liked':'Like')+' · '+likes+'</button><span style="font-size:12px;color:#c4cede">💬 '+comments.length+' replies</span></div><div style="margin-top:10px;padding-left:10px;border-left:2px solid #58657c">'+(comments.length?comments.slice(-4).map(c=>'<p style="margin:6px 0;font-size:13px"><b>'+escapeBusinessText(c.name||'Player')+':</b> '+escapeBusinessText(c.text)+'</p>').join(''):'<small style="color:#aeb9cc">Be the first to reply.</small>')+'</div><div style="display:flex;gap:6px;margin-top:10px"><input data-social-reply-input="'+escapeBusinessText(p.id)+'" maxlength="140" placeholder="Write a reply…" style="min-width:0;flex:1;width:0;padding:10px;border-radius:10px;background:#0c1220;color:white;border:1px solid #46516a;text-align:left"><button class="pb q" data-social-reply="'+escapeBusinessText(p.id)+'" style="padding:9px 12px">Reply</button></div></article>';
  }).join(''):'<div class="card">No posts yet. Be the first to share something with Lagos!</div>';
  feed.querySelectorAll('[data-social-like]').forEach(btn=>btn.addEventListener('click',()=>{if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'social_like',id:btn.dataset.socialLike}));else toast('Connect to multiplayer to like posts')}));
  feed.querySelectorAll('[data-social-reply]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.socialReply,input=feed.querySelector('[data-social-reply-input="'+id+'"]'),text=input&&input.value.trim();if(!text)return;if(!ws||ws.readyState!==1){toast('Connect to multiplayer to reply');return}ws.send(JSON.stringify({t:'social_reply',id,text}));input.value=''}));
@@ -3706,7 +3706,7 @@ guard('openApp',()=>{
   openApp=function(n){
     PX.app=n;
     if(n!=='Chat')PX.cur=null;
-    if(APPR[n]){const ph=$('phone'),view=$('appview');if(ph)ph.classList.add('app-open');if(view)view.dataset.app=n;APPR[n]();if(view&&!view.querySelector('.phone-appbar')){view.insertAdjacentHTML('afterbegin','<div class="phone-appbar"><button class="pb q" data-x="phoneAppBack">‹ Apps</button><div><b>'+esc(n)+'</b><small>LAGOS LIFE • APP</small></div><button class="pb q" data-x="phoneAppBack">⌂</button></div>')}if(n==='Invest')S({t:'getx',k:'mk'});if(n==='ID'){S({t:'getx',k:'cert'})}if(n==='Cars')S({t:'getx',k:'cars'});if(n==='Decor')S({t:'getx',k:'decor'});return}
+    if(APPR[n]){const ph=$('phone'),view=$('appview');if(ph)ph.classList.add('app-open');if(view)view.dataset.app=n;APPR[n]();if(view&&!view.querySelector('.phone-appbar')){view.insertAdjacentHTML('afterbegin','<div class="phone-appbar"><button class="pb q" data-x="phoneAppBack">‹ Apps</button><div><b>'+esc(n)+'</b><small>CITYGAME • APP</small></div><button class="pb q" data-x="phoneAppBack">⌂</button></div>')}if(n==='Invest')S({t:'getx',k:'mk'});if(n==='ID'){S({t:'getx',k:'cert'})}if(n==='Cars')S({t:'getx',k:'cars'});if(n==='Decor')S({t:'getx',k:'decor'});return}
     _oa(n);
   };
   const _rj=renderJobs;
@@ -4105,7 +4105,7 @@ guard('mmroute',()=>{
 
 // Public bridge for separately loaded phone-app modules.
 window.LAGOS_PHONE = { APPR, X, PX, S, phoneOpen, openApp: n => openApp(n), appview: document.getElementById('appview'), getCash:()=>myMoney, capturePhoto:()=>{renderer.render(scene,camera);const src=renderer.domElement,w=src.width,h=src.height,scale=Math.min(1,720/Math.max(w,h)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(w*scale));cv.height=Math.max(1,Math.round(h*scale));const ctx=cv.getContext('2d');ctx.drawImage(src,0,0,cv.width,cv.height);return cv.toDataURL('image/jpeg',0.76)} };
-console.log('Lagos Life v0.7 add-on loaded');
+console.log('Citygame v0.7 add-on loaded');
 })();
 
 </script>
@@ -4806,7 +4806,7 @@ catch(e){console.warn('palms fallback',e);try{palmBatchBoxes();flushBatch()}catc
 <script src="/citygame-city-guide.js?v=2026111505"></script>
 <script src="/citygame-map-experience.js?v=20261117-fix2"></script>
 <script src="/player-account-center.js?v=20261116"></script>
-<script src="/citygame-company-app.js?v=20261117c"></script>
+<script src="/citygame-company-app.js?v=20261117d"></script>
 <script src="/asset-download-manager.js?v=1"></script>
 <script src="/citygame-performance.js?v=20261117c"></script>\n</body>
 </html>
