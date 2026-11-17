@@ -4626,7 +4626,7 @@ function meta(p){if(p.act===undefined){const k=Math.floor(Math.random()*ACTS.len
 let nearP=null;
 function scan(){
   try{
-    if(!me||inside||typeof TR==='undefined'||!TR.ready){for(const k in sprites)sprites[k].visible=false;nearP=null;return}
+    if(!me||window.CG_INSIDE?.()||typeof TR==='undefined'||!TR.ready){for(const k in sprites)sprites[k].visible=false;nearP=null;return}
     let best=null,bd=14;
     for(const p of TR.peds){if(!p.g.visible)continue;const d=Math.hypot(p.x-pos.x,p.z-pos.z);if(d<bd){bd=d;best=p}}
     nearP=bd<3.8?best:null;
@@ -4658,7 +4658,7 @@ window.LG_OUT.push(()=>nearP?[{k:'talk',i:'💬',t:'Talk',f:()=>talk(nearP)}]:[]
 /* ---------- 'loading your home' so a slow model download never looks like a blank screen ---------- */
 const ld=document.createElement('div');ld.id='load5';ld.textContent='🏠 Loading your home…';document.body.appendChild(ld);
 setInterval(()=>{
-  try{const R=typeof inside!=='undefined'&&inside&&ROOMS[inside];ld.style.display=(R&&R.model&&typeof ajahGLB!=='undefined'&&!ajahGLB)?'block':'none'}catch(e){}
+  try{const place=window.CG_INSIDE?.(),R=place&&ROOMS[place];ld.style.display=(R&&R.model&&typeof ajahGLB!=='undefined'&&!ajahGLB)?'block':'none'}catch(e){}
 },300);
 })();
 
@@ -4701,8 +4701,8 @@ const nearest=(sp,kinds)=>{let b=null,bd=1e9;for(const s of sp){if(!kinds.includ
 const rc=new THREE.Raycaster(),dn=new THREE.Vector3(0,-1,0),org=new THREE.Vector3();
 let surf=0,surfT=0;
 function surfaceAbove(){
-  const R=ROOMS[inside];if(!R||!R.modelG)return 0;
-  if(floorKey!==inside){floorKey=inside;floorBase=1e9}
+  const place=window.CG_INSIDE?.(),R=ROOMS[place];if(!R||!R.modelG)return 0;
+  if(floorKey!==place){floorKey=place;floorBase=1e9}
   const n=performance.now();
   if(n-surfT>300){surfT=n;org.set(pos.x,1.9,pos.z);rc.set(org,dn);rc.far=3;const h=rc.intersectObject(R.modelG,true);surf=h.length?h[0].point.y:0;if(h.length)floorBase=Math.min(floorBase,surf)}
   return floorBase>1e8?0:Math.max(0,surf-floorBase);
