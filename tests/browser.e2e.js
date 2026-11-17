@@ -63,15 +63,19 @@ async function waitForServer() {
     const phoneApps = await page.evaluate(() => {
       const bridge = window.LAGOS_PHONE;
       const names = ['Company', 'Social', 'Emotes', 'News', 'Gallery', 'Market'];
+      const companyScript = [...document.scripts].find(script => script.src.includes('citygame-company-app.js'));
       return {
         bridgeReady: !!bridge && !!bridge.APPR && !!bridge.X && !!bridge.appview,
         registered: names.filter(name => typeof bridge?.APPR?.[name] === 'function'),
-        tiles: names.filter(name => !!document.querySelector('#pgrid [data-app="' + name + '"]'))
+        tiles: names.filter(name => !!document.querySelector('#pgrid [data-app="' + name + '"]')),
+        companyScript: companyScript?.src || null,
+        companyReceive: typeof window.CGCompanyReceive,
+        companyErrors: runtimeErrors.slice()
       };
     });
     assert.ok(phoneApps.bridgeReady, 'the in-game phone bridge must initialize');
     assert.deepEqual(phoneApps.registered.sort(), ['Company', 'Emotes', 'Gallery', 'Market', 'News', 'Social'].sort(),
-      'all separately loaded phone app renderers must register');
+      'all separately loaded phone app renderers must register; diagnostics: ' + JSON.stringify(phoneApps));
     assert.deepEqual(phoneApps.tiles.sort(), ['Company', 'Emotes', 'Gallery', 'Market', 'News', 'Social'].sort(),
       'all phone app launch tiles must be present');
 
