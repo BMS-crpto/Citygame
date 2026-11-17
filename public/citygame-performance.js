@@ -6,7 +6,7 @@
   'use strict';
   const profiles = {
     Auto: { min: 0.85, max: Math.min(window.devicePixelRatio || 1, 1.75), adaptive: true },
-    High: { min: Math.min(window.devicePixelRatio || 1, 2), max: Math.min(window.devicePixelRatio || 1, 2), adaptive: false },
+    High: { min: window.devicePixelRatio || 1, max: window.devicePixelRatio || 1, adaptive: false },
     Balanced: { min: 1, max: 1.35, adaptive: false },
     Saver: { min: 0.8, max: 1, adaptive: false }
   };
@@ -29,7 +29,7 @@
     const r = getRenderer();
     if (!r) return false;
     rendererRef = r;
-    const dpr = Math.max(0.75, Math.min(2, target));
+    const dpr = Math.max(0.75, target);
     if (Math.abs(dpr - currentDpr) > 0.03) {
       r.setPixelRatio(dpr);
       const canvas = r.domElement;
