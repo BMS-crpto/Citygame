@@ -70,7 +70,7 @@ async function waitForServer() {
         tiles: names.filter(name => !!document.querySelector('#pgrid [data-app="' + name + '"]')),
         companyScript: companyScript?.src || null,
         companyReceive: typeof window.CGCompanyReceive,
-        companyErrors: runtimeErrors.slice()
+        companyErrors: [...document.querySelectorAll('script')].filter(s => s.src.includes('citygame-company-app.js')).map(s => ({src:s.src,loaded:!!s.dataset.loaded}))
       };
     });
     assert.ok(phoneApps.bridgeReady, 'the in-game phone bridge must initialize');
