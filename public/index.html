@@ -1630,7 +1630,7 @@ const C=h=>new THREE.Color(h);
 const SKY={dTop:C(0x2c7cd0),dMid:C(0x8ec4f0),dHor:C(0xd2e4f1),nTop:C(0x0b1636),nMid:C(0x1b3266),nHor:C(0x34457d),warm:C(0xff9a5c)};
 const _t1=new THREE.Color(),_t2=new THREE.Color(),_t3=new THREE.Color();
 const DAY_LEN=480,clamp01=v=>Math.max(0,Math.min(1,v));
-let clockText='';let inside=null;let rainF=0;
+let clockText='';let inside=null;let rainF=0;window.CG_INSIDE=()=>inside;
 function lagosHours(){const d=new Date(Date.now()+3600000);return d.getUTCHours()+d.getUTCMinutes()/60+d.getUTCSeconds()/3600}
 function updateTime(){
   const t=(((lagosHours()-6)%24+24)%24)/24;      // REAL Lagos time (WAT). 0 = 6am sunrise, 0.25 = noon, 0.5 = 6pm sunset, 0.75 = midnight
@@ -4500,8 +4500,8 @@ function stop(){
 let homeTrack=null,homeVol=0.6,clubPick=null,clubPickSlot=-1;
 try{const s=JSON.parse(localStorage.getItem('lgmusic')||'{}');if(TRACKS[s.t])homeTrack=null;if(s.v)homeVol=Math.max(0.1,Math.min(1,+s.v))}catch(e){}
 const saveV=()=>{try{localStorage.setItem('lgmusic',JSON.stringify({v:homeVol}))}catch(e){}};
-const inClub=()=>typeof inside!=='undefined'&&inside==='v_club';
-const atHome=()=>typeof inside!=='undefined'&&inside&&typeof myHome!=='undefined'&&myHome&&inside==='house'+myHome.unit;
+const inClub=()=>window.CG_INSIDE?.()==='v_club';
+const atHome=()=>{const place=window.CG_INSIDE?.();return !!place&&typeof myHome!=='undefined'&&myHome&&place==='house'+myHome.unit};
 const slot=()=>Math.floor((Date.now()-EPOCH)/100000);
 const djTrack=()=>{const s=slot();if(clubPick&&clubPickSlot===s)return clubPick;return SET[s%SET.length]};
 
@@ -4680,14 +4680,14 @@ const st=document.createElement('style');st.textContent=`
 @keyframes mv6{to{background-position:300% 0}}
 `;document.head.appendChild(st);
 
-const inHome=()=>typeof inside!=='undefined'&&inside&&typeof myHome!=='undefined'&&myHome&&inside==='house'+myHome.unit;
+const inHome=()=>{const place=window.CG_INSIDE?.();return !!place&&typeof myHome!=='undefined'&&myHome&&place==='house'+myHome.unit};
 const isAjah=()=>inHome()&&typeof AJAH_UNITS!=='undefined'&&AJAH_UNITS.includes(myHome.unit);
 window.LG_REAL=()=>inHome();   // inside your own home the real furniture is used, so no pretend bed or sofa is spawned
 let busy=false,watching=false,floorBase=1e9,floorKey='';
 
 /* ---- where the real furniture is (normal homes) ---- */
 function homeSpots(){
-  const R=ROOMS[inside];if(!R)return[];
+  const R=ROOMS[window.CG_INSIDE?.()];if(!R)return[];
   const x0=R.x0,z0=R.z0,sp=[];
   sp.push({k:'bed',x:x0+6.5,z:z0-6,y:0.17,ry:0,r:3.8});
   for(const dx of[-1.2,1.2])sp.push({k:'sofa',x:x0-6+dx,z:z0-3.2,y:0.22,ry:Math.PI,r:2.8});
