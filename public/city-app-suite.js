@@ -72,4 +72,16 @@
  const st=document.createElement('style');
  st.textContent='.xbtn{border:0;border-radius:9px;padding:9px 11px;font-weight:800;font-size:12px;cursor:pointer;background:#26354a;color:#f8fafc}.xbtn.gold{background:#eabf46;color:#1b2430}.xbtn.gray{background:#334155;color:#f8fafc}.xbtn.red{background:#713b46;color:#fff}';
  document.head.appendChild(st);
+ // Load the Company renderer only after the phone bridge and base app suite exist.
+ // A single explicit loader keeps registration deterministic across the game shell.
+ const companyPath='/citygame-company-app.js?v=20261117f';
+ if(!window.CGCompanyReceive&&!document.querySelector('script[data-citygame-company-app]')){
+  const companyScript=document.createElement('script');
+  companyScript.src=companyPath;
+  companyScript.async=false;
+  companyScript.dataset.citygameCompanyApp='1';
+  companyScript.onerror=()=>console.error('Company phone app failed to load:',companyPath);
+  document.head.appendChild(companyScript);
+ }
+
 })();
