@@ -588,3 +588,26 @@ test('game entry document ends with real HTML line breaks', () => {
   assert.ok(html.endsWith('</script>\n</body>\n</html>\n'), 'the final script and document tags must use real line breaks');
   assert.ok(!html.includes('</script>\\n</body>'), 'escaped newline text must not be rendered after the final script');
 });
+
+
+test('camera touch controller supports drag orbit and bounded pinch zoom', () => {
+  const source = fs.readFileSync(path.join(root, 'public', 'citygame-camera-touch.js'), 'utf8');
+  const listeners = {};
+  const canvas = { addEventListener(name, callback) { listeners[name] = callback; } };
+  const state = { yaw: 0, height: 7, zoom: 1, canRotate() { return true; } };
+  const window = { CG_CAMERA_TOUCH: state, CITYGAME_RENDERER: { domElement: canvas } };
+  const document = { querySelector() { return canvas; } };
+  vm.runInNewContext(source, { window, document, console, Math });
+  listeners.touchstart({ touches: [{ identifier: 1, clientX: 10, clientY: 10 }], changedTouches: [{ identifier: 1, clientX: 10, clientY: 10 }] });
+  listeners.touchmove({ touches: [{ identifier: 1, clientX: 30, clientY: 20 }], changedTouches: [{ identifier: 1, clientX: 30, clientY: 20 }] });
+  assert.ok(state.yaw < 0);
+  assert.ok(state.height > 7);
+  listeners.touchstart({ touches: [{ identifier: 1, clientX: 10, clientY: 10 }, { identifier: 2, clientX: 30, clientY: 10 }], changedTouches: [{ identifier: 2, clientX: 30, clientY: 10 }] });
+  listeners.touchmove({ touches: [{ identifier: 1, clientX: 10, clientY: 10 }, { identifier: 2, clientX: 50, clientY: 10 }], changedTouches: [{ identifier: 2, clientX: 50, clientY: 10 }] });
+  assert.ok(state.zoom < 1);
+  state.zoom = 2;
+  listeners.touchmove({ touches: [{ identifier: 1, clientX: 10, clientY: 10 }, { identifier: 2, clientX: 60, clientY: 10 }], changedTouches: [{ identifier: 2, clientX: 60, clientY: 10 }] });
+  assert.ok(state.zoom <= 1.8);
+  listeners.touchend({ touches: [], changedTouches: [{ identifier: 1 }, { identifier: 2 }] });
+  assert.equal(window.CitygameCameraTouch.activeTouchId, null);
+});
