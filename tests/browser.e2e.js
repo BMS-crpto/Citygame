@@ -177,6 +177,7 @@ async function waitForServer() {
     assert.equal(dealership.filteredName, 'Honda Accord', 'search must show the matching vehicle');
     assert.equal(dealership.detailOpened, true, 'vehicle details preview must open');
     assert.equal(dealership.detailHasVehicle, true, 'vehicle details must identify the selected model');
+    await page.locator('#egClose').click(); // dismiss the full-screen 3D preview before entering the city
 
     // Enter the actual multiplayer world. Earlier checks only proved that the
     // shell and phone renderers loaded; this catches errors during the welcome
