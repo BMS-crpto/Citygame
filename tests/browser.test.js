@@ -361,6 +361,17 @@ test('premium stylesheet does not shrink the full-screen phone in landscape', ()
   assert.match(finalRules, /#phone:not\(\.app-open\) #pgrid\{grid-template-columns:repeat\(8,minmax\(0,1fr\)\)!important/);
 });
 
+test('mobile character creator stays scrollable and keeps controls clear', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  assert.match(html, /id="citygame-character-studio-fix"/);
+  assert.match(html, /overflow-y:auto!important/);
+  assert.match(html, /#menu #pvcanvas/);
+  assert.match(html, /#menu:not\(\[style\*="display: none"\]\)~#chatbtn/);
+  assert.match(html, /const hair=look\?LOOKC\.hairc\[look\[5\]\]/);
+  assert.match(html, /const feminine=!!\(look&&look\[4\]===1\)/);
+  assert.match(html, /shirt placket and stitched front pockets/);
+});
+
 test('Lagos 3D streets and avatars use higher-detail rendering', () => {
   const html = fs.readFileSync(htmlPath, 'utf8');
   assert.match(html, /canvasTex\(512,512,\(g,w,h\)=>\{g\.fillStyle='#45474a'/);
