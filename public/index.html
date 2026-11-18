@@ -1102,37 +1102,47 @@ function villa(x,z){
     loader.load('/models/ajah_houses.glb',gltf=>{
       const sceneRoot=gltf.scene;
       sceneRoot.updateMatrixWorld(true);
-      let candidates=sceneRoot.children.filter(n=>{
+      const candidates=sceneRoot.children.filter(n=>{
         let hasMesh=false;n.traverse(o=>{if(o.isMesh)hasMesh=true});
         return hasMesh;
       });
-      // Some exporters wrap all houses in a single scene node. Only use
-      // independent top-level house groups; never duplicate a whole city pack.
-      if(candidates.length<16){
-        console.warn('Residential GLB has fewer than 16 independent building roots; retaining safe villa fallback',candidates.length);
+      // The supplied Ajah pack contains three independent house variants, not
+      // sixteen. Reuse those real GLB variants across all sixteen Lekki plots.
+      // Falling back only when the asset has no usable mesh avoids silently
+      // replacing every house with procedural geometry just because the pack
+      // contains fewer variants than the city has plots.
+      if(!candidates.length){
+        console.warn('Residential GLB contains no usable building roots; retaining safe villa fallback');
         residentialVillaSlots.forEach(p=>villaProcedural(p.x,p.z));
         return;
       }
-      candidates=candidates.slice(0,16);
+      let placed=0;
       residentialVillaSlots.slice(0,16).forEach((p,i)=>{
-        const model=candidates[i].clone(true);
+        const model=candidates[i%candidates.length].clone(true);
         model.updateMatrixWorld(true);
         const bounds=new THREE.Box3().setFromObject(model);
+        if(bounds.isEmpty()){
+          villaProcedural(p.x,p.z);
+          return;
+        }
         const size=bounds.getSize(new THREE.Vector3());
         const span=Math.max(size.x,size.z)||1;
-        const scale=18/span;
-        model.scale.multiplyScalar(scale);
-        model.updateMatrixWorld(true);
-        const fitted=new THREE.Box3().setFromObject(model);
-        model.position.x+=T.X(p.x)-(fitted.min.x+fitted.max.x)/2;
-        model.position.z+=T.Z(p.z)-(fitted.min.z+fitted.max.z)/2;
-        model.position.y+=-fitted.min.y;
-        model.scale.multiply(new THREE.Vector3(T.kx,T.ky,T.kx));
-        model.rotation.y=(i%4)*Math.PI/2;
-        model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
-        scene.add(model);
+        const scale=11.5/span;
+        const center=bounds.getCenter(new THREE.Vector3());
+        const fit=new THREE.Group();
+        const pivot=new THREE.Group();
+        pivot.add(model);
+        pivot.position.set(-center.x,-bounds.min.y,-center.z);
+        fit.add(pivot);
+        fit.scale.setScalar(scale);
+        fit.rotation.y=(i%4)*Math.PI/2;
+        fit.position.set(T.X(p.x),0,T.Z(p.z));
+        fit.updateMatrixWorld(true);
+        fit.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true}});
+        scene.add(fit);
+        placed++;
       });
-      console.info('Residential GLB buildings placed:',Math.min(16,candidates.length));
+      console.info('Residential GLB buildings placed:',placed,'using variants:',candidates.length);
     },undefined,error=>{
       console.warn('Residential GLB failed to load; restoring procedural villa visuals',error);
       residentialVillaSlots.forEach(p=>villaProcedural(p.x,p.z));
