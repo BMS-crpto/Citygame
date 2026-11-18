@@ -382,6 +382,18 @@ test('Lagos 3D streets and avatars use higher-detail rendering', () => {
   assert.match(html, /Slim balcony bands and parapet rails/);
 });
 
+test('Lagos map is a dedicated full-screen HUD screen, not a phone app', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  assert.match(html, /id="mapbtn"/);
+  assert.match(html, /\$\('mapbtn'\)\.onclick=\(\)=>\{closePhone\(\);openMap\(\)\}/);
+  assert.match(html, /#bigmap\{position:fixed;inset:0;background:#102e2b/);
+  assert.match(html, /function sizeMap\(\)\{const W=.*bmc\.width=W;bmc\.height=H/s);
+  assert.match(html, /Raised building plots with shadows and coloured roofs/);
+  assert.match(html, /g\.roundRect\(a\[0\]-tw\/2/);
+  const apps = html.slice(html.indexOf('const APPS='), html.indexOf(";$('pgrid').innerHTML"));
+  assert.doesNotMatch(apps, /'Map'/);
+});
+
 test('big map caches static city layers between redraws', () => {
   const html = fs.readFileSync(path.join(root, 'public', 'index.html'), 'utf8');
   assert.match(html, /let mapBaseCanvas=null,mapBaseWorld=null,mapBaseSignature=''/);
