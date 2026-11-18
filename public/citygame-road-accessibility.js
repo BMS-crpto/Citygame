@@ -25,7 +25,8 @@
             tactile.push({
               x: cx + sx * 7.55 + lateral * cos + depth * sin,
               z: cz + sz * 7.55 - lateral * sin + depth * cos,
-              y: 0.405
+              y: 0.05 + ((depth + 1.2) / 2.4) * 0.355,
+              rotation
             });
           }
         }
@@ -68,7 +69,7 @@
   const tactileMesh = new THREE.InstancedMesh(tactileGeometry, tactileMaterial, tactile.length);
   tactile.forEach((p, i) => {
     dummy.position.set(p.x, p.y, p.z);
-    dummy.rotation.set(0, 0, 0);
+    dummy.rotation.set(0, p.rotation, 0);
     dummy.updateMatrix();
     tactileMesh.setMatrixAt(i, dummy.matrix);
   });
