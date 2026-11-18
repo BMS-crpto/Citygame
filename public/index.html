@@ -706,7 +706,13 @@ for(let i=0,cloudCount=CITYGAME_MOBILE?5:9;i<cloudCount;i++){
 
 // =============== textures ===============
 const grassBase=canvasTex(128,128,(g,w,h)=>{g.fillStyle='#5c9a3a';g.fillRect(0,0,w,h);for(let i=0;i<800;i++){const v=Math.random();g.fillStyle=v<0.4?'#6bab44':v<0.75?'#4d8a31':'#7fae52';g.fillRect(Math.random()*w,Math.random()*h,2,3)}for(let i=0;i<60;i++){g.fillStyle='#a58a5e';g.fillRect(Math.random()*w,Math.random()*h,3,2)}});
-const asphaltBase=canvasTex(128,128,(g,w,h)=>{g.fillStyle='#4a4a4c';g.fillRect(0,0,w,h);for(let i=0;i<1500;i++){const v=52+Math.random()*48|0;g.fillStyle=`rgb(${v},${v},${v+2})`;g.fillRect(Math.random()*w,Math.random()*h,2,2)}g.fillStyle='rgba(25,25,26,0.55)';g.fillRect(Math.random()*80,Math.random()*80,34,20);g.fillStyle='rgba(120,100,78,0.25)';g.fillRect(0,0,w,10);g.fillRect(0,h-10,w,10);g.strokeStyle='rgba(20,20,20,0.7)';g.lineWidth=1;for(let k=0;k<3;k++){g.beginPath();let x=Math.random()*w,y=Math.random()*h;g.moveTo(x,y);for(let s=0;s<6;s++){x+=Math.random()*18-6;y+=Math.random()*18-6;g.lineTo(x,y)}g.stroke()}});
+const asphaltBase=canvasTex(512,512,(g,w,h)=>{g.fillStyle='#45474a';g.fillRect(0,0,w,h);
+  // Fine aggregate, worn tyre paths and repaired asphalt patches.
+  for(let i=0;i<12500;i++){const v=42+Math.random()*62|0,a=0.12+Math.random()*0.34;g.fillStyle='rgba('+v+','+(v+1)+','+(v+3)+','+a+')';const z=Math.random()*2.2+0.5;g.fillRect(Math.random()*w,Math.random()*h,z,z)}
+  for(let i=0;i<18;i++){const x=Math.random()*w,y=Math.random()*h,ww=18+Math.random()*75,hh=12+Math.random()*48;g.fillStyle='rgba(25,27,29,'+(0.12+Math.random()*0.12)+')';g.fillRect(x,y,ww,hh);g.strokeStyle='rgba(135,132,123,0.16)';g.lineWidth=2;g.strokeRect(x+1,y+1,ww-2,hh-2)}
+  for(let i=0;i<10;i++){g.beginPath();let x=Math.random()*w,y=Math.random()*h;g.moveTo(x,y);g.strokeStyle='rgba(20,20,20,0.55)';g.lineWidth=1+Math.random()*1.5;for(let k=0;k<7;k++){x+=Math.random()*38-19;y+=Math.random()*38-19;g.lineTo(x,y)}g.stroke()}
+  g.fillStyle='rgba(180,158,120,0.08)';for(let i=0;i<8;i++){g.beginPath();g.ellipse(Math.random()*w,Math.random()*h,8+Math.random()*22,3+Math.random()*8,Math.random()*3,0,Math.PI*2);g.fill()}
+});
 const paveBase=canvasTex(128,128,(g,w,h)=>{g.fillStyle='#cdb994';g.fillRect(0,0,w,h);g.strokeStyle='#a89472';g.lineWidth=2;for(let i=0;i<=w;i+=32){g.beginPath();g.moveTo(i,0);g.lineTo(i,h);g.stroke();g.beginPath();g.moveTo(0,i);g.lineTo(w,i);g.stroke()}});
 const WLAY=[];for(let i=0;i<16;i++)WLAY.push(Math.random()<0.3);
 function drawWin(g,w,h,litMode){
@@ -755,6 +761,25 @@ ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 const roadMatH=new THREE.MeshLambertMaterial({map:tx(asphaltBase,Math.round(113*GN/6),1.5),polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});
 const roadMatV=new THREE.MeshLambertMaterial({map:tx(asphaltBase,1.5,Math.round(113*GN/6)),polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
 const lineMat=new THREE.MeshLambertMaterial({color:0xffc107,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4});
+const curbMat=new THREE.MeshStandardMaterial({color:0xb8b7ae,roughness:0.92});
+const sidewalkMat=new THREE.MeshStandardMaterial({color:0xb6ad9d,roughness:0.96});
+const curbRuns=[],walkRuns=[];
+for(let i=-GN;i<=GN;i++)for(let j=-GN;j<GN;j++){
+  const mid=(j+0.5)*BLOCK,len=BLOCK-18;
+  for(const side of [-1,1]){
+    curbRuns.push([mid,0.16,i*BLOCK+side*6.35,0]);
+    walkRuns.push([mid,0.07,i*BLOCK+side*8.0,0]);
+    curbRuns.push([i*BLOCK+side*6.35,0.16,mid,Math.PI/2]);
+    walkRuns.push([i*BLOCK+side*8.0,0.07,mid,Math.PI/2]);
+  }
+}
+function cityStripMesh(geo,mat,items){
+  const mesh=new THREE.InstancedMesh(geo,mat,items.length),o=new THREE.Object3D();
+  items.forEach((p,i)=>{o.position.set(p[0],p[1],p[2]);o.rotation.y=p[3];o.updateMatrix();mesh.setMatrixAt(i,o.matrix)});
+  mesh.instanceMatrix.needsUpdate=true;mesh.receiveShadow=true;mesh.castShadow=false;scene.add(mesh);return mesh;
+}
+cityStripMesh(new THREE.BoxGeometry(BLOCK-18,0.28,0.42),curbMat,curbRuns);
+cityStripMesh(new THREE.BoxGeometry(BLOCK-18,0.12,2.35),sidewalkMat,walkRuns);
 for(let i=-GN-1;i<=GN+1;i++){
   const h=new THREE.Mesh(new THREE.PlaneGeometry(2*BOUND+200,ROAD),roadMatH);h.rotation.x=-Math.PI/2;h.position.set(0,0.02,i*BLOCK);h.receiveShadow=true;scene.add(h);
   const v=new THREE.Mesh(new THREE.PlaneGeometry(ROAD,2*BOUND+200),roadMatV);v.rotation.x=-Math.PI/2;v.position.set(i*BLOCK,0.02,0);v.receiveShadow=true;scene.add(v);
@@ -940,6 +965,17 @@ function addFacade(cx,cz,w,h,d,col,y0){
   const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),facadeMat(col,rx,ry));
   m.position.set(cx,y0+h/2,cz);m.castShadow=true;m.receiveShadow=true;scene.add(m);
   cgCollectFacadeWindows(cx,cz,w,h,d,y0||0,col);
+  // Slim balcony bands and parapet rails add depth to apartment and office facades.
+  if(h>=9&&w>=8&&d>=7){
+    const levels=Math.min(5,Math.floor((h-2.5)/4.2));
+    for(let level=1;level<=levels;level++){
+      const by=y0+1.0+level*4.0;
+      batch.push([cx,by,cz+d/2+0.38,w*0.88,0.14,0.82,0x9da8ad,0]);
+      batch.push([cx,by+0.48,cz+d/2+0.72,w*0.88,0.08,0.08,0xe0e5e6,0]);
+      batch.push([cx-w*0.44,by+0.24,cz+d/2+0.72,0.08,0.42,0.08,0xe0e5e6,0]);
+      batch.push([cx+w*0.44,by+0.24,cz+d/2+0.72,0.08,0.42,0.08,0xe0e5e6,0]);
+    }
+  }
   {const hv=lgHash(cx,cz),top=y0+h;
    batch.push([cx,y0+0.45,cz,w+0.5,0.9,d+0.5,0x7d776c,0]);
    batch.push([cx,top+0.3,cz,w+0.7,0.6,d+0.7,0xcdc7ba,0]);
@@ -2043,16 +2079,19 @@ function makeCharacter(role,name,look,noLabel){
   const L={police:{shirt:0x2f5bd8,pants:0x1a2a55,hat:0x14224a},thief:{shirt:0x1c1c1e,pants:0x222226,hat:0x2b2b30},nurse:{shirt:0x3fd0d8,pants:0x2aa5ad,hat:0xffffff},lawyer:{shirt:0x2b2b35,pants:0x2b2b35,hat:0x000000},taxi:{shirt:0xfdd835,pants:0x37474f,hat:0xfdd835}}[role]||{shirt:0x7b8794,pants:0x33383f,hat:0x222222};
   const box=(w,h,d,mt,x,y,z,par)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mt);m.position.set(x,y,z);m.castShadow=true;(par||body).add(m);return m};
   const shirt=M(look?LOOKC.top[look[2]]:L.shirt),pants=M(look?LOOKC.pants[look[3]]:L.pants);
-  const sph=(rx,ry,rz,mt,x,y,z,par)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(1,20,14),mt);m.scale.set(rx,ry,rz);m.position.set(x,y,z);m.castShadow=true;(par||body).add(m);return m};
-  const cyl=(rt,rb,h,mt,x,y,z,par,sz)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,16),mt);m.scale.z=sz||1;m.position.set(x,y,z);m.castShadow=true;(par||body).add(m);return m};
+  const sph=(rx,ry,rz,mt,x,y,z,par)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(1,28,20),mt);m.scale.set(rx,ry,rz);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;(par||body).add(m);return m};
+  const cyl=(rt,rb,h,mt,x,y,z,par,sz)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,24,2),mt);m.scale.z=sz||1;m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;(par||body).add(m);return m};
   skin.roughness=0.55;
   const shoe=M(0x15110e),white=M(0xf4f4f4),dark=M(0x0d0b0a),lip=M(0x6e2f2f);
-  const mkLeg=x=>{const p=new THREE.Group();p.position.set(x,0.95,0);cyl(0.17,0.115,0.9,pants,0,-0.45,0,p);sph(0.16,0.16,0.16,pants,0,-0.5,0.02,p);sph(0.15,0.09,0.27,shoe,0,-0.9,0.07,p);body.add(p);return p};
+  const mkLeg=x=>{const p=new THREE.Group();p.position.set(x,0.95,0);cyl(0.155,0.115,0.9,pants,0,-0.45,0,p);sph(0.145,0.15,0.15,pants,0,-0.5,0.02,p);sph(0.17,0.075,0.29,shoe,0,-0.9,0.08,p);sph(0.17,0.035,0.26,dark,0,-0.96,0.08,p);body.add(p);return p};
   const legL=mkLeg(-0.21),legR=mkLeg(0.21);
   const mkArm=x=>{const p=new THREE.Group();p.position.set(x,1.93,0);sph(0.15,0.15,0.15,shirt,0,0,0,p);cyl(0.115,0.085,0.95,shirt,0,-0.5,0,p);sph(0.085,0.1,0.075,skin,0,-1.05,0,p);body.add(p);return p};
   const armL=mkArm(-0.58),armR=mkArm(0.58);
-  cyl(0.46,0.36,1.05,shirt,0,1.42,0,null,0.62);
-  sph(0.56,0.2,0.3,shirt,0,1.9,0);
+  // Tapered torso, rounded shoulder caps and a defined waist give the avatar a less blocky silhouette.
+  cyl(0.37,0.43,1.02,shirt,0,1.43,0,null,0.72);
+  sph(0.34,0.25,0.31,shirt,-0.31,1.83,0);
+  sph(0.34,0.25,0.31,shirt,0.31,1.83,0);
+  cyl(0.405,0.405,0.075,dark,0,1.02,0,null,0.7);
   sph(0.4,0.2,0.27,pants,0,0.97,0);
   const VEST={police:0x1b3d91,taxi:0xfdd835,nurse:0xffffff,lawyer:0x2b2b35}[role];
   if(look&&VEST)cyl(0.49,0.39,0.95,M(VEST),0,1.45,0,null,0.66);
