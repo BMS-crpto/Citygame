@@ -117,6 +117,57 @@
     districts.forEach(([name,x,z]) => {
       const tag = labelSprite(name); tag.position.set(x,34,z); tag.scale.set(34,6.2,1); scene.add(tag);
     });
+    // Recognisable skyline clusters give the overview a clear sense of scale.
+    function skylineCluster(cx, cz, seed, count, palette) {
+      let v = seed >>> 0;
+      const rand = () => { v = (v * 1664525 + 1013904223) >>> 0; return v / 4294967296; };
+      const group = new THREE.Group();
+      for (let i = 0; i < count; i++) {
+        const w = 9 + rand() * 13, d = 9 + rand() * 13, h = 18 + rand() * 58;
+        const x = (rand() - 0.5) * 74, z = (rand() - 0.5) * 74;
+        const body = new THREE.Mesh(new THREE.BoxGeometry(w, h, d),
+          material(palette[i % palette.length], 0.82));
+        body.position.set(x, h / 2 + 1.8, z); group.add(body);
+        const roof = new THREE.Mesh(new THREE.BoxGeometry(w * 0.78, 1.2, d * 0.78),
+          material(0xc6c5bd, 0.7));
+        roof.position.set(x, h + 2.4, z); group.add(roof);
+        if (h > 48) {
+          const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.8, 12, 5),
+            material(0x9baeb8, 0.55));
+          crown.position.set(x, h + 8, z); group.add(crown);
+        }
+      }
+      group.position.set(cx, 0, cz); scene.add(group);
+    }
+    skylineCluster(285, -325, 13, 12, [0x66808a,0x9aaeb4,0xb6aa96,0x526c7d]);
+    skylineCluster(-395, -330, 29, 9, [0x9b9a8d,0x7c9189,0xc0b8a5]);
+    skylineCluster(5, 300, 47, 7, [0x8e9b91,0xb5a58e,0x6e858b]);
+
+    // Urban green spaces: low raised park pads with tree canopies, not flat map icons.
+    const parks = [
+      {x:-310,z:55,r:42},{x:85,z:-470,r:34},{x:470,z:125,r:39},{x:-520,z:385,r:31}
+    ];
+    parks.forEach((p, i) => {
+      const pad = new THREE.Mesh(new THREE.CylinderGeometry(p.r, p.r * 1.02, 1.1, 9),
+        material(i % 2 ? 0x477b55 : 0x56845b, 0.98));
+      pad.position.set(p.x, 1.05, p.z); scene.add(pad);
+      for (let n = 0; n < 7; n++) {
+        const a = n * Math.PI * 2 / 7, rr = p.r * 0.62;
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 1, 7, 5), material(0x70543a));
+        trunk.position.set(p.x + Math.cos(a) * rr, 4.5, p.z + Math.sin(a) * rr); scene.add(trunk);
+        const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(5.4, 0), material(0x36764a));
+        crown.position.set(p.x + Math.cos(a) * rr, 10, p.z + Math.sin(a) * rr); scene.add(crown);
+      }
+    });
+    const landmarkNames = [
+      ['VI BUSINESS DISTRICT',285,-325],
+      ['IKEJA CITY CENTRE',-395,-330],
+      ['MAINLAND QUARTER',5,300]
+    ];
+    landmarkNames.forEach(([name,x,z]) => {
+      const tag = labelSprite(name); tag.position.set(x, 105, z); tag.scale.set(39, 7, 1); scene.add(tag);
+    });
+
     // Bridge links over the water edge.
     const bridgeMat = material(0x8b9699,0.72);
     ribbon([[420,-290],[490,-245],[560,-190],[640,-150]],19,4.2,bridgeMat);
