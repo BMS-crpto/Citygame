@@ -1370,7 +1370,7 @@ let carReqT=0;
 function ensureCarList(){
   if(typeof PX==='undefined'||(PX.carList&&PX.carList.length))return;
   const n=Date.now();if(n-carReqT<2500||!ws||ws.readyState!==1)return;carReqT=n;
-  ws.send(JSON.stringify({t:'getx',k:'cars'}));
+  sendWS(JSON.stringify({t:'getx',k:'cars'}));
 }
 function refreshShowLabels(){
   if(typeof PX==='undefined'||!PX.carList||!PX.carList.length)return;
@@ -1404,7 +1404,7 @@ function openShowCard(col){
   el.innerHTML='<div style="font-size:18px;font-weight:700">'+v.name+'</div><div style="color:#ffd54a;font-size:20px;margin:4px 0">'+fmtN(v.price)+'</div><div style="opacity:.85;line-height:1.6">Top speed: '+sp[1]+'<br>0-100 km/h: '+sp[2]+'<br>Power: '+sp[3]+'</div><div style="display:flex;gap:8px;margin-top:10px"><button id="scBuy" style="flex:1;padding:10px;border:0;border-radius:8px;background:'+(own?'#555':'#2e7d32')+';color:#fff;font-weight:700">'+(own?'YOU OWN THIS':'BUY NOW')+'</button><button id="scX" style="padding:10px 14px;border:0;border-radius:8px;background:#374151;color:#fff">Close</button></div>';
   document.body.appendChild(el);
   document.getElementById('scX').onclick=()=>el.remove();
-  document.getElementById('scBuy').onclick=()=>{if(!own&&ws&&ws.readyState===1)ws.send(JSON.stringify({t:'buycar',col}));el.remove()};
+  document.getElementById('scBuy').onclick=()=>{if(!own&&ws&&ws.readyState===1)sendWS(JSON.stringify({t:'buycar',col}));el.remove()};
 }
 function buildMallInside(){
   const R=makeRoom('mall',1000,200,22,16,8,tileBase,0xefe3c8),x0=R.x0,z0=R.z0;
@@ -2269,7 +2269,7 @@ function startPose(pose,secs){
 }
 function endPose(tell){
   if(!myPose)return;myPose=null;if(me)setPoseFor('me',me,'');
-  if(tell&&ws&&ws.readyState===1)ws.send(JSON.stringify({t:'pose',pose:''}));
+  if(tell&&ws&&ws.readyState===1)sendWS(JSON.stringify({t:'pose',pose:''}));
   const nx=pos.x+Math.sin(pos.ry)*1.7,nz=pos.z+Math.cos(pos.ry)*1.7;   // step off the bed or sofa
   if(!collide(nx,nz)){pos.x=nx;pos.z=nz}
 }
@@ -2421,6 +2421,11 @@ function popMoney(d){const e=document.createElement('div');e.className='pop';e.t
 
 // =============== state & input ===============
 let ridingId=0,lotName='';const others={};let myId=null,ws=null,myMoney=null,jailed=false;
+function sendWS(data){
+  if(!ws||typeof WebSocket==='undefined'||ws.readyState!==WebSocket.OPEN)return false;
+  try{ws.send(data);return true}catch(err){console.warn('Citygame socket send skipped:',err);return false}
+}
+
 const pos={x:0,z:0,ry:0,floor:0};window.CG_POS=()=>pos;
 let joy={x:0,y:0};let camYaw=0,camH=7,camInit=false;
 let myCol=-1,carObj=null,speed=0,moving=false,myBank=0,myFood=100;
@@ -2527,7 +2532,7 @@ setMode(true);
   const box=document.createElement('div');box.id='lifeBox';document.body.appendChild(box);
   let last=null,open=false,CAT={};
   const N=n=>'₦'+Math.round(n).toLocaleString('en-NG');
-  const send=o=>{if(typeof ws!=='undefined'&&ws&&ws.readyState===1)ws.send(JSON.stringify(Object.assign({t:'life'},o)))};
+  const send=o=>{if(typeof ws!=='undefined'&&ws&&ws.readyState===1)sendWS(JSON.stringify(Object.assign({t:'life'},o)))};
   const bar=(ic,v,col)=>'<div class="lb"><span>'+ic+'</span><i><b style="width:'+v+'%;background:'+(v<20?'#ff6b6b':col)+'"></b></i><span>'+v+'</span></div>';
   function render(){
     if(!last)return;const m=last,c=m.career;
@@ -2548,7 +2553,7 @@ setMode(true);
     box.innerHTML=h;
   }
   btn.onclick=()=>{open=!open;box.style.display=open?'block':'none';if(open)render()};
-  box.onclick=e=>{const t=e.target.closest('button');if(!t)return;if(t.dataset.c){open=false;box.style.display='none';return}if(t.dataset.r&&typeof ws!=='undefined'&&ws&&ws.readyState===1)ws.send(JSON.stringify({t:'rent',op:'renew'}));if(t.dataset.o)send({op:t.dataset.o,career:t.dataset.k});if(t.dataset.s&&typeof ws!=='undefined'&&ws&&ws.readyState===1)ws.send(JSON.stringify({t:'shop',op:t.dataset.s,id:t.dataset.i,qty:1}))};
+  box.onclick=e=>{const t=e.target.closest('button');if(!t)return;if(t.dataset.c){open=false;box.style.display='none';return}if(t.dataset.r&&typeof ws!=='undefined'&&ws&&ws.readyState===1)sendWS(JSON.stringify({t:'rent',op:'renew'}));if(t.dataset.o)send({op:t.dataset.o,career:t.dataset.k});if(t.dataset.s&&typeof ws!=='undefined'&&ws&&ws.readyState===1)sendWS(JSON.stringify({t:'shop',op:t.dataset.s,id:t.dataset.i,qty:1}))};
   window.lifeCatalog=m=>{CAT={};m.items.forEach(i=>CAT[i.id]=i);if(open)render()};
   window.lifeUpdate=m=>{last=m;btn.style.display='block';if(open)render()};
 })();
@@ -2637,7 +2642,7 @@ function showSpeaker(m){
 $e('spkbtn').onclick=()=>{
   if(typeof ws==='undefined'||!ws||ws.readyState!==1)return;
   const t=prompt('📢 Loudspeaker (₦200)\nEveryone in Lagos will hear this:');
-  if(t&&t.trim())ws.send(JSON.stringify({t:'speak',text:t.trim().slice(0,100)}));
+  if(t&&t.trim())sendWS(JSON.stringify({t:'speak',text:t.trim().slice(0,100)}));
 };
 
 document.getElementById('play').onclick=()=>{
@@ -2647,7 +2652,7 @@ document.getElementById('play').onclick=()=>{
   pvStop();audioInit();goLandscape();
   const proto=location.protocol==='https:'?'wss':'ws';
   ws=new WebSocket(`${proto}://${location.host}`);
-  ws.onopen=()=>ws.send(JSON.stringify({t:'join',name:myName,room,role:myRole,look,idToken,token:authToken}));
+  ws.onopen=()=>sendWS(JSON.stringify({t:'join',name:myName,room,role:myRole,look,idToken,token:authToken}));
   ws.onmessage=ev=>{
     const m=JSON.parse(ev.data);
     if(m.t==='lifeinfo'){if(m.home!==undefined)myHome=m.home;if(m.path)myPathInfo=m.path;lifeUpdate(m);return}
@@ -2703,24 +2708,24 @@ document.getElementById('play').onclick=()=>{
     }
   };
   ws.onclose=()=>toast('Disconnected');
-  setInterval(()=>{if(ws.readyState===1&&me)ws.send(JSON.stringify({t:'move',x:pos.x,z:pos.z,ry:pos.ry,moving:moving,car:myCol,floor:pos.floor}))},66);
+  setInterval(()=>{if(ws.readyState===1&&me)sendWS(JSON.stringify({t:'move',x:pos.x,z:pos.z,ry:pos.ry,moving:moving,car:myCol,floor:pos.floor}))},66);
 };
-document.getElementById('act').onclick=()=>{audioInit();ws&&ws.send(JSON.stringify({t:'action'}))};
+document.getElementById('act').onclick=()=>{audioInit();ws&&sendWS(JSON.stringify({t:'action'}))};
 (function(){
   const PH=['👋 Hello!','How far? 😄','Where are you going?','Hop in! 🚗','Wait for me!','Let\'s go to the gallery 🚘','See you tomorrow 🙏','Thank you!','Nice car! 🔥','Wetin dey happen?'];
   const b=document.createElement('button');b.textContent='💬';b.style.cssText='position:fixed;left:8px;bottom:160px;z-index:55;width:44px;height:44px;border-radius:22px;border:0;background:#1f2937cc;color:#fff;font-size:20px';
   const p=document.createElement('div');p.style.cssText='position:fixed;left:8px;bottom:210px;z-index:55;display:none;flex-direction:column;gap:5px;background:#111827ee;padding:8px;border-radius:12px;max-width:210px';
-  PH.forEach(t=>{const c=document.createElement('button');c.textContent=t;c.style.cssText='border:0;border-radius:8px;padding:7px 10px;background:#374151;color:#fff;text-align:left;font-size:13px';c.onclick=()=>{if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'chat',text:t}));p.style.display='none'};p.appendChild(c)});
+  PH.forEach(t=>{const c=document.createElement('button');c.textContent=t;c.style.cssText='border:0;border-radius:8px;padding:7px 10px;background:#374151;color:#fff;text-align:left;font-size:13px';c.onclick=()=>{if(ws&&ws.readyState===1)sendWS(JSON.stringify({t:'chat',text:t}));p.style.display='none'};p.appendChild(c)});
   b.onclick=()=>{p.style.display=p.style.display==='flex'?'none':'flex'};
   document.body.appendChild(b);document.body.appendChild(p);
 })();
-document.getElementById('chatbtn').onclick=()=>{const t=prompt('Say something:');if(t&&ws)ws.send(JSON.stringify({t:'chat',text:t}))};
+document.getElementById('chatbtn').onclick=()=>{const t=prompt('Say something:');if(t&&ws)sendWS(JSON.stringify({t:'chat',text:t}))};
 
 const atm=document.getElementById('atm');
 function updateATM(){document.getElementById('atmcash').textContent='₦'+(myMoney||0);document.getElementById('atmbank').textContent='₦'+myBank}
 function showATM(){atm.style.display='flex';updateATM()}
 function closeATM(){atm.style.display='none'}
-atm.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>{if(ws)ws.send(JSON.stringify({t:'bank',op:b.dataset.op,amt:b.dataset.amt==='all'?'all':+b.dataset.amt}))});
+atm.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>{if(ws)sendWS(JSON.stringify({t:'bank',op:b.dataset.op,amt:b.dataset.amt==='all'?'all':+b.dataset.amt}))});
 document.getElementById('atmx').onclick=closeATM;
 const useBtn=document.getElementById('use');
 let useTarget=null;
@@ -2733,19 +2738,19 @@ useBtn.onclick=()=>{
   }else if(useTarget.type==='enter'){
     const pc=useTarget.car;scene.remove(pc.g);carObj=pc;myCol=pc.col;speed=0;
     pos.x=pc.x;pos.z=pc.z;pos.ry=pc.ry;camYaw=pc.ry;setCarMode(me,myCol,myRole);
-  }else if(useTarget.type==='rent'){ws.send(JSON.stringify({t:'rent',op:'rent'}));sfx.buy()}
-  else if(useTarget.type==='npc')ws.send(JSON.stringify({t:'npc',id:useTarget.id}));
+  }else if(useTarget.type==='rent'){sendWS(JSON.stringify({t:'rent',op:'rent'}));sfx.buy()}
+  else if(useTarget.type==='npc')sendWS(JSON.stringify({t:'npc',id:useTarget.id}));
   else if(useTarget.type==='xshow')openShowCard(useTarget.col);
-  else if(useTarget.type==='xjoin')ws.send(JSON.stringify({t:'ridejoin',id:useTarget.id}));
-  else if(useTarget.type==='xleave')ws.send(JSON.stringify({t:'ridestop'}));
-  else if(useTarget.type==='in')ws.send(JSON.stringify({t:'enter',place:useTarget.place}));
-  else if(useTarget.type==='floor'){pos.floor=useTarget.floor;ws.send(JSON.stringify({t:'floor',floor:pos.floor}));camInit=false;toast(useTarget.method==='lift'?'🛗 Elevator arrived':'🪜 You changed floors');}
-  else if(useTarget.type==='out')ws.send(JSON.stringify({t:'exit'}));
+  else if(useTarget.type==='xjoin')sendWS(JSON.stringify({t:'ridejoin',id:useTarget.id}));
+  else if(useTarget.type==='xleave')sendWS(JSON.stringify({t:'ridestop'}));
+  else if(useTarget.type==='in')sendWS(JSON.stringify({t:'enter',place:useTarget.place}));
+  else if(useTarget.type==='floor'){pos.floor=useTarget.floor;sendWS(JSON.stringify({t:'floor',floor:pos.floor}));camInit=false;toast(useTarget.method==='lift'?'🛗 Elevator arrived':'🪜 You changed floors');}
+  else if(useTarget.type==='out')sendWS(JSON.stringify({t:'exit'}));
   else if(useTarget.type==='atm')showATM();
-  else if(useTarget.type==='paint')ws.send(JSON.stringify({t:'paint'}));
-  else if(useTarget.type==='life')ws.send(JSON.stringify({t:'life',op:useTarget.op}));
-  else if(useTarget.type==='eat')ws.send(JSON.stringify({t:'eat'}));
-  else if(useTarget.type==='venue')ws.send(JSON.stringify({t:'venue'}));
+  else if(useTarget.type==='paint')sendWS(JSON.stringify({t:'paint'}));
+  else if(useTarget.type==='life')sendWS(JSON.stringify({t:'life',op:useTarget.op}));
+  else if(useTarget.type==='eat')sendWS(JSON.stringify({t:'eat'}));
+  else if(useTarget.type==='venue')sendWS(JSON.stringify({t:'venue'}));
   else if(useTarget.type==='getup')endPose(true);
 };
 
@@ -2874,7 +2879,7 @@ $('pgrid').onclick=e=>{const b=e.target.closest('[data-app]');if(b)openApp(b.dat
 $('phoneSearch').addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();document.querySelectorAll('#pgrid .app').forEach(b=>{const n=b.dataset.app.toLowerCase();const aliases=n==='business'?'business company companies create company startup enterprise':n; b.style.display=(!q||aliases.includes(q))?'':'none'})});
 function gpsToHouse(h){if(!h)return;gps={x:h.x,z:h.z,name:h.name||('Property '+h.id)};closePhone();toast('📍 GPS set to '+gps.name)}
 function businessSend(op,data={}){
-  if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'business',op,...data}));
+  if(ws&&ws.readyState===1)sendWS(JSON.stringify({t:'business',op,...data}));
 }
 function renderBusinesses(){
   const mine=cityBusinesses.find(b=>b.isMine);
@@ -2920,7 +2925,7 @@ function openApp(n){
   if(n==='Business')renderBusinesses();
   else if(n==='GPS')renderGps();
   else if(n==='Properties')renderProperties();
-  else if(n==='Chat'){appview.innerHTML='<div class="card"><b>💬 LAGOS LIVE CHAT</b><p>Talk to players in your current multiplayer room.</p><div id="phoneChatFeed" style="height:48vh;overflow:auto;background:#0b111d;border-radius:12px;padding:10px"></div><div style="display:flex;gap:7px;margin-top:9px"><input id="phoneChatInput" maxlength="80" placeholder="Message your city..." style="flex:1;min-width:0;width:0;text-align:left;background:#111a2a;color:white;border:1px solid #46516a"><button class="pb q" id="phoneChatSend">Send</button></div></div>';renderPhoneChat();setTimeout(()=>{const send=$('phoneChatSend'),input=$('phoneChatInput');if(send&&input){const go=()=>{const text=input.value.trim();if(!text)return;if(!ws||ws.readyState!==1){toast('Connect to multiplayer chat first');return}ws.send(JSON.stringify({t:'chat',text}));input.value=''};send.onclick=go;input.onkeydown=e=>{if(e.key==='Enter')go()}}},0)}
+  else if(n==='Chat'){appview.innerHTML='<div class="card"><b>💬 LAGOS LIVE CHAT</b><p>Talk to players in your current multiplayer room.</p><div id="phoneChatFeed" style="height:48vh;overflow:auto;background:#0b111d;border-radius:12px;padding:10px"></div><div style="display:flex;gap:7px;margin-top:9px"><input id="phoneChatInput" maxlength="80" placeholder="Message your city..." style="flex:1;min-width:0;width:0;text-align:left;background:#111a2a;color:white;border:1px solid #46516a"><button class="pb q" id="phoneChatSend">Send</button></div></div>';renderPhoneChat();setTimeout(()=>{const send=$('phoneChatSend'),input=$('phoneChatInput');if(send&&input){const go=()=>{const text=input.value.trim();if(!text)return;if(!ws||ws.readyState!==1){toast('Connect to multiplayer chat first');return}sendWS(JSON.stringify({t:'chat',text}));input.value=''};send.onclick=go;input.onkeydown=e=>{if(e.key==='Enter')go()}}},0)}
   else if(n==='News')appview.innerHTML='<div class="card"><b>📰 LAGOS CITY NEWS</b><p>Latest city updates, events and opportunities.</p><small>News feed preview • More stories coming soon</small></div>';
   else if(n==='Yellow Pages')appview.innerHTML='<div class="card"><b>📒 YELLOW PAGES</b><p>Find city services and destinations.</p><button class="pb q" onclick="setGps(\'bank\')">🏦 Lagoon Bank</button><button class="pb q" onclick="renderGps()">📍 Explore map</button></div>';
   else if(n==='Account')appview.innerHTML='<div class="card"><b>💳 ACCOUNT OVERVIEW</b><h2 style="color:#a78bfa">₦'+(myMoney||0)+'</h2><small>Cash balance</small><hr style="border-color:#292f40"><b>Bank balance: ₦'+myBank+'</b></div>';
@@ -2965,8 +2970,8 @@ function renderSocialFeed(){
   const likes=Array.isArray(p.likes)?p.likes.length:(+p.likes||0);
   return '<article class="card social-post" style="margin:12px 0;padding:15px;background:linear-gradient(145deg,#20283a,#101722);border:1px solid #ffffff20;border-radius:18px"><div style="display:flex;align-items:center;gap:9px"><span style="font-size:25px">👤</span><div><b>'+escapeBusinessText(p.name||'Player')+'</b><br><small>'+escapeBusinessText(p.area||'Lagos City')+'</small></div><span style="margin-left:auto;font-size:11px;color:#aeb9cc">CITYGAME</span></div><p style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:16px;line-height:1.5;margin:15px 0">'+escapeBusinessText(p.text)+'</p><div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap"><button class="pb q" data-social-like="'+escapeBusinessText(p.id)+'" style="background:'+(p.likedByMe?'#9b3158':'#303b50')+';color:white;padding:9px 13px">❤️ '+(p.likedByMe?'Liked':'Like')+' · '+likes+'</button><span style="font-size:12px;color:#c4cede">💬 '+comments.length+' replies</span></div><div style="margin-top:10px;padding-left:10px;border-left:2px solid #58657c">'+(comments.length?comments.slice(-4).map(c=>'<p style="margin:6px 0;font-size:13px"><b>'+escapeBusinessText(c.name||'Player')+':</b> '+escapeBusinessText(c.text)+'</p>').join(''):'<small style="color:#aeb9cc">Be the first to reply.</small>')+'</div><div style="display:flex;gap:6px;margin-top:10px"><input data-social-reply-input="'+escapeBusinessText(p.id)+'" maxlength="140" placeholder="Write a reply…" style="min-width:0;flex:1;width:0;padding:10px;border-radius:10px;background:#0c1220;color:white;border:1px solid #46516a;text-align:left"><button class="pb q" data-social-reply="'+escapeBusinessText(p.id)+'" style="padding:9px 12px">Reply</button></div></article>';
  }).join(''):'<div class="card">No posts yet. Be the first to share something with Lagos!</div>';
- feed.querySelectorAll('[data-social-like]').forEach(btn=>btn.addEventListener('click',()=>{if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'social_like',id:btn.dataset.socialLike}));else toast('Connect to multiplayer to like posts')}));
- feed.querySelectorAll('[data-social-reply]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.socialReply,input=feed.querySelector('[data-social-reply-input="'+id+'"]'),text=input&&input.value.trim();if(!text)return;if(!ws||ws.readyState!==1){toast('Connect to multiplayer to reply');return}ws.send(JSON.stringify({t:'social_reply',id,text}));input.value=''}));
+ feed.querySelectorAll('[data-social-like]').forEach(btn=>btn.addEventListener('click',()=>{if(ws&&ws.readyState===1)sendWS(JSON.stringify({t:'social_like',id:btn.dataset.socialLike}));else toast('Connect to multiplayer to like posts')}));
+ feed.querySelectorAll('[data-social-reply]').forEach(btn=>btn.addEventListener('click',()=>{const id=btn.dataset.socialReply,input=feed.querySelector('[data-social-reply-input="'+id+'"]'),text=input&&input.value.trim();if(!text)return;if(!ws||ws.readyState!==1){toast('Connect to multiplayer to reply');return}sendWS(JSON.stringify({t:'social_reply',id,text}));input.value=''}));
 }
 function renderSocial(){
  const messages=['Who is online in Lagos? 👋','Anyone want to cruise? 🚗','Meet me at the city center 📍','Let’s do a delivery run 📦','Good vibes in Lagos! 🎉','Anyone at the mall? 🛍️'];
@@ -2974,15 +2979,15 @@ function renderSocial(){
  appview.innerHTML='<div class="card"><b>🎉 LAGOS SOCIAL FEED</b><br><small>Share a post with everyone in your multiplayer room.</small></div><div class="card"><label for="socialText">Write a post</label><textarea id="socialText" maxlength="180" rows="3" placeholder="What is happening in Lagos?" style="width:100%;padding:11px;border-radius:9px;background:#101827;color:white;border:1px solid #46516a;resize:vertical;text-align:left"></textarea><button class="pb q" id="socialSend" style="width:100%;margin-top:8px">📣 Publish post</button><small id="socialStatus">Posts appear in the feed below. Please wait for server confirmation.</small></div><div class="card"><b>Quick posts</b><div id="socialQuick"></div></div><div id="socialFeed"></div>';
  const quick=appview.querySelector('#socialQuick');
  messages.forEach(m=>{const btn=document.createElement('button');btn.className='pb q';btn.style.cssText='width:100%;margin:5px 0;text-align:left';btn.textContent=m;btn.addEventListener('click',()=>{const input=appview.querySelector('#socialText');if(input){input.value=m;input.focus()}});quick.appendChild(btn)});
- const send=()=>{const input=appview.querySelector('#socialText'),status=appview.querySelector('#socialStatus'),message=input&&input.value.trim();if(!message)return;if(!ws||ws.readyState!==1){status.textContent='Not connected to multiplayer. Reconnect before posting.';return}try{ws.send(JSON.stringify({t:'social_post',text:message.slice(0,180)}));status.textContent='Posting… waiting for the server.';input.value=''}catch(e){status.textContent='Could not send. Check your connection and try again.'}};
+ const send=()=>{const input=appview.querySelector('#socialText'),status=appview.querySelector('#socialStatus'),message=input&&input.value.trim();if(!message)return;if(!ws||ws.readyState!==1){status.textContent='Not connected to multiplayer. Reconnect before posting.';return}try{sendWS(JSON.stringify({t:'social_post',text:message.slice(0,180)}));status.textContent='Posting… waiting for the server.';input.value=''}catch(e){status.textContent='Could not send. Check your connection and try again.'}};
  appview.querySelector('#socialSend').addEventListener('click',send);
  appview.querySelector('#socialText').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
  renderSocialFeed();
- if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'social_get'}));
+ if(ws&&ws.readyState===1)sendWS(JSON.stringify({t:'social_get'}));
 }
 function sendSocialText(message){
  if(!ws||ws.readyState!==1){toast('Multiplayer is reconnecting. Try again when connected.');return false}
- try{ws.send(JSON.stringify({t:'chat',text:String(message).slice(0,180)}));return true}catch(e){toast('Message could not be sent. Check your connection.');return false}
+ try{sendWS(JSON.stringify({t:'chat',text:String(message).slice(0,180)}));return true}catch(e){toast('Message could not be sent. Check your connection.');return false}
 }
 function sendSocialMessage(i){
  const messages=['Who is online in Lagos? 👋','Anyone want to cruise? 🚗','Meet me at the city center 📍','Let’s do a delivery run 📦','Good vibes in Lagos! 🎉','Anyone at the mall? 🛍️'];
@@ -3026,7 +3031,7 @@ function renderJobs(){
     appview.innerHTML=`<div class="card">📦 <b>Delivery run</b><br>${jobInfo.label}<br>Pay: <b>₦${jobInfo.pay}</b> • Time left: ${Math.floor(l/60)}:${String(l%60).padStart(2,'0')}<br>Follow the yellow beam and the 📦 on your minimap.</div><button class="pb q" onclick="sendJob('cancel')">Cancel job</button>`}
   else appview.innerHTML=`<div class="card"><b>💼 LAGOS CAREER CENTER</b><p>Build your career, earn a steady income, and progress through the city economy.</p><button class="pb q" onclick="closePhone();$('lifeBtn').click()">📋 Open Career & Life</button></div><div class="card">📦 <b>Delivery run</b><br>Pick up a package at a shop and bring it to an address. Distance affects your reward.</div><button class="pb" style="background:#43a047;color:#fff" onclick="sendJob('start')">Start delivery</button><div class="card" style="font-size:11px">Special roles have unique actions: police, nurse, lawyer, and taxi driver. Your career shifts, needs, inventory, missions, and money history are in My Life.</div>`;
 }
-function sendJob(op){if(ws)ws.send(JSON.stringify({t:'job',op}));closePhone()}
+function sendJob(op){if(ws)sendWS(JSON.stringify({t:'job',op}));closePhone()}
 function setJob(j){
   jobInfo=j?{...j,until:Date.now()+j.left*1000}:null;jobTarget=j?{x:j.x,z:j.z}:null;renderJobs();
 }
@@ -3199,7 +3204,7 @@ mapside.onclick=e=>{
   else if(a==='cleargps'){gps=null;renderSide();drawBigMap()}
   else if(a==='ride'){
     if(myCol>=0){toast('Get out of your car first');return}
-    ws.send(JSON.stringify({t:'travel',place:selPlace,ride:b.dataset.ride}));closeMap();
+    sendWS(JSON.stringify({t:'travel',place:selPlace,ride:b.dataset.ride}));closeMap();
   }
 };
 // ---- riding overlay ----
@@ -3293,7 +3298,7 @@ function updateRideScene(){
     else if(nowT-R.sayT>5500&&R.say.length){R.sayT=nowT;R.sayI++;txt=R.say[R.sayI%R.say.length]}
     if(txt!==null&&txt!==R.msg.textContent)R.msg.textContent=txt;
   }
-  if(!R.done&&remain<0.6&&R.vs<0.8){R.done=true;if(ws&&ws.readyState===1)ws.send(JSON.stringify({t:'rideend'}))}   // tell the server we have arrived
+  if(!R.done&&remain<0.6&&R.vs<0.8){R.done=true;if(ws&&ws.readyState===1)sendWS(JSON.stringify({t:'rideend'}))}   // tell the server we have arrived
 }
 function endRideScene(){
   if(!rideSc)return;scene.remove(rideSc.g);rideSc.jam.forEach(j=>scene.remove(j));rideSc=null;
@@ -3527,7 +3532,7 @@ function loop(now){
         }else if(r.stage==='checkout'&&Math.hypot(n.x-n.checkoutX,n.z-n.checkoutZ)<0.65){
           r.tx=n.checkoutX;r.tz=n.checkoutZ;
           if(!r.checkoutUntil)r.checkoutUntil=nowNpc+1800;
-          if(nowNpc>=r.checkoutUntil){if(receipt)receipt.visible=true;if(!r.saleSent&&ws&&ws.readyState===1){ws.send(JSON.stringify({t:'customer_sale'}));r.saleSent=true}r.stage='exit';r.tx=n.exitX;r.tz=n.exitZ;r.checkoutUntil=0;r.stageAt=nowNpc+10000}
+          if(nowNpc>=r.checkoutUntil){if(receipt)receipt.visible=true;if(!r.saleSent&&ws&&ws.readyState===1){sendWS(JSON.stringify({t:'customer_sale'}));r.saleSent=true}r.stage='exit';r.tx=n.exitX;r.tz=n.exitZ;r.checkoutUntil=0;r.stageAt=nowNpc+10000}
         }else if(r.stage==='exit'&&Math.hypot(n.x-n.exitX,n.z-n.exitZ)<0.85){
           if(receipt)receipt.visible=false;o.g.userData.pose=null;
           n.x=n.spawnX;n.z=n.spawnZ;o.g.position.set(n.x,0,n.z);r.stage='browse';r.tx=n.x;r.tz=n.z;r.stageAt=nowNpc+5000+Math.random()*7000;r.sitUntil=0;r.saleSent=false;
@@ -3707,7 +3712,7 @@ const scene=window.scene;
 if(!scene)throw new Error("Shared Three.js scene was not initialized before phone add-ons");
 const PX={cars:[],license:false,carList:[],cert:null,mk:null,decor:{shop:[],inv:{},placed:{}},role:'citizen',players:{},
   threads:{},cur:null,app:null,catalog:[],myName:'',guard:false,route:null,routeLen:0,mapQ:''};
-const S=o=>{try{if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}catch(e){}};
+const S=o=>{try{if(ws&&ws.readyState===1)sendWS(JSON.stringify(o))}catch(e){}};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const phoneOpen=()=>phone.style.display==='flex';
 const guard=(name,fn)=>{try{fn()}catch(e){console.warn('plus:'+name,e)}};
@@ -4321,7 +4326,7 @@ console.log('Citygame v0.7 add-on loaded');
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
-const S=o=>{try{if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}catch(e){}};
+const S=o=>{try{if(ws&&ws.readyState===1)sendWS(JSON.stringify(o))}catch(e){}};
 const fmt=n=>'₦'+Math.round(n).toLocaleString('en-NG');
 const V=new THREE.Vector3();
 let W={acct:'',bank:0,money:0,hasPin:false,name:''},wPending=[],walletOpen=false;
@@ -4553,7 +4558,7 @@ setInterval(()=>{
 (function(){
 'use strict';
 const $=id=>document.getElementById(id);
-const S=o=>{try{if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}catch(e){}};
+const S=o=>{try{if(ws&&ws.readyState===1)sendWS(JSON.stringify(o))}catch(e){}};
 const fmt=n=>'₦'+Math.round(n).toLocaleString('en-NG');
 const st=document.createElement('style');st.textContent=`
 #mo3{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:31}
@@ -4874,7 +4879,7 @@ setInterval(()=>{
 <script id="lagos6">
 (function(){
 'use strict';
-const S=o=>{try{if(ws&&ws.readyState===1)ws.send(JSON.stringify(o))}catch(e){}};
+const S=o=>{try{if(ws&&ws.readyState===1)sendWS(JSON.stringify(o))}catch(e){}};
 const st=document.createElement('style');st.textContent=`
 /* left-side quick buttons: two tidy rows, clear of the minimap and the joystick */
 #walletbtn,#giftbtn,#jobbtn,#phonebtn,#lifeBtn{position:fixed!important;width:38px!important;height:38px!important;font-size:17px!important;padding:0!important;right:auto!important;bottom:auto!important;border-radius:50%!important;z-index:6!important}
