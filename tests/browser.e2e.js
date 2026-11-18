@@ -209,10 +209,36 @@ async function waitForServer() {
     // intercept the character-selection button. This does not fake account age
     // or credentials; it exercises the game's explicit guest entry flow.
     await page.locator('#guestbtn').click();
+    // Wait for the login overlay to leave the hit-testing tree and the
+    // character-selection screen to become the active, unobstructed surface.
+    await page.locator('#login').waitFor({ state: 'hidden', timeout: 10000 });
+    const playTarget = page.locator('#play');
+    await playTarget.waitFor({ state: 'visible', timeout: 10000 });
+    await playTarget.scrollIntoViewIfNeeded();
+    const playHitTest = await page.evaluate(() => {
+      const button = document.querySelector('#play');
+      if (!button) return { exists: false };
+      const rect = button.getBoundingClientRect();
+      const x = Math.max(0, Math.min(innerWidth - 1, rect.left + rect.width / 2));
+      const y = Math.max(0, Math.min(innerHeight - 1, rect.top + rect.height / 2));
+      const top = document.elementFromPoint(x, y);
+      return {
+        exists: true,
+        rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+        menuDisplay: getComputedStyle(document.querySelector('#menu')).display,
+        loginDisplay: getComputedStyle(document.querySelector('#login')).display,
+        phoneDisplay: getComputedStyle(document.querySelector('#phone')).display,
+        fateDisplay: getComputedStyle(document.querySelector('#fate')).display,
+        topElement: top ? { tag: top.tagName, id: top.id, className: String(top.className || '') } : null,
+        receivesClick: !!top && (top === button || button.contains(top))
+      };
+    });
+    assert.equal(playHitTest.receivesClick, true,
+      'Enter Citygame must be the topmost hit target after guest entry: ' + JSON.stringify(playHitTest));
     // Enter the actual multiplayer world. The randomized "Your Life" panel
     // is sent by the server only after the WebSocket welcome, not during guest
     // entry, so it must not be awaited before clicking Play.
-    await page.locator('#play').click();
+    await playTarget.click({ timeout: 10000 });
     await page.waitForFunction(() => {
       try {
         return typeof ws !== 'undefined' && !!ws && ws.readyState === 1 &&
