@@ -196,13 +196,9 @@ async function waitForServer() {
     // intercept the character-selection button. This does not fake account age
     // or credentials; it exercises the game's explicit guest entry flow.
     await page.locator('#guestbtn').click();
-    // Guest entry intentionally presents the randomized "Your Life" panel.
-    // The play menu is behind that full-screen panel until the player confirms.
-    await page.locator('#fgo').waitFor({ state: 'visible', timeout: 15000 });
-    await page.locator('#fgo').click();
-    // Enter the actual multiplayer world. Earlier checks only proved that the
-    // shell and phone renderers loaded; this catches errors during the welcome
-    // message, world construction, scene setup and WebSocket join.
+    // Enter the actual multiplayer world. The randomized "Your Life" panel
+    // is sent by the server only after the WebSocket welcome, not during guest
+    // entry, so it must not be awaited before clicking Play.
     await page.locator('#play').click();
     await page.waitForFunction(() => {
       try {
@@ -216,6 +212,14 @@ async function waitForServer() {
         return false;
       }
     }, null, { timeout: 25000 });
+
+    // If this is a first-time guest, dismiss the life-path panel after the
+    // world is already created. Returning players may not receive this panel.
+    const fate = page.locator('#fate');
+    if (await fate.isVisible().catch(() => false)) {
+      await page.locator('#fgo').waitFor({ state: 'visible', timeout: 15000 });
+      await page.locator('#fgo').click();
+    }
 
     const liveWorld = await page.evaluate(() => ({
       socket: typeof ws !== 'undefined' && ws ? ws.readyState : -1,
