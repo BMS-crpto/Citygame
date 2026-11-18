@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -79,7 +80,25 @@ namespace Citygame.Editor
             gameSystems.AddComponent<LagosWeatherSystem>();
             if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
                 AssetDatabase.CreateFolder("Assets", "Scenes");
-            EditorSceneManager.SaveScene(scene, "Assets/Scenes/CitygameFoundation.unity");
+            const string scenePath = "Assets/Scenes/CitygameFoundation.unity";
+            EditorSceneManager.SaveScene(scene, scenePath);
+
+            // Keep the generated playable scene in the Unity player build list.
+            // Preserve any additional scenes already configured by the project.
+            List<EditorBuildSettingsScene> buildScenes = new List<EditorBuildSettingsScene>(
+                EditorBuildSettings.scenes ?? new EditorBuildSettingsScene[0]);
+            bool sceneRegistered = false;
+            for (int i = 0; i < buildScenes.Count; i++)
+            {
+                if (buildScenes[i].path != scenePath)
+                    continue;
+                buildScenes[i] = new EditorBuildSettingsScene(scenePath, true);
+                sceneRegistered = true;
+                break;
+            }
+            if (!sceneRegistered)
+                buildScenes.Add(new EditorBuildSettingsScene(scenePath, true));
+            EditorBuildSettings.scenes = buildScenes.ToArray();
             AssetDatabase.SaveAssets();
             Selection.activeGameObject = player;
             Debug.Log("Citygame scene generated with touch controls, business systems, local save and dynamic day/night lighting.");
