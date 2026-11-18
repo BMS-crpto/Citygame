@@ -644,6 +644,10 @@ test('3D Lagos street infrastructure is modular, integrated, and performance-bat
     'streetLights: poles.length',
     'drainSections: drainBases.length',
     'busShelters: shelters.length',
+    'trafficSignals: signalPoles.length',
+    'districtSigns: districtSigns',
+    'new THREE.CanvasTexture(canvas)',
+    'new THREE.SphereGeometry(0.13, 10, 8)',
     'CylinderGeometry(0.075, 0.13, 7.3, 8)',
     'BoxGeometry(8.8, 0.22, 3.9)'
   ]) assert.ok(source.includes(feature), 'street module missing 3D feature: ' + feature);
