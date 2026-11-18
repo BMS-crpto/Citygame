@@ -551,3 +551,33 @@ test('HUD script is valid JavaScript', () => {
   const source = fs.readFileSync(path.join(root, 'public', 'citygame-hud.js'), 'utf8');
   assert.doesNotThrow(() => new vm.Script(source, { filename: 'public/citygame-hud.js' }));
 });
+
+
+test('mobile joystick keeps ownership of its active finger and ignores unrelated touch endings', () => {
+  const source = fs.readFileSync(path.join(root, 'public', 'citygame-touch-controls.js'), 'utf8');
+  const listeners = {};
+  const knob = { style: { transform: 'translate(0,0)' } };
+  const stick = {
+    getBoundingClientRect() { return { left: 0, top: 0, width: 100, height: 100 }; },
+    addEventListener(name, callback) { listeners[name] = callback; }
+  };
+  const joy = { x: 0, y: 0 };
+  const window = { CG_JOY: joy };
+  const document = { getElementById(id) { return id === 'stick' ? stick : id === 'knob' ? knob : null; } };
+  vm.runInNewContext(source, { window, document, console, Math });
+  listeners.touchstart({ changedTouches: [{ identifier: 7, clientX: 88, clientY: 50 }] });
+  assert.equal(window.CitygameTouchControls.activeTouchId, 7);
+  assert.ok(joy.x > 0.9);
+  listeners.touchstart({ changedTouches: [{ identifier: 8, clientX: 50, clientY: 88 }] });
+  assert.equal(window.CitygameTouchControls.activeTouchId, 7);
+  listeners.touchend({ changedTouches: [{ identifier: 8 }] });
+  assert.equal(window.CitygameTouchControls.activeTouchId, 7);
+  assert.ok(joy.x > 0.9);
+  listeners.touchmove({ changedTouches: [{ identifier: 7, clientX: 50, clientY: 12 }] });
+  assert.ok(joy.y < -0.9);
+  listeners.touchend({ changedTouches: [{ identifier: 7 }] });
+  assert.equal(window.CitygameTouchControls.activeTouchId, null);
+  assert.equal(joy.x, 0);
+  assert.equal(joy.y, 0);
+  assert.equal(knob.style.transform, 'translate(0,0)');
+});
