@@ -148,41 +148,38 @@
   count(activeLenses, new THREE.SphereGeometry(0.13, 10, 8), activeLensMat, false);
 
   // Raised, readable 3D district signs at the main crossroads.
-  const signCanvas = document.createElement('canvas');
-  signCanvas.width = 512; signCanvas.height = 128;
-  const signContext = signCanvas.getContext('2d');
-  const signTexture = new THREE.CanvasTexture(signCanvas);
-  signTexture.colorSpace = THREE.SRGBColorSpace || signTexture.colorSpace;
-  function districtForSign(x, z) {
-    if (x >= 2) return 'LEKKI';
-    if (x <= -3 && z <= -1) return 'IKEJA';
-    if (x <= -3) return 'SURULERE';
-    if (Math.abs(x) <= 1 && Math.abs(z) <= 1) return 'VICTORIA ISLAND';
-    return 'LAGOS MAINLAND';
+  function makeDistrictSign(label, x, z) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512; canvas.height = 128;
+    const context = canvas.getContext('2d');
+    context.fillStyle = '#075b3d'; context.fillRect(0, 0, 512, 128);
+    context.strokeStyle = '#f5f0d7'; context.lineWidth = 8; context.strokeRect(5, 5, 502, 118);
+    context.fillStyle = '#ffffff'; context.font = 'bold 48px Arial'; context.textAlign = 'center'; context.textBaseline = 'middle';
+    context.fillText(label, 256, 65, 470);
+    const texture = new THREE.CanvasTexture(canvas);
+    if ('colorSpace' in texture && THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
+    else if ('encoding' in texture && THREE.sRGBEncoding) texture.encoding = THREE.sRGBEncoding;
+    const material = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.78, metalness: 0.08, side: THREE.DoubleSide });
+    const board = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.05, 0.12), material);
+    board.position.set(x, 5.55, z);
+    board.rotation.y = Math.PI / 4;
+    board.castShadow = false; board.receiveShadow = true;
+    scene.add(board);
   }
-  const signMaterial = new THREE.MeshStandardMaterial({ map: signTexture, roughness: 0.78, metalness: 0.08, side: THREE.DoubleSide });
+  let districtSigns = 0;
   for (let ix = -6; ix <= 6; ix += 3) {
     for (let iz = -6; iz <= 6; iz += 3) {
-      const label = districtForSign(ix, iz);
-      signContext.clearRect(0, 0, 512, 128);
-      signContext.fillStyle = '#075b3d'; signContext.fillRect(0, 0, 512, 128);
-      signContext.strokeStyle = '#f5f0d7'; signContext.lineWidth = 8; signContext.strokeRect(5, 5, 502, 118);
-      signContext.fillStyle = '#ffffff'; signContext.font = 'bold 48px Arial'; signContext.textAlign = 'center'; signContext.textBaseline = 'middle';
-      signContext.fillText(label, 256, 65, 470);
-      signTexture.needsUpdate = true;
-      const board = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.05, 0.12), signMaterial);
-      board.position.set(ix * BLOCK + 8.2, 5.55, iz * BLOCK + 8.2);
-      board.rotation.y = Math.PI / 4;
-      board.castShadow = false; board.receiveShadow = true;
-      scene.add(board);
+      makeDistrictSign(districtForSign(ix, iz), ix * BLOCK + 8.2, iz * BLOCK + 8.2);
+      districtSigns++;
     }
   }
-
   window.CG_LAGOS_STREETS = {
     built: true,
     streetLights: poles.length,
     drainSections: drainBases.length,
-    busShelters: shelters.length
+    busShelters: shelters.length,
+    trafficSignals: signalPoles.length,
+    districtSigns: districtSigns
   };
   console.info('[Citygame streets] 3D street infrastructure built:', window.CG_LAGOS_STREETS);
 })();
