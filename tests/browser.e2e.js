@@ -179,6 +179,19 @@ async function waitForServer() {
     assert.equal(dealership.detailHasVehicle, true, 'vehicle details must identify the selected model');
     await page.locator('#egClose').click(); // dismiss the full-screen 3D preview before entering the city
 
+    // App-launch checks deliberately opened each phone app while the game menu
+    // was still visible. Close that test-only overlay before clicking Enter,
+    // otherwise the full-screen phone can intercept the menu button.
+    await page.evaluate(() => {
+      const phone = document.querySelector('#phone');
+      if (phone) {
+        phone.classList.remove('app-open');
+        phone.style.display = 'none';
+      }
+      const appview = document.querySelector('#appview');
+      if (appview) appview.dataset.app = '';
+    });
+
     // Continue through the supported guest path so the login overlay does not
     // intercept the character-selection button. This does not fake account age
     // or credentials; it exercises the game's explicit guest entry flow.
