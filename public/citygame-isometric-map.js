@@ -77,16 +77,18 @@
 
     const land = new THREE.Group(); scene.add(land);
     const tileGeo = new THREE.BoxGeometry(62, 1.2, 62);
-    const tileMats = [0x477866,0x456f62,0x3d7965,0x68745b,0x526c64,0x527c62].map(c => material(c));
-    const tiles = tileMats.map(m => new THREE.InstancedMesh(tileGeo, m, 576));
+    const tileColors = [0x477866,0x456f62,0x3d7965,0x68745b,0x526c64,0x527c62];
+    const tiles = new THREE.InstancedMesh(tileGeo, material(0xffffff), 576);
     const dummy = new THREE.Object3D();
     let n = 0;
     for (let x = -12; x < 12; x++) for (let z = -12; z < 12; z++) {
       const idx = x >= 4 ? (z < 0 ? 1 : 2) : x <= -4 ? (z < 0 ? 3 : 0) : z <= -4 ? 4 : z >= 4 ? 5 : 0;
       dummy.position.set(x * 64 + 32, -0.8, z * 64 + 32); dummy.updateMatrix();
-      tiles[idx].setMatrixAt(n, dummy.matrix); n++;
+      tiles.setMatrixAt(n, dummy.matrix); tiles.setColorAt(n, new THREE.Color(tileColors[idx])); n++;
     }
-    tiles.forEach(m => { m.instanceMatrix.needsUpdate = true; m.receiveShadow = true; scene.add(m); });
+    tiles.instanceMatrix.needsUpdate = true;
+    if (tiles.instanceColor) tiles.instanceColor.needsUpdate = true;
+    tiles.receiveShadow = true; scene.add(tiles);
 
     const roadMat = material(0x303a42, 0.98);
     const sidewalkMat = material(0xb8b4a8, 0.95);
