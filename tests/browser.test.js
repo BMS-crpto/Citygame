@@ -411,6 +411,27 @@ test('big map caches static city layers between redraws', () => {
   assert.match(draw, /const drawBlock=\(x,y,w,h,depth,roof,side,detail\)/);
   assert.match(html, /LIVE POSITION/);
 });
+test('interactive isometric map is loaded as a separate Three.js world overview', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  const mapPath = path.join(root, 'public', 'citygame-isometric-map.js');
+  assert.ok(fs.existsSync(mapPath), 'isometric map module must exist');
+  assert.match(html, /citygame-isometric-map\.js/);
+  const map = fs.readFileSync(mapPath, 'utf8');
+  for (const feature of [
+    'new THREE.WebGLRenderer',
+    'new THREE.OrthographicCamera',
+    'new THREE.InstancedMesh',
+    'new THREE.Raycaster',
+    'window.placesList()',
+    'window.setGps',
+    'pointerdown',
+    'pointermove',
+    'CGIsometricMap'
+  ]) assert.ok(map.includes(feature), 'isometric map is missing: ' + feature);
+  assert.match(map, /Tap a building to navigate/);
+  assert.match(map, /window\.CG_ME/);
+});
+
 test('WebSocket sends are guarded until the connection is OPEN', () => {
   const html = fs.readFileSync(htmlPath, 'utf8');
   assert.match(html, /function sendWS\(data\)/);
