@@ -388,7 +388,7 @@ test('Lagos map is a dedicated full-screen HUD screen, not a phone app', () => {
   assert.match(html, /\$\('mapbtn'\)\.onclick=\(\)=>\{closePhone\(\);openMap\(\)\}/);
   assert.match(html, /#bigmap\{position:fixed;inset:0;background:#102e2b/);
   assert.match(html, /function sizeMap\(\)\{const W=.*bmc\.width=W;bmc\.height=H/s);
-  assert.match(html, /Raised building plots with shadows and coloured roofs/);
+  assert.match(html, /Individual building footprints with raised, shaded sides and roof details/);
   assert.match(html, /g\.roundRect\(a\[0\]-tw\/2/);
   const appsStart = html.indexOf('const APPS=');
   const appsEnd = html.indexOf(';', appsStart);
