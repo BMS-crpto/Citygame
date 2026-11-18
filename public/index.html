@@ -2593,7 +2593,27 @@ function pvLoop(t){
   const cv=PV.r.domElement,w=cv.clientWidth,h=cv.clientHeight,pr=Math.min(window.devicePixelRatio||1,1.5);
   if(w&&h&&(cv.width!==Math.round(w*pr)||cv.height!==Math.round(h*pr))){PV.r.setPixelRatio(pr);PV.r.setSize(w,h,false);PV.cam.aspect=w/h;PV.cam.updateProjectionMatrix()}
   if(!w||!h)return;
-  if(PV.ch){if(!PV.drag)PV.ang+=dt*0.55;PV.ch.rotation.y=PV.ang;animate(PV.ch,false,dt)}
+  if(PV.ch){
+    if(!PV.drag)PV.ang+=dt*0.28;
+    PV.ch.rotation.y=PV.ang;
+    animate(PV.ch,false,dt);
+    // GLB characters load asynchronously. Reframe the preview once the real model arrives
+    // so tall/short model variants are not clipped by the fixed camera distance.
+    if(PV.ch.userData.modelDone&&!PV.ch.userData.previewFramed){
+      PV.ch.updateMatrixWorld(true);
+      const bounds=new THREE.Box3().setFromObject(PV.ch);
+      if(!bounds.isEmpty()){
+        const size=bounds.getSize(new THREE.Vector3());
+        const center=bounds.getCenter(new THREE.Vector3());
+        const height=Math.max(1,size.y);
+        PV.ch.position.y-=bounds.min.y;
+        PV.cam.position.set(0,height*0.56,Math.max(5.6,height*2.65));
+        PV.cam.lookAt(0,height*0.48,0);
+        PV.cam.near=0.05;PV.cam.far=100;PV.cam.updateProjectionMatrix();
+        PV.ch.userData.previewFramed=true;
+      }
+    }
+  }
   PV.r.render(PV.sc,PV.cam);
 }
 function pvStop(){
