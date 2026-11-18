@@ -1,0 +1,81 @@
+/* Citygame responsive overlay layout repair.
+   This file is loaded after the visual skin and before runtime map modules. */
+:root{--cg-safe-top:env(safe-area-inset-top,0px);--cg-safe-bottom:env(safe-area-inset-bottom,0px)}
+html,body{width:100%;min-width:0;max-width:100%;overflow:hidden}
+#bigmap{
+  box-sizing:border-box!important;
+  display:none;
+  grid-template-columns:minmax(0,1fr) minmax(270px,340px)!important;
+  grid-template-rows:minmax(0,1fr)!important;
+  gap:0!important;
+  align-items:stretch!important;
+  overflow:hidden!important;
+  padding:var(--cg-safe-top) 0 var(--cg-safe-bottom)!important;
+}
+#bigmap[style*="display: flex"],#bigmap[style*="display:flex"]{display:grid!important}
+#bigmap #cgIsoMap,#bigmap #bmc,#bigmap canvas{
+  position:relative!important;inset:auto!important;
+  display:block!important;grid-column:1;grid-row:1;
+  width:100%!important;height:100%!important;
+  min-width:0!important;min-height:0!important;
+  max-width:none!important;max-height:none!important;
+  object-fit:contain!important;align-self:stretch!important;
+}
+#bigmap #mapside{
+  position:relative!important;inset:auto!important;
+  grid-column:2;grid-row:1;
+  box-sizing:border-box!important;width:auto!important;height:100%!important;
+  min-width:0!important;min-height:0!important;max-height:none!important;
+  margin:0!important;border-radius:0!important;
+  overflow-x:hidden!important;overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+  padding:12px!important;
+}
+#bigmap #cgIsoTools{position:absolute!important;left:12px!important;top:calc(var(--cg-safe-top) + 12px)!important;z-index:8!important;max-width:calc(100% - 24px)!important;flex-wrap:wrap!important}
+#bigmap .cg-map-head{position:sticky!important;top:-12px!important;z-index:4!important}
+#bigmap .cg-map-list{min-width:0!important}
+#bigmap .cg-map-place{min-width:0!important;overflow:hidden!important}
+#bigmap .cg-map-name{min-width:0!important;overflow-wrap:anywhere!important}
+#bigmap .cg-map-detail{position:relative!important;max-width:100%!important;box-sizing:border-box!important}
+#bigmap .pl{min-width:0!important;overflow-wrap:anywhere!important}
+#phone{box-sizing:border-box!important;padding:var(--cg-safe-top) 8px var(--cg-safe-bottom)!important;overflow:auto!important;overscroll-behavior:contain!important}
+#phone .pbox{box-sizing:border-box!important;width:min(94vw,420px)!important;max-width:100%!important;max-height:calc(100dvh - var(--cg-safe-top) - var(--cg-safe-bottom) - 16px)!important;min-height:0!important}
+#phone .pbox>*{min-width:0!important}
+#pgrid{grid-template-columns:repeat(4,minmax(0,1fr))!important;min-width:0!important}
+#pgrid .app{min-width:0!important;overflow-wrap:anywhere!important}
+#appview{box-sizing:border-box!important;min-width:0!important;max-width:100%!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+#appview img,#appview video,#appview canvas,#appview iframe{max-width:100%!important}
+#appview input,#appview select,#appview textarea{box-sizing:border-box!important;max-width:100%!important;min-width:0!important}
+#appview table{display:block!important;max-width:100%!important;overflow-x:auto!important}
+#atm,#ride,#login,#menu,#phone{box-sizing:border-box}
+#atm{padding:calc(var(--cg-safe-top) + 12px) 12px calc(var(--cg-safe-bottom) + 12px)!important;overflow:auto!important}
+#atm .box{box-sizing:border-box!important;width:min(100%,440px)!important;min-width:0!important;max-width:100%!important;max-height:calc(100dvh - var(--cg-safe-top) - var(--cg-safe-bottom) - 24px)!important;overflow:auto!important}
+#login,#menu{overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;padding:var(--cg-safe-top) 12px var(--cg-safe-bottom)!important}
+#login .stage,#menu .stage{box-sizing:border-box!important;width:min(100%,720px)!important;max-width:100%!important;min-width:0!important}
+#login .card,#menu .card{box-sizing:border-box!important;max-width:100%!important;min-width:0!important}
+#login input,#menu input,#login select,#menu select{box-sizing:border-box!important;max-width:100%!important}
+#toast,#jailmsg,#npcbox,#spkbar{max-width:min(92vw,380px)!important;overflow-wrap:anywhere!important;box-sizing:border-box!important}
+@media(max-width:700px){
+  #bigmap{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,40dvh) minmax(0,1fr)!important}
+  #bigmap #cgIsoMap,#bigmap #bmc,#bigmap canvas{grid-column:1!important;grid-row:1!important;width:100%!important;height:100%!important;max-width:none!important;max-height:none!important}
+  #bigmap #mapside{grid-column:1!important;grid-row:2!important;width:auto!important;height:100%!important;max-height:none!important;min-height:0!important;margin:0!important;border-radius:0!important;padding:8px 10px calc(10px + var(--cg-safe-bottom))!important}
+  #bigmap .cg-map-list{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
+  #bigmap .cg-map-place{padding:8px!important}
+  #bigmap .cg-map-title{font-size:17px!important}
+  #bigmap #cgIsoTools{left:8px!important;top:calc(var(--cg-safe-top) + 8px)!important}
+  #bigmap #cgIsoHint{display:none!important}
+  #phone .pbox{width:min(96vw,420px)!important}
+}
+@media(max-width:380px){
+  #bigmap .cg-map-list{grid-template-columns:minmax(0,1fr)!important}
+  #pgrid{gap:5px!important;padding:7px 4px!important}
+  #pgrid .app{padding:5px 2px!important;font-size:10px!important}
+}
+@media(orientation:landscape) and (max-height:600px){
+  #bigmap{grid-template-columns:minmax(0,1fr) minmax(240px,34vw)!important;grid-template-rows:minmax(0,1fr)!important}
+  #bigmap #cgIsoMap,#bigmap #bmc,#bigmap canvas{grid-column:1!important;grid-row:1!important}
+  #bigmap #mapside{grid-column:2!important;grid-row:1!important}
+  #phone{padding:4px!important}
+  #phone .pbox{width:min(96vw,900px)!important;max-height:calc(100dvh - 8px)!important}
+}
+@media(prefers-reduced-motion:reduce){#bigmap *,#phone *{scroll-behavior:auto!important}}
