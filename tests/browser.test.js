@@ -687,3 +687,17 @@ test('3D road accessibility module builds instanced kerb ramps and tactile cross
   }
   assert.ok(html.includes('<script src="/citygame-road-accessibility.js?v=20261118-1"></script>'));
 });
+
+test('game-wide overlay layout stylesheet is loaded and keeps map panels in a responsive grid', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  const cssPath = path.join(root, 'public', 'citygame-overlay-layout.css');
+  assert.ok(fs.existsSync(cssPath), 'responsive overlay layout stylesheet exists');
+  assert.match(html, /citygame-overlay-layout\.css/);
+  const css = fs.readFileSync(cssPath, 'utf8');
+  assert.match(css, /#bigmap\s*\{[\s\S]*grid-template-columns/);
+  assert.match(css, /#bigmap #mapside\s*\{[\s\S]*position:relative!important/);
+  assert.match(css, /@media\(max-width:700px\)[\s\S]*grid-template-rows/);
+  assert.match(css, /#phone \.pbox[\s\S]*max-height/);
+  assert.match(css, /#appview[\s\S]*overflow-y:auto!important/);
+  assert.match(css, /#atm \.box[\s\S]*max-height/);
+});
