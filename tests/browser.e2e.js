@@ -55,7 +55,7 @@ async function waitForServer() {
       const companyTag = [...document.scripts].some(script => script.src.includes('citygame-company-app.js'));
       const appNames = ['Company', 'Social', 'Emotes', 'News', 'Gallery', 'Market'];
       return companyTag && !!bridge?.APPR && appNames.every(name => typeof bridge.APPR[name] === 'function');
-    }, { timeout: 45000 }).catch(async error => {
+    }, null, { timeout: 45000 }).catch(async error => {
       const diagnostics = await page.evaluate(() => ({
         scriptTags: [...document.scripts].map(script => script.src).filter(Boolean).slice(-18),
         bridge: !!window.LAGOS_PHONE,
