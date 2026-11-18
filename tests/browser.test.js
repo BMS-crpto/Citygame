@@ -623,3 +623,13 @@ test('Unity OSM importer triangulates concave polygons and keeps mesh faces corr
   assert.match(importer, /triangles\.Add\(indices\[i\]\);\s*triangles\.Add\(indices\[i \+ 2\]\);\s*triangles\.Add\(indices\[i \+ 1\]\);/);
   assert.doesNotMatch(importer, /for\s*\(int i\s*=\s*1;\s*i\s*<\s*n\s*-\s*1;\s*i\+\+\)\s*\{\s*tri\.Add\(0\)/);
 });
+
+
+test('Unity foundation scene is preserved and registered for player builds', () => {
+  const setup = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Editor', 'CitygameProjectSetup.cs'), 'utf8');
+  assert.match(setup, /const string scenePath = "Assets\/Scenes\/CitygameFoundation\.unity";/);
+  assert.match(setup, /EditorBuildSettings\.scenes/);
+  assert.match(setup, /new EditorBuildSettingsScene\(scenePath, true\)/);
+  assert.match(setup, /buildScenes\.Add\(new EditorBuildSettingsScene\(scenePath, true\)\)/);
+  assert.match(setup, /EditorSceneManager\.SaveScene\(scene, scenePath\)/);
+});
