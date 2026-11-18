@@ -1,0 +1,6 @@
+/* Dedicated venue camera selector. Kept separate from the game entry document. */
+#venueViews{position:fixed;right:max(8px,env(safe-area-inset-right));top:42%;z-index:7;display:flex;flex-direction:column;gap:4px;padding:5px;border:1px solid #ffffff25;border-radius:18px;background:#101b2bdc;backdrop-filter:blur(12px);box-shadow:0 8px 24px #0006}
+#venueViews button{width:48px;min-height:43px;padding:5px 3px;border:0;border-radius:12px;background:transparent;color:#dce7f4;font:600 10px system-ui;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#venueViews button span{font-size:17px;line-height:18px}
+#venueViews button.active{background:#e8f1fb;color:#172536;box-shadow:0 2px 8px #0004}
+@media(max-width:600px){#venueViews{right:max(5px,env(safe-area-inset-right));top:39%;gap:3px;padding:4px}#venueViews button{width:43px;min-height:39px}}
