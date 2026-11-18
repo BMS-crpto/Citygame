@@ -179,6 +179,10 @@ async function waitForServer() {
     assert.equal(dealership.detailHasVehicle, true, 'vehicle details must identify the selected model');
     await page.locator('#egClose').click(); // dismiss the full-screen 3D preview before entering the city
 
+    // Continue through the supported guest path so the login overlay does not
+    // intercept the character-selection button. This does not fake account age
+    // or credentials; it exercises the game's explicit guest entry flow.
+    await page.locator('#guestbtn').click();
     // Enter the actual multiplayer world. Earlier checks only proved that the
     // shell and phone renderers loaded; this catches errors during the welcome
     // message, world construction, scene setup and WebSocket join.
