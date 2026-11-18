@@ -3072,28 +3072,37 @@ function drawBigMap(){
       base.fillStyle=DCOL[districtOf(bx,bz)]||'#17483c';base.fillRect(x,y,w,h);
       base.fillStyle='#ffffff08';base.fillRect(x+3,y+3,Math.max(0,w-6),Math.max(0,h-6));
     }
-    // Broad road corridors, kerbs and lane markings.
+    // Lagos street grid: kerbs, paved shoulders, asphalt and double yellow centre lines.
+    const drawRoad=(a,b,horizontal)=>{
+      const dx=horizontal?0:Math.max(1,sc*.85),dy=horizontal?Math.max(1,sc*.85):0;
+      base.lineCap='round';
+      base.strokeStyle='#172b36';base.lineWidth=Math.max(8,ROAD*sc+7);base.beginPath();base.moveTo(a[0],a[1]);base.lineTo(b[0],b[1]);base.stroke();
+      base.strokeStyle='#9b9b86';base.lineWidth=Math.max(5,ROAD*sc+2);base.beginPath();base.moveTo(a[0],a[1]);base.lineTo(b[0],b[1]);base.stroke();
+      base.strokeStyle='#48545d';base.lineWidth=Math.max(3,ROAD*sc);base.beginPath();base.moveTo(a[0],a[1]);base.lineTo(b[0],b[1]);base.stroke();
+      base.setLineDash([Math.max(4,sc*5),Math.max(4,sc*3)]);
+      base.strokeStyle='#e2c95e';base.lineWidth=Math.max(0.8,sc*.55);
+      for(const sign of [-1,1]){base.beginPath();base.moveTo(a[0]+dx*sign,a[1]+dy*sign);base.lineTo(b[0]+dx*sign,b[1]+dy*sign);base.stroke()}
+      base.setLineDash([]);
+    };
     for(let i=-GN;i<=GN;i++){
-      let a=P(-GN*BLOCK,i*BLOCK),b=P(GN*BLOCK,i*BLOCK);
-      base.strokeStyle='#172b36';base.lineWidth=Math.max(8,ROAD*sc+5);base.beginPath();base.moveTo(a[0],a[1]);base.lineTo(b[0],b[1]);base.stroke();
-      base.strokeStyle='#52616a';base.lineWidth=Math.max(5,ROAD*sc);base.beginPath();base.moveTo(a[0],a[1]);base.lineTo(b[0],b[1]);base.stroke();
-      base.strokeStyle='#d6c77b';base.lineWidth=Math.max(1,sc*.7);base.setLineDash([Math.max(3,sc*2),Math.max(4,sc*2.5)]);base.beginPath();base.moveTo(a[0],a[1]);base.lineTo(b[0],b[1]);base.stroke();base.setLineDash([]);
-      a=P(i*BLOCK,-GN*BLOCK);b=P(i*BLOCK,GN*BLOCK);
-      base.strokeStyle='#172b36';base.lineWidth=Math.max(8,ROAD*sc+5);base.beginPath();base.moveTo(a[0],a[1]);base.lineTo(b[0],b[1]);base.stroke();
-      base.strokeStyle='#52616a';base.lineWidth=Math.max(5,ROAD*sc);base.beginPath();base.moveTo(a[0],a[1]);base.lineTo(b[0],b[1]);base.stroke();
-      base.strokeStyle='#d6c77b';base.lineWidth=Math.max(1,sc*.7);base.setLineDash([Math.max(3,sc*2),Math.max(4,sc*2.5)]);base.beginPath();base.moveTo(a[0],a[1]);base.lineTo(b[0],b[1]);base.stroke();base.setLineDash([]);
+      drawRoad(P(-GN*BLOCK,i*BLOCK),P(GN*BLOCK,i*BLOCK),true);
+      drawRoad(P(i*BLOCK,-GN*BLOCK),P(i*BLOCK,GN*BLOCK),false);
     }
-    // Raised building plots with shadows and coloured roofs, like a miniature city model.
-    world.places.forEach((p,i)=>{
-      const a=P(p.x,p.z),sz=Math.max(5,Math.min(18,sc*2.2)),d=Math.max(2,Math.min(7,sc*.9)),x=a[0]-sz/2,y=a[1]-sz/2;
-      base.fillStyle='#071b18aa';base.fillRect(x+2,y+3,sz+d,sz+d);
-      base.fillStyle=p.business?'#244e46':'#34485c';
-      base.beginPath();base.moveTo(x,y+sz);base.lineTo(x+d,y+sz-d);base.lineTo(x+sz+d,y+sz-d);base.lineTo(x+sz,y+sz);base.closePath();base.fill();
-      base.fillStyle=p.business?'#376e60':'#52677e';
-      base.beginPath();base.moveTo(x+sz,y);base.lineTo(x+sz+d,y-d);base.lineTo(x+sz+d,y+sz-d);base.lineTo(x+sz,y+sz);base.closePath();base.fill();
-      base.fillStyle='#9ab3a2';base.fillRect(x,y,sz,sz);
-      base.fillStyle=p.business?'#55d6a2':'#304c66';base.fillRect(x+2,y+2,Math.max(1,sz-4),Math.max(1,sz-4));
-      base.fillStyle='#d7e2cf';base.fillRect(x+sz*.35,y+2,Math.max(1,sz*.28),Math.max(1,sz*.22));
+    // Individual building footprints with raised, shaded sides and roof details.
+    const drawBlock=(x,y,w,h,depth,roof,side,detail)=>{
+      base.fillStyle='#071b18aa';base.beginPath();base.moveTo(x+2,y+h+2);base.lineTo(x+depth+3,y+h-depth+3);base.lineTo(x+w+depth+3,y+h-depth+3);base.lineTo(x+w+2,y+h+2);base.closePath();base.fill();
+      base.fillStyle=side;base.beginPath();base.moveTo(x,y+h);base.lineTo(x+depth,y+h-depth);base.lineTo(x+w+depth,y+h-depth);base.lineTo(x+w,y+h);base.closePath();base.fill();
+      base.fillStyle=detail;base.beginPath();base.moveTo(x+w,y);base.lineTo(x+w+depth,y-depth);base.lineTo(x+w+depth,y+h-depth);base.lineTo(x+w,y+h);base.closePath();base.fill();
+      base.fillStyle=roof;base.fillRect(x,y,w,h);
+      base.fillStyle='#ffffff35';base.fillRect(x+1,y+1,Math.max(1,w-2),Math.max(1,Math.min(2,h*.16)));
+      if(w>10&&h>10){base.fillStyle='#dbe8df';base.fillRect(x+w*.28,y+h*.24,Math.max(2,w*.16),Math.max(2,h*.13));base.fillRect(x+w*.62,y+h*.24,Math.max(2,w*.16),Math.max(2,h*.13))}
+    };
+    world.places.forEach(p=>{
+      const a=P(p.x,p.z),kind=String(p.type||p.kind||p.name||'').toLowerCase();
+      const landmark=/tower|hotel|plaza|mall|bank|court|hospital|airport|office|library|school/.test(kind);
+      const sz=Math.max(6,Math.min(25,sc*(landmark?8.2:6.1))),depth=Math.max(2,Math.min(9,sc*(landmark?2.1:1.55))),x=a[0]-sz/2,y=a[1]-sz/2;
+      const roof=p.business?'#4e9b79':landmark?'#8b9bad':'#617b91';
+      drawBlock(x,y,sz,Math.max(5,sz*(landmark?.82:.72)),depth,roof,p.business?'#245b49':'#344b61',p.business?'#34745d':'#405d75');
     });
     world.houses.forEach(h=>{const a=P(h.x,h.z);base.fillStyle='#253f55';base.fillRect(a[0]-3,a[1]-3,6,6)});
     world.shops.forEach(h=>{const a=P(h.x,h.z);base.fillStyle='#f4b942';base.beginPath();base.arc(a[0],a[1],4,0,7);base.fill()});
@@ -3123,14 +3132,25 @@ function drawBigMap(){
       if(mapZoom>=0.82){const label=String(p.name||'').slice(0,25);g.font='bold 10px system-ui';const tw=Math.min(150,g.measureText(label).width+14);g.fillStyle='#101d2be8';g.beginPath();g.roundRect(a[0]-tw/2,a[1]-szForLabel(sc)-18,tw,18,8);g.fill();g.lineWidth=2;g.strokeStyle='#07131c';g.strokeText(label,a[0],a[1]-szForLabel(sc)-9);g.fillStyle='#f1f6ef';g.fillText(label,a[0],a[1]-szForLabel(sc)-9)}
     }else{
       if(selPlace===p.id){g.fillStyle='#ffd54a55';g.beginPath();g.arc(a[0],a[1],20,0,7);g.fill()}
-      g.font='22px sans-serif';g.fillStyle='#fff';g.fillText(p.icon,a[0],a[1]);
-      g.font='bold 11px sans-serif';g.lineWidth=3;g.strokeStyle='#000';g.strokeText(p.name,a[0],a[1]+17);g.fillStyle='#fff';g.fillText(p.name,a[0],a[1]+17);
+      g.save();g.shadowColor='#07131c';g.shadowBlur=9;g.font='22px sans-serif';g.fillStyle='#fff';g.fillText(p.icon,a[0],a[1]);g.shadowBlur=0;
+      g.font='bold 11px system-ui';g.textAlign='center';g.textBaseline='middle';
+      const label=String(p.name||'').slice(0,28),tw=Math.min(170,g.measureText(label).width+18);
+      g.fillStyle='#101d2bed';g.beginPath();g.roundRect(a[0]-tw/2,a[1]+13,tw,20,9);g.fill();
+      g.strokeStyle='#ffffff35';g.lineWidth=1;g.stroke();
+      g.fillStyle='#f1f6ef';g.fillText(label,a[0],a[1]+23);g.restore();
     }
   });
   if(gps){const a=P(gps.x,gps.z),m=P(pos.x,pos.z);g.save();g.setLineDash([7,5]);g.strokeStyle='#58c7ff';g.lineWidth=3;g.beginPath();g.moveTo(m[0],m[1]);g.lineTo(a[0],a[1]);g.stroke();g.setLineDash([]);g.restore();g.font='22px sans-serif';g.fillText('📍',a[0],a[1]-8)}
   if(jobTarget){const a=P(jobTarget.x,jobTarget.z);g.font='22px sans-serif';g.fillText('📦',a[0],a[1]-8)}
-  const m=P(pos.x,pos.z);g.save();g.translate(m[0],m[1]);g.rotate(-pos.ry);g.fillStyle='#fff';g.strokeStyle='#000';g.lineWidth=2;
+  const m=P(pos.x,pos.z);g.save();
+  g.fillStyle='#42d6ad30';g.beginPath();g.arc(m[0],m[1],17,0,Math.PI*2);g.fill();
+  g.strokeStyle='#67f0c5';g.lineWidth=2;g.beginPath();g.arc(m[0],m[1],11,0,Math.PI*2);g.stroke();
+  g.translate(m[0],m[1]);g.rotate(-pos.ry);g.fillStyle='#f8fffb';g.strokeStyle='#123b35';g.lineWidth=2;
   g.beginPath();g.moveTo(0,-11);g.lineTo(8,9);g.lineTo(0,5);g.lineTo(-8,9);g.closePath();g.fill();g.stroke();g.restore();
+  // Compact compass and map scale keep orientation clear on mobile.
+  g.save();g.textAlign='center';g.font='900 11px system-ui';g.fillStyle='#e9f4ef';g.fillText('N',W-28,28);
+  g.strokeStyle='#e9f4ef';g.lineWidth=2;g.beginPath();g.moveTo(W-28,35);g.lineTo(W-28,54);g.stroke();
+  g.fillStyle='#e9f4ef';g.beginPath();g.moveTo(W-28,31);g.lineTo(W-33,40);g.lineTo(W-23,40);g.closePath();g.fill();g.restore();
 }
 window.addEventListener('resize',()=>{if(bigmap.style.display==='flex'){sizeMap();mapBaseCanvas=null;drawBigMap()}});
 bmc.addEventListener('wheel',e=>{e.preventDefault();const r=bmc.getBoundingClientRect(),x=(e.clientX-r.left)*bmc.width/r.width,y=(e.clientY-r.top)*bmc.height/r.height,old=mapZoom;mapZoom=Math.max(0.75,Math.min(3.2,mapZoom*(e.deltaY<0?1.12:0.89)));const f=mapZoom/old;mapPanX=x-(x-mapPanX)*f;mapPanY=y-(y-mapPanY)*f;drawBigMap()},{passive:false});
@@ -3145,8 +3165,14 @@ bmc.addEventListener('click',e=>{
 function renderSide(){
   const L=placesList(),me_=pos;
   L.forEach(p=>p.d=Math.round(Math.hypot(p.x-me_.x,p.z-me_.z)));L.sort((a,b)=>a.d-b.d);
-  let h=`<div class="mh">🗺️ LAGOS CITY MAP <button class="pb q" data-act="close" style="margin:0">✖</button></div><div style="display:flex;gap:5px;flex-wrap:wrap;padding:5px 0"><button class="pb q" data-act="zoomIn">＋ Zoom</button><button class="pb q" data-act="zoomOut">－ Zoom</button><button class="pb q" data-act="mapReset">◎ Re-centre</button></div><div style="font-size:10px;opacity:.8;margin-bottom:6px">Drag map to pan · pinch/scroll to zoom · blue line shows straight-line GPS bearing</div>`;
-  h+=L.map(p=>`<div class="pl ${selPlace===p.id?'sel':''}" data-act="sel" data-id="${p.id}"><span>${p.icon} ${p.name}</span><span>${p.d}m</span></div>`).join('');
+  let h=`<div class="mh"><span>🗺️ LAGOS CITY</span><button class="pb q" data-act="close" style="margin:0">✕</button></div>
+  <div style="display:flex;gap:5px;flex-wrap:wrap;padding:5px 0"><button class="pb q" data-act="zoomIn">＋ Zoom</button><button class="pb q" data-act="zoomOut">－ Zoom</button><button class="pb q" data-act="mapReset">◎ Re-centre</button></div>
+  <div style="display:flex;gap:6px;align-items:center;margin:4px 0 8px"><span style="font-size:10px;color:#7ee2c0;font-weight:800">● LIVE POSITION</span><span style="font-size:10px;opacity:.7">${districtAt(pos.x,pos.z)||'Lagos'}</span></div>
+  <input id="mapSearch" type="search" placeholder="Search Lagos places, districts..." autocomplete="off" style="box-sizing:border-box;width:100%;padding:10px 12px;border-radius:11px;border:1px solid #ffffff2a;background:#071923;color:#fff;margin:3px 0 8px">
+  <div style="font-size:10px;opacity:.72;margin-bottom:6px">Drag to explore · pinch or scroll to zoom · select a destination for GPS or a ride</div>
+  <div id="mapPlaceList">`;
+  h+=L.map(p=>`<div class="pl ${selPlace===p.id?'sel':''}" data-act="sel" data-id="${p.id}" data-name="${String(p.name||'').toLowerCase()}"><span>${p.icon} ${p.name}</span><span>${p.d}m</span></div>`).join('');
+  h+='</div>';
   const sp=L.find(p=>p.id===selPlace);
   if(sp){
     h+=`<div class="det"><b>${sp.icon} ${sp.name}</b>${sp.area?`<br><small>${sp.area} · ${sp.type||'Lagos destination'}</small>`:''}<br><button class="pb q" data-act="gps">📍 Set GPS (free)</button><br>`;
@@ -3156,6 +3182,11 @@ function renderSide(){
   if(gps)h+=`<button class="pb q" data-act="cleargps">Clear GPS</button>`;
   mapside.innerHTML=h;
 }
+mapside.addEventListener('input',e=>{
+  if(e.target.id!=='mapSearch')return;
+  const q=e.target.value.trim().toLowerCase();
+  mapside.querySelectorAll('#mapPlaceList .pl').forEach(el=>{el.style.display=!q||el.dataset.name.includes(q)?'':'none'});
+});
 mapside.onclick=e=>{
   const b=e.target.closest('[data-act]');if(!b)return;const a=b.dataset.act;
   if(a==='close')closeMap();
