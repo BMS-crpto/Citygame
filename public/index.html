@@ -2702,9 +2702,13 @@ function pvLoop(t){
   PV.r.render(PV.sc,PV.cam);
 }
 function pvStop(){
-  PV.on=false;cancelAnimationFrame(PV.raf);
-  try{if(PV.r){PV.r.dispose();if(PV.r.forceContextLoss)PV.r.forceContextLoss()}}catch(e){}
-  PV.r=null;PV.sc=null;PV.ch=null;
+  PV.on=false;
+  if(PV.raf)cancelAnimationFrame(PV.raf);
+  // Dispose preview GPU resources without forcibly destroying the WebGL
+  // context. forceContextLoss() can stall Chromium/SwiftShader during the
+  // transition from the character preview to the live city renderer.
+  try{if(PV.r)PV.r.dispose()}catch(e){console.warn('Character preview cleanup:',e)}
+  PV.r=null;PV.sc=null;PV.ch=null;PV.cam=null;
 }
 
 // ---- "Your life in Lagos": the system rolls Nepo baby or Lapo babe ----
