@@ -21,6 +21,42 @@ test('all inline browser scripts in the game page have valid JavaScript syntax',
   }
 });
 
+test('venue camera controller is modular, validates modes, and updates accessible controls', () => {
+  const modulePath = path.join(root, 'public', 'citygame-venue-camera.js');
+  const cssPath = path.join(root, 'public', 'citygame-venue-camera.css');
+  assert.ok(fs.existsSync(modulePath), 'dedicated venue camera module exists');
+  assert.ok(fs.existsSync(cssPath), 'dedicated venue camera stylesheet exists');
+  const source = fs.readFileSync(modulePath, 'utf8');
+  const buttons = ['above','inside','eyes'].map(mode => ({
+    dataset: { cgView: mode }, attributes: {}, classList: {
+      toggle(name, enabled) { this[name] = enabled; }
+    },
+    setAttribute(name, value) { this.attributes[name] = value; }
+  }));
+  const listeners = {};
+  const events = [];
+  const window = {
+    dispatchEvent(event) { events.push(event); },
+    addEventListener() {}
+  };
+  const document = {
+    readyState: 'complete',
+    querySelectorAll() { return buttons; },
+    addEventListener(name, callback) { listeners[name] = callback; }
+  };
+  class CustomEvent { constructor(type, init) { this.type = type; this.detail = init.detail; } }
+  vm.runInNewContext(source, { window, document, CustomEvent });
+  assert.equal(window.CitygameVenueCamera.mode, 'inside');
+  assert.equal(window.CitygameVenueCamera.setMode('invalid'), false);
+  assert.equal(window.CitygameVenueCamera.setMode('eyes'), true);
+  assert.equal(window.CitygameVenueCamera.mode, 'eyes');
+  assert.equal(buttons[2].attributes['aria-pressed'], 'true');
+  assert.equal(buttons[1].attributes['aria-pressed'], 'false');
+  assert.equal(events.at(-1).type, 'citygame:venue-camera-change');
+  assert.equal(events.at(-1).detail.mode, 'eyes');
+  assert.equal(typeof listeners.click, 'function');
+});
+
 test('every local JavaScript file referenced by the game page exists', () => {
   const sources = [...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi)]
     .map(match => match[1])
