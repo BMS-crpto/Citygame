@@ -653,7 +653,7 @@ test('3D Lagos street infrastructure is modular, integrated, and performance-bat
     'CylinderGeometry(0.075, 0.13, 7.3, 8)',
     'BoxGeometry(8.8, 0.22, 3.9)'
   ]) assert.ok(source.includes(feature), 'street module missing 3D feature: ' + feature);
-  assert.match(html, /<script src="\/citygame-lagos-streets\\.js\\?v=20261118-3"><\/script>/);
+  assert.ok(html.includes('<script src="/citygame-lagos-streets.js?v=20261118-3"></script>'));
   assert.match(source, /if \(window\.CG_LAGOS_STREETS && window\.CG_LAGOS_STREETS\.built\) return/);
 });
 
@@ -665,5 +665,5 @@ test('3D road accessibility module builds instanced kerb ramps and tactile cross
   for (const feature of ['new THREE.InstancedMesh', 'curbRamps: ramps.length', 'tactilePavingStuds: tactile.length', 'rampGeometry.computeVertexNormals()', 'new THREE.BoxGeometry(0.16, 0.045, 0.12)']) {
     assert.ok(source.includes(feature), 'road accessibility module missing: ' + feature);
   }
-  assert.match(html, /<script src="\\/citygame-road-accessibility\\.js\\?v=20261118-1"><\\/script>/);
+  assert.ok(html.includes('<script src="/citygame-road-accessibility.js?v=20261118-1"></script>'));
 });
