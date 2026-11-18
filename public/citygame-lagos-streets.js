@@ -114,6 +114,70 @@
     }
   }
 
+
+  // Major junctions receive full 3D traffic signals and district wayfinding.
+  // Geometry is instanced so the extra street detail stays lightweight on phones.
+  const signalPoles = [], signalBodies = [], signalLenses = [], activeLenses = [];
+  const signalPoleMat = new THREE.MeshStandardMaterial({ color: 0x39434a, metalness: 0.58, roughness: 0.55 });
+  const signalBodyMat = new THREE.MeshStandardMaterial({ color: 0x20282d, metalness: 0.18, roughness: 0.68 });
+  const lensMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.05 });
+  const activeLensMat = new THREE.MeshStandardMaterial({ color: 0x72e58a, emissive: 0x28d65a, emissiveIntensity: 0.72, roughness: 0.24 });
+  for (let ix = -6; ix <= 6; ix += 3) {
+    for (let iz = -6; iz <= 6; iz += 3) {
+      for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+        const x = ix * BLOCK + sx * 7.45;
+        const z = iz * BLOCK + sz * 7.45;
+        const face = sx < 0 ? Math.PI / 2 : -Math.PI / 2;
+        const rotation = Math.abs(sx) ? face : (sz < 0 ? 0 : Math.PI);
+        signalPoles.push({ x, y: 2.35, z });
+        signalBodies.push({ x, y: 4.12, z, rotation, sx: 0.48, sy: 1.18, sz: 0.38 });
+        for (let lens = 0; lens < 3; lens++) {
+          const ly = 4.48 - lens * 0.36;
+          const offset = rotation === 0 ? { x: 0, z: 0.205 } :
+            rotation === Math.PI ? { x: 0, z: -0.205 } :
+            rotation > 0 ? { x: 0.205, z: 0 } : { x: -0.205, z: 0 };
+          signalLenses.push({ x: x + offset.x, y: ly, z: z + offset.z, color: [0xe74b4b, 0xffc247, 0x43c978][lens], rotation, sx: 0.23, sy: 0.23, sz: 0.23 });
+          if (lens === 2) activeLenses.push({ x: x + offset.x, y: ly, z: z + offset.z, rotation, sx: 0.72, sy: 0.72, sz: 0.72 });
+        }
+      }
+    }
+  }
+  count(signalPoles, new THREE.CylinderGeometry(0.075, 0.095, 4.7, 8), signalPoleMat, false);
+  count(signalBodies, new THREE.BoxGeometry(1, 1, 1), signalBodyMat, false);
+  count(signalLenses, new THREE.SphereGeometry(0.13, 10, 8), lensMat, false);
+  count(activeLenses, new THREE.SphereGeometry(0.13, 10, 8), activeLensMat, false);
+
+  // Raised, readable 3D district signs at the main crossroads.
+  const signCanvas = document.createElement('canvas');
+  signCanvas.width = 512; signCanvas.height = 128;
+  const signContext = signCanvas.getContext('2d');
+  const signTexture = new THREE.CanvasTexture(signCanvas);
+  signTexture.colorSpace = THREE.SRGBColorSpace || signTexture.colorSpace;
+  function districtForSign(x, z) {
+    if (x >= 2) return 'LEKKI';
+    if (x <= -3 && z <= -1) return 'IKEJA';
+    if (x <= -3) return 'SURULERE';
+    if (Math.abs(x) <= 1 && Math.abs(z) <= 1) return 'VICTORIA ISLAND';
+    return 'LAGOS MAINLAND';
+  }
+  const signMaterial = new THREE.MeshStandardMaterial({ map: signTexture, roughness: 0.78, metalness: 0.08, side: THREE.DoubleSide });
+  for (let ix = -6; ix <= 6; ix += 3) {
+    for (let iz = -6; iz <= 6; iz += 3) {
+      const label = districtForSign(ix, iz);
+      signContext.clearRect(0, 0, 512, 128);
+      signContext.fillStyle = '#075b3d'; signContext.fillRect(0, 0, 512, 128);
+      signContext.strokeStyle = '#f5f0d7'; signContext.lineWidth = 8; signContext.strokeRect(5, 5, 502, 118);
+      signContext.fillStyle = '#ffffff'; signContext.font = 'bold 48px Arial'; signContext.textAlign = 'center'; signContext.textBaseline = 'middle';
+      signContext.fillText(label, 256, 65, 470);
+      signTexture.needsUpdate = true;
+      const board = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.05, 0.12), signMaterial);
+      board.position.set(ix * BLOCK + 8.2, 5.55, iz * BLOCK + 8.2);
+      board.rotation.y = Math.PI / 4;
+      board.castShadow = false; board.receiveShadow = true;
+      scene.add(board);
+    }
+  }
+
   window.CG_LAGOS_STREETS = {
     built: true,
     streetLights: poles.length,
