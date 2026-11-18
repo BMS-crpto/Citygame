@@ -57,6 +57,11 @@ test('venue camera controller is modular, validates modes, and updates accessibl
   assert.equal(typeof listeners.click, 'function');
 });
 
+test('venue camera assets use valid HTML separators rather than visible escaped text', () => {
+  assert.match(html, /<link rel="stylesheet" href="\\/citygame-venue-camera\\.css\\?v=1">\\s*<script src="\\/citygame-venue-camera\\.js\\?v=1"><\\/script>\\s*<script src="\\/buildings\\.js\\?v=2026111503"><\\/script>/);
+  assert.doesNotMatch(html, /<link rel="stylesheet" href="\\/citygame-venue-camera\\.css\\?v=1">\\\\n<script/);
+});
+
 test('every local JavaScript file referenced by the game page exists', () => {
   const sources = [...html.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi)]
     .map(match => match[1])
