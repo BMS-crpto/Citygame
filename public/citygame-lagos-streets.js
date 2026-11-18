@@ -147,6 +147,15 @@
   count(signalLenses, new THREE.SphereGeometry(0.13, 10, 8), lensMat, false);
   count(activeLenses, new THREE.SphereGeometry(0.13, 10, 8), activeLensMat, false);
 
+  // Map the procedural grid to recognisable Lagos districts for wayfinding.
+  function districtForSign(ix, iz) {
+    if (ix >= 3 && iz >= 0) return 'LEKKI';
+    if (ix >= 0 && iz < 0) return 'IKEJA';
+    if (ix < 0 && iz >= 0) return 'SURULERE';
+    if (ix < -3 && iz < 0) return 'VICTORIA ISLAND';
+    return 'LAGOS MAINLAND';
+  }
+
   // Raised, readable 3D district signs at the main crossroads.
   const signSupports = [];
   function makeDistrictSign(label, x, z) {
@@ -177,6 +186,9 @@
       districtSigns++;
     }
   }
+  // Structural sign supports reach the pavement and are batched into one mesh.
+  count(signSupports, new THREE.CylinderGeometry(0.065, 0.085, 5.5, 8), poleMat, false);
+
   window.CG_LAGOS_STREETS = {
     built: true,
     streetLights: poles.length,
