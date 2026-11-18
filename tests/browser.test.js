@@ -390,8 +390,10 @@ test('Lagos map is a dedicated full-screen HUD screen, not a phone app', () => {
   assert.match(html, /function sizeMap\(\)\{const W=.*bmc\.width=W;bmc\.height=H/s);
   assert.match(html, /Raised building plots with shadows and coloured roofs/);
   assert.match(html, /g\.roundRect\(a\[0\]-tw\/2/);
-  const apps = html.slice(html.indexOf('const APPS='), html.indexOf(";$('pgrid').innerHTML"));
-  assert.doesNotMatch(apps, /'Map'/);
+  const appsStart = html.indexOf('const APPS=');
+  const appsEnd = html.indexOf(';', appsStart);
+  const apps = html.slice(appsStart, appsEnd);
+  assert.doesNotMatch(apps, /,'Map'/);
 });
 
 test('big map caches static city layers between redraws', () => {
