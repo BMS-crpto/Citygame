@@ -20,6 +20,8 @@ jobs:
         run: node --check server.js
       - name: Check browser JavaScript syntax
         run: find public -type f -name '*.js' -print0 | xargs -0 -r -n 1 node --check
+      - name: Inspect residential GLB structure
+        run: node tests/inspect-residential-glb.js
       - name: Run HTTP smoke tests
         run: npm test
 
