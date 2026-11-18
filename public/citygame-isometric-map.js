@@ -174,6 +174,36 @@
     ribbon([[445,245],[510,275],[575,315],[655,350]],19,4.2,bridgeMat);
   }
 
+  function addStreetNameLayer(scene) {
+    const records = window.CG_LAGOS_STREET_DATA;
+    if (!Array.isArray(records) || !records.length) return;
+    const anchors = {
+      'Victoria Island':[245,-365], 'Lekki':[410,390], 'Ikoyi':[390,-120],
+      'Yaba':[-235,-70], 'Surulere':[-410,285], 'Ikeja':[-440,-390],
+      'Lagos Island':[70,-80], 'Somolu':[-80,300], 'Gbagada':[65,170]
+    };
+    const buckets = new Map();
+    records.forEach(record => {
+      if (!record || !record.name || !anchors[record.district]) return;
+      if (!buckets.has(record.district)) buckets.set(record.district, []);
+      buckets.get(record.district).push(record);
+    });
+    buckets.forEach((items, district) => {
+      const [cx,cz] = anchors[district];
+      items.forEach((record,index) => {
+        const col = index % 4, row = Math.floor(index / 4);
+        const x = cx + (col - 1.5) * 24;
+        const z = cz + (row - (Math.ceil(items.length / 4) - 1) / 2) * 16;
+        const tag = labelSprite(record.name);
+        tag.position.set(x, 12 + (index % 2) * 0.2, z);
+        tag.scale.set(23, 3.1, 1);
+        tag.userData.streetName = record.name;
+        tag.userData.district = district;
+        scene.add(tag);
+      });
+    });
+  }
+
   function buildWorld() {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a1b25);
@@ -210,6 +240,7 @@
     }
     if (!cloned) console.warn('Isometric map found no static world meshes; check world initialisation');
     addUrbanMapLayer(scene);
+    addStreetNameLayer(scene);
     const places = (window.placesList() || []).filter(p => Number.isFinite(Number(p.x)) && Number.isFinite(Number(p.z)));
     state.places = places;
     state.pickables = [];
