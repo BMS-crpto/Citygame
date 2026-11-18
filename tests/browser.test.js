@@ -520,3 +520,29 @@ test('residential GLB variants are distributed across all sixteen Lekki plots', 
   assert.match(html, /Residential GLB buildings placed:/);
   assert.doesNotMatch(html, /candidates\.length<16/);
 });
+
+
+test('responsive Lagos HUD is integrated with the existing browser game', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  const cssPath = path.join(root, 'public', 'citygame-hud.css');
+  const jsPath = path.join(root, 'public', 'citygame-hud.js');
+  assert.ok(fs.existsSync(cssPath), 'HUD design system stylesheet exists');
+  assert.ok(fs.existsSync(jsPath), 'HUD controller exists');
+  assert.match(html, /citygame-hud\.css\?v=1/);
+  assert.match(html, /citygame-hud\.js\?v=1/);
+  const css = fs.readFileSync(cssPath, 'utf8');
+  for (const token of ['--cg-navy', '--cg-green', '--cg-amber', '--cg-blue', '--cg-pink', '--cg-red']) {
+    assert.ok(css.includes(token), 'missing design token ' + token);
+  }
+  assert.match(css, /orientation:landscape/);
+  assert.match(css, /safe-area-inset/);
+  const hud = fs.readFileSync(jsPath, 'utf8');
+  assert.match(hud, /CitygameHUD/);
+  assert.match(hud, /cg-clean-toggle/);
+  assert.match(hud, /Intl\.DateTimeFormat/);
+});
+
+test('HUD script is valid JavaScript', () => {
+  const source = fs.readFileSync(path.join(root, 'public', 'citygame-hud.js'), 'utf8');
+  assert.doesNotThrow(() => new vm.Script(source, { filename: 'public/citygame-hud.js' }));
+});
