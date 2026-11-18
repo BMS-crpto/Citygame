@@ -361,6 +361,16 @@ test('premium stylesheet does not shrink the full-screen phone in landscape', ()
   assert.match(finalRules, /#phone:not\(\.app-open\) #pgrid\{grid-template-columns:repeat\(8,minmax\(0,1fr\)\)!important/);
 });
 
+test('Lagos 3D streets and avatars use higher-detail rendering', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  assert.match(html, /canvasTex\(512,512,\(g,w,h\)=>\{g\.fillStyle='#45474a'/);
+  assert.match(html, /cityStripMesh\(new THREE\.BoxGeometry\(BLOCK-18,0\.28,0\.42\),curbMat,curbRuns\)/);
+  assert.match(html, /cityStripMesh\(new THREE\.BoxGeometry\(BLOCK-18,0\.12,2\.35\),sidewalkMat,walkRuns\)/);
+  assert.match(html, /new THREE\.SphereGeometry\(1,28,20\)/);
+  assert.match(html, /new THREE\.CylinderGeometry\(rt,rb,h,24,2\)/);
+  assert.match(html, /Slim balcony bands and parapet rails/);
+});
+
 test('big map caches static city layers between redraws', () => {
   const html = fs.readFileSync(path.join(root, 'public', 'index.html'), 'utf8');
   assert.match(html, /let mapBaseCanvas=null,mapBaseWorld=null,mapBaseSignature=''/);
