@@ -474,12 +474,12 @@ test('interactive isometric map is loaded as a separate Three.js world overview'
     'pointermove',
     'CGIsometricMap',
     'function addUrbanMapLayer(scene)',
-    'LAGOS',
     'VICTORIA ISLAND',
     'const lagoon = new THREE.Shape()',
-    'Drag to move'
+    'Drag to explore',
+    'Tap a place to navigate'
   ]) assert.ok(map.includes(feature), 'isometric map is missing: ' + feature);
-  assert.match(map, /Tap a building to navigate/);
+  assert.match(map, /Tap a place to navigate/);
   assert.match(map, /state\.target\.x = state\.drag\.targetX/);
   assert.doesNotMatch(map, /state\.yaw=state\.drag\.yaw/);
   assert.match(map, /window\.CG_ME/);
