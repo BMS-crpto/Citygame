@@ -2553,31 +2553,8 @@ let joy={x:0,y:0};window.CG_JOY=joy;let camYaw=0,camH=7,camInit=false;
 let myCol=-1,carObj=null,speed=0,moving=false,myBank=0,myFood=100;
 
 // drag anywhere to rotate the camera (left/right = turn, up/down = height)
-let camTouch=null,lastX=0,lastY=0,pinchDist=0,camZoom=1;
+window.CG_CAMERA_TOUCH={get yaw(){return camYaw},set yaw(v){camYaw=v},get height(){return camH},set height(v){camH=v},get zoom(){return camZoom},set zoom(v){camZoom=v},canRotate(){return myCol<0}};
 const touchGap=e=>Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-renderer.domElement.addEventListener('touchstart',e=>{
-  if(e.touches.length>=2){camTouch=null;pinchDist=touchGap(e);return}
-  const t=e.changedTouches[0];camTouch=t.identifier;lastX=t.clientX;lastY=t.clientY;
-});
-renderer.domElement.addEventListener('touchmove',e=>{
-  if(e.touches.length>=2){
-    const d=touchGap(e);
-    if(pinchDist>0&&d>0)camZoom=Math.max(0.72,Math.min(1.8,camZoom*pinchDist/d));
-    pinchDist=d;return;
-  }
-  for(const t of e.changedTouches)if(t.identifier===camTouch){
-    if(myCol<0)camYaw-=(t.clientX-lastX)*0.01;
-    camH=Math.max(3,Math.min(16,camH+(t.clientY-lastY)*0.03));
-    lastX=t.clientX;lastY=t.clientY;
-  }
-});
-const resetCameraTouches=e=>{
-  pinchDist=0;
-  if(e.touches.length===1){const t=e.touches[0];camTouch=t.identifier;lastX=t.clientX;lastY=t.clientY}
-  else camTouch=null;
-};
-renderer.domElement.addEventListener('touchend',resetCameraTouches);
-renderer.domElement.addEventListener('touchcancel',resetCameraTouches);
 const keys={};addEventListener('keydown',e=>keys[e.key.toLowerCase()]=1);addEventListener('keyup',e=>keys[e.key.toLowerCase()]=0);
 
 function toast(t){
@@ -5154,6 +5131,7 @@ catch(e){console.warn('palms fallback',e);try{palmBatchBoxes();flushBatch()}catc
 <script src="/player-account-center.js?v=20261116"></script>
 <script src="/asset-download-manager.js?v=20261117-auto"></script>
 <script src="/citygame-touch-controls.js?v=1"></script>
+<script src="/citygame-camera-touch.js?v=1"></script>
 <script src="/citygame-performance.js?v=20261117c"></script>
 <script src="/citygame-hud.js?v=1"></script>
 </body>
