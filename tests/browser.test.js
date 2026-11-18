@@ -585,46 +585,6 @@ test('mobile joystick keeps ownership of its active finger and ignores unrelated
 
 test('game entry document ends with real HTML line breaks', () => {
   const html = fs.readFileSync(htmlPath, 'utf8');
-  assert.ok(html.endsWith('</script>\\n</body>\\n</html>\\n'), 'the final script and document tags must use real line breaks');
-  assert.ok(!html.includes('</script>\\\\n</body>'), 'escaped newline text must not be rendered after the final script');
-});
-
-test('mobile joystick keeps ownership of its active touch until release', () => {
-  const source = fs.readFileSync(path.join(root, 'public', 'citygame-touch-controls.js'), 'utf8');
-  const handlers = {};
-  const stick = {
-    addEventListener(name, handler) { handlers[name] = handler; },
-    getBoundingClientRect() { return { left: 0, top: 0, width: 100, height: 100 }; }
-  };
-  const knob = { style: {} };
-  const joy = { x: 0, y: 0 };
-  const fakeWindow = { CG_JOY: joy };
-  const fakeDocument = {
-    getElementById(id) { return id === 'stick' ? stick : id === 'knob' ? knob : null; }
-  };
-  vm.runInNewContext(source, { window: fakeWindow, document: fakeDocument });
-
-  const touch = (identifier, clientX, clientY) => ({ identifier, clientX, clientY });
-  handlers.touchstart({ changedTouches: [touch(11, 88, 50)] });
-  assert.equal(fakeWindow.CitygameTouchControls.activeTouchId, 11);
-  assert.equal(joy.x, 1);
-
-  handlers.touchstart({ changedTouches: [touch(22, 50, 88)] });
-  handlers.touchmove({ changedTouches: [touch(22, 50, 88)] });
-  assert.equal(joy.y, 0, 'a second finger must not steer the joystick');
-
-  handlers.touchmove({ changedTouches: [touch(11, 50, 12)] });
-  assert.equal(joy.y, -1);
-  handlers.touchend({ changedTouches: [touch(22, 50, 88)] });
-  assert.equal(fakeWindow.CitygameTouchControls.activeTouchId, 11, 'ending the secondary touch must not release the joystick');
-
-  handlers.touchcancel({ changedTouches: [touch(11, 50, 12)] });
-  assert.equal(fakeWindow.CitygameTouchControls.activeTouchId, null);
-  assert.deepEqual({ x: joy.x, y: joy.y }, { x: 0, y: 0 });
-  assert.equal(knob.style.transform, 'translate(0,0)');
-
-  handlers.touchstart({ changedTouches: [touch(33, 88, 50)] });
-  fakeWindow.CitygameTouchControls.release();
-  assert.equal(fakeWindow.CitygameTouchControls.activeTouchId, null);
-  assert.deepEqual({ x: joy.x, y: joy.y }, { x: 0, y: 0 });
+  assert.ok(html.endsWith('</script>\n</body>\n</html>\n'), 'the final script and document tags must use real line breaks');
+  assert.ok(!html.includes('</script>\\n</body>'), 'escaped newline text must not be rendered after the final script');
 });
