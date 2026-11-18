@@ -633,3 +633,20 @@ test('Unity foundation scene is preserved and registered for player builds', () 
   assert.match(setup, /buildScenes\.Add\(new EditorBuildSettingsScene\(scenePath, true\)\)/);
   assert.match(setup, /EditorSceneManager\.SaveScene\(scene, scenePath\)/);
 });
+
+test('3D Lagos street infrastructure is modular, integrated, and performance-batched', () => {
+  const modulePath = path.join(root, 'public', 'citygame-lagos-streets.js');
+  assert.ok(fs.existsSync(modulePath), 'dedicated 3D street module exists');
+  const source = fs.readFileSync(modulePath, 'utf8');
+  assert.doesNotThrow(() => new vm.Script(source, { filename: 'citygame-lagos-streets.js' }));
+  for (const feature of [
+    'new THREE.InstancedMesh',
+    'streetLights: poles.length',
+    'drainSections: drainBases.length',
+    'busShelters: shelters.length',
+    'CylinderGeometry(0.075, 0.13, 7.3, 8)',
+    'BoxGeometry(8.8, 0.22, 3.9)'
+  ]) assert.ok(source.includes(feature), 'street module missing 3D feature: ' + feature);
+  assert.match(html, /<script src="\/citygame-lagos-streets\.js\?v=20261118-1"><\/script>/);
+  assert.match(source, /if \(window\.CG_LAGOS_STREETS && window\.CG_LAGOS_STREETS\.built\) return/);
+});
