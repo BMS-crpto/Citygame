@@ -611,3 +611,15 @@ test('camera touch controller supports drag orbit and bounded pinch zoom', () =>
   listeners.touchend({ touches: [], changedTouches: [{ identifier: 1 }, { identifier: 2 }] });
   assert.equal(window.CitygameCameraTouch.activeTouchId, null);
 });
+
+
+test('Unity OSM importer triangulates concave polygons and keeps mesh faces correctly oriented', () => {
+  const importer = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'LagosRealMapImporter.cs'), 'utf8');
+  for (const helper of ['CleanPolygon', 'SignedArea', 'PointInTriangle', 'TriangulatePolygon']) {
+    assert.ok(importer.includes(helper), 'OSM importer is missing polygon helper: ' + helper);
+  }
+  assert.match(importer, /triangles\.Add\(a \+ count\);\s*triangles\.Add\(c \+ count\);\s*triangles\.Add\(b \+ count\);/);
+  assert.match(importer, /triangles\.Add\(i\);\s*triangles\.Add\(next \+ count\);\s*triangles\.Add\(next\);/);
+  assert.match(importer, /triangles\.Add\(indices\[i\]\);\s*triangles\.Add\(indices\[i \+ 2\]\);\s*triangles\.Add\(indices\[i \+ 1\]\);/);
+  assert.doesNotMatch(importer, /for\s*\(int i\s*=\s*1;\s*i\s*<\s*n\s*-\s*1;\s*i\+\+\)\s*\{\s*tri\.Add\(0\)/);
+});
