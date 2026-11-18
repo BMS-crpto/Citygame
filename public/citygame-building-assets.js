@@ -59,9 +59,9 @@
         resolve();
       };
 
-      // The source file is a multi-building asset pack. Only independently
-      // bounded top-level roots are eligible; a single scene/merged mesh is
-      // never stretched across every residential lot.
+      // Treat this as a candidate asset, not a trusted catalogue. Only multiple
+      // independently bounded top-level roots are eligible; a single merged
+      // scene is never stretched across every residential lot.
       loader.load('/models/ajah_houses.glb', function (gltf) {
         try {
           if (completed) return;
