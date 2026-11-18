@@ -828,9 +828,10 @@ function inst(geo,mat,list,cast){
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(2*BOUND+500,2*BOUND+500),new THREE.MeshLambertMaterial({map:tx(grassBase,Math.round((2*BOUND+500)/4),Math.round((2*BOUND+500)/4))}));
 ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 
-const roadMatH=new THREE.MeshLambertMaterial({map:tx(asphaltBase,Math.round(113*GN/6),1.5),polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});
-const roadMatV=new THREE.MeshLambertMaterial({map:tx(asphaltBase,1.5,Math.round(113*GN/6)),polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
-const lineMat=new THREE.MeshLambertMaterial({color:0xffc107,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4});
+// Physically based, high-roughness asphalt keeps the road matte under both daylight and street lighting.
+const roadMatH=new THREE.MeshStandardMaterial({map:tx(asphaltBase,Math.round(113*GN/6),1.5),color:0xe4e5e7,roughness:0.96,metalness:0.015,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});
+const roadMatV=new THREE.MeshStandardMaterial({map:tx(asphaltBase,1.5,Math.round(113*GN/6)),color:0xe4e5e7,roughness:0.96,metalness:0.015,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
+const lineMat=new THREE.MeshStandardMaterial({color:0xffc928,roughness:0.82,metalness:0,polygonOffset:true,polygonOffsetFactor:-4,polygonOffsetUnits:-4});
 const curbMat=new THREE.MeshStandardMaterial({color:0xb8b7ae,roughness:0.92});
 const sidewalkMat=new THREE.MeshStandardMaterial({color:0xb6ad9d,roughness:0.96});
 const curbRuns=[],walkRuns=[];
