@@ -196,6 +196,10 @@ async function waitForServer() {
     // intercept the character-selection button. This does not fake account age
     // or credentials; it exercises the game's explicit guest entry flow.
     await page.locator('#guestbtn').click();
+    // Guest entry intentionally presents the randomized "Your Life" panel.
+    // The play menu is behind that full-screen panel until the player confirms.
+    await page.locator('#fgo').waitFor({ state: 'visible', timeout: 15000 });
+    await page.locator('#fgo').click();
     // Enter the actual multiplayer world. Earlier checks only proved that the
     // shell and phone renderers loaded; this catches errors during the welcome
     // message, world construction, scene setup and WebSocket join.
