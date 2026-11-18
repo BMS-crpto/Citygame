@@ -651,6 +651,6 @@ test('3D Lagos street infrastructure is modular, integrated, and performance-bat
     'CylinderGeometry(0.075, 0.13, 7.3, 8)',
     'BoxGeometry(8.8, 0.22, 3.9)'
   ]) assert.ok(source.includes(feature), 'street module missing 3D feature: ' + feature);
-  assert.match(html, /<script src="\/citygame-lagos-streets\\.js\\?v=20261118-2"><\/script>/);
+  assert.match(html, /<script src="\/citygame-lagos-streets\.js\?v=20261118-2"><\/script>/);
   assert.match(source, /if \(window\.CG_LAGOS_STREETS && window\.CG_LAGOS_STREETS\.built\) return/);
 });
