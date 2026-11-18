@@ -2730,6 +2730,7 @@ const $=id=>document.getElementById(id);
 const phone=$('phone'),appview=$('appview'),bigmap=$('bigmap'),bmc=$('bmc'),bmg=bmc.getContext('2d'),mapside=$('mapside');
 let gps=null,jobInfo=null,jobTarget=null,selPlace=null,mapTimer=null,bmHits=[],cityBusinesses=[];
 let mapZoom=1,mapPanX=0,mapPanY=0,mapDrag=null,mapDragged=false;
+let mapBaseCanvas=null,mapBaseWorld=null,mapBaseSignature='';
 function syncCityBusinesses(list){
   cityBusinesses=Array.isArray(list)?list:[];
   if(world)for(const b of cityBusinesses){const p=world.places.find(x=>x.id===b.id);if(p){p.name=b.name;p.icon=b.icon;p.business=true;p.owner=b.owner;p.area=b.area}}
@@ -2933,23 +2934,36 @@ function closeMap(){bigmap.style.display='none';clearInterval(mapTimer)}
 function sizeMap(){const S=Math.floor(Math.min(innerHeight-4,innerWidth*0.58));bmc.width=bmc.height=S;bmc.style.width=bmc.style.height=S+'px'}
 function districtNameForMap(bx,bz){const k=districtOf(bx,bz);return k==='airport'?'AIRPORT':(DIST[k]||outerInfo(bx,bz)[1]).toUpperCase()}
 function drawBigMap(){
-  // The world can be reset while the map refresh timer is still running.
-  // Stop drawing until a new world has been created instead of dereferencing null.
+  // Keep the expensive district/road/building layer between refreshes.
+  // Rebuild only when the world, map dimensions, zoom or pan changes.
   if(!world){clearInterval(mapTimer);mapTimer=null;if(bigmap)bigmap.style.display='none';return}
-  const S=bmc.width,sc=S/(GN*BLOCK*2+60)*mapZoom,g=bmg,P=(x,z)=>[S/2-x*sc+mapPanX,S/2-z*sc+mapPanY];
-  g.fillStyle='#0f2a45';g.fillRect(0,0,S,S);
-  for(let bx=-GN;bx<GN;bx++)for(let bz=-GN;bz<GN;bz++){
-    const a=P(bx*BLOCK+6,bz*BLOCK+6),b=P(bx*BLOCK+BLOCK-6,bz*BLOCK+BLOCK-6);
-    g.fillStyle=DCOL[districtOf(bx,bz)];g.fillRect(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.abs(a[0]-b[0]),Math.abs(a[1]-b[1]));
+  const S=bmc.width,sc=S/(GN*BLOCK*2+60)*mapZoom,g=bmg;
+  const signature=[S,GN,BLOCK,ROAD,mapZoom,mapPanX,mapPanY,world.houses.length,world.shops.length].join(':');
+  const P=(x,z)=>[S/2-x*sc+mapPanX,S/2-z*sc+mapPanY];
+  if(!mapBaseCanvas||mapBaseWorld!==world||mapBaseSignature!==signature){
+    mapBaseCanvas=document.createElement('canvas');mapBaseCanvas.width=mapBaseCanvas.height=S;
+    const base=mapBaseCanvas.getContext('2d');
+    base.fillStyle='#0f2a45';base.fillRect(0,0,S,S);
+    for(let bx=-GN;bx<GN;bx++)for(let bz=-GN;bz<GN;bz++){
+      const a=P(bx*BLOCK+6,bz*BLOCK+6),b=P(bx*BLOCK+BLOCK-6,bz*BLOCK+BLOCK-6);
+      base.fillStyle=DCOL[districtOf(bx,bz)];base.fillRect(Math.min(a[0],b[0]),Math.min(a[1],b[1]),Math.abs(a[0]-b[0]),Math.abs(a[1]-b[1]));
+    }
+    base.strokeStyle='#222';base.lineWidth=Math.max(2,ROAD*sc);
+    for(let i=-GN;i<=GN;i++){
+      let a=P(-GN*BLOCK,i*BLOCK),b=P(GN*BLOCK,i*BLOCK);base.beginPath();base.moveTo(a[0],a[1]);base.lineTo(b[0],b[1]);base.stroke();
+      a=P(i*BLOCK,-GN*BLOCK);b=P(i*BLOCK,GN*BLOCK);base.beginPath();base.moveTo(a[0],a[1]);base.lineTo(b[0],b[1]);base.stroke();
+    }
+    world.houses.forEach(h=>{const a=P(h.x,h.z);base.fillStyle=houseDot(h);base.fillRect(a[0]-3,a[1]-3,6,6)});
+    world.shops.forEach(h=>{const a=P(h.x,h.z);base.fillStyle='#ff9800';base.beginPath();base.arc(a[0],a[1],4,0,7);base.fill()});
+    const jail=P(world.jail.x,world.jail.z);base.font='16px sans-serif';base.textAlign='center';base.textBaseline='middle';base.fillText('⛓️',jail[0]+4,jail[1]-4);
+    mapBaseWorld=world;mapBaseSignature=signature;
   }
-  g.strokeStyle='#222';g.lineWidth=Math.max(2,ROAD*sc);
-  for(let i=-GN;i<=GN;i++){let a=P(-GN*BLOCK,i*BLOCK),b=P(GN*BLOCK,i*BLOCK);g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke();a=P(i*BLOCK,-GN*BLOCK);b=P(i*BLOCK,GN*BLOCK);g.beginPath();g.moveTo(a[0],a[1]);g.lineTo(b[0],b[1]);g.stroke()}
-  g.textAlign='center';g.textBaseline='middle';
-  world.houses.forEach(h=>{const a=P(h.x,h.z);g.fillStyle=houseDot(h);g.fillRect(a[0]-3,a[1]-3,6,6)});
-  world.shops.forEach(h=>{const a=P(h.x,h.z);g.fillStyle='#ff9800';g.beginPath();g.arc(a[0],a[1],4,0,7);g.fill()});
-  const jj=P(world.jail.x,world.jail.z);g.font='16px sans-serif';g.fillText('⛓️',jj[0]+4,jj[1]-4);
-  bmHits=[];
-  placesList().forEach(p=>{
+  g.clearRect(0,0,S,S);g.drawImage(mapBaseCanvas,0,0);
+  g.textAlign='center';g.textBaseline='middle';bmHits=[];
+  const mapPlaces=world.places.slice();
+  const home=myHome&&world.houses.find(h=>h.id===myHome.id);
+  if(home)mapPlaces.push({id:'home',name:'My Home',icon:'🏠',x:home.out.x,z:home.out.z});
+  mapPlaces.forEach(p=>{
     const a=P(p.x,p.z),building=String(p.id).startsWith('b');
     bmHits.push({x:a[0],y:a[1],id:p.id,building});
     if(building){
