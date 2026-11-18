@@ -488,7 +488,7 @@ test('interactive isometric map is loaded as a separate Three.js world overview'
   const streetDataPath = path.join(root, 'public', 'citygame-lagos-street-data.js');
   assert.ok(fs.existsSync(streetDataPath), 'Lagos street-name dataset must exist');
   const streetData = fs.readFileSync(streetDataPath, 'utf8');
-  assert.match(html, /citygame-lagos-street-data\\.js/);
+  assert.match(html, /citygame-lagos-street-data\.js/);
   for (const name of ['Ahmadu Bello Way', 'Adeola Odeku Street', 'Admiralty Road', 'Herbert Macaulay Way', 'Adeniran Ogunsanya Street', 'Broad Street']) {
     assert.ok(streetData.includes(name), 'street directory is missing: ' + name);
   }
