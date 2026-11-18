@@ -69,7 +69,7 @@
       const mid = segment * BLOCK + BLOCK / 2;
       for (const side of [-1, 1]) {
         drainBases.push({ x: mid, y: 0.205, z: road * BLOCK + side * 6.02, sx: 1, sy: 1, sz: 1 });
-        drainBases.push({ x: road * BLOCK + side * 6.02, y: 0.205, z: mid, sx: 1, sy: 1, sz: 1 });
+        drainBases.push({ x: road * BLOCK + side * 6.02, y: 0.205, z: mid, rotation: Math.PI / 2, sx: 1, sy: 1, sz: 1 });
         for (let k = -4; k <= 4; k += 2) {
           drainSlots.push({ x: mid + k, y: 0.218, z: road * BLOCK + side * 6.02, rotation: 0 });
           drainSlots.push({ x: road * BLOCK + side * 6.02, y: 0.218, z: mid + k, rotation: Math.PI / 2 });
