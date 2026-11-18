@@ -647,6 +647,8 @@ test('3D Lagos street infrastructure is modular, integrated, and performance-bat
     'trafficSignals: signalPoles.length',
     'districtSigns: districtSigns',
     'new THREE.CanvasTexture(canvas)',
+    'function districtForSign(ix, iz)',
+    'count(signSupports, new THREE.CylinderGeometry(0.065, 0.085, 5.5, 8)',
     'new THREE.SphereGeometry(0.13, 10, 8)',
     'CylinderGeometry(0.075, 0.13, 7.3, 8)',
     'BoxGeometry(8.8, 0.22, 3.9)'
