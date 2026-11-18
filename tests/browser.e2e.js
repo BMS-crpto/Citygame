@@ -48,8 +48,21 @@ async function waitForServer() {
     // The game shell is served locally, so wait for its real entry screen instead.
     await page.locator('#login, #menu').first().waitFor({ state: 'attached', timeout: 15000 });
 
-    // Give deferred scripts, the Three.js scene and first render a chance to initialize.
-    await page.waitForTimeout(9000);
+    // Wait for the complete deferred script stack, not an arbitrary delay.
+    // The legacy inline world bootstrap is large and can take longer on CI's software WebGL.
+    await page.waitForFunction(() => {
+      const bridge = window.LAGOS_PHONE;
+      const companyTag = [...document.scripts].some(script => script.src.includes('citygame-company-app.js'));
+      const appNames = ['Company', 'Social', 'Emotes', 'News', 'Gallery', 'Market'];
+      return companyTag && !!bridge?.APPR && appNames.every(name => typeof bridge.APPR[name] === 'function');
+    }, { timeout: 45000 }).catch(async error => {
+      const diagnostics = await page.evaluate(() => ({
+        scriptTags: [...document.scripts].map(script => script.src).filter(Boolean).slice(-18),
+        bridge: !!window.LAGOS_PHONE,
+        renderers: Object.keys(window.LAGOS_PHONE?.APPR || {})
+      }));
+      throw new Error('Phone app scripts did not finish initializing: ' + JSON.stringify(diagnostics) + '; ' + error.message);
+    });
     const state = await page.evaluate(() => ({
       title: document.title,
       hasCanvas: !!document.querySelector('canvas'),
