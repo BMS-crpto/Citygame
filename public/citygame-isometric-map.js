@@ -14,7 +14,7 @@
   const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const state = { active: false, raf: 0, renderer: null, scene: null, camera: null,
     canvas: null, yaw: Math.PI / 4, pitch: 0.78, zoom: 1, target: new THREE.Vector3(),
-    drag: null, moved: false, places: [], pickables: [], marker: null, lastResize: '' };
+    drag: null, moved: false, places: [], pickables: [], streetLabels: [], marker: null, lastResize: '' };
   const root = document.getElementById('bigmap');
   const legacy = document.getElementById('bmc');
   if (!root || !legacy) return;
@@ -197,6 +197,7 @@
         const tag = labelSprite(record.name);
         tag.position.set(x, 12 + (index % 2) * 0.2, z);
         tag.scale.set(23, 3.1, 1);
+        tag.visible = false; state.streetLabels.push(tag);
         tag.userData.streetName = record.name;
         tag.userData.district = district;
         scene.add(tag);
@@ -344,6 +345,7 @@
       state.marker.position.x += (me.position.x-state.marker.position.x)*0.12;
       state.marker.position.z += (me.position.z-state.marker.position.z)*0.12;
     }
+    state.streetLabels.forEach(label => { label.visible = state.zoom >= 1.65; });
     state.renderer.render(state.scene,state.camera);
   }
   function start() {
