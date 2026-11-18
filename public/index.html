@@ -2852,6 +2852,7 @@ let mapBaseCanvas=null,mapBaseWorld=null,mapBaseSignature='';
 function syncCityBusinesses(list){
   cityBusinesses=Array.isArray(list)?list:[];
   if(world)for(const b of cityBusinesses){const p=world.places.find(x=>x.id===b.id);if(p){p.name=b.name;p.icon=b.icon;p.business=true;p.owner=b.owner;p.area=b.area}}
+  mapBaseCanvas=null;mapBaseSignature='';
   if(phone.style.display==='flex'&&$('appview')&&$('appview').dataset.app==='Business')openApp('Business');
 }
 const dist2=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
@@ -3100,7 +3101,7 @@ function drawBigMap(){
     world.places.forEach(p=>{
       const a=P(p.x,p.z),kind=String(p.type||p.kind||p.name||'').toLowerCase();
       const landmark=/tower|hotel|plaza|mall|bank|court|hospital|airport|office|library|school/.test(kind);
-      const sz=Math.max(6,Math.min(25,sc*(landmark?8.2:6.1))),depth=Math.max(2,Math.min(9,sc*(landmark?2.1:1.55))),x=a[0]-sz/2,y=a[1]-sz/2;
+      const sz=Math.max(7,Math.min(30,sc*(landmark?15:11))),depth=Math.max(2,Math.min(9,sc*(landmark?2.1:1.55))),x=a[0]-sz/2,y=a[1]-sz/2;
       const roof=p.business?'#4e9b79':landmark?'#8b9bad':'#617b91';
       drawBlock(x,y,sz,Math.max(5,sz*(landmark?.82:.72)),depth,roof,p.business?'#245b49':'#344b61',p.business?'#34745d':'#405d75');
     });
@@ -3171,7 +3172,7 @@ function renderSide(){
   <input id="mapSearch" type="search" placeholder="Search Lagos places, districts..." autocomplete="off" style="box-sizing:border-box;width:100%;padding:10px 12px;border-radius:11px;border:1px solid #ffffff2a;background:#071923;color:#fff;margin:3px 0 8px">
   <div style="font-size:10px;opacity:.72;margin-bottom:6px">Drag to explore · pinch or scroll to zoom · select a destination for GPS or a ride</div>
   <div id="mapPlaceList">`;
-  h+=L.map(p=>`<div class="pl ${selPlace===p.id?'sel':''}" data-act="sel" data-id="${p.id}" data-name="${String(p.name||'').toLowerCase()}"><span>${p.icon} ${p.name}</span><span>${p.d}m</span></div>`).join('');
+  h+=L.map(p=>`<div class="pl ${selPlace===p.id?'sel':''}" data-act="sel" data-id="${p.id}" data-name="${escapeBusinessText(String(p.name||'').toLowerCase())}"><span>${p.icon} ${escapeBusinessText(p.name)}</span><span>${p.d}m</span></div>`).join('');
   h+='</div>';
   const sp=L.find(p=>p.id===selPlace);
   if(sp){
