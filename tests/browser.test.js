@@ -470,3 +470,12 @@ test('Unity rideable car reuses suspension raycast buffers and preserves dashboa
   assert.ok(!car.includes('Physics.RaycastAll('));
   assert.ok(car.includes('" km/h\\n" + currentGear'));
 });
+
+test('residential GLB variants are distributed across all sixteen Lekki plots', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  assert.match(html, /residentialVillaSlots\.slice\(0,16\)/);
+  assert.match(html, /candidates\[i%candidates\.length\]/);
+  assert.match(html, /const fit=new THREE\.Group\(\)/);
+  assert.match(html, /Residential GLB buildings placed:/);
+  assert.doesNotMatch(html, /candidates\.length<16/);
+});
