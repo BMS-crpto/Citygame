@@ -13,7 +13,7 @@
 
   const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const state = { active: false, raf: 0, renderer: null, scene: null, camera: null,
-    canvas: null, yaw: Math.PI / 4, pitch: 0.72, zoom: 1, target: new THREE.Vector3(),
+    canvas: null, yaw: Math.PI / 4, pitch: 0.78, zoom: 1, target: new THREE.Vector3(),
     drag: null, moved: false, places: [], pickables: [], marker: null, lastResize: '' };
   const root = document.getElementById('bigmap');
   const legacy = document.getElementById('bmc');
@@ -37,7 +37,7 @@
   root.insertBefore(canvas, root.firstChild);
   const tools = document.createElement('div');
   tools.id = 'cgIsoTools';
-  tools.innerHTML = '<button type="button" data-zoom="out" aria-label="Zoom out">−</button><button type="button" data-zoom="in" aria-label="Zoom in">+</button><button type="button" data-view="reset">Reset view</button><span id="cgIsoHint">Drag to rotate · Tap a building to navigate</span>';
+  tools.innerHTML = '<button type="button" data-zoom="out" aria-label="Zoom out">−</button><button type="button" data-zoom="in" aria-label="Zoom in">+</button><button type="button" data-view="reset">Reset view</button><span id="cgIsoHint">Drag to explore · Tap a place to navigate</span>';
   root.appendChild(tools);
 
   function districtColor(x, z) {
@@ -65,6 +65,64 @@
     sprite.scale.set(18, 3.4, 1);
     return sprite;
   }
+  function addUrbanMapLayer(scene) {
+    // Cartographic overlay: curved arterial corridors and a lagoon edge make the
+    // overview read as a city map while retaining the live world's destination coordinates.
+    const roadMat = material(0x303b43, 0.96);
+    const laneMat = new THREE.MeshBasicMaterial({ color: 0xd8c49a, transparent: true, opacity: 0.8 });
+    function ribbon(points, width, y, mat) {
+      const verts = [], indices = [];
+      for (let i = 0; i < points.length; i++) {
+        const p = points[i], a = points[Math.max(0, i - 1)], b = points[Math.min(points.length - 1, i + 1)];
+        const dx = b[0] - a[0], dz = b[1] - a[1], len = Math.hypot(dx, dz) || 1;
+        const nx = -dz / len * width / 2, nz = dx / len * width / 2;
+        verts.push(p[0] + nx, y, p[1] + nz, p[0] - nx, y, p[1] - nz);
+        if (i) { const k = i * 2; indices.push(k-2,k-1,k,k-1,k+1,k); }
+      }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+      g.setIndex(indices); g.computeVertexNormals();
+      const mesh = new THREE.Mesh(g, mat); mesh.rotation.x = 0; scene.add(mesh);
+      return mesh;
+    }
+    const corridors = [
+      [[-760,-360],[-560,-290],[-360,-230],[-170,-155],[30,-105],[240,-55],[470,20],[760,95]],
+      [[-730,310],[-520,245],[-330,185],[-120,145],[80,160],[280,215],[510,300],[760,390]],
+      [[-430,-760],[-370,-540],[-300,-330],[-240,-120],[-170,90],[-110,300],[-40,520],[35,760]],
+      [[250,-760],[220,-540],[180,-330],[155,-110],[190,100],[255,310],[340,530],[420,760]]
+    ];
+    corridors.forEach(path => {
+      ribbon(path, 15, 2.2, roadMat);
+      const center = path.map(p => [p[0], p[1]]);
+      ribbon(center, 0.65, 2.35, laneMat);
+    });
+
+    // Lagoon/water occupies the eastern edge, with an irregular shoreline.
+    const lagoon = new THREE.Shape();
+    lagoon.moveTo(555,-850);
+    lagoon.bezierCurveTo(455,-620,610,-430,535,-235);
+    lagoon.bezierCurveTo(470,-65,650,95,590,285);
+    lagoon.bezierCurveTo(545,485,690,660,640,850);
+    lagoon.lineTo(1000,850); lagoon.lineTo(1000,-850); lagoon.closePath();
+    const water = new THREE.Mesh(new THREE.ShapeGeometry(lagoon, 28),
+      new THREE.MeshStandardMaterial({color:0x287e9a, roughness:0.38, metalness:0.08}));
+    water.rotation.x = -Math.PI / 2; water.position.y = 0.55; scene.add(water);
+
+    // District names are anchored geographically and remain readable at overview scale.
+    const districts = [
+      ['IKEJA',-440,-390],['YABA',-235,-70],['SURULERE',-410,285],
+      ['VICTORIA ISLAND',245,-365],['IKOYI',390,-120],['LEKKI',410,390],
+      ['MAINLAND',-40,410]
+    ];
+    districts.forEach(([name,x,z]) => {
+      const tag = labelSprite(name); tag.position.set(x,34,z); tag.scale.set(34,6.2,1); scene.add(tag);
+    });
+    // Bridge links over the water edge.
+    const bridgeMat = material(0x8b9699,0.72);
+    ribbon([[420,-290],[490,-245],[560,-190],[640,-150]],19,4.2,bridgeMat);
+    ribbon([[445,245],[510,275],[575,315],[655,350]],19,4.2,bridgeMat);
+  }
+
   function buildWorld() {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a1b25);
@@ -100,6 +158,7 @@
       });
     }
     if (!cloned) console.warn('Isometric map found no static world meshes; check world initialisation');
+    addUrbanMapLayer(scene);
     const places = (window.placesList() || []).filter(p => Number.isFinite(Number(p.x)) && Number.isFinite(Number(p.z)));
     state.places = places;
     state.pickables = [];
@@ -167,7 +226,7 @@
     state.lastResize = sig;
     state.renderer.setPixelRatio(dpr); state.renderer.setSize(w,h,false);
     const aspect = w / h;
-    const verticalExtent = Math.max(1850, 1900 / Math.max(0.38, aspect));
+    const verticalExtent = Math.max(980, 1180 / Math.max(0.58, aspect));
     state.camera.left = -verticalExtent * aspect / 2;
     state.camera.right = verticalExtent * aspect / 2;
     state.camera.top = verticalExtent / 2;
@@ -175,7 +234,7 @@
     state.camera.updateProjectionMatrix();
   }
   function placeCamera() {
-    const distance = 1750 / state.zoom;
+    const distance = 1180 / state.zoom;
     const cp = Math.cos(state.pitch), sp = Math.sin(state.pitch);
     state.camera.position.set(
       state.target.x + Math.sin(state.yaw) * distance * cp,
@@ -218,13 +277,14 @@
         state.scene = buildWorld();
         state.camera = new THREE.OrthographicCamera(-400,400,400,-400,0.1,5000);
         placeCamera();
-        canvas.addEventListener('pointerdown',e=>{state.drag={x:e.clientX,y:e.clientY,yaw:state.yaw,pitch:state.pitch};state.moved=false;try{canvas.setPointerCapture(e.pointerId)}catch(_){}});
+        canvas.addEventListener('pointerdown',e=>{state.drag={x:e.clientX,y:e.clientY,targetX:state.target.x,targetZ:state.target.z};state.moved=false;try{canvas.setPointerCapture(e.pointerId)}catch(_){}});
         canvas.addEventListener('pointermove',e=>{
           if(!state.drag)return;
           const dx=e.clientX-state.drag.x,dy=e.clientY-state.drag.y;
           if(Math.abs(dx)+Math.abs(dy)>5)state.moved=true;
-          state.yaw=state.drag.yaw-dx*0.006;
-          state.pitch=Math.max(0.42,Math.min(1.18,state.drag.pitch+dy*0.004));
+          const scale = 2.4 / state.zoom;
+          state.target.x = state.drag.targetX - dx * scale;
+          state.target.z = state.drag.targetZ + dy * scale;
           placeCamera();
         });
         const end=e=>{if(state.drag){if(!state.moved)pick(e);state.drag=null}};
@@ -232,7 +292,7 @@
         tools.addEventListener('click',e=>{
           const b=e.target.closest('button');if(!b)return;
           if(b.dataset.zoom){state.zoom=Math.max(0.55,Math.min(2.2,state.zoom+(b.dataset.zoom==='in'?0.15:-0.15)));placeCamera()}
-          if(b.dataset.view){state.yaw=Math.PI/4;state.pitch=.72;state.zoom=1;state.target.set(0,0,0);placeCamera()}
+          if(b.dataset.view){state.yaw=Math.PI/4;state.pitch=.78;state.zoom=1;state.target.set(0,0,0);placeCamera()}
         });
         canvas.addEventListener('wheel',e=>{e.preventDefault();state.zoom=Math.max(.55,Math.min(2.2,state.zoom+(e.deltaY<0?.08:-.08)));placeCamera()},{passive:false});
         window.addEventListener('resize',()=>{state.lastResize='';resize()},{passive:true});
