@@ -148,6 +148,7 @@
   count(activeLenses, new THREE.SphereGeometry(0.13, 10, 8), activeLensMat, false);
 
   // Raised, readable 3D district signs at the main crossroads.
+  const signSupports = [];
   function makeDistrictSign(label, x, z) {
     const canvas = document.createElement('canvas');
     canvas.width = 512; canvas.height = 128;
@@ -163,6 +164,9 @@
     const board = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.05, 0.12), material);
     board.position.set(x, 5.55, z);
     board.rotation.y = Math.PI / 4;
+    const supportOffset = 1.55 * Math.SQRT1_2;
+    signSupports.push({ x: x - supportOffset, y: 2.75, z: z + supportOffset });
+    signSupports.push({ x: x + supportOffset, y: 2.75, z: z - supportOffset });
     board.castShadow = false; board.receiveShadow = true;
     scene.add(board);
   }
