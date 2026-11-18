@@ -361,6 +361,19 @@ test('premium stylesheet does not shrink the full-screen phone in landscape', ()
   assert.match(finalRules, /#phone:not\(\.app-open\) #pgrid\{grid-template-columns:repeat\(8,minmax\(0,1fr\)\)!important/);
 });
 
+test('big map caches static city layers between redraws', () => {
+  const html = fs.readFileSync(path.join(root, 'public', 'index.html'), 'utf8');
+  assert.match(html, /let mapBaseCanvas=null,mapBaseWorld=null,mapBaseSignature=''/);
+  const start = html.indexOf('function drawBigMap(){');
+  const end = html.indexOf("bmc.addEventListener('wheel'", start);
+  assert.ok(start >= 0 && end > start);
+  const draw = html.slice(start, end);
+  assert.match(draw, /mapBaseWorld!==world\|\|mapBaseSignature!==signature/);
+  assert.match(draw, /document\.createElement\('canvas'\)/);
+  assert.match(draw, /g\.drawImage\(mapBaseCanvas,0,0\)/);
+  assert.match(draw, /const mapPlaces=world\.places\.slice\(\)/);
+});
+
 test('rideable vehicle physics uses the fixed timestep while steering visuals remain frame responsive', () => {
   const car = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'RideableCar.cs'), 'utf8');
   const updateStart = car.indexOf('private void Update()');
