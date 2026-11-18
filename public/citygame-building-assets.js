@@ -64,6 +64,7 @@
       // never stretched across every residential lot.
       loader.load('/models/ajah_houses.glb', function (gltf) {
         try {
+          if (completed) return;
           const roots = (gltf.scene.children || []).filter(validBuildingRoot);
           if (roots.length >= 2) state.variants = roots;
           else console.warn('[Citygame buildings] Ajah asset has no separable building set; using procedural fallback.');
