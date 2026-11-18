@@ -2549,22 +2549,9 @@ function sendWS(data){
 }
 
 const pos={x:0,z:0,ry:0,floor:0};window.CG_POS=()=>pos;
-let joy={x:0,y:0};let camYaw=0,camH=7,camInit=false;
+let joy={x:0,y:0};window.CG_JOY=joy;let camYaw=0,camH=7,camInit=false;
 let myCol=-1,carObj=null,speed=0,moving=false,myBank=0,myFood=100;
 
-const stick=document.getElementById('stick'),knob=document.getElementById('knob');
-let stickId=null;
-function setStick(t){
-  const r=stick.getBoundingClientRect(),R=r.width*0.38;
-  let dx=t.clientX-(r.left+r.width/2),dy=t.clientY-(r.top+r.height/2);
-  const m=Math.min(R,Math.hypot(dx,dy)),a=Math.atan2(dy,dx);
-  dx=Math.cos(a)*m;dy=Math.sin(a)*m;
-  knob.style.transform=`translate(${dx}px,${dy}px)`;joy.x=dx/R;joy.y=dy/R;
-}
-stick.addEventListener('touchstart',e=>{stickId=e.changedTouches[0].identifier;setStick(e.changedTouches[0])});
-stick.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.identifier===stickId)setStick(t)});
-const endStick=()=>{stickId=null;joy.x=joy.y=0;knob.style.transform='translate(0,0)'};
-stick.addEventListener('touchend',endStick);stick.addEventListener('touchcancel',endStick);
 // drag anywhere to rotate the camera (left/right = turn, up/down = height)
 let camTouch=null,lastX=0,lastY=0,pinchDist=0,camZoom=1;
 const touchGap=e=>Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
@@ -5166,6 +5153,7 @@ catch(e){console.warn('palms fallback',e);try{palmBatchBoxes();flushBatch()}catc
 <script src="/citygame-isometric-map.js?v=20261118-1"></script>
 <script src="/player-account-center.js?v=20261116"></script>
 <script src="/asset-download-manager.js?v=20261117-auto"></script>
+<script src="/citygame-touch-controls.js?v=1"></script>
 <script src="/citygame-performance.js?v=20261117c"></script>
 <script src="/citygame-hud.js?v=1"></script>\n</body>
 </html>
