@@ -411,6 +411,12 @@ test('big map caches static city layers between redraws', () => {
   assert.match(draw, /const drawBlock=\(x,y,w,h,depth,roof,side,detail\)/);
   assert.match(html, /LIVE POSITION/);
 });
+test('WebSocket sends are guarded until the connection is OPEN', () => {
+  const html = fs.readFileSync(htmlPath, 'utf8');
+  assert.match(html, /function sendWS\(data\)/);
+  assert.match(html, /ws\.readyState!==WebSocket\.OPEN\)return false/);
+  assert.match(html, /onopen=\(\)=>sendWS\(JSON\.stringify\(\{t:'join'/);
+});
 test('Lagos city map supports searching named destinations', () => {
   const html = fs.readFileSync(htmlPath, 'utf8');
   assert.match(html, /id="mapSearch"/);
