@@ -2941,6 +2941,8 @@ function openApp(n){
   // Let registered add-on apps replace the legacy preview with their full working screen.
   if(typeof APPR!=='undefined'&&APPR[n]&&typeof APPR[n]==='function')APPR[n]();
 }
+window.openApp=openApp;
+window.CGOpenPhoneApp=openApp;
 
 function setQuality(q){quality=q;document.querySelectorAll('#qrow .q').forEach(x=>x.classList.toggle('sel',x.dataset.q===q));applyQuality();openApp('Settings')}
 let phoneChatMessages=[];
@@ -3051,7 +3053,8 @@ function openMap(){
 function closeMap(){bigmap.style.display='none';clearInterval(mapTimer)}
 function sizeMap(){const W=Math.max(320,Math.floor(innerWidth)),H=Math.max(420,Math.floor(innerHeight));bmc.width=W;bmc.height=H;bmc.style.width='100%';bmc.style.height='100%'}
 function districtNameForMap(bx,bz){const k=districtOf(bx,bz);return k==='airport'?'AIRPORT':(DIST[k]||outerInfo(bx,bz)[1]).toUpperCase()}
-function szForLabel(sc){return Math.max(6,Math.min(16,sc*2.2))}\nfunction drawBigMap(){
+function szForLabel(sc){return Math.max(6,Math.min(16,sc*2.2))}
+function drawBigMap(){
   // Keep the expensive district/road/building layer between refreshes.
   // Rebuild only when the world, map dimensions, zoom or pan changes.
   if(!world){clearInterval(mapTimer);mapTimer=null;if(bigmap)bigmap.style.display='none';return}
@@ -4277,7 +4280,7 @@ guard('mmroute',()=>{
 });
 
 // Public bridge for separately loaded phone-app modules.
-window.LAGOS_PHONE = { APPR, X, PX, S, phoneOpen, openApp: n => openApp(n), appview: document.getElementById('appview'), getCash:()=>myMoney, capturePhoto:()=>{renderer.render(scene,camera);const src=renderer.domElement,w=src.width,h=src.height,scale=Math.min(1,720/Math.max(w,h)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(w*scale));cv.height=Math.max(1,Math.round(h*scale));const ctx=cv.getContext('2d');ctx.drawImage(src,0,0,cv.width,cv.height);return cv.toDataURL('image/jpeg',0.76)} };
+window.LAGOS_PHONE = { APPR, X, PX, S, phoneOpen, openApp: n => window.CGOpenPhoneApp(n), appview: document.getElementById('appview'), getCash:()=>myMoney, capturePhoto:()=>{renderer.render(scene,camera);const src=renderer.domElement,w=src.width,h=src.height,scale=Math.min(1,720/Math.max(w,h)),cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(w*scale));cv.height=Math.max(1,Math.round(h*scale));const ctx=cv.getContext('2d');ctx.drawImage(src,0,0,cv.width,cv.height);return cv.toDataURL('image/jpeg',0.76)} };
 console.log('Citygame v0.7 add-on loaded');
 })();
 
