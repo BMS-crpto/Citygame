@@ -3116,7 +3116,8 @@ function szForLabel(sc){return Math.max(6,Math.min(16,sc*2.2))}\nfunction drawBi
   const m=P(pos.x,pos.z);g.save();g.translate(m[0],m[1]);g.rotate(-pos.ry);g.fillStyle='#fff';g.strokeStyle='#000';g.lineWidth=2;
   g.beginPath();g.moveTo(0,-11);g.lineTo(8,9);g.lineTo(0,5);g.lineTo(-8,9);g.closePath();g.fill();g.stroke();g.restore();
 }
-window.addEventListener('resize',()=>{if(bigmap.style.display==='flex'){sizeMap();mapBaseCanvas=null;drawBigMap()}});\n bmc.addEventListener('wheel',e=>{e.preventDefault();const r=bmc.getBoundingClientRect(),x=(e.clientX-r.left)*bmc.width/r.width,y=(e.clientY-r.top)*bmc.height/r.height,old=mapZoom;mapZoom=Math.max(0.75,Math.min(3.2,mapZoom*(e.deltaY<0?1.12:0.89)));const f=mapZoom/old;mapPanX=x-(x-mapPanX)*f;mapPanY=y-(y-mapPanY)*f;drawBigMap()},{passive:false});
+window.addEventListener('resize',()=>{if(bigmap.style.display==='flex'){sizeMap();mapBaseCanvas=null;drawBigMap()}});
+bmc.addEventListener('wheel',e=>{e.preventDefault();const r=bmc.getBoundingClientRect(),x=(e.clientX-r.left)*bmc.width/r.width,y=(e.clientY-r.top)*bmc.height/r.height,old=mapZoom;mapZoom=Math.max(0.75,Math.min(3.2,mapZoom*(e.deltaY<0?1.12:0.89)));const f=mapZoom/old;mapPanX=x-(x-mapPanX)*f;mapPanY=y-(y-mapPanY)*f;drawBigMap()},{passive:false});
 bmc.addEventListener('pointerdown',e=>{mapDrag={x:e.clientX,y:e.clientY,px:mapPanX,py:mapPanY,id:e.pointerId};mapDragged=false;bmc.setPointerCapture(e.pointerId)});
 bmc.addEventListener('pointermove',e=>{if(!mapDrag||mapDrag.id!==e.pointerId)return;const dx=e.clientX-mapDrag.x,dy=e.clientY-mapDrag.y;if(Math.abs(dx)+Math.abs(dy)>5)mapDragged=true;if(mapDragged){const r=bmc.getBoundingClientRect();mapPanX=mapDrag.px+dx*bmc.width/r.width;mapPanY=mapDrag.py+dy*bmc.height/r.height;drawBigMap()}});
 const stopMapDrag=e=>{if(mapDrag&&mapDrag.id===e.pointerId)mapDrag=null};bmc.addEventListener('pointerup',stopMapDrag);bmc.addEventListener('pointercancel',stopMapDrag);
