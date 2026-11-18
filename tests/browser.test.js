@@ -480,8 +480,18 @@ test('interactive isometric map is loaded as a separate Three.js world overview'
     'Tap a place to navigate',
     'skylineCluster(285',
     'const parks = [',
-    'VI BUSINESS DISTRICT'
+    'VI BUSINESS DISTRICT',
+    'function addStreetNameLayer(scene)',
+    'CG_LAGOS_STREET_DATA',
+    'streetName'
   ]) assert.ok(map.includes(feature), 'isometric map is missing: ' + feature);
+  const streetDataPath = path.join(root, 'public', 'citygame-lagos-street-data.js');
+  assert.ok(fs.existsSync(streetDataPath), 'Lagos street-name dataset must exist');
+  const streetData = fs.readFileSync(streetDataPath, 'utf8');
+  assert.match(html, /citygame-lagos-street-data\\.js/);
+  for (const name of ['Ahmadu Bello Way', 'Adeola Odeku Street', 'Admiralty Road', 'Herbert Macaulay Way', 'Adeniran Ogunsanya Street', 'Broad Street']) {
+    assert.ok(streetData.includes(name), 'street directory is missing: ' + name);
+  }
   assert.match(map, /Tap a place to navigate/);
   assert.match(map, /state\.target\.x = state\.drag\.targetX/);
   assert.doesNotMatch(map, /state\.yaw=state\.drag\.yaw/);
