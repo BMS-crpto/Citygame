@@ -178,6 +178,42 @@ async function waitForServer() {
     assert.equal(dealership.detailOpened, true, 'vehicle details preview must open');
     assert.equal(dealership.detailHasVehicle, true, 'vehicle details must identify the selected model');
 
+    // Enter the actual multiplayer world. Earlier checks only proved that the
+    // shell and phone renderers loaded; this catches errors during the welcome
+    // message, world construction, scene setup and WebSocket join.
+    await page.locator('#play').click();
+    await page.waitForFunction(() => {
+      try {
+        return typeof ws !== 'undefined' && !!ws && ws.readyState === 1 &&
+          typeof world !== 'undefined' && !!world &&
+          Array.isArray(world.houses) && world.houses.length > 0 &&
+          typeof scene !== 'undefined' && !!scene && scene.children.length > 0 &&
+          !!document.querySelector('#info') &&
+          document.querySelector('#info').textContent.includes('CITYGAME');
+      } catch (_) {
+        return false;
+      }
+    }, null, { timeout: 25000 });
+
+    const liveWorld = await page.evaluate(() => ({
+      socket: typeof ws !== 'undefined' && ws ? ws.readyState : -1,
+      houses: typeof world !== 'undefined' && world ? world.houses.length : 0,
+      shops: typeof world !== 'undefined' && world ? world.shops.length : 0,
+      sceneObjects: typeof scene !== 'undefined' && scene ? scene.children.length : 0,
+      playerCreated: typeof me !== 'undefined' && !!me,
+      canvasCount: document.querySelectorAll('canvas').length,
+      info: document.querySelector('#info')?.textContent || ''
+    }));
+    assert.equal(liveWorld.socket, 1, 'game WebSocket must remain connected after joining');
+    assert.ok(liveWorld.houses > 0, 'server must provide houses and client must build the world');
+    assert.ok(liveWorld.sceneObjects > 0, 'Three.js scene must contain the loaded city');
+    assert.ok(liveWorld.playerCreated, 'local player must be created after welcome');
+    assert.ok(liveWorld.canvasCount > 0, 'game renderer canvas must remain mounted');
+
+    await page.waitForTimeout(1200);
+    assert.deepEqual(runtimeErrors, [],
+      'browser runtime must not throw uncaught JavaScript errors during real world entry: ' +
+      JSON.stringify({ liveWorld, runtimeErrors }));
     assert.deepEqual(runtimeErrors, [], 'browser runtime must not throw uncaught JavaScript errors');
     process.stdout.write('Browser startup passed: ' + JSON.stringify(state) + '\\n');
   } finally {
