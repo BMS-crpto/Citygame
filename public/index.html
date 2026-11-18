@@ -3082,11 +3082,15 @@ function szForLabel(sc){return Math.max(6,Math.min(16,sc*2.2))}\nfunction drawBi
     }
     // Raised building plots with shadows and coloured roofs, like a miniature city model.
     world.places.forEach((p,i)=>{
-      const a=P(p.x,p.z),sz=Math.max(5,Math.min(18,sc*2.2)),x=a[0]-sz/2,y=a[1]-sz/2;
-      base.fillStyle='#071b18aa';base.fillRect(x+2,y+3,sz,sz);
-      base.fillStyle=p.business?'#376e60':'#52677e';base.fillRect(x,y,sz,sz);
-      base.fillStyle='#9ab3a2';base.fillRect(x+2,y+2,Math.max(1,sz-4),Math.max(1,sz-4));
-      base.fillStyle=p.business?'#55d6a2':'#304c66';base.fillRect(x+3,y+3,Math.max(1,sz-6),Math.max(1,sz-6));
+      const a=P(p.x,p.z),sz=Math.max(5,Math.min(18,sc*2.2)),d=Math.max(2,Math.min(7,sc*.9)),x=a[0]-sz/2,y=a[1]-sz/2;
+      base.fillStyle='#071b18aa';base.fillRect(x+2,y+3,sz+d,sz+d);
+      base.fillStyle=p.business?'#244e46':'#34485c';
+      base.beginPath();base.moveTo(x,y+sz);base.lineTo(x+d,y+sz-d);base.lineTo(x+sz+d,y+sz-d);base.lineTo(x+sz,y+sz);base.closePath();base.fill();
+      base.fillStyle=p.business?'#376e60':'#52677e';
+      base.beginPath();base.moveTo(x+sz,y);base.lineTo(x+sz+d,y-d);base.lineTo(x+sz+d,y+sz-d);base.lineTo(x+sz,y+sz);base.closePath();base.fill();
+      base.fillStyle='#9ab3a2';base.fillRect(x,y,sz,sz);
+      base.fillStyle=p.business?'#55d6a2':'#304c66';base.fillRect(x+2,y+2,Math.max(1,sz-4),Math.max(1,sz-4));
+      base.fillStyle='#d7e2cf';base.fillRect(x+sz*.35,y+2,Math.max(1,sz*.28),Math.max(1,sz*.22));
     });
     world.houses.forEach(h=>{const a=P(h.x,h.z);base.fillStyle='#253f55';base.fillRect(a[0]-3,a[1]-3,6,6)});
     world.shops.forEach(h=>{const a=P(h.x,h.z);base.fillStyle='#f4b942';base.beginPath();base.arc(a[0],a[1],4,0,7);base.fill()});
@@ -3095,6 +3099,15 @@ function szForLabel(sc){return Math.max(6,Math.min(16,sc*2.2))}\nfunction drawBi
   }
   g.clearRect(0,0,W,H);g.drawImage(mapBaseCanvas,0,0);
   g.textAlign='center';g.textBaseline='middle';bmHits=[];
+  // Show one district title per named area at overview zoom.
+  if(mapZoom<1.7){
+    const shown=new Set();
+    for(let bx=-GN;bx<GN;bx++)for(let bz=-GN;bz<GN;bz++){
+      const name=districtNameForMap(bx,bz);if(!name||shown.has(name))continue;shown.add(name);
+      const a=P(bx*BLOCK+BLOCK/2,bz*BLOCK+BLOCK/2);
+      g.font='900 13px system-ui';g.fillStyle='#c6e6a8a8';g.fillText(name,a[0],a[1]);
+    }
+  }
   const mapPlaces=world.places.slice();
   const home=myHome&&world.houses.find(h=>h.id===myHome.id);
   if(home)mapPlaces.push({id:'home',name:'My Home',icon:'🏠',x:home.out.x,z:home.out.z});
