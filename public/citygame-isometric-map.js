@@ -75,57 +75,31 @@
     const fill = new THREE.DirectionalLight(0x83c9e7, 0.42);
     fill.position.set(420, 250, -500); scene.add(fill);
 
-    const land = new THREE.Group(); scene.add(land);
-    const tileGeo = new THREE.BoxGeometry(62, 1.2, 62);
-    const tileColors = [0x477866,0x456f62,0x3d7965,0x68745b,0x526c64,0x527c62];
-    const tiles = new THREE.InstancedMesh(tileGeo, material(0xffffff), 576);
-    const dummy = new THREE.Object3D();
-    let n = 0;
-    for (let x = -12; x < 12; x++) for (let z = -12; z < 12; z++) {
-      const idx = x >= 4 ? (z < 0 ? 1 : 2) : x <= -4 ? (z < 0 ? 3 : 0) : z <= -4 ? 4 : z >= 4 ? 5 : 0;
-      dummy.position.set(x * 64 + 32, -0.8, z * 64 + 32); dummy.updateMatrix();
-      tiles.setMatrixAt(n, dummy.matrix); tiles.setColorAt(n, new THREE.Color(tileColors[idx])); n++;
+    // Clone the actual static Three.js city geometry into the overview.
+    // This keeps the map visually tied to the playable world instead of drawing substitute blocks.
+    const sourceScene = window.scene;
+    let cloned = 0;
+    if (sourceScene && sourceScene.children) {
+      sourceScene.children.forEach(function (sourceObject) {
+        if (!sourceObject || (!sourceObject.isMesh && !sourceObject.isInstancedMesh)) return;
+        if (sourceObject.isSkinnedMesh || sourceObject.isSprite || sourceObject.isPoints) return;
+        try {
+          const copy = sourceObject.clone();
+          copy.traverse(function (node) {
+            if (node.isMesh || node.isInstancedMesh) {
+              node.castShadow = false;
+              node.receiveShadow = false;
+              node.frustumCulled = false;
+            }
+          });
+          scene.add(copy);
+          cloned++;
+        } catch (error) {
+          console.warn('Map skipped a non-cloneable city object:', error);
+        }
+      });
     }
-    tiles.instanceMatrix.needsUpdate = true;
-    if (tiles.instanceColor) tiles.instanceColor.needsUpdate = true;
-    tiles.receiveShadow = true; scene.add(tiles);
-
-    const roadMat = material(0x303a42, 0.98);
-    const sidewalkMat = material(0xb8b4a8, 0.95);
-    const curbMat = material(0xe0d8c8, 0.9);
-    for (let i = -12; i <= 12; i++) {
-      const h = new THREE.Mesh(new THREE.BoxGeometry(1580, 0.35, 12), roadMat);
-      h.position.set(0, 0.05, i * 64); scene.add(h);
-      const v = new THREE.Mesh(new THREE.BoxGeometry(12, 0.35, 1580), roadMat);
-      v.position.set(i * 64, 0.05, 0); scene.add(v);
-      for (const side of [-1, 1]) {
-        const hs = new THREE.Mesh(new THREE.BoxGeometry(1580, 0.24, 2.4), sidewalkMat);
-        hs.position.set(0, 0.24, i * 64 + side * 8.8); scene.add(hs);
-        const vs = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.24, 1580), sidewalkMat);
-        vs.position.set(i * 64 + side * 8.8, 0.24, 0); scene.add(vs);
-        const hc = new THREE.Mesh(new THREE.BoxGeometry(1580, 0.42, 0.42), curbMat);
-        hc.position.set(0, 0.28, i * 64 + side * 7.4); scene.add(hc);
-        const vc = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.42, 1580), curbMat);
-        vc.position.set(i * 64 + side * 7.4, 0.28, 0); scene.add(vc);
-      }
-    }
-    const yellow = material(0xf1cf54, 0.72);
-    for (let i = -12; i <= 12; i++) for (const off of [-1.2,1.2]) {
-      const a = new THREE.Mesh(new THREE.BoxGeometry(1580, 0.08, 0.16), yellow);
-      a.position.set(0, 0.27, i * 64 + off); scene.add(a);
-      const b = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.08, 1580), yellow);
-      b.position.set(i * 64 + off, 0.27, 0); scene.add(b);
-    }
-
-    // Water channel is a deliberate visual district divider on the map, not a GPS overlay.
-    const water = new THREE.Mesh(new THREE.BoxGeometry(1580, 0.7, 28), material(0x176b9a, 0.34));
-    water.position.set(0, -0.1, 176); scene.add(water);
-    const bank = material(0x8b9b83);
-    for (const side of [-1,1]) {
-      const edge = new THREE.Mesh(new THREE.BoxGeometry(1580, 0.6, 1.2), bank);
-      edge.position.set(0, 0.18, 176 + side * 15); scene.add(edge);
-    }
-
+    if (!cloned) console.warn('Isometric map found no static world meshes; check world initialisation');
     const places = (window.placesList() || []).filter(p => Number.isFinite(Number(p.x)) && Number.isFinite(Number(p.z)));
     state.places = places;
     state.pickables = [];
@@ -133,23 +107,17 @@
     places.forEach((p, i) => {
       const name = String(p.name || 'Lagos destination');
       const landmark = /hotel|tower|mall|bank|court|hospital|airport|plaza|library|school|lounge|salon|station/i.test(name);
-      const w = landmark ? 17 + (i % 3) * 2 : 10 + (i % 4) * 1.8;
-      const d = landmark ? 15 + (i % 2) * 3 : 9 + (i % 3) * 1.5;
-      const h = landmark ? 16 + (i % 5) * 5 : 5 + (i % 4) * 2.5;
-      const base = new THREE.Mesh(new THREE.BoxGeometry(w + 1.2, 1.4, d + 1.2), material(0x4b5660));
-      base.position.set(Number(p.x), 0.95, Number(p.z)); scene.add(base);
-      const body = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material(palette[i % palette.length]));
-      body.position.set(Number(p.x), 1.6 + h / 2, Number(p.z)); body.castShadow = true; body.receiveShadow = true;
-      body.userData.placeId = p.id; body.userData.placeName = name; scene.add(body);
-      const roof = new THREE.Mesh(new THREE.BoxGeometry(w + 0.7, 0.8, d + 0.7), material(landmark ? 0x34495b : 0x555b60));
-      roof.position.set(Number(p.x), h + 2, Number(p.z)); scene.add(roof);
-      const door = new THREE.Mesh(new THREE.BoxGeometry(Math.max(1.6,w*0.16), Math.max(2.5,h*0.28), 0.18), material(0x263849));
-      door.position.set(Number(p.x), 1.7 + Math.max(2.5,h*0.14), Number(p.z) + d/2 + 0.1); scene.add(door);
-      body.userData.placeId = p.id;
-      state.pickables.push(body);
+      // Invisible pick volumes sit over the real buildings; they do not replace city geometry.
+      const hit = new THREE.Mesh(
+        new THREE.BoxGeometry(landmark ? 30 : 20, 42, landmark ? 30 : 20),
+        new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false })
+      );
+      hit.position.set(Number(p.x), 19, Number(p.z));
+      hit.userData.placeId = p.id; hit.userData.placeName = name;
+      scene.add(hit); state.pickables.push(hit);
       if (landmark || i % 3 === 0) {
         const label = labelSprite(name);
-        label.position.set(Number(p.x), h + 7, Number(p.z));
+        label.position.set(Number(p.x), 38, Number(p.z));
         scene.add(label);
       }
     });
@@ -198,12 +166,16 @@
     if (sig === state.lastResize) return;
     state.lastResize = sig;
     state.renderer.setPixelRatio(dpr); state.renderer.setSize(w,h,false);
-    state.camera.left = -w / 2; state.camera.right = w / 2;
-    state.camera.top = h / 2; state.camera.bottom = -h / 2;
+    const aspect = w / h;
+    const verticalExtent = Math.max(1850, 1900 / Math.max(0.38, aspect));
+    state.camera.left = -verticalExtent * aspect / 2;
+    state.camera.right = verticalExtent * aspect / 2;
+    state.camera.top = verticalExtent / 2;
+    state.camera.bottom = -verticalExtent / 2;
     state.camera.updateProjectionMatrix();
   }
   function placeCamera() {
-    const distance = 1050 / state.zoom;
+    const distance = 1750 / state.zoom;
     const cp = Math.cos(state.pitch), sp = Math.sin(state.pitch);
     state.camera.position.set(
       state.target.x + Math.sin(state.yaw) * distance * cp,
