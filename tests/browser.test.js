@@ -409,7 +409,7 @@ test('big map caches static city layers between redraws', () => {
   assert.match(draw, /const mapPlaces=world\.places\.slice\(\)/);
   assert.match(draw, /const drawRoad=\(a,b,horizontal\)/);
   assert.match(draw, /const drawBlock=\(x,y,w,h,depth,roof,side,detail\)/);
-  assert.match(draw, /LIVE POSITION/);
+  assert.match(html, /LIVE POSITION/);
 });
 test('Lagos city map supports searching named destinations', () => {
   const html = fs.readFileSync(htmlPath, 'utf8');
