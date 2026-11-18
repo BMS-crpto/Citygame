@@ -477,7 +477,10 @@ test('interactive isometric map is loaded as a separate Three.js world overview'
     'VICTORIA ISLAND',
     'const lagoon = new THREE.Shape()',
     'Drag to explore',
-    'Tap a place to navigate'
+    'Tap a place to navigate',
+    'skylineCluster(285',
+    'const parks = [',
+    'VI BUSINESS DISTRICT'
   ]) assert.ok(map.includes(feature), 'isometric map is missing: ' + feature);
   assert.match(map, /Tap a place to navigate/);
   assert.match(map, /state\.target\.x = state\.drag\.targetX/);
