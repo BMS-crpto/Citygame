@@ -516,6 +516,61 @@ button.go,#play,#fgo{background:linear-gradient(105deg,#42d8c0,#f0c46b)!importan
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style>
 
+<style id="citygame-character-studio-fix">
+  /* Mobile character studio: keep the full creator scrollable and controls unobstructed. */
+  #menu{
+    justify-content:flex-start!important;align-items:center!important;
+    overflow-x:hidden!important;overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    padding: max(18px,env(safe-area-inset-top)) 14px max(30px,env(safe-area-inset-bottom))!important;
+  }
+  #menu .skyline{position:absolute;inset:0 0 auto;height:42vh;pointer-events:none}
+  #menu .stage{position:relative;z-index:1;width:min(760px,100%)!important;max-width:760px;margin:0 auto;gap:14px!important}
+  #menu .card{max-height:none!important;overflow:visible!important;padding:clamp(14px,3vw,24px)!important}
+  #menu .pvwrap{
+    height:clamp(270px,38vh,390px)!important;min-height:270px;
+    border-radius:22px!important;overflow:hidden;position:relative;
+    background:
+      radial-gradient(ellipse at 50% 86%,rgba(246,200,76,.20),transparent 42%),
+      radial-gradient(ellipse at 50% 45%,#193c60 0%,#10243d 68%,#0a1728 100%)!important;
+  }
+  #menu #pvcanvas{display:block;width:100%!important;height:100%!important}
+  #menu .pvhint{bottom:12px!important;left:0;right:0;text-align:center;pointer-events:none}
+  #menu #lookbox{gap:10px!important}
+  #menu #lookbox>div{
+    min-height:48px;padding:9px 10px;border:1px solid #ffffff18;border-radius:13px;
+    background:linear-gradient(110deg,#ffffff0b,#ffffff04);gap:5px 7px!important;
+  }
+  #menu #lookbox>div:first-child{border-color:#f6c84c44}
+  #menu .sw{width:32px;height:32px;flex:0 0 32px}
+  #menu .hc{min-height:38px;padding:8px 12px!important}
+  #menu .roles{width:100%;max-width:none;grid-template-columns:repeat(5,minmax(0,1fr));gap:7px}
+  #menu .role{min-width:0;min-height:76px;padding:9px 3px!important;font-size:11px}
+  #menu .role b{font-size:23px!important}
+  #menu #play{width:100%;position:relative;z-index:2}
+  #menu .world{position:relative;z-index:1;padding-bottom:8px}
+  #menu:not([style*="display: none"])~#chatbtn,
+  #menu:not([style*="display: none"])~#spkbtn,
+  #menu:not([style*="display: none"])~#phonebtn,
+  #menu:not([style*="display: none"])~#fsbtn,
+  #menu:not([style*="display: none"])~#mutebtn,
+  #menu:not([style*="display: none"])~#stick,
+  #menu:not([style*="display: none"])~#act,
+  #menu:not([style*="display: none"])~#use{display:none!important}
+  @media(max-width:520px){
+    #menu .stage{width:100%!important}
+    #menu .pvwrap{height:clamp(260px,36vh,340px)!important}
+    #menu .roles{grid-template-columns:repeat(3,minmax(0,1fr))}
+    #menu .role{min-height:68px}
+    #menu .brand.small h1{font-size:34px!important;letter-spacing:5px!important}
+    #menu .brand h1 span{font-size:36px!important;letter-spacing:7px!important}
+  }
+  @media(orientation:landscape) and (max-height:520px){
+    #menu{display:block!important}
+    #menu .stage{width:min(900px,100%)!important}
+    #menu .pvwrap{height:260px!important;min-height:220px}
+  }
+</style>
 </head>
 <body>
 <div id="login"><div class="skyline" aria-hidden="true"></div>
@@ -2088,11 +2143,18 @@ function makeCharacter(role,name,look,noLabel){
   const mkArm=x=>{const p=new THREE.Group();p.position.set(x,1.93,0);sph(0.15,0.15,0.15,shirt,0,0,0,p);cyl(0.115,0.085,0.95,shirt,0,-0.5,0,p);sph(0.085,0.1,0.075,skin,0,-1.05,0,p);body.add(p);return p};
   const armL=mkArm(-0.58),armR=mkArm(0.58);
   // Tapered torso, rounded shoulder caps and a defined waist give the avatar a less blocky silhouette.
-  cyl(0.37,0.43,1.02,shirt,0,1.43,0,null,0.72);
+  const feminine=!!(look&&look[4]===1);
+  cyl(feminine?0.35:0.37,feminine?0.39:0.43,1.02,shirt,0,1.43,0,null,0.72);
   sph(0.34,0.25,0.31,shirt,-0.31,1.83,0);
   sph(0.34,0.25,0.31,shirt,0.31,1.83,0);
+  if(feminine){sph(0.39,0.25,0.31,pants,-0.19,0.99,0);sph(0.39,0.25,0.31,pants,0.19,0.99,0)}
   cyl(0.405,0.405,0.075,dark,0,1.02,0,null,0.7);
   sph(0.4,0.2,0.27,pants,0,0.97,0);
+  // Collar, shirt placket and stitched front pockets add readable clothing detail.
+  sph(0.16,0.07,0.12,shirt,0,1.91,0.12);
+  box(0.035,0.48,0.025,white,0,1.48,0.265);
+  box(0.19,0.17,0.035,shirt,-0.22,1.55,0.27);
+  box(0.19,0.17,0.035,shirt,0.22,1.55,0.27);
   const VEST={police:0x1b3d91,taxi:0xfdd835,nurse:0xffffff,lawyer:0x2b2b35}[role];
   if(look&&VEST)cyl(0.49,0.39,0.95,M(VEST),0,1.45,0,null,0.66);
   cyl(0.09,0.105,0.2,skin,0,2.08,0);
@@ -2103,7 +2165,9 @@ function makeCharacter(role,name,look,noLabel){
   sph(0.022,0.026,0.02,dark,-0.11,2.44,0.268);sph(0.022,0.026,0.02,dark,0.11,2.44,0.268);
   sph(0.07,0.012,0.02,dark,-0.11,2.51,0.25);sph(0.07,0.012,0.02,dark,0.11,2.51,0.25);
   sph(0.075,0.017,0.02,lip,0,2.24,0.27);
-  const hair=role==='nurse'?0x5a3a22:0x15110e,hm=M(hair);
+  sph(0.035,0.025,0.035,skin,-0.285,2.28,0.02);sph(0.035,0.025,0.035,skin,0.285,2.28,0.02);
+  sph(0.045,0.04,0.055,skin,0,2.34,0.31);
+  const hair=look?LOOKC.hairc[look[5]]:(role==='nurse'?0x5a3a22:0x15110e),hm=M(hair);
   const hs=look?look[1]:0;
   if(hs===1)sph(0.37,0.36,0.37,hm,0,2.52,-0.03);
   else if(hs===2){const cm=M(look?LOOKC.top[look[2]]:0x888888);sph(0.3,0.2,0.31,cm,0,2.58,0);sph(0.24,0.03,0.2,cm,0,2.52,0.3)}
