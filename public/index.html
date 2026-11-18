@@ -492,6 +492,12 @@
     #menu #play{min-height:48px;padding:11px}
   }
 
+
+#venueViews{position:fixed;right:max(8px,env(safe-area-inset-right));top:42%;z-index:7;display:flex;flex-direction:column;gap:4px;padding:5px;border:1px solid #ffffff25;border-radius:18px;background:#101b2bdc;backdrop-filter:blur(12px);box-shadow:0 8px 24px #0006}
+#venueViews button{width:48px;min-height:43px;padding:5px 3px;border:0;border-radius:12px;background:transparent;color:#dce7f4;font:600 10px system-ui;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+#venueViews button span{font-size:17px;line-height:18px}#venueViews button.active{background:#e8f1fb;color:#172536;box-shadow:0 2px 8px #0004}
+@media(max-width:700px){#venueViews{right:5px;top:38%;gap:2px;padding:4px}#venueViews button{width:42px;min-height:39px;font-size:9px}}
+
 </style>
 <link href="/lagos-3d-skin.css?v=5" rel="stylesheet">
 <link href="/citygame-premium-ui.css?v=5" rel="stylesheet">
@@ -672,6 +678,7 @@ button.go,#play,#fgo{background:linear-gradient(105deg,#42d8c0,#f0c46b)!importan
 <div id="npcbox"></div><div id="spkbar"></div>
 <div id="flash"></div>
 <div id="hud"><div id="info"></div><div id="money">₦500</div><div id="players"></div></div>
+<div id="venueViews" aria-label="Camera view"><button type="button" data-cg-view="above"><span>🏠</span>Above</button><button type="button" data-cg-view="inside"><span>🚪</span>Inside</button><button type="button" data-cg-view="eyes"><span>👁️</span>Eyes</button></div>
 <div id="district"></div><div id="banner"></div>
 <div id="toast"></div>
 <canvas id="mm"></canvas>
@@ -1624,6 +1631,9 @@ function buildAjahInside(unit){
 // The list of buildings (doors, names, what you can do inside) comes from buildings.js, the same file the server uses.
 const BUILD=window.Buildings,BLD=BUILD?BUILD.list():[];
 let venueName='';
+let venueCameraMode='inside';
+function setVenueCameraMode(mode){if(!['above','inside','eyes'].includes(mode))return;venueCameraMode=mode;camInit=false;document.querySelectorAll('#venueViews [data-cg-view]').forEach(b=>b.classList.toggle('active',b.dataset.cgView===mode));}
+document.addEventListener('click',e=>{const b=e.target.closest('#venueViews [data-cg-view]');if(b)setVenueCameraMode(b.dataset.cgView)});
 const VFLOOR={wood:woodBase,checker:checkerBase,tile:tileBase};
 const vSignCache={};
 function venueSign(text,bg,x,y,z,ry,w){       // like addSign, but shrinks long names so they fit
@@ -3705,7 +3715,7 @@ function loop(now){
       }
       const vis=(n.place||null)===(inside||null)&&(Number(n.floor)||0)===(pos.floor||0)&&Math.hypot(n.x-pos.x,n.z-pos.z)<(inside?60:70);o.g.visible=vis;if(vis)animate(o.g,d>.08&&active,dt);
     }
-    const inCar=myCol>=0||ridingId>0||!!rideSc,levelY=(inside&&pos.floor?7.56:0),cd=(inside?(ROOMS[inside]&&ROOMS[inside].model?5.4:3.4):inCar?9:3.5)*camZoom,ch=inside?(ROOMS[inside]&&ROOMS[inside].model?Math.max(6.2,camH*0.9):Math.min(2.8,camH*0.3)):inCar?Math.max(3.4,camH*0.55):Math.max(1.7,camH*0.27);
+    const inCar=myCol>=0||ridingId>0||!!rideSc,levelY=(inside&&pos.floor?7.56:0),cd=(inside?(ROOMS[inside]&&ROOMS[inside].model?5.4:3.4):inCar?9:venueCameraMode==='eyes'?0.28:venueCameraMode==='above'?Math.max(12,camH*1.9):3.5)*camZoom,ch=venueCameraMode==='eyes'?0.48:venueCameraMode==='above'?Math.max(15,camH*1.8):inside?(ROOMS[inside]&&ROOMS[inside].model?Math.max(6.2,camH*0.9):Math.min(2.8,camH*0.3)):inCar?Math.max(3.4,camH*0.55):Math.max(1.7,camH*0.27);
     if(rideSc&&rideSc.cabin){   // inside view: eyes in the vehicle, looking where it is heading
       const yw=rideSc.cy,fx=Math.sin(yw),fz=Math.cos(yw),lx=-Math.cos(yw),lz=Math.sin(yw),big=rideSc.col===5,bike=rideSc.col===8;
       camera.position.set(pos.x+lx*(bike?0:0.38)+fx*(bike?-0.1:0.1),bike?1.6:big?1.65:1.3,pos.z+lz*(bike?0:0.38)+fz*(bike?-0.1:0.1));
@@ -3716,7 +3726,7 @@ function loop(now){
     if(!camInit){camera.position.set(gx,ch+levelY,gz);camInit=true}
     const k=Math.min(1,dt*9);
     camera.position.x+=(gx-camera.position.x)*k;camera.position.y+=((ch+levelY)-camera.position.y)*k;camera.position.z+=(gz-camera.position.z)*k;
-    camera.lookAt(pos.x,levelY+(myCol>=0?1.2:1.45),pos.z);
+    camera.lookAt(pos.x,levelY+(venueCameraMode==='eyes'?1.58:(myCol>=0?1.2:1.45)),pos.z);
     }
     sun.position.set(pos.x+SUNV.x*80,SUNV.y*80,pos.z+SUNV.z*80);sun.target.position.set(pos.x,0,pos.z);
     if(++uc%6===0)updateUse();
