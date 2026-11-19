@@ -701,3 +701,14 @@ test('game-wide overlay layout stylesheet is loaded and keeps map panels in a re
   assert.match(css, /#appview[\s\S]*overflow-y:auto!important/);
   assert.match(css, /#atm \.box[\s\S]*max-height/);
 });
+
+
+test('3D isometric street labels update only when the map zoom crosses the detail threshold', () => {
+  const source = fs.readFileSync(path.join(root, 'public', 'citygame-isometric-map.js'), 'utf8');
+  assert.match(source, /streetLabelsVisible:\s*null/);
+  assert.match(source, /function syncStreetLabelVisibility\(\)[\s\S]*?if \(state\.streetLabelsVisible === visible\) return;[\s\S]*?state\.streetLabels\.forEach\(label => \{ label\.visible = visible; \}\)/);
+  const cameraPlacement = source.slice(source.indexOf('function placeCamera()'), source.indexOf('function pick(event)'));
+  assert.match(cameraPlacement, /syncStreetLabelVisibility\(\)/);
+  const renderLoop = source.slice(source.indexOf('function render()'), source.indexOf('function start()'));
+  assert.doesNotMatch(renderLoop, /streetLabels\.forEach/);
+});
