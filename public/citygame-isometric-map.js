@@ -14,7 +14,7 @@
   const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
   const state = { active: false, raf: 0, renderer: null, scene: null, camera: null,
     canvas: null, yaw: Math.PI / 4, pitch: 0.78, zoom: 1, target: new THREE.Vector3(),
-    drag: null, moved: false, places: [], pickables: [], streetLabels: [], marker: null, lastResize: '' };
+    drag: null, moved: false, places: [], pickables: [], streetLabels: [], streetLabelsVisible: null, marker: null, lastResize: '' };
   const root = document.getElementById('bigmap');
   const legacy = document.getElementById('bmc');
   if (!root || !legacy) return;
@@ -325,6 +325,13 @@
       state.target.z + Math.cos(state.yaw) * distance * cp
     );
     state.camera.lookAt(state.target);
+    syncStreetLabelVisibility();
+  }
+  function syncStreetLabelVisibility() {
+    const visible = state.zoom >= 1.65;
+    if (state.streetLabelsVisible === visible) return;
+    state.streetLabelsVisible = visible;
+    state.streetLabels.forEach(label => { label.visible = visible; });
   }
   function pick(event) {
     if (state.moved || !state.renderer) return;
@@ -345,7 +352,6 @@
       state.marker.position.x += (me.position.x-state.marker.position.x)*0.12;
       state.marker.position.z += (me.position.z-state.marker.position.z)*0.12;
     }
-    state.streetLabels.forEach(label => { label.visible = state.zoom >= 1.65; });
     state.renderer.render(state.scene,state.camera);
   }
   function start() {
