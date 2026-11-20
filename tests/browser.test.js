@@ -712,3 +712,34 @@ test('3D isometric street labels update only when the map zoom crosses the detai
   const renderLoop = source.slice(source.indexOf('function render()'), source.indexOf('function start()'));
   assert.doesNotMatch(renderLoop, /streetLabels\.forEach/);
 });
+
+
+test('adaptive graphics sampler pauses its animation frame while the page is hidden and resumes on return', () => {
+  const source = fs.readFileSync(path.join(root, 'public', 'citygame-performance.js'), 'utf8');
+  const listeners = {};
+  const scheduled = new Map();
+  let nextId = 1;
+  const control = { style: {}, setAttribute() {}, addEventListener() {} };
+  const document = {
+    visibilityState: 'visible',
+    readyState: 'complete',
+    body: { appendChild() {} },
+    createElement() { return control; },
+    addEventListener(name, callback) { listeners[name] = callback; }
+  };
+  const window = { devicePixelRatio: 2, addEventListener() {} };
+  const requestAnimationFrame = callback => {
+    const id = nextId++;
+    scheduled.set(id, callback);
+    return id;
+  };
+  const cancelAnimationFrame = id => scheduled.delete(id);
+  vm.runInNewContext(source, { window, document, requestAnimationFrame, cancelAnimationFrame, console });
+  assert.equal(scheduled.size, 1, 'sampler starts with one pending animation frame');
+  document.visibilityState = 'hidden';
+  listeners.visibilitychange();
+  assert.equal(scheduled.size, 0, 'hidden page cancels its pending animation frame');
+  document.visibilityState = 'visible';
+  listeners.visibilitychange();
+  assert.equal(scheduled.size, 1, 'visible page schedules the sampler again');
+});
