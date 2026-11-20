@@ -20,7 +20,6 @@
   let sampleStart = 0;
   let lowSamples = 0;
   let highSamples = 0;
-  let lastVisibility = document.visibilityState;
 
   function getRenderer() {
     const r = window.CITYGAME_RENDERER || window.renderer;
@@ -71,9 +70,23 @@
   });
   (document.body || document.documentElement).appendChild(control);
 
+  let frameHandle = 0;
+
+  function scheduleFrame() {
+    if (document.visibilityState !== 'visible' || frameHandle) return;
+    frameHandle = requestAnimationFrame(frame);
+  }
+
+  function stopFrame() {
+    if (!frameHandle) return;
+    cancelAnimationFrame(frameHandle);
+    frameHandle = 0;
+  }
+
   function frame(now) {
-    requestAnimationFrame(frame);
+    frameHandle = 0;
     if (document.visibilityState !== 'visible') return;
+    scheduleFrame();
 
     // The game may create its renderer after this controller loads. Keep retrying
     // until it exists instead of permanently giving up after the first attempt.
@@ -117,17 +130,16 @@
 
   function start() {
     sampleStart = 0;
-    requestAnimationFrame(frame);
+    scheduleFrame();
   }
 
   document.addEventListener('visibilitychange', function () {
-    if (lastVisibility !== document.visibilityState) {
-      lastVisibility = document.visibilityState;
-      frames = 0;
-      sampleStart = 0;
-      lowSamples = 0;
-      highSamples = 0;
-    }
+    frames = 0;
+    sampleStart = 0;
+    lowSamples = 0;
+    highSamples = 0;
+    if (document.visibilityState === 'visible') scheduleFrame();
+    else stopFrame();
   });
 
   window.addEventListener('resize', function () {
