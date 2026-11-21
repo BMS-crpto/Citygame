@@ -2274,15 +2274,16 @@ function makeCharacter(role,name,look,noLabel){
   const shirt=M(look?LOOKC.top[look[2]]:L.shirt),pants=M(look?LOOKC.pants[look[3]]:L.pants);
   const sph=(rx,ry,rz,mt,x,y,z,par)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(1,28,20),mt);m.scale.set(rx,ry,rz);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;(par||body).add(m);return m};
   const cyl=(rt,rb,h,mt,x,y,z,par,sz)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(rt,rb,h,24,2),mt);m.scale.z=sz||1;m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;(par||body).add(m);return m};
+  const form=(profile,mt,x,y,z,par,radial=24)=>{const pts=profile.map(v=>new THREE.Vector2(v[0],v[1]));const geo=new THREE.LatheGeometry(pts,radial);geo.computeVertexNormals();const m=new THREE.Mesh(geo,mt);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;(par||body).add(m);return m};
   skin.roughness=0.55;
   const shoe=M(0x15110e),white=M(0xf4f4f4),dark=M(0x0d0b0a),lip=M(0x6e2f2f);
-  const mkLeg=x=>{const p=new THREE.Group();p.position.set(x,0.95,0);cyl(0.155,0.115,0.9,pants,0,-0.45,0,p);sph(0.145,0.15,0.15,pants,0,-0.5,0.02,p);sph(0.17,0.075,0.29,shoe,0,-0.9,0.08,p);sph(0.17,0.035,0.26,dark,0,-0.96,0.08,p);body.add(p);return p};
+  const mkLeg=x=>{const p=new THREE.Group();p.position.set(x,0.95,0);form([[0.075,-0.9],[0.105,-0.84],[0.12,-0.68],[0.145,-0.43],[0.16,-0.18],[0.18,0.12],[0.19,0.38],[0.16,0.45]],pants,0,-0.45,0,p);sph(0.145,0.15,0.15,pants,0,-0.5,0.02,p);sph(0.17,0.075,0.29,shoe,0,-0.9,0.08,p);sph(0.17,0.035,0.26,dark,0,-0.96,0.08,p);body.add(p);return p};
   const legL=mkLeg(-0.21),legR=mkLeg(0.21);
-  const mkArm=x=>{const p=new THREE.Group();p.position.set(x,1.93,0);sph(0.15,0.15,0.15,shirt,0,0,0,p);cyl(0.115,0.085,0.95,shirt,0,-0.5,0,p);sph(0.085,0.1,0.075,skin,0,-1.05,0,p);body.add(p);return p};
+  const mkArm=x=>{const p=new THREE.Group();p.position.set(x,1.93,0);sph(0.15,0.15,0.15,shirt,0,0,0,p);form([[0.065,-0.98],[0.078,-0.82],[0.09,-0.58],[0.105,-0.35],[0.12,-0.1],[0.15,0.12],[0.16,0.34],[0.14,0.45]],shirt,0,-0.5,0,p);sph(0.085,0.1,0.075,skin,0,-1.05,0,p);body.add(p);return p};
   const armL=mkArm(-0.58),armR=mkArm(0.58);
   // Tapered torso, rounded shoulder caps and a defined waist give the avatar a less blocky silhouette.
   const feminine=!!(look&&look[4]===1);
-  cyl(feminine?0.35:0.37,feminine?0.39:0.43,1.02,shirt,0,1.43,0,null,0.72);
+  form(feminine?[[0.27,0.92],[0.31,0.78],[0.34,0.55],[0.32,0.28],[0.36,0.02],[0.39,-0.1]]:[[0.31,0.92],[0.35,0.72],[0.37,0.48],[0.34,0.2],[0.39,-0.02],[0.43,-0.1]],shirt,0,1.43,0,null);
   sph(0.34,0.25,0.31,shirt,-0.31,1.83,0);
   sph(0.34,0.25,0.31,shirt,0.31,1.83,0);
   if(feminine){sph(0.39,0.25,0.31,pants,-0.19,0.99,0);sph(0.39,0.25,0.31,pants,0.19,0.99,0)}
