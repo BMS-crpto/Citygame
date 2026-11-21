@@ -1,7 +1,7 @@
 'use strict';
-const SHELL='citygame-shell-v4';
+const SHELL='citygame-shell-v5';
 const ASSETS='citygame-assets-v1';
-const SHELL_FILES=['/','/index.html','/asset-packs.json','/buildings.js','/lagos-3d-skin.css','/citygame-premium-ui.css','/mobile-controls.css','/city3d-social-emotes.js','/city-missions-career.js','/city-app-suite.js','/citygame-company-app.js','/lagos-3d-polish.js','/citygame-world-finish.js','/citygame-city-guide.js','/citygame-map-experience.js','/player-account-center.js','/asset-download-manager.js'];
+const SHELL_FILES=['/','/index.html','/asset-packs.json','/buildings.js','/lagos-3d-skin.css','/citygame-premium-ui.css','/mobile-controls.css','/city3d-social-emotes.js','/city-missions-career.js','/city-app-suite.js','/citygame-company-app.js','/lagos-3d-polish.js','/citygame-world-finish.js','/citygame-city-guide.js','/citygame-map-experience.js','/player-account-center.js','/asset-download-manager.js','/citygame-street-commerce.js'];
 self.addEventListener('install',event=>{
  event.waitUntil((async()=>{
   const cache=await caches.open(SHELL);
