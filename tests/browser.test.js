@@ -60,10 +60,11 @@ test('venue camera controller is modular, validates modes, and updates accessibl
 test('venue camera assets use valid HTML separators rather than visible escaped text', () => {
   const cameraInclude = [
     '<link rel="stylesheet" href="/citygame-venue-camera.css?v=1">',
+    '<link rel="stylesheet" href="/citygame-overlay-layout.css?v=1">',
     '<script src="/citygame-venue-camera.js?v=1"></script>',
     '<script src="/buildings.js?v=2026111503"></script>'
   ].join('\n');
-  assert.ok(html.includes(cameraInclude), 'camera stylesheet and scripts must be separated by real newlines');
+  assert.ok(html.includes(cameraInclude), 'camera and overlay assets must be separated by real newlines');
   assert.ok(!html.includes('<link rel="stylesheet" href="/citygame-venue-camera.css?v=1">\\n<script'), 'escaped newline text must not appear in the HTML');
 });
 
