@@ -2234,13 +2234,13 @@ function attachCharModel(g,body,role,name,look){
       body.add(ch);body.scale.setScalar(1);g.userData.modelDone=true;
       addHeadgear(body,H,lk,role);
       const clips=MODELS[key].anims,pick_=re=>clips.find(c=>re.test(c.name));
-      const walk=pick_(/walk$/i),idle=pick_(/idle$/i)||pick_(/standing$/i);
+      const walk=pick_(/walk$/i),run=pick_(/run$/i),idle=pick_(/idle$/i)||pick_(/standing$/i);
       if(walk){
-        const mixer=new THREE.AnimationMixer(ch),wa=mixer.clipAction(walk),ia=idle?mixer.clipAction(idle):null;
-        wa.timeScale=1.15;wa.play();if(ia){ia.play();ia.setEffectiveWeight(1);wa.setEffectiveWeight(0)}
+        const mixer=new THREE.AnimationMixer(ch),wa=mixer.clipAction(walk),ra=run?mixer.clipAction(run):null,ia=idle?mixer.clipAction(idle):null;
+        wa.timeScale=1.05;wa.play();if(ra){ra.timeScale=1.12;ra.play();ra.setEffectiveWeight(0)}if(ia){ia.play();ia.setEffectiveWeight(1);wa.setEffectiveWeight(0)}
         const sit=pick_(/sitting$/i),sa=sit?mixer.clipAction(sit):null;     // the man and woman models come with a real sitting animation
         if(sa){sa.play();sa.setEffectiveWeight(0)}
-        g.userData.mixer=mixer;g.userData.wa=wa;g.userData.ia=ia;g.userData.sa=sa;g.userData.mixW=0;
+        g.userData.mixer=mixer;g.userData.wa=wa;g.userData.ra=ra;g.userData.ia=ia;g.userData.sa=sa;g.userData.mixW=0;g.userData.runW=0;
       }
     }catch(e){console.warn('character model failed',e)}
   });
@@ -2338,7 +2338,7 @@ function setCarMode(g,col,role){
     if(u.curCar!==col||u.carRole!==role){if(u.carG)g.remove(u.carG);u.carG=makeCar(col,role);g.add(u.carG);u.curCar=col;u.carRole=role}
   }else{u.body.visible=true;if(u.carG){g.remove(u.carG);u.carG=null}u.curCar=-1;u.carRole=null}
 }
-function animate(g,mv,dt){
+function animate(g,mv,dt,runRequested){
   const u=g.userData;
   // sleeping: the whole body eases down until it lies flat on its back (u.pose is set by startPose / the server)
   const lieT=u.pose==='sleep'?1:0;u.lie=(u.lie||0)+(lieT-(u.lie||0))*Math.min(1,dt*4);
@@ -2348,7 +2348,8 @@ function animate(g,mv,dt){
     u.mixer.update(dt);
     const sitT=(u.pose==='sit'&&u.sa)?1:0;u.sitW=(u.sitW||0)+(sitT-(u.sitW||0))*Math.min(1,dt*8);
     const target=(mv&&!u.pose)?1:0;u.mixW+=(target-u.mixW)*Math.min(1,dt*10);
-    u.wa.setEffectiveWeight(u.mixW*(1-u.sitW));if(u.sa)u.sa.setEffectiveWeight(u.sitW);
+    const runTarget=(mv&&runRequested&&!u.pose&&u.ra)?1:0;u.runW=(u.runW||0)+(runTarget-(u.runW||0))*Math.min(1,dt*7);
+    u.wa.setEffectiveWeight(u.mixW*(1-u.runW)*(1-u.sitW));if(u.ra)u.ra.setEffectiveWeight(u.mixW*u.runW*(1-u.sitW));if(u.sa)u.sa.setEffectiveWeight(u.sitW);
     if(u.ia)u.ia.setEffectiveWeight((1-u.mixW)*(1-u.sitW));
     return;
   }
@@ -3635,7 +3636,7 @@ function loop(now){
     if(rideSc)updateRideScene();
     if(ridingId>0){const d=others[ridingId];if(d){pos.x=d.g.position.x;pos.z=d.g.position.z;pos.ry=d.g.rotation.y;speed=0}else ridingId=0}
     me.rotation.y=myCol>=0?pos.ry:me.rotation.y+wrap(pos.ry-me.rotation.y)*0.2;
-    animate(me,moving&&myCol<0,dt);animatePoseProps();
+    animate(me,moving&&myCol<0,dt,mag>0.82&&myCol<0);animatePoseProps();
     for(const o of npcObjs){
       const n=o.n;if(!o.routine)o.routine={x:n.x,z:n.z,phase:Math.random()*Math.PI*2,next:0,tx:n.x,tz:n.z,stage:'browse',stageAt:performance.now()+6500+Math.random()*5000};
       const r=o.routine,nowNpc=performance.now(),hour=new Date().getHours(),active=hour>=7&&hour<22;
