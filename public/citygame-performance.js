@@ -50,10 +50,15 @@
   control.textContent = 'Graphics: ' + mode + (auto ? ' + Auto' : '');
   control.setAttribute('aria-label', 'Graphics quality. Tap to cycle Low, Medium, High and Ultra. Long press is not required; adaptive mode toggles separately.');
   control.style.cssText = 'position:fixed;right:8px;top:max(146px,calc(env(safe-area-inset-top) + 138px));z-index:7;padding:7px 10px;border:1px solid #d7bd78;border-radius:11px;background:#071d18dd;color:#fff;font:700 11px system-ui;box-shadow:0 3px 12px #0008;touch-action:manipulation';
+  const autoControl = document.createElement('button');
+  autoControl.type = 'button'; autoControl.id = 'cgGraphicsAuto';
+  autoControl.style.cssText = 'position:fixed;right:8px;top:max(184px,calc(env(safe-area-inset-top) + 176px));z-index:7;padding:7px 10px;border:1px solid #d7bd78;border-radius:11px;background:#071d18dd;color:#fff;font:700 11px system-ui;box-shadow:0 3px 12px #0008;touch-action:manipulation';
+  autoControl.addEventListener('click', function () { auto = !auto; save(); resetSamples(); updateControl(); apply(baseDpr()); });
   control.addEventListener('click', function () { chooseMode(['Low','Medium','High','Ultra'][(['Low','Medium','High','Ultra'].indexOf(mode)+1)%4]); });
-  control.addEventListener('contextmenu', function (e) { e.preventDefault(); auto = !auto; save(); resetSamples(); updateControl(); apply(baseDpr()); });
-  function updateControl() { control.textContent = 'Graphics: ' + mode + (auto ? ' · Auto' : ''); }
+  
+  function updateControl() { control.textContent = 'Graphics: ' + mode; autoControl.textContent = 'Adaptive: ' + (auto ? 'ON' : 'OFF'); autoControl.setAttribute('aria-pressed', String(auto)); }
   (document.body || document.documentElement).appendChild(control);
+  (document.body || document.documentElement).appendChild(autoControl);
   let frameHandle = 0;
   function scheduleFrame() { if (document.visibilityState === 'visible' && !frameHandle) frameHandle = requestAnimationFrame(frame); }
   function stopFrame() { if (frameHandle) { cancelAnimationFrame(frameHandle); frameHandle = 0; } }
@@ -75,7 +80,7 @@
       if (fps < 43) { lowSamples++; highSamples = 0; }
       else if (fps > 57) { highSamples++; lowSamples = 0; }
       else { lowSamples = Math.max(0, lowSamples - 1); highSamples = Math.max(0, highSamples - 1); }
-      if (lowSamples >= 2) { apply(Math.max(0.75, currentDpr - 0.12)); lowSamples = 0; }
+      if (lowSamples >= 2) { apply(Math.max(baseDpr(), currentDpr - 0.12)); lowSamples = 0; }
       else if (highSamples >= 3) { apply(Math.min(baseDpr(), currentDpr + 0.08)); highSamples = 0; }
     }
   }
