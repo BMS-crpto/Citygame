@@ -646,6 +646,16 @@ test('Unity OSM importer triangulates concave polygons and keeps mesh faces corr
 });
 
 
+test('Unity OSM meshes safely use 32-bit indices for oversized geometry on supported devices', () => {
+  const importer = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'LagosRealMapImporter.cs'), 'utf8');
+  assert.match(importer, /if \(vertexCount <= 65535\) return true;/);
+  assert.match(importer, /if \(!SystemInfo\.supports32bitsIndices\)/);
+  assert.match(importer, /mesh\.indexFormat = UnityEngine\.Rendering\.IndexFormat\.UInt32/);
+  assert.equal((importer.match(/if \(!SetMeshIndexFormat\(mesh, vertices\.Length\)\)/g) || []).length, 3,
+    'roads, buildings, and flat polygons must guard their vertex counts');
+});
+
+
 test('Unity foundation scene is preserved and registered for player builds', () => {
   const setup = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Editor', 'CitygameProjectSetup.cs'), 'utf8');
   assert.match(setup, /const string scenePath = "Assets\/Scenes\/CitygameFoundation\.unity";/);
