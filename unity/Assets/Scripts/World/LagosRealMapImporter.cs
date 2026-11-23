@@ -39,10 +39,20 @@ namespace Citygame.World
             return roads > 0;
         }
 
+        static bool SetMeshIndexFormat(Mesh mesh, int vertexCount)
+        {
+            if (vertexCount <= 65535) return true;
+            if (!SystemInfo.supports32bitsIndices)
+            {
+                Debug.LogWarning("Skipping oversized OSM mesh because this device does not support 32-bit mesh indices.");
+                return false;
+            }
+            mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+            return true;
+        }
+
         static void MakeRoad(Transform root, LagosMapFeature f, Material material)
         {
-            GameObject go = new GameObject(string.IsNullOrEmpty(f.name) ? "OSM road" : f.name);
-            go.transform.SetParent(root, false);
             int n = f.points.Length;
             float halfWidth = Mathf.Clamp(f.width, 2f, 18f) * .5f;
             Vector3[] vertices = new Vector3[n * 2];
@@ -61,7 +71,10 @@ namespace Citygame.World
                 triangles[t + 3] = v + 1; triangles[t + 4] = v + 2; triangles[t + 5] = v + 3;
             }
             Mesh mesh = new Mesh { name = "OSM drivable road surface" };
+            if (!SetMeshIndexFormat(mesh, vertices.Length)) { UnityEngine.Object.Destroy(mesh); return; }
             mesh.vertices = vertices; mesh.triangles = triangles; mesh.RecalculateNormals();
+            GameObject go = new GameObject(string.IsNullOrEmpty(f.name) ? "OSM road" : f.name);
+            go.transform.SetParent(root, false);
             go.AddComponent<MeshFilter>().sharedMesh = mesh;
             go.AddComponent<MeshRenderer>().sharedMaterial = material;
             go.AddComponent<MeshCollider>().sharedMesh = mesh;
@@ -250,12 +263,13 @@ namespace Citygame.World
                 triangles.Add(i); triangles.Add(i + count); triangles.Add(next + count);
             }
 
-            GameObject go = new GameObject(string.IsNullOrEmpty(f.name) ? "OSM building" : f.name);
-            go.transform.SetParent(root, false);
             Mesh mesh = new Mesh { name = "OSM building footprint" };
+            if (!SetMeshIndexFormat(mesh, vertices.Length)) { UnityEngine.Object.Destroy(mesh); return; }
             mesh.vertices = vertices;
             mesh.triangles = triangles.ToArray();
             mesh.RecalculateNormals();
+            GameObject go = new GameObject(string.IsNullOrEmpty(f.name) ? "OSM building" : f.name);
+            go.transform.SetParent(root, false);
             go.AddComponent<MeshFilter>().sharedMesh = mesh;
             go.AddComponent<MeshRenderer>().sharedMaterial = material;
             go.AddComponent<MeshCollider>().sharedMesh = mesh;
@@ -287,9 +301,12 @@ namespace Citygame.World
             }
 
             Mesh mesh = new Mesh { name = "OSM " + f.kind + " polygon" };
+            if (!SetMeshIndexFormat(mesh, vertices.Length)) { UnityEngine.Object.Destroy(mesh); return; }
             mesh.vertices = vertices;
             mesh.triangles = triangles.ToArray();
             mesh.RecalculateNormals();
+            GameObject go = new GameObject(string.IsNullOrEmpty(f.name) ? f.kind : f.name);
+            go.transform.SetParent(root, false);
             go.AddComponent<MeshFilter>().sharedMesh = mesh;
             go.AddComponent<MeshRenderer>().sharedMaterial = material;
         }
