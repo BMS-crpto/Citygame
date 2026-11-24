@@ -3,7 +3,8 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
-from download_lagos_osm import element_to_feature, features_from_payload\nfrom convert_lagos_osm import feature_to_map_features
+from download_lagos_osm import element_to_feature, features_from_payload
+from convert_lagos_osm import feature_to_map_features
 
 
 def way(tags, coords):
