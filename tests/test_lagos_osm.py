@@ -53,6 +53,40 @@ class OSMConverterTests(unittest.TestCase):
         self.assertEqual(converted[0]["kind"], "water")
 
 
+    def test_height_tag_in_metres(self):
+        self.assertEqual(feature_to_map_features({
+            "properties": {"building": "yes", "height": "12.5 m"},
+            "geometry": {"type": "Polygon", "coordinates": [[
+                [3.3, 6.5], [3.31, 6.5], [3.31, 6.51],
+                [3.3, 6.51], [3.3, 6.5]
+            ]]}
+        })[0]["height"], 12.5)
+
+    def test_height_tag_in_feet_converts_to_metres(self):
+        converted = feature_to_map_features({
+            "properties": {"building": "yes", "height": "30 ft"},
+            "geometry": {"type": "Polygon", "coordinates": [[
+                [3.3, 6.5], [3.31, 6.5], [3.31, 6.51],
+                [3.3, 6.51], [3.3, 6.5]
+            ]]}
+        })
+        self.assertAlmostEqual(converted[0]["height"], 9.144, places=3)
+
+    def test_comma_decimal_height_and_level_fallback(self):
+        polygon = [[3.3, 6.5], [3.31, 6.5], [3.31, 6.51],
+                   [3.3, 6.51], [3.3, 6.5]]
+        decimal = feature_to_map_features({
+            "properties": {"building": "yes", "height": "12,5m"},
+            "geometry": {"type": "Polygon", "coordinates": [polygon]}
+        })
+        fallback = feature_to_map_features({
+            "properties": {"building": "yes", "height": "unknown", "building:levels": "5"},
+            "geometry": {"type": "Polygon", "coordinates": [polygon]}
+        })
+        self.assertEqual(decimal[0]["height"], 12.5)
+        self.assertEqual(fallback[0]["height"], 16.0)
+
+
 class OSMFeatureExportTests(unittest.TestCase):
     def test_open_waterway_is_exported_as_line(self):
         item = way({"waterway": "stream", "name": "Test stream"},
