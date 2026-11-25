@@ -32,7 +32,7 @@ def height_for(tags):
     """Parse common OSM height units into metres, including imperial tags."""
     raw = tags.get("height")
     if raw:
-        match = re.fullmatch(r"\\s*(\\d+(?:[.,]\\d+)?)\\s*(m|metres?|meters?|ft|feet|foot|')?\\s*", str(raw), re.IGNORECASE)
+        match = re.fullmatch(r"\s*(\d+(?:[.,]\d+)?)\s*(m|metres?|meters?|ft|feet|foot|')?\s*", str(raw), re.IGNORECASE)
         if match:
             value = float(match.group(1).replace(",", "."))
             unit = (match.group(2) or "").lower()
