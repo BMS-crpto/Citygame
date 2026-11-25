@@ -8,7 +8,7 @@ The input should cover the chosen Lagos play area and contain OSM tags in featur
 Coordinates are projected locally in metres around central Lagos (6.5244, 3.3792).
 Unity JsonUtility requires Vector2 points as {x,y} objects, not coordinate arrays.
 """
-import json, math, sys
+import json, math, re, sys
 from pathlib import Path
 
 ORIGIN_LAT, ORIGIN_LON = 6.5244, 3.3792
@@ -29,13 +29,19 @@ def local_point(pair):
 
 
 def height_for(tags):
+    """Parse common OSM height units into metres, including imperial tags."""
+    raw = tags.get("height")
+    if raw:
+        match = re.fullmatch(r"\\s*(\\d+(?:[.,]\\d+)?)\\s*(m|metres?|meters?|ft|feet|foot|')?\\s*", str(raw), re.IGNORECASE)
+        if match:
+            value = float(match.group(1).replace(",", "."))
+            unit = (match.group(2) or "").lower()
+            if unit in ("ft", "feet", "foot", "'"):
+                value *= 0.3048
+            return value
     try:
-        if tags.get("height"):
-            return float(str(tags["height"]).replace("m", "").strip())
-    except ValueError:
-        pass
-    try:
-        return max(3.0, float(tags.get("building:levels", 1)) * 3.2)
+        levels = str(tags.get("building:levels", 1)).replace(",", ".")
+        return max(3.0, float(levels) * 3.2)
     except (ValueError, TypeError):
         return 6.0
 
