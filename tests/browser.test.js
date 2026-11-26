@@ -763,5 +763,5 @@ test('Unity OSM flat polygon importer creates only one object after mesh validat
   assert.ok(start >= 0 && end > start, 'flat polygon importer method exists');
   const method = source.slice(start, end);
   assert.equal((method.match(/new GameObject/g) || []).length, 1, 'only the mesh-bearing polygon object is created');
-  assert.match(method, /SetMeshIndexFormat\(mesh, vertices\.Length\)[\\s\\S]*?return;[\\s\\S]*?mesh\.vertices = vertices;[\\s\\S]*?mesh\.triangles = triangles\.ToArray\(\);[\\s\\S]*?GameObject go = new GameObject/);
+  assert.match(method, /SetMeshIndexFormat\(mesh, vertices\.Length\)[\s\S]*?return;[\s\S]*?mesh\.vertices = vertices;[\s\S]*?mesh\.triangles = triangles\.ToArray\(\);[\s\S]*?GameObject go = new GameObject/);
 });
