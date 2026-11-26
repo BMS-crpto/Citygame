@@ -285,8 +285,6 @@ namespace Citygame.World
                 return;
             }
 
-            GameObject go = new GameObject(string.IsNullOrEmpty(f.name) ? f.kind : f.name);
-            go.transform.SetParent(root, false);
             Vector3[] vertices = new Vector3[polygon.Count];
             for (int i = 0; i < vertices.Length; i++)
                 vertices[i] = new Vector3(polygon[i].x, 0.015f, polygon[i].y);
