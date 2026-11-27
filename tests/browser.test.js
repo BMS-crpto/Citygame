@@ -765,3 +765,25 @@ test('Unity OSM flat polygon importer creates only one object after mesh validat
   assert.equal((method.match(/new GameObject/g) || []).length, 1, 'only the mesh-bearing polygon object is created');
   assert.match(method, /SetMeshIndexFormat\(mesh, vertices\.Length\)[\s\S]*?return;[\s\S]*?mesh\.vertices = vertices;[\s\S]*?mesh\.triangles = triangles\.ToArray\(\);[\s\S]*?GameObject go = new GameObject/);
 });
+
+
+test('Unity OSM importer falls back only when road mesh creation succeeds and cleans partial imports', () => {
+  const source = fs.readFileSync(path.join(root, 'unity', 'Assets', 'Scripts', 'World', 'LagosRealMapImporter.cs'), 'utf8');
+  const build = source.slice(source.indexOf('public static bool TryBuild'), source.indexOf('static void DestroyGenerated'));
+  assert.match(build, /if \(MakeRoad\(root, f, road\)\) roads\+\+/);
+  assert.match(build, /if \(MakeFootprint\(root, f, building\)\) buildings\+\+/);
+  assert.match(build, /if \(MakeFlatPolygon\(root, f, water\)\) waterCount\+\+/);
+  assert.match(build, /if \(roads == 0\)[\s\S]*?DestroyGenerated\(root\.gameObject\)[\s\S]*?return false;/);
+  for (const [startName, endName] of [
+    ['static bool MakeRoad', 'static void MakeWaterLine'],
+    ['static bool MakeFootprint', 'static bool MakeFlatPolygon'],
+    ['static bool MakeFlatPolygon', 'static Material Mat']
+  ]) {
+    const start = source.indexOf(startName);
+    const end = source.indexOf(endName, start);
+    assert.ok(start >= 0 && end > start, startName + ' method exists');
+    const method = source.slice(start, end);
+    assert.match(method, /return false;/);
+    assert.match(method, /return true;/);
+  }
+});
