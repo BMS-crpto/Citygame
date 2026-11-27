@@ -29,14 +29,31 @@ namespace Citygame.World
             foreach (LagosMapFeature f in doc.features)
             {
                 if (f == null || f.points == null || f.points.Length < 2) continue;
-                if (f.kind == "road") { MakeRoad(root, f, road); roads++; }
-                else if (f.kind == "building") { MakeFootprint(root, f, building); buildings++; }
-                else if (f.kind == "water") { MakeFlatPolygon(root, f, water); waterCount++; }
+                if (f.kind == "road") { if (MakeRoad(root, f, road)) roads++; }
+                else if (f.kind == "building") { if (MakeFootprint(root, f, building)) buildings++; }
+                else if (f.kind == "water") { if (MakeFlatPolygon(root, f, water)) waterCount++; }
                 else if (f.kind == "waterline") MakeWaterLine(root, f, water);
                 else if (f.kind == "park") MakeFlatPolygon(root, f, park);
             }
+            if (roads == 0)
+            {
+                DestroyGenerated(root.gameObject);
+                DestroyGenerated(road);
+                DestroyGenerated(water);
+                DestroyGenerated(park);
+                DestroyGenerated(building);
+                Debug.LogWarning("OSM import produced no usable road meshes. Falling back to the procedural city.");
+                return false;
+            }
             Debug.Log("Imported real Lagos OSM geometry: " + roads + " roads, " + buildings + " building footprints, " + waterCount + " water features. " + doc.attribution);
-            return roads > 0;
+            return true;
+        }
+
+        static void DestroyGenerated(UnityEngine.Object target)
+        {
+            if (target == null) return;
+            if (Application.isPlaying) UnityEngine.Object.Destroy(target);
+            else UnityEngine.Object.DestroyImmediate(target);
         }
 
         static bool SetMeshIndexFormat(Mesh mesh, int vertexCount)
@@ -51,7 +68,7 @@ namespace Citygame.World
             return true;
         }
 
-        static void MakeRoad(Transform root, LagosMapFeature f, Material material)
+        static bool MakeRoad(Transform root, LagosMapFeature f, Material material)
         {
             int n = f.points.Length;
             float halfWidth = Mathf.Clamp(f.width, 2f, 18f) * .5f;
@@ -71,13 +88,14 @@ namespace Citygame.World
                 triangles[t + 3] = v + 1; triangles[t + 4] = v + 2; triangles[t + 5] = v + 3;
             }
             Mesh mesh = new Mesh { name = "OSM drivable road surface" };
-            if (!SetMeshIndexFormat(mesh, vertices.Length)) { UnityEngine.Object.Destroy(mesh); return; }
+            if (!SetMeshIndexFormat(mesh, vertices.Length)) { UnityEngine.Object.Destroy(mesh); return false; }
             mesh.vertices = vertices; mesh.triangles = triangles; mesh.RecalculateNormals();
             GameObject go = new GameObject(string.IsNullOrEmpty(f.name) ? "OSM road" : f.name);
             go.transform.SetParent(root, false);
             go.AddComponent<MeshFilter>().sharedMesh = mesh;
             go.AddComponent<MeshRenderer>().sharedMaterial = material;
             go.AddComponent<MeshCollider>().sharedMesh = mesh;
+            return true;
         }
 
         static void MakeWaterLine(Transform root, LagosMapFeature f, Material material)
@@ -224,14 +242,14 @@ namespace Citygame.World
             return triangles;
         }
 
-        static void MakeFootprint(Transform root, LagosMapFeature f, Material material)
+        static bool MakeFootprint(Transform root, LagosMapFeature f, Material material)
         {
             List<Vector2> polygon = CleanPolygon(f.points);
             List<int> caps = TriangulatePolygon(polygon);
             if (caps.Count < 3)
             {
                 Debug.LogWarning("Skipping invalid OSM building footprint: " + f.name);
-                return;
+                return false;
             }
 
             float height = Mathf.Clamp(f.height, 3f, 65f);
@@ -273,16 +291,17 @@ namespace Citygame.World
             go.AddComponent<MeshFilter>().sharedMesh = mesh;
             go.AddComponent<MeshRenderer>().sharedMaterial = material;
             go.AddComponent<MeshCollider>().sharedMesh = mesh;
+            return true;
         }
 
-        static void MakeFlatPolygon(Transform root, LagosMapFeature f, Material material)
+        static bool MakeFlatPolygon(Transform root, LagosMapFeature f, Material material)
         {
             List<Vector2> polygon = CleanPolygon(f.points);
             List<int> indices = TriangulatePolygon(polygon);
             if (indices.Count < 3)
             {
                 Debug.LogWarning("Skipping invalid OSM " + f.kind + " polygon: " + f.name);
-                return;
+                return false;
             }
 
             Vector3[] vertices = new Vector3[polygon.Count];
@@ -307,6 +326,7 @@ namespace Citygame.World
             go.transform.SetParent(root, false);
             go.AddComponent<MeshFilter>().sharedMesh = mesh;
             go.AddComponent<MeshRenderer>().sharedMaterial = material;
+            return true;
         }
 
         static Material Mat(Color color)
