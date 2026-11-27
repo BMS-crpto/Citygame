@@ -282,7 +282,7 @@ namespace Citygame.World
             }
 
             Mesh mesh = new Mesh { name = "OSM building footprint" };
-            if (!SetMeshIndexFormat(mesh, vertices.Length)) { UnityEngine.Object.Destroy(mesh); return; }
+            if (!SetMeshIndexFormat(mesh, vertices.Length)) { UnityEngine.Object.Destroy(mesh); return false; }
             mesh.vertices = vertices;
             mesh.triangles = triangles.ToArray();
             mesh.RecalculateNormals();
