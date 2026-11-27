@@ -37,6 +37,7 @@ namespace Citygame.World
             }
             if (roads == 0)
             {
+                DestroyGeneratedMeshes(root);
                 DestroyGenerated(root.gameObject);
                 DestroyGenerated(road);
                 DestroyGenerated(water);
@@ -54,6 +55,14 @@ namespace Citygame.World
             if (target == null) return;
             if (Application.isPlaying) UnityEngine.Object.Destroy(target);
             else UnityEngine.Object.DestroyImmediate(target);
+        }
+
+        static void DestroyGeneratedMeshes(Transform root)
+        {
+            if (root == null) return;
+            MeshFilter[] filters = root.GetComponentsInChildren<MeshFilter>();
+            for (int i = 0; i < filters.Length; i++)
+                DestroyGenerated(filters[i].sharedMesh);
         }
 
         static bool SetMeshIndexFormat(Mesh mesh, int vertexCount)
