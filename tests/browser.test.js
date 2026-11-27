@@ -773,7 +773,8 @@ test('Unity OSM importer falls back only when road mesh creation succeeds and cl
   assert.match(build, /if \(MakeRoad\(root, f, road\)\) roads\+\+/);
   assert.match(build, /if \(MakeFootprint\(root, f, building\)\) buildings\+\+/);
   assert.match(build, /if \(MakeFlatPolygon\(root, f, water\)\) waterCount\+\+/);
-  assert.match(build, /if \(roads == 0\)[\s\S]*?DestroyGenerated\(root\.gameObject\)[\s\S]*?return false;/);
+  assert.match(build, /if \(roads == 0\)[\s\S]*?DestroyGeneratedMeshes\(root\)[\s\S]*?DestroyGenerated\(root\.gameObject\)[\s\S]*?return false;/);
+  assert.match(source, /static void DestroyGeneratedMeshes\(Transform root\)[\s\S]*?DestroyGenerated\(filters\[i\]\.sharedMesh\)/);
   for (const [startName, endName] of [
     ['static bool MakeRoad', 'static void MakeWaterLine'],
     ['static bool MakeFootprint', 'static bool MakeFlatPolygon'],
